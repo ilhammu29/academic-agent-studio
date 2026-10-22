@@ -1,6 +1,6 @@
 export type ProposalCategory = 'magang' | 'skripsi' | 'penelitian';
 
-export type StudioStage = 'input' | 'interview' | 'orchestration' | 'result';
+export type StudioStage = 'input' | 'interview' | 'orchestration' | 'result' | 'drive';
 
 export interface DiagnosticQuestion {
   id: string;

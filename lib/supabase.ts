@@ -18,7 +18,7 @@ export interface SavedProjectRecord {
   category: 'magang' | 'skripsi' | 'penelitian';
   targetEntity: string;
   durationMonths: number;
-  stage: 'input' | 'interview' | 'orchestration' | 'result';
+  stage: 'input' | 'interview' | 'orchestration' | 'result' | 'drive';
   answers: Record<string, string>;
   documentData?: ProposalDocument;
   treeGraph?: TreeNode | TreeNode[];

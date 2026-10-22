@@ -40,15 +40,16 @@ export const DiagnosticInterview: React.FC<DiagnosticInterviewProps> = ({
   };
 
   const answeredCount = questions.filter(q => !!answers[q.field]?.trim()).length;
-  const progressPercent = Math.round((answeredCount / questions.length) * 100);
+  const progressPercent = Math.round((answeredCount / (questions.length || 1)) * 100);
+  const isAllAnswered = answeredCount === questions.length && questions.length > 0;
 
   return (
-    <div className="max-w-4xl mx-auto px-6 py-8">
+    <div className="max-w-4xl mx-auto px-4 sm:px-6 py-6 sm:py-8 text-white animate-in fade-in duration-300">
       
       {/* Header Info */}
-      <div className="mb-8">
-        <div className="flex items-center justify-between gap-4 mb-2">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-champagne/30 bg-champagne/5 text-champagne text-xs font-mono font-bold uppercase tracking-wider">
+      <div className="mb-6">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-2">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-[#27272A] bg-[#18181B] text-white text-xs font-mono font-semibold uppercase tracking-wider">
             <Brain className="w-3.5 h-3.5" />
             Tahap 02 &bull; Wawancara Diagnostik Kritis
           </div>
@@ -56,38 +57,38 @@ export const DiagnosticInterview: React.FC<DiagnosticInterviewProps> = ({
           {/* Quick autofill all */}
           <button
             onClick={handleApplyAllSuggestions}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-champagne/40 bg-champagne/10 hover:bg-champagne/20 text-champagne text-xs font-mono font-bold transition-all"
+            className="flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-xl border border-[#27272A] bg-white hover:bg-gray-200 text-black text-xs font-semibold transition-all cursor-pointer shadow-sm"
           >
             <Sparkles className="w-3.5 h-3.5" />
-            Rekomendasi Lengkap (1-Klik)
+            <span>Rekomendasi Lengkap (1-Klik)</span>
           </button>
         </div>
 
-        <h2 className="text-2xl md:text-3xl font-serif font-bold text-milk-white tracking-tight">
-          Sesi Pengumpulan Data Spesifik
+        <h2 className="text-xl sm:text-3xl font-bold text-white tracking-tight">
+          Pengumpulan Data Spesifik Berdasarkan Judul
         </h2>
-        <p className="text-xs text-milk-muted font-mono mt-1">
-          Topik Terpilih: <span className="text-milk-soft italic font-serif">"{title}"</span>
+        <p className="text-xs text-bw-muted font-mono mt-1">
+          Topik: <span className="text-white italic">"{title}"</span>
         </p>
 
         {/* Progress Bar */}
-        <div className="mt-4 p-3 rounded-xl bg-matte-surface border border-matte-border flex items-center justify-between gap-4">
+        <div className="mt-4 p-3 rounded-xl bg-[#09090B] border border-[#27272A] flex items-center justify-between gap-4">
           <div className="flex items-center gap-2 text-xs font-mono">
-            <span className="text-milk-muted">Kelengkapan Jawaban:</span>
-            <span className="font-bold text-milk-white">{answeredCount} dari {questions.length} Selesai</span>
+            <span className="text-bw-muted">Status Kelengkapan:</span>
+            <span className="font-bold text-white">{answeredCount} dari {questions.length} Pertanyaan Terisi</span>
           </div>
-          <div className="flex-1 max-w-xs bg-matte-bg h-2 rounded-full overflow-hidden border border-matte-border">
+          <div className="flex-1 max-w-xs bg-[#18181B] h-2 rounded-full overflow-hidden border border-[#27272A]">
             <div
-              className="h-full bg-champagne transition-all duration-300"
+              className="h-full bg-white transition-all duration-300"
               style={{ width: `${progressPercent}%` }}
-            ></div>
+            />
           </div>
-          <span className="text-xs font-mono font-bold text-champagne">{progressPercent}%</span>
+          <span className="text-xs font-mono font-bold text-white">{progressPercent}%</span>
         </div>
       </div>
 
       {/* Questions Stack */}
-      <div className="space-y-6">
+      <div className="space-y-4 sm:space-y-5">
         {questions.map((q, idx) => {
           const currentVal = answers[q.field] || "";
           const isAnswered = currentVal.trim().length > 0;
@@ -95,36 +96,36 @@ export const DiagnosticInterview: React.FC<DiagnosticInterviewProps> = ({
           return (
             <div
               key={q.id}
-              className={`p-6 rounded-2xl border transition-all ${
+              className={`p-4 sm:p-5 rounded-2xl border transition-all ${
                 isAnswered
-                  ? "bg-matte-surface border-matte-borderLight"
-                  : "bg-matte-surface/80 border-matte-border"
+                  ? "bg-[#09090B] border-white/40"
+                  : "bg-[#09090B]/90 border-[#27272A]"
               }`}
             >
               {/* Question Header */}
-              <div className="flex items-start justify-between gap-3 mb-2.5">
+              <div className="flex items-start justify-between gap-3 mb-2">
                 <div className="flex items-center gap-2.5">
-                  <span className="w-7 h-7 rounded-lg bg-matte-surface2 border border-matte-border flex items-center justify-center font-mono font-bold text-xs text-champagne">
+                  <span className="w-7 h-7 rounded-lg bg-[#18181B] border border-[#27272A] flex items-center justify-center font-mono font-bold text-xs text-white">
                     {idx + 1 < 10 ? `0${idx + 1}` : idx + 1}
                   </span>
-                  <h3 className="text-sm font-serif font-bold text-milk-white">
+                  <h3 className="text-xs sm:text-sm font-bold text-white">
                     {q.question}
                   </h3>
                 </div>
 
                 {isAnswered && (
-                  <span className="flex items-center gap-1 text-[11px] font-mono text-emerald-400 bg-emerald-500/10 px-2.5 py-0.5 rounded-full border border-emerald-500/30 flex-shrink-0">
-                    <CheckCircle2 className="w-3 h-3" /> Terisi
+                  <span className="flex items-center gap-1 text-[10px] font-mono text-white bg-white/10 px-2.5 py-0.5 rounded-full border border-white/20 flex-shrink-0">
+                    <CheckCircle2 className="w-3 h-3 text-white" /> Terisi
                   </span>
                 )}
               </div>
 
               {/* Context Hint */}
-              <div className="mb-3 px-3.5 py-2 rounded-lg bg-matte-bg/60 border border-matte-border/50 text-[11px] text-milk-muted flex items-start gap-2">
-                <HelpCircle className="w-3.5 h-3.5 text-champagne flex-shrink-0 mt-0.5" />
+              <div className="mb-2.5 px-3 py-2 rounded-lg bg-[#121214] border border-[#27272A] text-[11px] text-bw-muted flex items-start gap-2">
+                <HelpCircle className="w-3.5 h-3.5 text-white flex-shrink-0 mt-0.5" />
                 <span>
-                  <strong className="text-milk-soft">Konteks SOP:</strong> {q.contextHint}
-                  <span className="ml-2 font-mono text-champagne/80">[{q.thinkingModeApplied}]</span>
+                  <strong className="text-white">Konteks SOP:</strong> {q.contextHint}
+                  <span className="ml-2 font-mono text-bw-dim">[{q.thinkingModeApplied}]</span>
                 </span>
               </div>
 
@@ -134,18 +135,18 @@ export const DiagnosticInterview: React.FC<DiagnosticInterviewProps> = ({
                 value={currentVal}
                 onChange={(e) => handleAnswerChange(q.field, e.target.value)}
                 placeholder={q.placeholder}
-                className="w-full bg-matte-bg border border-matte-border focus:border-champagne/70 rounded-xl px-4 py-3 text-xs text-milk-white placeholder:text-milk-dim focus:outline-none focus:ring-1 focus:ring-champagne transition-all font-sans leading-relaxed"
+                className="w-full bg-[#121214] border border-[#27272A] focus:border-white rounded-xl px-3.5 py-2.5 text-xs text-white placeholder:text-bw-dim focus:outline-none transition-all font-sans leading-relaxed"
               />
 
               {/* Suggestion Pill / Auto-fill button */}
-              <div className="mt-2.5 flex items-center justify-between gap-3 text-xs">
-                <span className="text-[11px] text-milk-dim truncate">
-                  Saran AI: <span className="text-milk-muted italic">{q.aiSuggestion.slice(0, 65)}...</span>
+              <div className="mt-2 flex items-center justify-between gap-3 text-xs">
+                <span className="text-[11px] text-bw-dim truncate">
+                  Saran Jawaban: <span className="text-bw-muted italic">{q.aiSuggestion.slice(0, 70)}...</span>
                 </span>
                 <button
                   type="button"
                   onClick={() => handleApplySingleSuggestion(q)}
-                  className="flex items-center gap-1 text-[11px] font-mono text-champagne hover:text-champagne-light hover:underline flex-shrink-0"
+                  className="flex items-center gap-1 text-[11px] font-mono text-white hover:underline flex-shrink-0 cursor-pointer"
                 >
                   <Lightbulb className="w-3.5 h-3.5" />
                   Gunakan Rekomendasi
@@ -157,19 +158,20 @@ export const DiagnosticInterview: React.FC<DiagnosticInterviewProps> = ({
       </div>
 
       {/* Navigation Buttons */}
-      <div className="mt-8 pt-4 border-t border-matte-border flex items-center justify-between gap-4">
+      <div className="mt-8 pt-4 border-t border-[#27272A] flex items-center justify-between gap-4">
         <button
           onClick={onBack}
-          className="px-5 py-2.5 rounded-xl border border-matte-border bg-matte-surface hover:bg-matte-surface2 text-milk-soft text-xs font-mono font-bold flex items-center gap-2 transition-all cursor-pointer"
+          className="px-4 py-2.5 rounded-xl border border-[#27272A] bg-[#09090B] hover:bg-[#18181B] text-white text-xs font-mono font-semibold flex items-center gap-2 transition-all cursor-pointer"
         >
           <ArrowLeft className="w-4 h-4" />
-          Kembali ke Topik
+          <span>Kembali ke Topik</span>
         </button>
 
         <button
           onClick={onSubmit}
-          disabled={answeredCount === 0}
-          className="px-8 py-3.5 rounded-xl bg-champagne hover:bg-champagne-light text-matte-bg font-sans font-bold text-sm tracking-wide transition-all shadow-lg shadow-champagne/10 flex items-center gap-2 disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
+          disabled={!isAllAnswered}
+          title={!isAllAnswered ? "Lengkapi seluruh pertanyaan sebelum melanjutkan" : "Luncurkan Agen AI"}
+          className="px-6 py-3 rounded-xl bg-white hover:bg-gray-200 text-black font-semibold text-xs tracking-wide transition-all shadow-md flex items-center gap-2 disabled:opacity-30 disabled:cursor-not-allowed cursor-pointer"
         >
           <span>Luncurkan Multi-Agent Orchestrator</span>
           <ArrowRight className="w-4 h-4" />

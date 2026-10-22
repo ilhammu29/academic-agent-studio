@@ -164,8 +164,8 @@ export function buildGeneratedDocument(
     targetEntity: targetEntity || "PT Telkom Indonesia (Persero) Tbk",
     targetDepartment: dept,
     durationMonths: isMagang ? 4 : 6,
-    candidateName: candidateName || "Heswipa Alamanda Budi Saputri",
-    candidateId: candidateId || "22/502810/KU/24144",
+    candidateName: candidateName || "Peneliti / Pengusul Akademik",
+    candidateId: candidateId || "NIM-2026-AKAD",
     generationDate: new Date().toLocaleDateString("id-ID", { day: "numeric", month: "long", year: "numeric" }),
     executiveSummary: `Proposal ini dirancang secara sistematis untuk memenuhi prasyarat ${isMagang ? "pelaksanaan Praktik Kerja Lapangan / Magang Mandiri Berbobot 20 SKS" : "Ujian Seminar Proposal Skripsi Pendidikan Dokter"} di ${institution || "UGM"}. Bertempat di ${targetEntity || "instansi mitra"}, kegiatan ini membedah ${problem} melalui penerapan instrumen berbasis bukti (${tools}). Seluruh tahapan telah diselaraskan dengan SOP Academic Campus Pro dan 12 Metode Berpikir Kritis.`,
     bab1: {
@@ -267,7 +267,7 @@ export function buildGeneratedDocument(
         title: title,
         subtitle: `Rencana Strategis Pelaksanaan di ${targetEntity || "Instansi Tujuan"}`,
         keyPoints: [
-          `Pengusul: ${candidateName || "Heswipa Alamanda"} (NIM: ${candidateId || "22/502810/KU/24144"})`,
+          `Pengusul: ${candidateName || "Peneliti"} (NIM: ${candidateId || "NIM-2026"})`,
           `Institusi: ${institution || "Universitas Gadjah Mada"}`,
           `Unit Tujuan: ${dept}`
         ],

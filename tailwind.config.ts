@@ -9,46 +9,39 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
+        bw: {
+          bg: "#000000",
+          card: "#09090B",
+          surface: "#121214",
+          surface2: "#18181B",
+          surface3: "#27272A",
+          border: "#27272A",
+          borderLight: "#3F3F46",
+          borderStrong: "#52525B",
+          text: "#FFFFFF",
+          muted: "#A1A1AA",
+          dim: "#71717A",
+          hover: "#27272A",
+        },
         matte: {
-          bg: "#07090E",
-          surface: "#0D111A",
-          surface2: "#141A26",
-          surface3: "#1C2436",
-          border: "#1E2738",
-          borderLight: "#2B374D",
+          bg: "#000000",
+          surface: "#09090B",
+          surface2: "#121214",
+          surface3: "#18181B",
+          border: "#27272A",
+          borderLight: "#3F3F46",
         },
         milk: {
-          white: "#F8FAFC",
-          soft: "#E2E8F0",
-          muted: "#94A3B8",
-          dim: "#64748B",
+          white: "#FFFFFF",
+          soft: "#FAFAFA",
+          muted: "#A1A1AA",
+          dim: "#71717A",
         },
-        champagne: {
-          DEFAULT: "#D4B996",
-          light: "#EAD7BF",
-          dark: "#A68A64",
-        },
-        electric: {
-          cyan: "#00A3FF",
-          cyanHover: "#008BD9",
-          cyanGlow: "rgba(0, 163, 255, 0.25)",
-        },
-        academic: {
-          blue: "#38BDF8",
-          emerald: "#10B981",
-          amber: "#F59E0B",
-          purple: "#A855F7",
-        }
       },
       fontFamily: {
-        sans: ["'Plus Jakarta Sans'", "system-ui", "-apple-system", "BlinkMacSystemFont", "'Segoe UI'", "Roboto", "sans-serif"],
-        serif: ["'Merriweather'", "Georgia", "'Times New Roman'", "serif"],
-        mono: ["'JetBrains Mono'", "ui-monospace", "SFMono-Regular", "Menlo", "monospace"],
+        sans: ["'Plus Jakarta Sans'", "system-ui", "-apple-system", "sans-serif"],
+        mono: ["'JetBrains Mono'", "ui-monospace", "monospace"],
       },
-      animation: {
-        'pulse-subtle': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
-        'spin-slow': 'spin 12s linear infinite',
-      }
     },
   },
   plugins: [],

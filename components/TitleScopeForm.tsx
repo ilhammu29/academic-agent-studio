@@ -225,7 +225,7 @@ export const TitleScopeForm: React.FC<TitleScopeFormProps> = ({
               type="text"
               value={candidateName}
               onChange={(e) => setCandidateName(e.target.value)}
-              placeholder="Contoh: Heswipa Alamanda Budi Saputri"
+              placeholder="Contoh: Muhammad Ilham / Nama Pengusul"
               className="w-full bg-matte-bg border border-matte-border focus:border-champagne/70 rounded-xl px-4 py-2.5 text-xs text-milk-white placeholder:text-milk-dim focus:outline-none focus:ring-1 focus:ring-champagne transition-all"
             />
           </div>

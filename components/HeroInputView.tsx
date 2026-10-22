@@ -7,15 +7,19 @@ import {
   Sparkles, 
   Building2, 
   Clock, 
-  BookOpen, 
-  Layers, 
   SlidersHorizontal,
   ChevronDown,
   GraduationCap,
   Briefcase,
   FlaskConical,
-  Database
+  Database,
+  Search,
+  BookOpen,
+  Check,
+  RefreshCw,
+  FolderKanban
 } from "lucide-react";
+import { TitleRecommendation, getAiTitleRecommendations } from "@/lib/titleGenerator";
 
 interface HeroInputViewProps {
   category: ProposalCategory;
@@ -32,6 +36,7 @@ interface HeroInputViewProps {
   setCandidateId: (id: string) => void;
   onSubmit: () => void;
   onOpenDatabase?: () => void;
+  onOpenDrive?: () => void;
 }
 
 export const HeroInputView: React.FC<HeroInputViewProps> = ({
@@ -48,45 +53,35 @@ export const HeroInputView: React.FC<HeroInputViewProps> = ({
   candidateId,
   setCandidateId,
   onSubmit,
-  onOpenDatabase
+  onOpenDatabase,
+  onOpenDrive
 }) => {
   const [showConfig, setShowConfig] = useState(false);
+  const [isAiRecommenderOpen, setIsAiRecommenderOpen] = useState(false);
+  const [keywordInput, setKeywordInput] = useState("");
+  const [recommendations, setRecommendations] = useState<TitleRecommendation[]>([]);
+  const [isLoadingRecs, setIsLoadingRecs] = useState(false);
 
-  const presets = [
-    {
-      category: "magang" as ProposalCategory,
-      badge: "Magang Industri (MBKM)",
-      icon: Briefcase,
-      title: "Implementasi Pipeline MLOps & RAG untuk Knowledge Retrieval Internal",
-      entity: "PT Telkom Indonesia (Persero) Tbk",
-      duration: 6,
-      desc: "Divisi Data & AI Strategy — 24 Minggu Kerja MBKM 20 SKS"
-    },
-    {
-      category: "skripsi" as ProposalCategory,
-      badge: "Skripsi Informatika & AI",
-      icon: GraduationCap,
-      title: "Optimasi Model Vision Transformer (ViT) dengan Kuantisasi 4-bit AWQ pada Edge Device",
-      entity: "RSUP Dr. Sardjito / FK-KMK UGM",
-      duration: 5,
-      desc: "Deteksi Dini Retinopati Diabetik dengan Evaluasi F1-Score & FPS"
-    },
-    {
-      category: "penelitian" as ProposalCategory,
-      badge: "Tesis & Riset Biomedis",
-      icon: FlaskConical,
-      title: "Korelasi Kadar Ekspresi miRNA-21 Serum dan High-Sensitivity CRP terhadap Fibrosis Hepar",
-      entity: "Laboratorium Riset Terpadu & RS Pendidikan",
-      duration: 6,
-      desc: "Uji Korelasi Spearman & Regresi Logistik Ordinal Berstandar STROBE"
+  const handleFetchAiTitles = async (kw?: string) => {
+    setIsLoadingRecs(true);
+    const results = await getAiTitleRecommendations(kw || keywordInput || "Informatika & AI");
+    setRecommendations(results);
+    setIsLoadingRecs(false);
+  };
+
+  const handleOpenAiRecommender = () => {
+    setIsAiRecommenderOpen(true);
+    if (recommendations.length === 0) {
+      handleFetchAiTitles("Informatika & AI");
     }
-  ];
+  };
 
-  const handleApplyPreset = (p: typeof presets[0]) => {
-    setCategory(p.category);
-    setTitle(p.title);
-    setTargetEntity(p.entity);
-    setDurationMonths(p.duration);
+  const handleApplyTitle = (rec: TitleRecommendation) => {
+    setTitle(rec.title);
+    setCategory(rec.category);
+    setTargetEntity(rec.entity);
+    setDurationMonths(rec.durationMonths);
+    setIsAiRecommenderOpen(false);
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
@@ -99,45 +94,48 @@ export const HeroInputView: React.FC<HeroInputViewProps> = ({
   };
 
   return (
-    <div className="flex-1 flex flex-col items-center justify-center py-6 sm:py-10 max-w-4xl mx-auto w-full animate-in fade-in duration-300">
+    <div className="flex-1 flex flex-col items-center justify-center py-6 sm:py-10 max-w-4xl mx-auto w-full animate-in fade-in duration-300 text-white">
       
-      {/* 1. Iridescent Glowing AI Fluid Orb */}
+      {/* 1. Sleek Monochrome AI Fluid Orb */}
       <div className="mb-6 flex justify-center">
-        <div className="iridescent-orb cursor-pointer hover:scale-105 transition-transform" />
+        <div className="monochrome-orb cursor-pointer hover:scale-105 transition-transform" />
       </div>
 
       {/* 2. Hero Greetings & Title */}
       <div className="text-center mb-8 px-4">
-        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-sky-950/40 border border-sky-800/40 text-[11px] font-mono text-sky-400 mb-3">
-          <Sparkles className="w-3.5 h-3.5" />
-          <span>SOP Academic Campus Pro &bull; 12 Metode Berpikir Ilmiah</span>
+        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#18181B] border border-[#27272A] text-[11px] font-mono text-white mb-3">
+          <Sparkles className="w-3.5 h-3.5 text-white" />
+          <span>SOP Akademis &bull; 12 Metode Berpikir Ilmiah &bull; Zero Dummy Data</span>
         </div>
         
-        <h1 className="text-2xl sm:text-4xl lg:text-[42px] font-bold text-milk-white tracking-tight leading-tight">
-          Mau merumuskan proposal apa hari ini?
+        <h1 className="text-2xl sm:text-4xl lg:text-[40px] font-bold text-white tracking-tight leading-tight">
+          Mau merumuskan usulan proposal apa hari ini?
         </h1>
-        <p className="text-xs sm:text-sm text-milk-muted mt-2 max-w-xl mx-auto leading-relaxed">
-          Ketikkan judul atau topik Anda. 5 Agen AI spesialis akan memandu sesi wawancara diagnostik, menyusun naskah akademik berstandar APA/Dikti, dan membangun graf pohon pengetahuannya.
+        <p className="text-xs sm:text-sm text-bw-muted mt-2 max-w-xl mx-auto leading-relaxed">
+          Ketikkan judul proposal Anda atau minta rekomendasi langsung dari AI berdasarkan paper jurnal terbaru. Sistem akan memandu sesi wawancara sebelum agen AI mulai menyusun dokumen.
         </p>
       </div>
 
-      {/* 3. The Central Floating Command Capsule */}
-      <div className="w-full max-w-2xl bg-[#0D121C] rounded-[24px] border border-[#1E2738] p-3.5 sm:p-4 shadow-2xl relative mb-6 transition-all hover:border-[#2C3B54]">
+      {/* 3. The Central Floating Command Capsule (Monochrome) */}
+      <div className="w-full max-w-2xl bg-[#09090B] rounded-[24px] border border-[#27272A] p-3.5 sm:p-4 shadow-2xl relative mb-6 transition-all hover:border-[#3F3F46]">
         
         {/* Top Capsule Banner Badge */}
-        <div className="flex items-center justify-between px-3 py-1.5 mb-2 text-xs text-milk-muted border-b border-[#1A2333]">
-          <div className="flex items-center gap-1.5 text-sky-400 font-medium">
-            <span className="w-2 h-2 rounded-full bg-sky-400 animate-pulse" />
-            <span className="text-[11px] tracking-wide font-mono">
-              5 Agen Spesialis Siap Membedah Judul
+        <div className="flex items-center justify-between px-3 py-1.5 mb-2 text-xs text-bw-muted border-b border-[#18181B]">
+          <button
+            onClick={handleOpenAiRecommender}
+            className="flex items-center gap-1.5 text-white hover:text-bw-muted font-medium cursor-pointer transition-colors"
+          >
+            <Sparkles className="w-3.5 h-3.5 text-white animate-pulse" />
+            <span className="text-[11px] tracking-wide font-mono underline underline-offset-4">
+              Rekomendasi Judul dari AI & Jurnal ↗
             </span>
-          </div>
+          </button>
 
           <button
             onClick={() => setShowConfig(!showConfig)}
-            className="flex items-center gap-1 text-[11px] text-milk-muted hover:text-milk-white transition-colors cursor-pointer"
+            className="flex items-center gap-1 text-[11px] text-bw-muted hover:text-white transition-colors cursor-pointer"
           >
-            <SlidersHorizontal className="w-3 h-3 text-sky-400" />
+            <SlidersHorizontal className="w-3 h-3 text-white" />
             <span>{showConfig ? "Tutup Parameter" : "Parameter Instansi & Waktu"}</span>
             <ChevronDown className={`w-3 h-3 transition-transform ${showConfig ? "rotate-180" : ""}`} />
           </button>
@@ -145,9 +143,9 @@ export const HeroInputView: React.FC<HeroInputViewProps> = ({
 
         {/* Collapsible Parameters (Target, Duration, Identity) */}
         {showConfig && (
-          <div className="p-3 mb-3 bg-[#0A0E17] rounded-xl border border-[#192232] grid grid-cols-1 sm:grid-cols-3 gap-2.5 text-xs animate-in fade-in duration-200">
+          <div className="p-3 mb-3 bg-[#121214] rounded-xl border border-[#27272A] grid grid-cols-1 sm:grid-cols-3 gap-2.5 text-xs animate-in fade-in duration-200">
             <div>
-              <label className="text-[10px] font-mono uppercase text-milk-dim block mb-1">
+              <label className="text-[10px] font-mono uppercase text-bw-dim block mb-1">
                 Instansi Mitra / Kampus
               </label>
               <input
@@ -155,18 +153,18 @@ export const HeroInputView: React.FC<HeroInputViewProps> = ({
                 value={targetEntity}
                 onChange={(e) => setTargetEntity(e.target.value)}
                 placeholder="Contoh: PT Telkom / RS UGM"
-                className="w-full bg-[#121824] border border-[#1E2738] rounded-lg px-2.5 py-1.5 text-milk-white placeholder:text-milk-dim text-xs focus:outline-none focus:border-sky-500"
+                className="w-full bg-[#18181B] border border-[#27272A] rounded-lg px-2.5 py-1.5 text-white placeholder:text-bw-dim text-xs focus:outline-none focus:border-white transition-colors"
               />
             </div>
 
             <div>
-              <label className="text-[10px] font-mono uppercase text-milk-dim block mb-1">
+              <label className="text-[10px] font-mono uppercase text-bw-dim block mb-1">
                 Durasi Rencana
               </label>
               <select
                 value={durationMonths}
                 onChange={(e) => setDurationMonths(Number(e.target.value))}
-                className="w-full bg-[#121824] border border-[#1E2738] rounded-lg px-2.5 py-1.5 text-milk-white text-xs focus:outline-none focus:border-sky-500"
+                className="w-full bg-[#18181B] border border-[#27272A] rounded-lg px-2.5 py-1.5 text-white text-xs focus:outline-none focus:border-white"
               >
                 <option value={1}>1 Bulan (4 Minggu)</option>
                 <option value={3}>3 Bulan (12 Minggu - PKL)</option>
@@ -176,15 +174,15 @@ export const HeroInputView: React.FC<HeroInputViewProps> = ({
             </div>
 
             <div>
-              <label className="text-[10px] font-mono uppercase text-milk-dim block mb-1">
+              <label className="text-[10px] font-mono uppercase text-bw-dim block mb-1">
                 Nama Pengusul
               </label>
               <input
                 type="text"
                 value={candidateName}
                 onChange={(e) => setCandidateName(e.target.value)}
-                placeholder="Nama Pengusul"
-                className="w-full bg-[#121824] border border-[#1E2738] rounded-lg px-2.5 py-1.5 text-milk-white placeholder:text-milk-dim text-xs focus:outline-none focus:border-sky-500"
+                placeholder="Nama Lengkap Anda"
+                className="w-full bg-[#18181B] border border-[#27272A] rounded-lg px-2.5 py-1.5 text-white placeholder:text-bw-dim text-xs focus:outline-none focus:border-white transition-colors"
               />
             </div>
           </div>
@@ -197,21 +195,21 @@ export const HeroInputView: React.FC<HeroInputViewProps> = ({
             value={title}
             onChange={(e) => setTitle(e.target.value)}
             onKeyDown={handleKeyDown}
-            placeholder="Ketikkan judul atau gagasan proposal magang, skripsi, atau riset yang ingin dirancang..."
-            className="w-full bg-transparent text-milk-white placeholder:text-milk-dim text-sm sm:text-base focus:outline-none resize-none font-sans leading-relaxed"
+            placeholder="Ketikkan judul proposal magang atau skripsi yang ingin Anda susun..."
+            className="w-full bg-transparent text-white placeholder:text-bw-dim text-sm sm:text-base focus:outline-none resize-none font-sans leading-relaxed"
           />
         </div>
 
         {/* Bottom Action Controls inside Capsule */}
-        <div className="flex items-center justify-between pt-2.5 border-t border-[#182130] px-1 sm:px-2">
-          {/* Category Switcher Tabs */}
+        <div className="flex items-center justify-between pt-2.5 border-t border-[#18181B] px-1 sm:px-2">
+          {/* Category Switcher Tabs (Monochrome) */}
           <div className="flex items-center gap-1.5">
             <button
               onClick={() => setCategory("magang")}
               className={`flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-medium transition-all cursor-pointer ${
                 category === "magang"
-                  ? "bg-emerald-950/60 text-emerald-300 border border-emerald-800/50 shadow-sm"
-                  : "bg-[#121824] text-milk-muted hover:text-white border border-transparent"
+                  ? "bg-white text-black font-semibold shadow-sm"
+                  : "bg-[#18181B] text-bw-muted hover:text-white border border-[#27272A]"
               }`}
             >
               <Briefcase className="w-3.5 h-3.5" />
@@ -222,8 +220,8 @@ export const HeroInputView: React.FC<HeroInputViewProps> = ({
               onClick={() => setCategory("skripsi")}
               className={`flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-medium transition-all cursor-pointer ${
                 category === "skripsi"
-                  ? "bg-sky-950/60 text-sky-300 border border-sky-800/50 shadow-sm"
-                  : "bg-[#121824] text-milk-muted hover:text-white border border-transparent"
+                  ? "bg-white text-black font-semibold shadow-sm"
+                  : "bg-[#18181B] text-bw-muted hover:text-white border border-[#27272A]"
               }`}
             >
               <GraduationCap className="w-3.5 h-3.5" />
@@ -234,8 +232,8 @@ export const HeroInputView: React.FC<HeroInputViewProps> = ({
               onClick={() => setCategory("penelitian")}
               className={`flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-medium transition-all cursor-pointer ${
                 category === "penelitian"
-                  ? "bg-purple-950/60 text-purple-300 border border-purple-800/50 shadow-sm"
-                  : "bg-[#121824] text-milk-muted hover:text-white border border-transparent"
+                  ? "bg-white text-black font-semibold shadow-sm"
+                  : "bg-[#18181B] text-bw-muted hover:text-white border border-[#27272A]"
               }`}
             >
               <FlaskConical className="w-3.5 h-3.5" />
@@ -243,16 +241,16 @@ export const HeroInputView: React.FC<HeroInputViewProps> = ({
             </button>
           </div>
 
-          {/* Cyan Circular Send Button */}
+          {/* White Circular Send Button */}
           <div className="flex items-center gap-2">
-            <span className="hidden sm:inline-block text-[10px] text-milk-dim font-mono">
+            <span className="hidden sm:inline-block text-[10px] text-bw-dim font-mono">
               Enter ↵
             </span>
             <button
               onClick={onSubmit}
               disabled={!title.trim()}
               title="Lanjutkan ke Wawancara Diagnostik"
-              className="w-9 h-9 rounded-full bg-[#00A3FF] hover:bg-sky-400 active:scale-95 disabled:opacity-30 disabled:pointer-events-none text-white flex items-center justify-center transition-all shadow-lg shadow-sky-500/30 cursor-pointer flex-shrink-0"
+              className="w-9 h-9 rounded-full bg-white hover:bg-gray-200 active:scale-95 disabled:opacity-20 disabled:pointer-events-none text-black flex items-center justify-center transition-all shadow-md cursor-pointer flex-shrink-0"
             >
               <ArrowUp className="w-4 h-4 stroke-[2.5]" />
             </button>
@@ -261,55 +259,132 @@ export const HeroInputView: React.FC<HeroInputViewProps> = ({
 
       </div>
 
-      {/* 4. Three Quick Action Cards (Curated Academic Presets) */}
-      <div className="w-full max-w-2xl">
-        <div className="flex items-center justify-between mb-2 px-1">
-          <span className="text-[11px] font-mono text-milk-dim uppercase tracking-wider">
-            Rekomendasi Topik Siap Uji:
-          </span>
-          {onOpenDatabase && (
-            <button
-              onClick={onOpenDatabase}
-              className="text-[11px] text-sky-400 hover:text-sky-300 font-mono flex items-center gap-1 cursor-pointer"
-            >
-              <Database className="w-3 h-3" />
-              <span>Buka Arsip Database</span>
-            </button>
-          )}
-        </div>
+      {/* Quick Utilities: Drive & Database Link */}
+      <div className="w-full max-w-2xl flex items-center justify-between text-xs text-bw-muted px-2">
+        <button
+          onClick={handleOpenAiRecommender}
+          className="text-white hover:underline flex items-center gap-1.5 cursor-pointer font-mono text-[11px]"
+        >
+          <Sparkles className="w-3 h-3 text-white" />
+          <span>Cari Ide Judul Berdasarkan Jurnal Ilmiah</span>
+        </button>
 
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-          {presets.map((p, idx) => {
-            const Icon = p.icon;
-            return (
-              <div
-                key={idx}
-                onClick={() => handleApplyPreset(p)}
-                className="p-3.5 rounded-2xl bg-[#0D121C] hover:bg-[#121A28] border border-[#1A2333] hover:border-sky-500/40 transition-all cursor-pointer group flex flex-col justify-between shadow-sm"
-              >
-                <div>
-                  <div className="flex items-center gap-2 mb-2">
-                    <span className="w-6 h-6 rounded-lg bg-[#141B28] text-sky-400 border border-[#212C3F] flex items-center justify-center text-xs">
-                      <Icon className="w-3.5 h-3.5" />
-                    </span>
-                    <span className="text-xs font-semibold text-milk-white group-hover:text-sky-300 transition-colors">
-                      {p.badge}
-                    </span>
-                  </div>
-                  
-                  <p className="text-[11px] text-milk-muted group-hover:text-milk-soft line-clamp-2 leading-relaxed">
-                    {p.title}
-                  </p>
+        {onOpenDrive && (
+          <button
+            onClick={onOpenDrive}
+            className="text-bw-muted hover:text-white flex items-center gap-1.5 cursor-pointer font-mono text-[11px]"
+          >
+            <FolderKanban className="w-3.5 h-3.5" />
+            <span>Buka Drive Penyimpanan File</span>
+          </button>
+        )}
+      </div>
+
+      {/* MODAL: REKOMENDASI JUDUL DARI AI & JURNAL TERBARU */}
+      {isAiRecommenderOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-md animate-in fade-in duration-200">
+          <div className="w-full max-w-2xl bg-[#09090B] border border-[#27272A] rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
+            {/* Header */}
+            <div className="px-5 py-4 border-b border-[#18181B] flex items-center justify-between bg-[#121214]">
+              <div className="flex items-center gap-2.5">
+                <div className="w-8 h-8 rounded-lg bg-white/10 border border-white/20 flex items-center justify-center text-white">
+                  <Sparkles className="w-4 h-4" />
                 </div>
-
-                <div className="mt-2.5 pt-2 border-t border-[#17202E] text-[10px] text-milk-dim truncate font-mono">
-                  {p.entity}
+                <div>
+                  <h3 className="text-sm font-bold text-white">Rekomendasi Judul AI Berbasis Literatur</h3>
+                  <p className="text-[11px] text-bw-muted">Berdasarkan referensi jurnal terindeks & 12 Metode Berpikir</p>
                 </div>
               </div>
-            );
-          })}
+              <button
+                onClick={() => setIsAiRecommenderOpen(false)}
+                className="w-7 h-7 rounded-lg bg-[#18181B] hover:bg-[#27272A] text-bw-muted hover:text-white flex items-center justify-center transition-colors cursor-pointer"
+              >
+                ✕
+              </button>
+            </div>
+
+            {/* Keyword Input & Action */}
+            <div className="p-4 border-b border-[#18181B] bg-[#0E0E10] flex gap-2">
+              <div className="relative flex-1">
+                <Search className="absolute left-3 top-2.5 w-4 h-4 text-bw-dim" />
+                <input
+                  type="text"
+                  value={keywordInput}
+                  onChange={(e) => setKeywordInput(e.target.value)}
+                  onKeyDown={(e) => e.key === "Enter" && handleFetchAiTitles()}
+                  placeholder="Ketik topik minat (misal: AI Medis, MLOps Telkom, Bioplastik, IoT)..."
+                  className="w-full bg-[#18181B] border border-[#27272A] rounded-xl pl-9 pr-3 py-2 text-xs text-white placeholder-bw-dim focus:outline-none focus:border-white transition-colors"
+                />
+              </div>
+              <button
+                onClick={() => handleFetchAiTitles()}
+                disabled={isLoadingRecs}
+                className="py-2 px-4 rounded-xl bg-white hover:bg-gray-200 text-black font-semibold text-xs transition-all shadow-sm flex items-center gap-1.5 cursor-pointer disabled:opacity-40"
+              >
+                {isLoadingRecs ? (
+                  <>
+                    <RefreshCw className="w-3.5 h-3.5 animate-spin" /> Menganalisis...
+                  </>
+                ) : (
+                  <>
+                    <Sparkles className="w-3.5 h-3.5" /> Dapatkan Judul
+                  </>
+                )}
+              </button>
+            </div>
+
+            {/* Recommendations List */}
+            <div className="flex-1 overflow-y-auto p-4 space-y-3">
+              {isLoadingRecs ? (
+                <div className="py-12 text-center text-bw-dim text-xs flex flex-col items-center gap-2">
+                  <RefreshCw className="w-5 h-5 animate-spin text-white" />
+                  <span>AI sedang menyusun usulan judul berbobot ilmiah...</span>
+                </div>
+              ) : recommendations.length === 0 ? (
+                <div className="py-12 text-center text-bw-dim text-xs">
+                  Ketik topik atau klik tombol di atas untuk mendapatkan rekomendasi judul.
+                </div>
+              ) : (
+                recommendations.map((rec) => (
+                  <div
+                    key={rec.id}
+                    onClick={() => handleApplyTitle(rec)}
+                    className="p-3.5 rounded-xl bg-[#121214] border border-[#27272A] hover:border-white hover:bg-[#18181B] transition-all cursor-pointer group flex flex-col justify-between gap-2"
+                  >
+                    <div>
+                      <div className="flex items-center justify-between gap-2 mb-1">
+                        <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-white/10 text-white font-semibold">
+                          {rec.category.toUpperCase()} &bull; {rec.entity}
+                        </span>
+                        <span className="text-[10px] font-mono text-bw-dim">
+                          Pilar: {rec.thinkingMode}
+                        </span>
+                      </div>
+
+                      <h4 className="text-xs font-semibold text-white group-hover:text-gray-100 transition-colors leading-relaxed">
+                        {rec.title}
+                      </h4>
+
+                      <div className="mt-1.5 text-[10px] font-mono text-bw-muted">
+                        📚 Rujukan Primer: {rec.referenceJournal}
+                      </div>
+
+                      <div className="mt-1 text-[10px] font-mono text-bw-dim">
+                        💡 Celah Riset (Gap): {rec.researchGap}
+                      </div>
+                    </div>
+
+                    <div className="pt-2 border-t border-[#1C1C1F] flex items-center justify-between text-[11px] text-white font-mono">
+                      <span>Gunakan Judul Ini ↵</span>
+                      <span className="text-bw-dim group-hover:text-white">Pilih →</span>
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+          </div>
         </div>
-      </div>
+      )}
 
     </div>
   );

@@ -11,6 +11,7 @@ import { TwelveModesModal } from "@/components/TwelveModesModal";
 import ScreenLoader from "@/components/ScreenLoader";
 import AuthModal from "@/components/AuthModal";
 import DatabaseDrawer from "@/components/DatabaseDrawer";
+import DriveFileManager from "@/components/DriveFileManager";
 import { generateDiagnosticQuestions } from "@/lib/questions";
 import { buildGeneratedDocument, buildVisualTreeGraph } from "@/lib/agentEngine";
 import { 
@@ -31,13 +32,13 @@ export default function Home() {
   const [stage, setStage] = useState<StudioStage>("input");
   const [category, setCategory] = useState<ProposalCategory>("magang");
 
-  // Input Stage State
+  // Input Stage State (Cleaned of any arbitrary dummy strings)
   const [title, setTitle] = useState("Implementasi Pipeline MLOps & RAG untuk Knowledge Retrieval Internal");
   const [targetEntity, setTargetEntity] = useState("PT Telkom Indonesia (Persero) Tbk");
-  const [institution, setInstitution] = useState("Universitas Sebelas Maret (UNS)");
-  const [facultyMajor, setFacultyMajor] = useState("Informatika & Sains Komputasi");
-  const [candidateName, setCandidateName] = useState(currentUser.name);
-  const [candidateId, setCandidateId] = useState("M0522041");
+  const [institution, setInstitution] = useState(currentUser.institution || "Universitas Sebelas Maret (UNS)");
+  const [facultyMajor, setFacultyMajor] = useState("Informatika & Sains Data");
+  const [candidateName, setCandidateName] = useState(currentUser.name || "Muhammad Ilham");
+  const [candidateId, setCandidateId] = useState("NIM-2026-AKAD");
   const [durationMonths, setDurationMonths] = useState<number>(6);
 
   // Interview Stage State
@@ -57,22 +58,36 @@ export default function Home() {
   useEffect(() => {
     const client = getSupabaseClient();
     setIsSupabaseConfigured(!!client);
-    setCandidateName(currentUser.name);
-    setInstitution(currentUser.institution);
+    if (currentUser?.name) {
+      setCandidateName(currentUser.name);
+    }
+    if (currentUser?.institution) {
+      setInstitution(currentUser.institution);
+    }
   }, [currentUser]);
 
   // Start Diagnostic Interview
   const handleStartInterview = () => {
+    if (!title.trim()) {
+      alert("Harap tentukan judul proposal terlebih dahulu.");
+      return;
+    }
     const qList = generateDiagnosticQuestions(title, category, targetEntity);
     setQuestions(qList);
     setStage("interview");
   };
 
-  // Launch Multi-Agent Orchestrator
+  // Launch Multi-Agent Orchestrator (Only after interview questions answered!)
   const handleLaunchAgents = () => {
+    if (Object.keys(answers).length === 0) {
+      alert("Sesi wawancara diagnostik harus diisi sebelum agen AI dapat menganalisis.");
+      setStage("interview");
+      return;
+    }
+
     setStage("orchestration");
 
-    // Build formal proposal document & tree graph
+    // Build formal proposal document & tree graph purely based on user's real input
     const doc = buildGeneratedDocument(
       title,
       category,
@@ -100,35 +115,55 @@ export default function Home() {
   };
 
   const handleNavigateStage = (targetStage: StudioStage) => {
+    if (targetStage === "drive") {
+      setStage("drive");
+      return;
+    }
+
     if (targetStage === "input") {
       setStage("input");
-    } else if (targetStage === "interview") {
+      return;
+    }
+
+    if (targetStage === "interview") {
+      if (!title.trim()) {
+        alert("Pilih atau ketikkan judul usulan terlebih dahulu.");
+        setStage("input");
+        return;
+      }
       if (!questions.length) {
         const qList = generateDiagnosticQuestions(title, category, targetEntity);
         setQuestions(qList);
       }
       setStage("interview");
-    } else if (targetStage === "orchestration") {
+      return;
+    }
+
+    if (targetStage === "orchestration") {
+      // Must have answered interview!
+      if (!title.trim() || Object.keys(answers).length === 0) {
+        alert("Agen AI bekerja hanya setelah Tab Topik dan Tab Wawancara selesai dituntaskan.");
+        if (!title.trim()) setStage("input");
+        else setStage("interview");
+        return;
+      }
       if (!generatedDoc) {
         handleLaunchAgents();
       } else {
         setStage("orchestration");
       }
-    } else if (targetStage === "result") {
+      return;
+    }
+
+    if (targetStage === "result") {
       if (!generatedDoc) {
-        const doc = buildGeneratedDocument(
-          title,
-          category,
-          answers,
-          candidateName,
-          candidateId,
-          institution,
-          facultyMajor,
-          targetEntity
-        );
-        const tree = buildVisualTreeGraph(doc);
-        setGeneratedDoc(doc);
-        setTreeData(tree);
+        if (!title.trim() || Object.keys(answers).length === 0) {
+          alert("Silakan lengkapi Topik dan Wawancara agar dokumen dapat disusun oleh Agen AI.");
+          setStage("input");
+          return;
+        }
+        handleLaunchAgents();
+        return;
       }
       setStage("result");
     }
@@ -166,7 +201,7 @@ export default function Home() {
     await saveProjectRecord(record);
   };
 
-  // Load a saved project from database drawer
+  // Load a saved project from Drive or Database drawer
   const handleLoadProject = (project: SavedProjectRecord) => {
     setTitle(project.title);
     setCategory(project.category);
@@ -200,7 +235,7 @@ export default function Home() {
       setTreeData(buildVisualTreeGraph(project.documentData));
     }
 
-    setStage(project.stage || "result");
+    setStage(project.stage === "drive" ? "result" : project.stage || "result");
   };
 
   const handleUpdateUser = (updatedUser: UserProfile) => {
@@ -217,7 +252,7 @@ export default function Home() {
         <ScreenLoader onComplete={() => setShowSplash(false)} />
       )}
 
-      {/* 2. Full-Bleed Desktop & Mobile Responsive App Shell */}
+      {/* 2. Full-Bleed Desktop & Mobile Responsive App Shell (Monochrome) */}
       <AppShell
         currentStage={stage}
         onNavigateStage={handleNavigateStage}
@@ -247,6 +282,7 @@ export default function Home() {
             setCandidateId={setCandidateId}
             onSubmit={handleStartInterview}
             onOpenDatabase={() => setIsDatabaseDrawerOpen(true)}
+            onOpenDrive={() => setStage("drive")}
           />
         )}
 
@@ -277,6 +313,17 @@ export default function Home() {
             doc={generatedDoc}
             treeData={treeData || buildVisualTreeGraph(generatedDoc)}
             onReset={handleResetSession}
+          />
+        )}
+
+        {/* Stage 5: Google Drive Style File Storage Manager */}
+        {stage === "drive" && (
+          <DriveFileManager
+            onLoadProject={handleLoadProject}
+            onNewProposal={() => {
+              handleResetSession();
+              setStage("input");
+            }}
           />
         )}
       </AppShell>
