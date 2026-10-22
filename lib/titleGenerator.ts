@@ -15,194 +15,116 @@ export interface TitleRecommendation {
 /**
  * Generate academic title recommendations based on real journal literature or keywords
  * Multi-layer pipeline:
- * Layer 1: Real scholarly papers from Semantic Scholar API (IEEE, Springer, Nature, ACM)
- * Layer 2: Domain-specific heuristic literature synthesis based on user query
+ * Layer 1: Unified Server API (/api/academic/recommend-titles) with OpenAlex + Crossref + Gemini AI
+ * Layer 2: Client-side literature query + dynamic academic heuristic synthesis
  */
 export async function getAiTitleRecommendations(
   keywordOrTopic: string = "Informatika"
 ): Promise<TitleRecommendation[]> {
   const cleanQuery = keywordOrTopic.trim();
+  if (!cleanQuery) return [];
 
-  // 1. Primary: Search real peer-reviewed papers via Semantic Scholar
+  // 1. Primary: Unified Academic Recommender API
+  try {
+    const isBrowser = typeof window !== "undefined";
+    const apiUrl = isBrowser 
+      ? "/api/academic/recommend-titles" 
+      : "http://localhost:3000/api/academic/recommend-titles";
+
+    const res = await fetch(apiUrl, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ query: cleanQuery }),
+      signal: AbortSignal.timeout(8000)
+    });
+
+    if (res.ok) {
+      const data = await res.json();
+      if (data.success && Array.isArray(data.recommendations) && data.recommendations.length > 0) {
+        return data.recommendations;
+      }
+    }
+  } catch (apiErr: any) {
+    console.warn("Server title recommendation API failed or timed out, activating local synthesis:", apiErr?.message);
+  }
+
+  // 2. Secondary: Client-Side Literature Search & Heuristic Synthesis
   try {
     const papers = await searchSemanticScholarPapers(cleanQuery, 4);
+    const titleCase = cleanQuery.charAt(0).toUpperCase() + cleanQuery.slice(1);
+    const kw = cleanQuery.toLowerCase();
 
-    if (papers && papers.length >= 2) {
-      return papers.map((paper, idx) => {
-        const isInternship = idx % 2 === 0;
-        const category: ProposalCategory = isInternship ? "magang" : "skripsi";
-        
-        let titleFormatted = "";
-        let entity = "";
+    let defaultEntityMagang = "PT Telkom Indonesia (Persero) Tbk / Mitra Industri Terkait";
+    let defaultEntitySkripsi = "Laboratorium Riset Terpadu Kampus";
+    let defaultJournal = "Jurnal Riset Terakreditasi SINTA & Scopus (2024)";
 
-        if (category === "magang") {
-          titleFormatted = `Implementasi & Benchmarking ${paper.title.replace(/[.:]$/, '')} pada Lingkungan Industri`;
-          entity = "PT Telkom Indonesia (Persero) Tbk / Mitra Industri Terkait";
-        } else {
-          titleFormatted = `Analisis Komparatif & Optimasi ${paper.title.replace(/[.:]$/, '')}`;
-          entity = "Laboratorium Riset Terpadu & RS Pendidikan";
-        }
-
-        const thinkingModes = [
-          "First-Principles Thinking",
-          "Probabilistic & Bayesian Updating",
-          "Inversion / Pre-Mortem Thinking",
-          "Critical / Falsification Thinking"
-        ];
-
-        return {
-          id: `rec-${paper.paperId || idx}`,
-          title: titleFormatted,
-          category,
-          entity,
-          durationMonths: isInternship ? 6 : 5,
-          referenceJournal: `${paper.venue || "Indexed Scientific Proceedings"} (${paper.year || 2024})`,
-          researchGap: paper.researchGap || `Keterbatasan pada dataset lokal dan kebutuhan evaluasi latensi pada skenario riil.`,
-          thinkingMode: thinkingModes[idx % thinkingModes.length]
-        };
-      });
+    if (kw.includes("medis") || kw.includes("kesehatan") || kw.includes("dokter") || kw.includes("gizi") || kw.includes("farmasi")) {
+      defaultEntityMagang = "RSUP Dr. Sardjito / Dinas Kesehatan";
+      defaultEntitySkripsi = "Fakultas Kedokteran & RS Akademik";
+      defaultJournal = "The Lancet & Jurnal Kesehatan Masyarakat (2024)";
+    } else if (kw.includes("pertanian") || kw.includes("pangan") || kw.includes("tanah")) {
+      defaultEntityMagang = "PT Pupuk Indonesia / Balai Penerapan Standar Pertanian";
+      defaultEntitySkripsi = "Laboratorium Agroteknologi & Ilmu Tanah";
+      defaultJournal = "Jurnal Ilmu Pertanian Indonesia & Crop Science (2024)";
+    } else if (kw.includes("pendidikan") || kw.includes("guru") || kw.includes("sekolah")) {
+      defaultEntityMagang = "Dinas Pendidikan Provinsi / LPMP";
+      defaultEntitySkripsi = "Pusat Riset Pedagogi & Kurikulum";
+      defaultJournal = "Jurnal Pendidikan Karakter (2024)";
+    } else if (kw.includes("ekonomi") || kw.includes("bisnis") || kw.includes("akuntansi")) {
+      defaultEntityMagang = "Bank Indonesia / Kantor Akuntan Publik / FinTech";
+      defaultEntitySkripsi = "Pusat Kajian Ekonomi Terapan";
+      defaultJournal = "Journal of Business Research (2024)";
     }
-  } catch (err) {
-    console.warn("Semantic Scholar live paper query failed, falling back to Domain Synthesis Engine:", err);
-  }
 
-  // 2. Secondary: Domain-Tailored Synthesis Engine
-  const kw = cleanQuery.toLowerCase();
-  const titleCase = cleanQuery.charAt(0).toUpperCase() + cleanQuery.slice(1);
+    const p1 = papers[0];
+    const p2 = papers[1];
+    const p3 = papers[2];
+    const p4 = papers[3];
 
-  // Medical / Health / Nutrition Domain
-  if (kw.includes("medis") || kw.includes("dokter") || kw.includes("kesehatan") || kw.includes("gizi") || kw.includes("klinis") || kw.includes("farmasi")) {
     return [
       {
-        id: "rec-med-1",
-        title: `Korelasi Kadar Biomarker Spesifik dan Profil Inflamasi pada Kasus Klinis ${titleCase}`,
-        category: "skripsi",
-        entity: "RSUP Dr. Sardjito / FK-KMK UGM",
-        durationMonths: 6,
-        referenceJournal: "The Lancet & Journal of Clinical Medicine (2024)",
-        researchGap: "Belum meneliti interaksi kombinasi biomarker serum pada populasi pasien Asia Tenggara.",
-        thinkingMode: "Probabilistic & Bayesian Updating"
-      },
-      {
-        id: "rec-med-2",
-        title: `Analisis Efektivitas Intervensi Terapeutik Berbasis ${titleCase} terhadap Luaran Klinis Pasien Rawat Inap`,
-        category: "skripsi",
-        entity: "Rumah Sakit Akademik / Laboratorium Farmakologi",
-        durationMonths: 6,
-        referenceJournal: "BMJ Open & Clinical Pharmacology (2024)",
-        researchGap: "Kurangnya data prospektif multicenter mengenai profil tolerabilitas dosis jangka panjang.",
-        thinkingMode: "Second-Order Thinking"
-      },
-      {
-        id: "rec-med-3",
-        title: `Implementasi Sistem Triase Digital dan Validasi Diagnostik Berbasis ${titleCase} pada Unit Gawat Darurat`,
+        id: "rec-local-1",
+        title: p1 ? `Implementasi dan Benchmarking Metode ${titleCase} pada Lingkungan Kerja Industri` : `Implementasi Pipeline Otomasi dan Evaluasi Kinerja ${titleCase} pada Lingkungan Industri`,
         category: "magang",
-        entity: "Dinas Kesehatan & RSUD Kelas A",
-        durationMonths: 4,
-        referenceJournal: "International Journal of Medical Informatics (2024)",
-        researchGap: "Tingginya angka false positive pada triase manual saat lonjakan pasien darurat.",
+        entity: defaultEntityMagang,
+        durationMonths: 6,
+        referenceJournal: p1 ? `${p1.venue || "Publikasi Ilmiah Terindeks"} (${p1.year || 2024})` : defaultJournal,
+        researchGap: p1?.researchGap || `Kesenjangan antara kerangka teoritis dengan keandalan operasional riil pada ${cleanQuery}.`,
         thinkingMode: "First-Principles Thinking"
       },
       {
-        id: "rec-med-4",
-        title: `Studi Komparasi Determinan Perilaku dan Kepatuhan Pola Hidup Sehat Pasca-Intervensi ${titleCase}`,
-        category: "penelitian",
-        entity: "Pusat Studi Kebijakan Kesehatan & Komunitas",
-        durationMonths: 6,
-        referenceJournal: "Public Health Reports & Frontiers in Nutrition (2024)",
-        researchGap: "Kesenjangan pemahaman determinan psikososial terhadap keberlanjutan hasil intervensi primer.",
-        thinkingMode: "Systems / Holistic Thinking"
-      }
-    ];
-  }
-
-  // Engineering / IoT / Hardware Domain
-  if (kw.includes("sipil") || kw.includes("mesin") || kw.includes("elektro") || kw.includes("iot") || kw.includes("energi") || kw.includes("sensor")) {
-    return [
-      {
-        id: "rec-eng-1",
-        title: `Rancang Bangun Sistem Monitoring Real-Time Berbasis IoT dan Sensor Presisi pada Infrastruktur ${titleCase}`,
-        category: "magang",
-        entity: "PT Wijaya Karya / PT PLN (Persero)",
-        durationMonths: 6,
-        referenceJournal: "IEEE Transactions on Industrial Informatics (2024)",
-        researchGap: "Degradasi akurasi sensor dan latency packet loss pada kondisi cuaca ekstrem.",
-        thinkingMode: "First-Principles Thinking"
-      },
-      {
-        id: "rec-eng-2",
-        title: `Simulasi Kinerja dan Analisis Ketahanan Struktur Material Menggunakan Pendekatan ${titleCase}`,
+        id: "rec-local-2",
+        title: p2 ? `Analisis Komparatif dan Optimasi Algoritma ${titleCase} Berbasis Standar Empiris` : `Analisis Komparatif Efektivitas dan Uji Validitas Metodologi ${titleCase}`,
         category: "skripsi",
-        entity: "Laboratorium Uji Bahan & Struktur Teknik",
+        entity: defaultEntitySkripsi,
         durationMonths: 6,
-        referenceJournal: "Construction and Building Materials & Elsevier (2024)",
-        researchGap: "Perbedaan elastisitas komposit lokal terhadap beban siklik dinamis frekuensi tinggi.",
+        referenceJournal: p2 ? `${p2.venue || "Publikasi Ilmiah Terindeks"} (${p2.year || 2024})` : defaultJournal,
+        researchGap: p2?.researchGap || `Keterbatasan pengujian empiris berskala riil dan minimnya parameter evaluasi objektif pada ${cleanQuery}.`,
         thinkingMode: "Critical / Falsification Thinking"
       },
       {
-        id: "rec-eng-3",
-        title: `Optimasi Konsumsi Daya dan Rekayasa Siklus Termal Berbasis ${titleCase} pada Sistem Pembangkit`,
-        category: "penelitian",
-        entity: "Pusat Riset Tenaga Listrik BRIN",
+        id: "rec-local-3",
+        title: p3 ? `Perancangan Arsitektur Sistem Terintegrasi Berbasis ${titleCase} untuk Akselerasi Layanan` : `Perancangan Kerangka Kerja dan Manajemen Risiko Operasional Sistem ${titleCase}`,
+        category: "magang",
+        entity: defaultEntityMagang,
         durationMonths: 6,
-        referenceJournal: "Applied Energy & Renewable Resources (2023)",
-        researchGap: "Inefisiensi termal parsial saat fluktuasi beban puncak belum dimitigasi secara adaptif.",
+        referenceJournal: p3 ? `${p3.venue || "Publikasi Ilmiah Terindeks"} (${p3.year || 2024})` : defaultJournal,
+        researchGap: `Tingginya friksi proses manual yang memicu hambatan skalabilitas dan perlunya otomasi tata kelola pada ${cleanQuery}.`,
         thinkingMode: "Occam's Razor"
       },
       {
-        id: "rec-eng-4",
-        title: `Audit Keandalan Operasional dan Mitigasi Kegagalan Sistem Transmisi Berbasis ${titleCase}`,
-        category: "magang",
-        entity: "PT Pertamina (Persero) / Mitra Energi",
+        id: "rec-local-4",
+        title: p4 ? `Studi Eksperimental Dampak Multi-Variabel ${titleCase} Berdasarkan Kerangka Analisis Terstandarisasi` : `Studi Kelayakan Strategis dan Pemodelan Kausalitas Pengaruh Variabel Penentu terhadap ${titleCase}`,
+        category: "penelitian",
+        entity: defaultEntitySkripsi,
         durationMonths: 6,
-        referenceJournal: "Reliability Engineering & System Safety (2024)",
-        researchGap: "Keterbatasan metode observasi visual berkala dibanding continuous failure telemetry.",
-        thinkingMode: "Inversion / Pre-Mortem Thinking"
+        referenceJournal: p4 ? `${p4.venue || "Publikasi Ilmiah Terindeks"} (${p4.year || 2024})` : defaultJournal,
+        researchGap: `Belum terpetakannya korelasi kausal antar variabel determinan dan konsekuensi jangka panjang penerapan ${cleanQuery}.`,
+        thinkingMode: "Systems / Holistic Thinking"
       }
     ];
+  } catch (err: any) {
+    console.error("Critical title generation failure:", err);
+    return [];
   }
-
-  // Default: Advanced Informatics, AI, Business, & General Sains
-  return [
-    {
-      id: "rec-gen-1",
-      title: `Implementasi Pipeline Otomasi & Benchmarking Performa Arsitektur ${titleCase} pada Lingkungan Produksi`,
-      category: "magang",
-      entity: "PT Telkom Indonesia (Persero) Tbk / Enterprise Partner",
-      durationMonths: 6,
-      referenceJournal: `IEEE Transactions on Software Engineering & Systems (2024)`,
-      researchGap: `Tingginya latensi pemrosesan data pipeline manual dan perlunya throughput terukur pada ${cleanQuery}.`,
-      thinkingMode: "First-Principles Thinking"
-    },
-    {
-      id: "rec-gen-2",
-      title: `Analisis Komparatif dan Optimasi Algoritma ${titleCase} Menggunakan Model Evaluasi Terstandarisasi`,
-      category: "skripsi",
-      entity: "Laboratorium Sains Komputasi & AI Terapan",
-      durationMonths: 6,
-      referenceJournal: `ACM Computing Surveys & Knowledge Systems (2024)`,
-      researchGap: `Penurunan efisiensi komputasi pada volume data masif yang belum teratasi dengan pemodelan konvensional.`,
-      thinkingMode: "Critical / Falsification Thinking"
-    },
-    {
-      id: "rec-gen-3",
-      title: `Perancangan Arsitektur Microservices Berbasis Event-Driven untuk Integrasi Sistem ${titleCase}`,
-      category: "magang",
-      entity: "Perusahaan Teknologi Nasional / Fintech",
-      durationMonths: 6,
-      referenceJournal: `IEEE Cloud Computing & Distributed Systems (2023)`,
-      researchGap: `Bottleneck skalabilitas saat lonjakan konkurensi data transaksi tinggi pada platform operasional.`,
-      thinkingMode: "Occam's Razor"
-    },
-    {
-      id: "rec-gen-4",
-      title: `Studi Kelayakan dan Pengukuran Dampak Transformasi Digital Berbasis ${titleCase} pada Proses Bisnis`,
-      category: "penelitian",
-      entity: "Lembaga Kajian Strategis & Inovasi Industri",
-      durationMonths: 6,
-      referenceJournal: `Journal of Business Research & Technological Forecasting (2024)`,
-      researchGap: `Kesenjangan adaptasi pengguna internal dan ketiadaan kerangka kerja audit efisiensi investasi teknologi.`,
-      thinkingMode: "Systems / Holistic Thinking"
-    }
-  ];
 }
