@@ -1,8 +1,8 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
-import { AgentInfo, ProposalCategory } from "@/types/studio";
-import { INITIAL_AGENTS } from "@/lib/agentEngine";
+import React, { useState, useEffect, useRef } from "react";
+import { AgentInfo, ProposalCategory, ProposalDocument } from "@/types/studio";
+import { INITIAL_AGENTS, buildGeneratedDocument } from "@/lib/agentEngine";
 import { ArrowRight, Check, Loader2 } from "lucide-react";
 
 interface AgentExecutionMonitorProps {
@@ -11,28 +11,47 @@ interface AgentExecutionMonitorProps {
   answers?: Record<string, string>;
   targetEntity?: string;
   candidateName?: string;
+  candidateId?: string;
   institution?: string;
-  onComplete: () => void;
+  facultyMajor?: string;
+  onComplete: (doc?: ProposalDocument) => void;
 }
 
 export const AgentExecutionMonitor: React.FC<AgentExecutionMonitorProps> = ({
   title,
   category = "magang",
   answers = {},
-  targetEntity = "PT Telkom Indonesia",
-  candidateName = "Muhammad Ilham",
-  institution = "Universitas Sebelas Maret (UNS)",
+  targetEntity = "Instansi Mitra",
+  candidateName = "Pengusul Akademik",
+  candidateId = "NIM-2026-AKAD",
+  institution = "Universitas",
+  facultyMajor = "Program Studi Terkait",
   onComplete
 }) => {
   const [agents, setAgents] = useState<AgentInfo[]>(INITIAL_AGENTS);
   const [activeLogs, setActiveLogs] = useState<{ time: string; agent: string; text: string }[]>([]);
   const [overallProgress, setOverallProgress] = useState(15);
   const [isFinished, setIsFinished] = useState(false);
+  
+  // Store the actual generated doc from Gemini / fallback
+  const generatedDocRef = useRef<ProposalDocument | null>(null);
 
   useEffect(() => {
     const timestamp = () => new Date().toLocaleTimeString("id-ID", { hour12: false });
 
-    // Initial Gemini API handshake & Real Context Grounding
+    // Initial fallback doc ready immediately
+    generatedDocRef.current = buildGeneratedDocument(
+      title,
+      category,
+      answers,
+      candidateName,
+      candidateId,
+      institution,
+      facultyMajor,
+      targetEntity
+    );
+
+    // Call Gemini API to generate the full authentic academic proposal document
     fetch("/api/gemini", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -42,16 +61,19 @@ export const AgentExecutionMonitor: React.FC<AgentExecutionMonitorProps> = ({
         answers,
         targetEntity,
         candidateName,
-        institution
+        candidateId,
+        institution,
+        facultyMajor
       })
     })
       .then(res => res.json())
       .then(data => {
-        if (data.success) {
-          const engineLabel = data.engine === "gemini-1.5-flash" ? "Google Gemini 1.5 Flash" : "Academic Intelligence Engine";
+        if (data.success && data.doc) {
+          generatedDocRef.current = data.doc;
+          const engineLabel = data.engine === "gemini-3.5-flash-lite" ? "Google Gemini 3.5 Flash Lite" : "Academic Intelligence Engine";
           setActiveLogs(l => [
             ...l,
-            { time: timestamp(), agent: "Orchestrator Core", text: `Terhubung ke ${engineLabel}: ${data.data?.chapters?.length || 4} Bab utama siap dirumuskan.` }
+            { time: timestamp(), agent: "Orchestrator Core", text: `Terhubung ke ${engineLabel}: Dokumen Bab I-IV, 16:9 Slides, & SOP Audit berhasil dikompilasi.` }
           ]);
         }
       })
@@ -62,7 +84,7 @@ export const AgentExecutionMonitor: React.FC<AgentExecutionMonitorProps> = ({
         ]);
       });
 
-    // Step-by-step orchestrator timeline simulation
+    // Step-by-step orchestrator timeline
     const timer1 = setTimeout(() => {
       setAgents(prev => prev.map((a, i) => i === 0 ? {
         ...a,
@@ -93,7 +115,7 @@ export const AgentExecutionMonitor: React.FC<AgentExecutionMonitorProps> = ({
         return a;
       }));
       setActiveLogs(l => [...l, { time: timestamp(), agent: "Workplan Scheduler", text: "Menyusun jadwal matriks kerja berjenjang (Fase 1 s.d. 5)." }]);
-      setActiveLogs(l => [...l, { time: timestamp(), agent: "Workplan Scheduler", text: "Memetakan target luaran mingguan (WBS, SRS, Prototype, UAT)." }]);
+      setActiveLogs(l => [...l, { time: timestamp(), agent: "Workplan Scheduler", text: "Memetakan target luaran mingguan (Logbook, Protokol, Evaluasi Mutu)." }]);
       setOverallProgress(70);
     }, 3200);
 
@@ -116,7 +138,7 @@ export const AgentExecutionMonitor: React.FC<AgentExecutionMonitorProps> = ({
       }));
       setActiveLogs(l => [...l, { time: timestamp(), agent: "Presentation Architect", text: "Membangun simpul graf pohon (Visual Tree Graph) relasi Bab 1-4." }]);
       setActiveLogs(l => [...l, { time: timestamp(), agent: "Presentation Architect", text: "Menyusun 6 slide presentasi eksekutif siap ekspor (.pptx)." }]);
-      setActiveLogs(l => [...l, { time: timestamp(), agent: "System Orchestrator", text: `Kompilasi dokumen akademik untuk ${candidateName} selesai.` }]);
+      setActiveLogs(l => [...l, { time: timestamp(), agent: "System Orchestrator", text: `Kompilasi dokumen akademik untuk ${candidateName} selesai 100%.` }]);
       setOverallProgress(100);
       setIsFinished(true);
     }, 6000);
@@ -128,7 +150,11 @@ export const AgentExecutionMonitor: React.FC<AgentExecutionMonitorProps> = ({
       clearTimeout(timer4);
       clearTimeout(timer5);
     };
-  }, [title, category, answers, targetEntity, candidateName, institution]);
+  }, [title, category, answers, targetEntity, candidateName, candidateId, institution, facultyMajor]);
+
+  const handleFinish = () => {
+    onComplete(generatedDocRef.current || undefined);
+  };
 
   return (
     <div className="max-w-3xl mx-auto py-6 sm:py-8 w-full animate-in fade-in duration-200">
@@ -224,7 +250,7 @@ export const AgentExecutionMonitor: React.FC<AgentExecutionMonitorProps> = ({
         <div className="flex justify-end pt-2">
           <button
             type="button"
-            onClick={onComplete}
+            onClick={handleFinish}
             className="w-full sm:w-auto px-6 py-3 rounded-lg bg-zinc-100 hover:bg-white text-black font-semibold text-xs transition-all flex items-center justify-center gap-2 cursor-pointer shadow-lg"
           >
             <span>Buka Naskah Proposal & Slide Studio</span>

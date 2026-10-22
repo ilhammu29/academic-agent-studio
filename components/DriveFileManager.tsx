@@ -81,10 +81,10 @@ export default function DriveFileManager({
   });
 
   return (
-    <div className="w-full flex-1 flex flex-col md:flex-row bg-[#000000] border border-zinc-900 rounded-xl overflow-hidden shadow-xl min-h-[580px] animate-in fade-in duration-200">
+    <div className="w-full flex-1 flex flex-col md:flex-row bg-white dark:bg-[#000000] border border-zinc-200 dark:border-zinc-900 rounded-xl overflow-hidden shadow-xl min-h-[580px] animate-in fade-in duration-200">
       
       {/* 1. DRIVE SIDEBAR (Clean & Minimalist) */}
-      <aside className="w-full md:w-56 bg-zinc-950 border-b md:border-b-0 md:border-r border-zinc-900 p-4 flex flex-col justify-between flex-shrink-0">
+      <aside className="w-full md:w-56 bg-zinc-50 dark:bg-zinc-950 border-b md:border-b-0 md:border-r border-zinc-200 dark:border-zinc-900 p-4 flex flex-col justify-between flex-shrink-0">
         <div>
           {/* New Proposal CTA */}
           <button
@@ -165,10 +165,10 @@ export default function DriveFileManager({
       </aside>
 
       {/* 2. MAIN DRIVE CONTENT AREA */}
-      <div className="flex-1 flex flex-col bg-[#000000] overflow-hidden">
+      <div className="flex-1 flex flex-col bg-white dark:bg-[#000000] overflow-hidden">
         
         {/* Top Search & Filter Bar */}
-        <div className="p-3 sm:p-4 border-b border-zinc-900 bg-zinc-950/60 flex items-center justify-between gap-3">
+        <div className="p-3 sm:p-4 border-b border-zinc-200 dark:border-zinc-900 bg-zinc-50/60 dark:bg-zinc-950/60 flex items-center justify-between gap-3">
           <div className="relative flex-1 max-w-sm">
             <Search className="absolute left-3 top-2.5 w-4 h-4 text-zinc-500" />
             <input

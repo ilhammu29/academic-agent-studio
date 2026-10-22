@@ -11,9 +11,13 @@ export async function POST(req: Request) {
     const body = await req.json();
     const { sectionTitle, currentContent, instruction } = body;
 
-    if (!sectionTitle || !currentContent) {
+    const contentStr = Array.isArray(currentContent) 
+      ? currentContent.join("\n\n") 
+      : String(currentContent || "").trim();
+
+    if (!sectionTitle) {
       return NextResponse.json(
-        { error: "Judul bagian dan konten saat ini harus disertakan." },
+        { error: "Judul bagian harus disertakan." },
         { status: 400 }
       );
     }
@@ -30,7 +34,7 @@ Tugas Anda adalah merevisi atau menyempurnakan bagian naskah proposal akademik b
 
 Judul Bagian: ${sectionTitle}
 Naskah Saat Ini:
-${currentContent}
+${contentStr || "Draf bagian usulan proposal akademik."}
 
 Instruksi Revisi dari Pengguna:
 ${instruction || "Perbaiki diksi, buat lebih akademis, perjelas logika kausalitas, dan perkuat data rujukan."}
@@ -59,11 +63,11 @@ Ketentuan:
         if (geminiRes.ok) {
           const data = await geminiRes.json();
           const revised = data?.candidates?.[0]?.content?.parts?.[0]?.text;
-          if (revised && revised.trim().length > 20) {
+          if (revised && revised.trim().length > 10) {
             return NextResponse.json({
               success: true,
               revisedContent: revised.trim(),
-              engine: "gemini-1.5-flash",
+              engine: "gemini-3.5-flash-lite",
               message: "Naskah berhasil disempurnakan menggunakan Gemini AI."
             });
           }
@@ -74,7 +78,7 @@ Ketentuan:
     }
 
     // 2. Intelligent Academic Fallback Refiner (No API key needed, zero hallucination)
-    const refinedText = performHeuristicAcademicRefinement(sectionTitle, currentContent, instruction);
+    const refinedText = performHeuristicAcademicRefinement(sectionTitle, contentStr, instruction);
 
     return NextResponse.json({
       success: true,

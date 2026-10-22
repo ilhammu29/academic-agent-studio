@@ -48,6 +48,7 @@ export const DocumentStudio: React.FC<DocumentStudioProps> = ({
   const [refineSectionTitle, setRefineSectionTitle] = useState<string | null>(null);
   const [refineContent, setRefineContent] = useState("");
   const [refineInstruction, setRefineInstruction] = useState("");
+  const [revisedPreview, setRevisedPreview] = useState<string | null>(null);
   const [isRefining, setIsRefining] = useState(false);
   const [refineError, setRefineError] = useState<string | null>(null);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
@@ -59,8 +60,17 @@ export const DocumentStudio: React.FC<DocumentStudioProps> = ({
   const handleRefineWithAI = (key: string, title: string, textToRefine: string) => {
     setRefineKey(key);
     setRefineSectionTitle(title);
-    setRefineContent(textToRefine);
+    setRefineContent(textToRefine || "");
     setRefineInstruction("");
+    setRevisedPreview(null);
+    setRefineError(null);
+  };
+
+  const closeRefineModal = () => {
+    setRefineSectionTitle(null);
+    setRefineKey(null);
+    setRefineInstruction("");
+    setRevisedPreview(null);
     setRefineError(null);
   };
 
@@ -80,37 +90,55 @@ export const DocumentStudio: React.FC<DocumentStudioProps> = ({
       });
       const data = await res.json();
       if (data.success && data.revisedContent) {
-        setCurrentDoc(prev => {
-          const updated = { ...prev };
-          if (refineKey === "executiveSummary") {
-            updated.executiveSummary = data.revisedContent;
-          } else if (refineKey === "bab1.latarBelakang") {
-            const paras = data.revisedContent.split("\n\n").map((p: string) => p.trim()).filter(Boolean);
-            updated.bab1 = { ...updated.bab1, latarBelakang: paras.length > 0 ? paras : [data.revisedContent] };
-          } else if (refineKey === "bab1.rumusanMasalah") {
-            const items = data.revisedContent.split("\n").map((l: string) => l.replace(/^[\d\.\-\*\•\s]+/, "").trim()).filter(Boolean);
-            updated.bab1 = { ...updated.bab1, rumusanMasalah: items.length > 0 ? items : [data.revisedContent] };
-          } else if (refineKey === "bab2.profilInstansi") {
-            updated.bab2 = { ...updated.bab2, profilInstansi: data.revisedContent };
-          } else if (refineKey === "bab3.metodePelaksanaan") {
-            updated.bab3 = { ...updated.bab3, metodePelaksanaan: data.revisedContent };
-          } else if (refineKey === "bab4.penutup") {
-            updated.bab4 = { ...updated.bab4, penutup: data.revisedContent };
-          }
-          return updated;
-        });
-        setToastMessage(`Bagian "${refineSectionTitle}" berhasil direvisi dengan standar akademik!`);
-        setTimeout(() => setToastMessage(null), 4000);
-        setRefineSectionTitle(null);
-        setRefineKey(null);
+        setRevisedPreview(data.revisedContent);
       } else {
-        setRefineError(data.error || "Gagal merevisi naskah.");
+        setRefineError(data.error || "Gagal merevisi naskah. Silakan coba kembali.");
       }
     } catch (e: any) {
       setRefineError(`Terjadi kesalahan: ${e.message}`);
     } finally {
       setIsRefining(false);
     }
+  };
+
+  const applyRefinedContent = (finalText: string) => {
+    if (!refineKey) return;
+    setCurrentDoc(prev => {
+      const updated = { ...prev };
+      if (refineKey === "executiveSummary") {
+        updated.executiveSummary = finalText;
+      } else if (refineKey === "bab1.latarBelakang") {
+        const paras = finalText.split("\n\n").map((p: string) => p.trim()).filter(Boolean);
+        updated.bab1 = { ...updated.bab1, latarBelakang: paras.length > 0 ? paras : [finalText] };
+      } else if (refineKey === "bab1.rumusanMasalah") {
+        const items = finalText.split("\n").map((l: string) => l.replace(/^[\d\.\-\*\•\s]+/, "").trim()).filter(Boolean);
+        updated.bab1 = { ...updated.bab1, rumusanMasalah: items.length > 0 ? items : [finalText] };
+      } else if (refineKey === "bab1.batasanMasalah") {
+        const items = finalText.split("\n").map((l: string) => l.replace(/^[\d\.\-\*\•\s]+/, "").trim()).filter(Boolean);
+        updated.bab1 = { ...updated.bab1, batasanMasalah: items.length > 0 ? items : [finalText] };
+      } else if (refineKey === "bab1.tujuanUmum") {
+        updated.bab1 = { ...updated.bab1, tujuanUmum: finalText };
+      } else if (refineKey === "bab2.profilInstansi") {
+        updated.bab2 = { ...updated.bab2, profilInstansi: finalText };
+      } else if (refineKey === "bab2.conceptualFramework") {
+        updated.bab2 = { ...updated.bab2, conceptualFramework: finalText };
+      } else if (refineKey === "bab3.metodePelaksanaan") {
+        updated.bab3 = { ...updated.bab3, metodePelaksanaan: finalText };
+      } else if (refineKey === "bab3.populationSample") {
+        updated.bab3 = { ...updated.bab3, populationSample: finalText };
+      } else if (refineKey === "bab3.ethicalConsiderations") {
+        updated.bab3 = { ...updated.bab3, ethicalConsiderations: finalText };
+      } else if (refineKey === "bab4.penutup") {
+        updated.bab4 = { ...updated.bab4, penutup: finalText };
+      } else if (refineKey === "bab4.disseminationPlan") {
+        updated.bab4 = { ...updated.bab4, disseminationPlan: finalText };
+      }
+      return updated;
+    });
+
+    setToastMessage(`Bagian "${refineSectionTitle}" berhasil diperbarui ke dalam naskah!`);
+    setTimeout(() => setToastMessage(null), 3500);
+    closeRefineModal();
   };
 
   const generateFullMarkdown = () => {
@@ -496,96 +524,6 @@ NIP / NIK.
             </p>
           </div>
 
-          {/* AI Refine Modal/Drawer if active */}
-          {refineSectionTitle && (
-            <div className="mb-8 p-5 rounded-xl border border-zinc-800 bg-zinc-900/90 text-zinc-100 no-print animate-in fade-in shadow-xl backdrop-blur-sm">
-              <div className="flex items-center justify-between pb-3 border-b border-zinc-800/80 mb-3">
-                <div className="flex items-center gap-2">
-                  <Sparkles className="w-4 h-4 text-zinc-200" />
-                  <h3 className="text-sm font-semibold text-zinc-100">
-                    Revisi AI Gemini: <span className="text-zinc-300 font-normal">{refineSectionTitle}</span>
-                  </h3>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setRefineSectionTitle(null);
-                    setRefineKey(null);
-                    setRefineError(null);
-                  }}
-                  className="p-1 rounded hover:bg-zinc-800 text-zinc-400 hover:text-zinc-200 cursor-pointer"
-                >
-                  <X className="w-4 h-4" />
-                </button>
-              </div>
-
-              {refineError && (
-                <div className="mb-3 p-2.5 rounded bg-red-950/40 border border-red-900/60 text-red-300 text-xs flex items-center gap-2">
-                  <ShieldAlert className="w-3.5 h-3.5 flex-shrink-0 text-red-400" />
-                  <span>{refineError}</span>
-                </div>
-              )}
-
-              <p className="text-xs text-zinc-400 mb-2">
-                Pilih arahan cepat atau tulis instruksi perbaikan akademik khusus:
-              </p>
-
-              {/* Quick Prompt Chips */}
-              <div className="flex flex-wrap gap-1.5 mb-3">
-                {[
-                  "Perdalam analisis teoritis & rujukan ilmiah",
-                  "Perjelas metodologi kuantitatif & indikator",
-                  "Tingkatkan formalitas bahasa akademik",
-                  "Pertegas urgensi rumusan masalah"
-                ].map((chip, idx) => (
-                  <button
-                    key={idx}
-                    type="button"
-                    onClick={() => setRefineInstruction(chip)}
-                    className="text-[11px] px-2.5 py-1 rounded-full bg-zinc-800/80 hover:bg-zinc-700 text-zinc-300 border border-zinc-700/60 transition-colors cursor-pointer"
-                  >
-                    + {chip}
-                  </button>
-                ))}
-              </div>
-
-              <textarea
-                value={refineInstruction}
-                onChange={(e) => setRefineInstruction(e.target.value)}
-                placeholder="Contoh: Perluas analisis latar belakang dengan memasukkan referensi standar industri terbaru dan data empiris..."
-                className="w-full p-3 rounded-lg bg-zinc-950 border border-zinc-800 text-xs text-zinc-200 mb-3 focus:outline-none focus:border-zinc-500 font-sans leading-relaxed resize-y min-h-[80px]"
-                rows={3}
-              />
-
-              <div className="flex items-center justify-between">
-                <span className="text-[11px] text-zinc-500 font-mono">
-                  Didukung Gemini 2.5 Flash & 12 Thinking Modes
-                </span>
-                <div className="flex items-center gap-2">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setRefineSectionTitle(null);
-                      setRefineKey(null);
-                    }}
-                    className="px-3 py-1.5 rounded-lg bg-zinc-800 text-xs text-zinc-300 hover:bg-zinc-700 cursor-pointer"
-                  >
-                    Batal
-                  </button>
-                  <button
-                    type="button"
-                    disabled={isRefining || !refineInstruction.trim()}
-                    onClick={submitAiRefinement}
-                    className="px-4 py-1.5 rounded-lg bg-zinc-100 text-black font-semibold text-xs hover:bg-white disabled:opacity-50 cursor-pointer flex items-center gap-1.5 shadow-sm"
-                  >
-                    {isRefining ? <RefreshCw className="w-3.5 h-3.5 animate-spin" /> : <Sparkles className="w-3.5 h-3.5" />}
-                    <span>{isRefining ? "Sedang Merumuskan AI..." : "Terapkan Revisi AI"}</span>
-                  </button>
-                </div>
-              </div>
-            </div>
-          )}
-
           {/* BAB I */}
           <section className="mb-10">
             <div className="border-b border-zinc-900 pb-2 mb-4 print:border-black">
@@ -672,38 +610,118 @@ NIP / NIK.
             </div>
 
             <div className="space-y-4 text-xs sm:text-sm text-zinc-300 leading-relaxed text-justify print:text-black font-sans">
-              <div className="flex items-center justify-between">
-                <h3 className="text-sm font-semibold text-zinc-100 print:text-black font-serif">2.1 Profil Instansi Mitra</h3>
-                <button
-                  type="button"
-                  onClick={() => handleRefineWithAI("bab2.profilInstansi", "2.1 Profil Instansi Mitra", currentDoc.bab2.profilInstansi)}
-                  className="no-print text-[11px] font-mono text-zinc-400 hover:text-zinc-100 bg-zinc-900 px-2 py-0.5 rounded border border-zinc-800 flex items-center gap-1 cursor-pointer transition-colors"
-                >
-                  <Sparkles className="w-3 h-3 text-zinc-400" />
-                  <span>Revisi AI</span>
-                </button>
-              </div>
-              <p className="indent-6">{currentDoc.bab2.profilInstansi}</p>
-              
-              <div className="p-3 bg-zinc-900/60 rounded border border-zinc-900 print:bg-gray-50 print:border-gray-300">
-                <p className="font-semibold text-xs text-zinc-200 mb-1 print:text-black">Visi & Misi:</p>
-                <ul className="space-y-1 text-xs">
-                  {currentDoc.bab2.visiMisi.map((v, i) => <li key={i}>{v}</li>)}
-                </ul>
-              </div>
-
-              <p className="indent-6">{currentDoc.bab2.strukturOrganisasi}</p>
-
-              <h3 className="text-sm font-semibold text-zinc-100 print:text-black font-serif pt-2">2.2 Landasan Teori Ilmiah</h3>
-              <div className="space-y-3">
-                {currentDoc.bab2.landasanTeori.map((theory, i) => (
-                  <div key={i} className="p-3 rounded bg-zinc-900/40 border border-zinc-900 print:border-gray-200">
-                    <h4 className="text-xs font-semibold text-zinc-100 print:text-black mb-1">{theory.topic}</h4>
-                    <p className="text-xs text-zinc-300 print:text-black">{theory.elaboration}</p>
-                    <p className="text-[11px] text-zinc-500 font-mono mt-1 print:text-gray-600">Rujukan: {theory.citation}</p>
+              {currentDoc.category === "magang" ? (
+                /* Format Khusus Magang: Profil Perusahaan, Visi Misi, Struktur Organisasi */
+                <>
+                  <div className="flex items-center justify-between">
+                    <h3 className="text-sm font-semibold text-zinc-100 print:text-black font-serif">2.1 Profil Instansi Mitra</h3>
+                    <button
+                      type="button"
+                      onClick={() => handleRefineWithAI("bab2.profilInstansi", "2.1 Profil Instansi Mitra", currentDoc.bab2.profilInstansi)}
+                      className="no-print text-[11px] font-mono text-zinc-400 hover:text-zinc-100 bg-zinc-900 px-2 py-0.5 rounded border border-zinc-800 flex items-center gap-1 cursor-pointer transition-colors"
+                    >
+                      <Sparkles className="w-3 h-3 text-zinc-400" />
+                      <span>Revisi AI</span>
+                    </button>
                   </div>
-                ))}
-              </div>
+                  <p className="indent-6">{currentDoc.bab2.profilInstansi}</p>
+                  
+                  <div className="p-3 bg-zinc-900/60 rounded border border-zinc-900 print:bg-gray-50 print:border-gray-300">
+                    <p className="font-semibold text-xs text-zinc-200 mb-1 print:text-black">Visi & Misi:</p>
+                    <ul className="space-y-1 text-xs">
+                      {currentDoc.bab2.visiMisi.map((v, i) => <li key={i}>{v}</li>)}
+                    </ul>
+                  </div>
+
+                  <p className="indent-6">{currentDoc.bab2.strukturOrganisasi}</p>
+
+                  <h3 className="text-sm font-semibold text-zinc-100 print:text-black font-serif pt-2">2.2 Landasan Teori Terapan & Standar Industri</h3>
+                  <div className="space-y-3">
+                    {currentDoc.bab2.landasanTeori.map((theory, i) => (
+                      <div key={i} className="p-3 rounded bg-zinc-900/40 border border-zinc-900 print:border-gray-200">
+                        <h4 className="text-xs font-semibold text-zinc-100 print:text-black mb-1">{theory.topic}</h4>
+                        <p className="text-xs text-zinc-300 print:text-black">{theory.elaboration}</p>
+                        <p className="text-[11px] text-zinc-500 font-mono mt-1 print:text-gray-600">Rujukan: {theory.citation}</p>
+                      </div>
+                    ))}
+                  </div>
+                </>
+              ) : (
+                /* Format Khusus Skripsi/Penelitian: Tinjauan Pustaka, Matriks Keaslian 7 Kolom, Kerangka Konsep, Hipotesis */
+                <>
+                  <h3 className="text-sm font-semibold text-zinc-100 print:text-black font-serif">2.1 Tinjauan Teoretis Variabel Penelitian</h3>
+                  <div className="space-y-3">
+                    {currentDoc.bab2.landasanTeori.map((theory, i) => (
+                      <div key={i} className="p-3 rounded bg-zinc-900/40 border border-zinc-900 print:border-gray-200">
+                        <h4 className="text-xs font-semibold text-zinc-100 print:text-black mb-1">{theory.topic}</h4>
+                        <p className="text-xs text-zinc-300 print:text-black">{theory.elaboration}</p>
+                        <p className="text-[11px] text-zinc-500 font-mono mt-1 print:text-gray-600">Rujukan Otoritatif: {theory.citation}</p>
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* Matriks Keaslian Penelitian (SOP 7-Kolom PRISMA 2020) */}
+                  {currentDoc.bab2.researchGapMatrix && currentDoc.bab2.researchGapMatrix.length > 0 && (
+                    <div className="pt-2">
+                      <h3 className="text-sm font-semibold text-zinc-100 print:text-black font-serif mb-2">
+                        2.2 Matriks Keaslian Penelitian (Research Gap & State-of-the-Art)
+                      </h3>
+                      <div className="overflow-x-auto my-3">
+                        <table className="w-full text-left text-xs font-sans border-t-2 border-b-2 border-zinc-200 print:border-black">
+                          <thead>
+                            <tr className="border-b border-zinc-800 print:border-black font-semibold text-zinc-100 print:text-black">
+                              <th className="py-2 px-2.5">No</th>
+                              <th className="py-2 px-2.5">Penulis & Tahun</th>
+                              <th className="py-2 px-2.5">Judul & Jurnal</th>
+                              <th className="py-2 px-2.5">Desain & Sampel</th>
+                              <th className="py-2 px-2.5">Variabel & Instrumen</th>
+                              <th className="py-2 px-2.5">Temuan Utama</th>
+                              <th className="py-2 px-2.5">Celah & Perbedaan Studi Ini</th>
+                            </tr>
+                          </thead>
+                          <tbody className="divide-y divide-zinc-900 print:divide-gray-300 text-zinc-300 print:text-black text-[11px]">
+                            {currentDoc.bab2.researchGapMatrix.map((item, idx) => (
+                              <tr key={idx} className="align-top">
+                                <td className="py-2 px-2.5 font-mono font-medium">{item.no}</td>
+                                <td className="py-2 px-2.5 font-medium text-zinc-200 print:text-black whitespace-nowrap">{item.authorYear}</td>
+                                <td className="py-2 px-2.5 italic">{item.titleJournal}</td>
+                                <td className="py-2 px-2.5">{item.designSample}</td>
+                                <td className="py-2 px-2.5">{item.variables}</td>
+                                <td className="py-2 px-2.5">{item.findingsEffect}</td>
+                                <td className="py-2 px-2.5 font-medium text-zinc-200 print:text-black bg-zinc-900/30 print:bg-gray-50">{item.gapDifference}</td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                        <p className="text-[11px] text-zinc-500 mt-1.5 italic print:text-gray-600">
+                          *Matriks sintesis 7 kolom berstandar pedoman PRISMA 2020 & STROBE.
+                        </p>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Kerangka Konseptual & Hipotesis */}
+                  {currentDoc.bab2.conceptualFramework && (
+                    <div className="pt-2">
+                      <h3 className="text-sm font-semibold text-zinc-100 print:text-black font-serif mb-1">
+                        2.3 Kerangka Konsep Penelitian
+                      </h3>
+                      <p className="indent-6">{currentDoc.bab2.conceptualFramework}</p>
+                    </div>
+                  )}
+
+                  {currentDoc.bab2.hypotheses && currentDoc.bab2.hypotheses.length > 0 && (
+                    <div className="pt-2">
+                      <h3 className="text-sm font-semibold text-zinc-100 print:text-black font-serif mb-1">
+                        2.4 Hipotesis Penelitian
+                      </h3>
+                      <ul className="list-disc pl-6 space-y-1 text-xs">
+                        {currentDoc.bab2.hypotheses.map((h, i) => <li key={i}>{h}</li>)}
+                      </ul>
+                    </div>
+                  )}
+                </>
+              )}
             </div>
           </section>
 
@@ -716,28 +734,112 @@ NIP / NIK.
             </div>
 
             <div className="space-y-4 text-xs sm:text-sm text-zinc-300 leading-relaxed text-justify print:text-black font-sans">
-              <div className="flex items-center justify-between">
-                <h3 className="text-sm font-semibold text-zinc-100 print:text-black font-serif">3.1 Metode Pelaksanaan Kerja</h3>
-                <button
-                  type="button"
-                  onClick={() => handleRefineWithAI("bab3.metodePelaksanaan", "3.1 Metode Pelaksanaan Kerja", currentDoc.bab3.metodePelaksanaan)}
-                  className="no-print text-[11px] font-mono text-zinc-400 hover:text-zinc-100 bg-zinc-900 px-2 py-0.5 rounded border border-zinc-800 flex items-center gap-1 cursor-pointer transition-colors"
-                >
-                  <Sparkles className="w-3 h-3 text-zinc-400" />
-                  <span>Revisi AI</span>
-                </button>
-              </div>
-              <p className="indent-6">{currentDoc.bab3.metodePelaksanaan}</p>
+              {currentDoc.category === "magang" ? (
+                /* Format Khusus Magang: Metode Kerja, WBS, Perangkat, Kompetensi */
+                <>
+                  <div className="flex items-center justify-between">
+                    <h3 className="text-sm font-semibold text-zinc-100 print:text-black font-serif">3.1 Metode Pelaksanaan Kerja</h3>
+                    <button
+                      type="button"
+                      onClick={() => handleRefineWithAI("bab3.metodePelaksanaan", "3.1 Metode Pelaksanaan Kerja", currentDoc.bab3.metodePelaksanaan)}
+                      className="no-print text-[11px] font-mono text-zinc-400 hover:text-zinc-100 bg-zinc-900 px-2 py-0.5 rounded border border-zinc-800 flex items-center gap-1 cursor-pointer transition-colors"
+                    >
+                      <Sparkles className="w-3 h-3 text-zinc-400" />
+                      <span>Revisi AI</span>
+                    </button>
+                  </div>
+                  <p className="indent-6">{currentDoc.bab3.metodePelaksanaan}</p>
 
-              <h3 className="text-sm font-semibold text-zinc-100 print:text-black font-serif pt-2">3.2 Lingkup Penugasan</h3>
-              <ol className="list-decimal pl-6 space-y-1">
-                {currentDoc.bab3.lingkupPekerjaan.map((l, i) => <li key={i}>{l}</li>)}
-              </ol>
+                  <h3 className="text-sm font-semibold text-zinc-100 print:text-black font-serif pt-2">3.2 Lingkup Penugasan (Work Breakdown Structure)</h3>
+                  <ol className="list-decimal pl-6 space-y-1">
+                    {(currentDoc.bab3.wbsScope || currentDoc.bab3.lingkupPekerjaan).map((l, i) => <li key={i}>{l}</li>)}
+                  </ol>
 
-              <h3 className="text-sm font-semibold text-zinc-100 print:text-black font-serif pt-2">3.3 Lingkungan Kerja & Tools</h3>
-              <ul className="list-disc pl-6 space-y-1">
-                {currentDoc.bab3.perangkatTools.map(p => `• ${p}`).join(", ")}
-              </ul>
+                  <h3 className="text-sm font-semibold text-zinc-100 print:text-black font-serif pt-2">3.3 Lingkungan Kerja, Tools, & SOP</h3>
+                  <ul className="list-disc pl-6 space-y-1">
+                    {currentDoc.bab3.perangkatTools.map((p, i) => <li key={i}>{p}</li>)}
+                  </ul>
+
+                  <h3 className="text-sm font-semibold text-zinc-100 print:text-black font-serif pt-2">3.4 Target Capaian Hard & Soft Skills</h3>
+                  <ul className="list-disc pl-6 space-y-1">
+                    {currentDoc.bab3.rencanaKompetensi.map((k, i) => <li key={i}>{k}</li>)}
+                  </ul>
+                </>
+              ) : (
+                /* Format Khusus Skripsi: Desain Riset, Populasi & Sampel, DOV Table, KEPK */
+                <>
+                  <div className="flex items-center justify-between">
+                    <h3 className="text-sm font-semibold text-zinc-100 print:text-black font-serif">3.1 Jenis dan Desain Penelitian</h3>
+                    <button
+                      type="button"
+                      onClick={() => handleRefineWithAI("bab3.metodePelaksanaan", "3.1 Jenis dan Desain Penelitian", currentDoc.bab3.metodePelaksanaan)}
+                      className="no-print text-[11px] font-mono text-zinc-400 hover:text-zinc-100 bg-zinc-900 px-2 py-0.5 rounded border border-zinc-800 flex items-center gap-1 cursor-pointer transition-colors"
+                    >
+                      <Sparkles className="w-3 h-3 text-zinc-400" />
+                      <span>Revisi AI</span>
+                    </button>
+                  </div>
+                  <p className="indent-6">{currentDoc.bab3.metodePelaksanaan}</p>
+
+                  {/* Populasi & Sampel */}
+                  {currentDoc.bab3.populationSample && (
+                    <div>
+                      <h3 className="text-sm font-semibold text-zinc-100 print:text-black font-serif pt-2">3.2 Populasi, Sampel, & Kriteria Subjek</h3>
+                      <p className="indent-6">{currentDoc.bab3.populationSample}</p>
+                    </div>
+                  )}
+
+                  {/* Tabel Definisi Operasional Variabel (Tabel 3 Garis Terbuka) */}
+                  {currentDoc.bab3.operationalDefinitions && currentDoc.bab3.operationalDefinitions.length > 0 && (
+                    <div className="pt-2">
+                      <h3 className="text-sm font-semibold text-zinc-100 print:text-black font-serif mb-2">
+                        3.3 Tabel Definisi Operasional Variabel (DOV)
+                      </h3>
+                      <div className="overflow-x-auto my-3">
+                        <table className="w-full text-left text-xs font-sans border-t-2 border-b-2 border-zinc-200 print:border-black">
+                          <thead>
+                            <tr className="border-b border-zinc-800 print:border-black font-semibold text-zinc-100 print:text-black">
+                              <th className="py-2 px-3">Variabel Penelitian</th>
+                              <th className="py-2 px-3">Definisi Operasional</th>
+                              <th className="py-2 px-3">Parameter & Alat Ukur</th>
+                              <th className="py-2 px-3">Skala Pengukuran</th>
+                            </tr>
+                          </thead>
+                          <tbody className="divide-y divide-zinc-900 print:divide-gray-300 text-zinc-300 print:text-black text-[11px]">
+                            {currentDoc.bab3.operationalDefinitions.map((dov, idx) => (
+                              <tr key={idx} className="align-top">
+                                <td className="py-2 px-3 font-medium text-zinc-200 print:text-black whitespace-nowrap">{dov.variable}</td>
+                                <td className="py-2 px-3">{dov.definition}</td>
+                                <td className="py-2 px-3">{dov.parameterTool}</td>
+                                <td className="py-2 px-3 font-mono">{dov.indicatorScale}</td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Instrumen & Kalibrasi */}
+                  <h3 className="text-sm font-semibold text-zinc-100 print:text-black font-serif pt-2">3.4 Instrumen & Kalibrasi Alat Ukur</h3>
+                  <ul className="list-disc pl-6 space-y-1">
+                    {currentDoc.bab3.perangkatTools.map((p, i) => <li key={i}>{p}</li>)}
+                  </ul>
+
+                  {/* Kelaikan Etik (Ethical Clearance) */}
+                  {currentDoc.bab3.ethicalConsiderations && (
+                    <div>
+                      <h3 className="text-sm font-semibold text-zinc-100 print:text-black font-serif pt-2">3.5 Protokol Etika Penelitian (Ethical Clearance)</h3>
+                      <p className="indent-6">{currentDoc.bab3.ethicalConsiderations}</p>
+                    </div>
+                  )}
+
+                  <h3 className="text-sm font-semibold text-zinc-100 print:text-black font-serif pt-2">3.6 Rencana Analisis Data & Uji Hipotesis</h3>
+                  <ul className="list-disc pl-6 space-y-1">
+                    {currentDoc.bab3.rencanaKompetensi.map((k, i) => <li key={i}>{k}</li>)}
+                  </ul>
+                </>
+              )}
             </div>
           </section>
 
@@ -750,7 +852,7 @@ NIP / NIK.
             </div>
 
             <h3 className="text-sm font-semibold text-zinc-100 print:text-black font-serif mb-3">
-              Tabel 4.1 Matriks Rencana Kerja Mingguan
+              Tabel 4.1 {currentDoc.category === "magang" ? "Matriks Rencana Kerja Mingguan (Logbook)" : "Jadwal Pelaksanaan Penelitian (Gantt Chart)"}
             </h3>
 
             {/* Academic 3-line Table */}
@@ -790,11 +892,62 @@ NIP / NIK.
               </p>
             </div>
 
+            {/* Tabel Rencana Anggaran Biaya (RAB) untuk Skripsi/Penelitian */}
+            {currentDoc.bab4.budgetPlan && currentDoc.bab4.budgetPlan.length > 0 && (
+              <div className="pt-3 mb-6">
+                <h3 className="text-sm font-semibold text-zinc-100 print:text-black font-serif mb-2">
+                  Tabel 4.2 Rencana Anggaran Biaya (RAB Penelitian)
+                </h3>
+                <div className="overflow-x-auto my-2">
+                  <table className="w-full text-left text-xs font-sans border-t-2 border-b-2 border-zinc-200 print:border-black">
+                    <thead>
+                      <tr className="border-b border-zinc-800 print:border-black font-semibold text-zinc-100 print:text-black">
+                        <th className="py-2 px-3">Komponen Biaya</th>
+                        <th className="py-2 px-3">Kategori</th>
+                        <th className="py-2 px-3 text-right">Alokasi Anggaran (Rp)</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-zinc-900 print:divide-gray-300 text-zinc-300 print:text-black text-[11px]">
+                      {currentDoc.bab4.budgetPlan.map((b, idx) => (
+                        <tr key={idx}>
+                          <td className="py-2 px-3">{b.item}</td>
+                          <td className="py-2 px-3 font-medium text-zinc-400">{b.category}</td>
+                          <td className="py-2 px-3 text-right font-mono font-medium text-zinc-200 print:text-black">
+                            Rp {b.cost.toLocaleString("id-ID")}
+                          </td>
+                        </tr>
+                      ))}
+                      <tr className="border-t-2 border-zinc-700 font-bold text-zinc-100 print:text-black">
+                        <td colSpan={2} className="py-2.5 px-3">Total Anggaran Riset</td>
+                        <td className="py-2.5 px-3 text-right font-mono">
+                          Rp {currentDoc.bab4.budgetPlan.reduce((acc, curr) => acc + curr.cost, 0).toLocaleString("id-ID")}
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            )}
+
+            {/* Target Publikasi / Diseminasi untuk Skripsi */}
+            {currentDoc.bab4.disseminationPlan && (
+              <div className="mb-4">
+                <h3 className="text-sm font-semibold text-zinc-100 print:text-black font-serif mb-1">
+                  4.3 Rencana Diseminasi & Publikasi Jurnal
+                </h3>
+                <p className="text-xs sm:text-sm text-zinc-300 indent-6 font-sans print:text-black">
+                  {currentDoc.bab4.disseminationPlan}
+                </p>
+              </div>
+            )}
+
             <div className="flex items-center justify-between pt-3 mb-2">
-              <h3 className="text-sm font-semibold text-zinc-100 print:text-black font-serif">4.2 Penutup</h3>
+              <h3 className="text-sm font-semibold text-zinc-100 print:text-black font-serif">
+                {currentDoc.category === "magang" ? "4.2 Penutup" : "4.4 Penutup"}
+              </h3>
               <button
                 type="button"
-                onClick={() => handleRefineWithAI("bab4.penutup", "4.2 Penutup", currentDoc.bab4.penutup)}
+                onClick={() => handleRefineWithAI("bab4.penutup", "Penutup Proposal", currentDoc.bab4.penutup)}
                 className="no-print text-[11px] font-mono text-zinc-400 hover:text-zinc-100 bg-zinc-900 px-2 py-0.5 rounded border border-zinc-800 flex items-center gap-1 cursor-pointer transition-colors"
               >
                 <Sparkles className="w-3 h-3 text-zinc-400" />
@@ -806,25 +959,84 @@ NIP / NIK.
             </p>
           </section>
 
-          {/* Lembar Pengesahan */}
+          {/* DAFTAR PUSTAKA (Standar APA 7th Edition) */}
+          {currentDoc.bibliography && currentDoc.bibliography.length > 0 && (
+            <section className="mb-10 pt-6 border-t border-zinc-900 print:border-black">
+              <div className="border-b border-zinc-900 pb-2 mb-4 print:border-black">
+                <h2 className="text-base sm:text-lg font-serif font-bold text-zinc-100 print:text-black uppercase">
+                  DAFTAR PUSTAKA
+                </h2>
+              </div>
+              <div className="space-y-3 text-xs text-zinc-300 print:text-black font-sans">
+                {currentDoc.bibliography.map((bib) => (
+                  <p key={bib.id} className="pl-6 -indent-6 leading-relaxed">
+                    <span className="font-medium text-zinc-200 print:text-black">{bib.author}</span> ({bib.year}). <em>{bib.title}</em>. {bib.source}
+                    {bib.doiUrl && (
+                      <span className="block pl-0 font-mono text-[10px] text-zinc-500 print:text-gray-600 mt-0.5">
+                        DOI/URL: {bib.doiUrl}
+                      </span>
+                    )}
+                  </p>
+                ))}
+              </div>
+            </section>
+          )}
+
+          {/* Lembar Pengesahan Formal */}
           <div className="pt-8 mt-10 border-t border-zinc-900 print:border-black font-sans text-xs">
-            <h3 className="text-center font-serif font-bold text-sm text-zinc-100 uppercase tracking-wider mb-8 print:text-black">
-              LEMBAR PENGESAHAN PROPOSAL
+            <h3 className="text-center font-serif font-bold text-sm text-zinc-100 uppercase tracking-wider mb-2 print:text-black">
+              {currentDoc.approvalSheet?.title || "LEMBAR PENGESAHAN PROPOSAL"}
             </h3>
+            <p className="text-center text-[11px] text-zinc-500 font-mono mb-8 print:text-gray-600">
+              Disahkan di {currentDoc.institution}, Tanggal: {currentDoc.approvalSheet?.approvalDate || currentDoc.generationDate}
+            </p>
 
             <div className="grid grid-cols-2 gap-8 text-center pt-4">
-              <div>
-                <p className="text-zinc-400 print:text-black mb-16">Mengetahui,<br /><strong>Dosen Pembimbing Akademik</strong></p>
-                <p className="font-semibold text-zinc-200 print:text-black">(__________________________________)</p>
-                <p className="text-zinc-500 font-mono print:text-gray-600">NIP.</p>
-              </div>
+              {currentDoc.approvalSheet?.primarySigners ? (
+                currentDoc.approvalSheet.primarySigners.map((signer, sIdx) => (
+                  <div key={sIdx}>
+                    <p className="text-zinc-400 print:text-black mb-16 leading-tight">
+                      Menyetujui,<br /><strong>{signer.role}</strong>
+                    </p>
+                    <p className="font-semibold text-zinc-200 print:text-black underline underline-offset-4">
+                      {signer.name}
+                    </p>
+                    <p className="text-zinc-500 font-mono print:text-gray-600 mt-0.5">
+                      {signer.idNumber}
+                    </p>
+                  </div>
+                ))
+              ) : (
+                <>
+                  <div>
+                    <p className="text-zinc-400 print:text-black mb-16">Menyetujui,<br /><strong>Dosen Pembimbing Akademik</strong></p>
+                    <p className="font-semibold text-zinc-200 print:text-black">(__________________________________)</p>
+                    <p className="text-zinc-500 font-mono print:text-gray-600">NIP.</p>
+                  </div>
 
-              <div>
-                <p className="text-zinc-400 print:text-black mb-16">Menyetujui,<br /><strong>Pimpinan / Mentor Lapangan {currentDoc.targetEntity}</strong></p>
-                <p className="font-semibold text-zinc-200 print:text-black">(__________________________________)</p>
-                <p className="text-zinc-500 font-mono print:text-gray-600">NIP / NIK.</p>
-              </div>
+                  <div>
+                    <p className="text-zinc-400 print:text-black mb-16">Menyetujui,<br /><strong>Pimpinan / Mentor Lapangan {currentDoc.targetEntity}</strong></p>
+                    <p className="font-semibold text-zinc-200 print:text-black">(__________________________________)</p>
+                    <p className="text-zinc-500 font-mono print:text-gray-600">NIP / NIK.</p>
+                  </div>
+                </>
+              )}
             </div>
+
+            {/* Ketua Program Studi Approval */}
+            {currentDoc.approvalSheet?.headSigner && (
+              <div className="mt-12 text-center">
+                <p className="text-zinc-400 print:text-black mb-16 leading-tight">
+                  Mengetahui,<br /><strong>{currentDoc.approvalSheet.headSigner.role}</strong>
+                </p>
+                <p className="font-semibold text-zinc-200 print:text-black underline underline-offset-4">
+                  {currentDoc.approvalSheet.headSigner.name}
+                </p>
+                <p className="text-zinc-500 font-mono print:text-gray-600 mt-0.5">
+                  {currentDoc.approvalSheet.headSigner.idNumber}
+                </p>
+              </div>
+            )}
           </div>
 
         </article>
@@ -1030,6 +1242,167 @@ NIP / NIK.
           setTimeout(() => setToastMessage(null), 4000);
         }}
       />
+
+      {/* FLOATING ACADEMIC AI REVISION MODAL DIALOG */}
+      {refineSectionTitle && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 dark:bg-black/80 backdrop-blur-md animate-in fade-in duration-150">
+          <div className="w-full max-w-2xl bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh] animate-in zoom-in-95 duration-150">
+            
+            {/* Modal Header */}
+            <div className="p-4 sm:p-5 border-b border-zinc-200 dark:border-zinc-800 flex items-center justify-between bg-zinc-50 dark:bg-zinc-900/60">
+              <div className="flex items-center gap-2.5">
+                <div className="w-8 h-8 rounded-lg bg-zinc-900 dark:bg-zinc-100 text-white dark:text-black flex items-center justify-center">
+                  <Sparkles className="w-4 h-4" />
+                </div>
+                <div>
+                  <h3 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">
+                    Revisi AI Akademik: <span className="font-normal text-zinc-600 dark:text-zinc-400">{refineSectionTitle}</span>
+                  </h3>
+                  <p className="text-[11px] text-zinc-500 font-mono">
+                    Didukung Google Gemini 3.5 & SOP 12 Metode Berpikir
+                  </p>
+                </div>
+              </div>
+
+              <button
+                type="button"
+                onClick={closeRefineModal}
+                className="p-1.5 rounded-lg hover:bg-zinc-200 dark:hover:bg-zinc-800 text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 transition-colors cursor-pointer"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            {/* Modal Body */}
+            <div className="p-4 sm:p-5 space-y-4 overflow-y-auto max-h-[70vh]">
+              {refineError && (
+                <div className="p-3 rounded-lg bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-900 text-red-600 dark:text-red-300 text-xs flex items-center gap-2">
+                  <ShieldAlert className="w-4 h-4 flex-shrink-0" />
+                  <span>{refineError}</span>
+                </div>
+              )}
+
+              {/* Revision Instructions */}
+              <div>
+                <label className="block text-xs font-medium text-zinc-700 dark:text-zinc-300 mb-1.5">
+                  Pilih Arahan Cepat atau Masukkan Instruksi Khusus:
+                </label>
+                <div className="flex flex-wrap gap-1.5 mb-2.5">
+                  {[
+                    "Perdalam analisis teoritis & rujukan primer",
+                    "Perjelas metodologi kuantitatif & indikator",
+                    "Tingkatkan formalitas bahasa akademik baku",
+                    "Pertegas urgensi rumusan & kesenjangan masalah",
+                    "Ringkas & padatkan narasi agar lebih tajam"
+                  ].map((chip, idx) => (
+                    <button
+                      key={idx}
+                      type="button"
+                      onClick={() => setRefineInstruction(chip)}
+                      className="text-[11px] px-2.5 py-1 rounded-full bg-zinc-100 dark:bg-zinc-900 hover:bg-zinc-200 dark:hover:bg-zinc-800 text-zinc-700 dark:text-zinc-300 border border-zinc-200 dark:border-zinc-800 transition-colors cursor-pointer"
+                    >
+                      + {chip}
+                    </button>
+                  ))}
+                </div>
+
+                <div className="relative">
+                  <textarea
+                    rows={2}
+                    value={refineInstruction}
+                    onChange={(e) => setRefineInstruction(e.target.value)}
+                    placeholder="Contoh: Perluas uraian dengan menambahkan variabel perancu dan dasar teori dari Gibson (2019)..."
+                    className="w-full p-3 rounded-xl bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-xs text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-400 focus:outline-none focus:border-zinc-500 font-sans leading-relaxed resize-none"
+                  />
+                  <button
+                    type="button"
+                    disabled={isRefining || !refineInstruction.trim()}
+                    onClick={submitAiRefinement}
+                    className="absolute right-2.5 bottom-2.5 px-3 py-1 rounded-lg bg-zinc-900 dark:bg-zinc-100 text-white dark:text-black font-semibold text-xs hover:opacity-90 disabled:opacity-40 transition-all cursor-pointer flex items-center gap-1.5 shadow-sm"
+                  >
+                    {isRefining ? <RefreshCw className="w-3.5 h-3.5 animate-spin" /> : <Sparkles className="w-3.5 h-3.5" />}
+                    <span>{isRefining ? "Merumuskan AI..." : "Jalankan Revisi AI"}</span>
+                  </button>
+                </div>
+              </div>
+
+              {/* AI Generated Preview (if available) */}
+              {revisedPreview ? (
+                <div className="space-y-2 p-3.5 rounded-xl border border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900/40 animate-in fade-in">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-semibold text-zinc-900 dark:text-zinc-100 flex items-center gap-1.5">
+                      <Sparkles className="w-3.5 h-3.5 text-zinc-500" />
+                      Hasil Rumusan Revisi AI:
+                    </span>
+                    <span className="text-[10px] font-mono text-zinc-400">Siap Diterapkan</span>
+                  </div>
+                  <textarea
+                    rows={6}
+                    value={revisedPreview}
+                    onChange={(e) => setRevisedPreview(e.target.value)}
+                    className="w-full p-3 rounded-lg bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 text-xs text-zinc-900 dark:text-zinc-100 focus:outline-none font-sans leading-relaxed resize-y"
+                  />
+                  <div className="flex justify-end gap-2 pt-1">
+                    <button
+                      type="button"
+                      onClick={() => setRevisedPreview(null)}
+                      className="px-3 py-1.5 rounded-lg border border-zinc-200 dark:border-zinc-800 text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 text-xs transition-colors cursor-pointer"
+                    >
+                      Batal Hasil Ini
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => applyRefinedContent(revisedPreview)}
+                      className="px-4 py-1.5 rounded-lg bg-zinc-900 dark:bg-zinc-100 text-white dark:text-black font-semibold text-xs hover:opacity-90 transition-all cursor-pointer shadow-sm flex items-center gap-1.5"
+                    >
+                      <Check className="w-3.5 h-3.5" />
+                      <span>Terapkan ke Naskah Proposal</span>
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                /* Editable Original Text Area */
+                <div className="space-y-1.5">
+                  <div className="flex items-center justify-between">
+                    <label className="text-xs font-medium text-zinc-700 dark:text-zinc-300">
+                      Teks Naskah Saat Ini (Bisa Disunting Manual Langsung):
+                    </label>
+                    <span className="text-[10px] text-zinc-500 font-mono">Sunting Bebas</span>
+                  </div>
+                  <textarea
+                    rows={5}
+                    value={refineContent}
+                    onChange={(e) => setRefineContent(e.target.value)}
+                    className="w-full p-3 rounded-xl bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-xs text-zinc-900 dark:text-zinc-100 focus:outline-none font-sans leading-relaxed resize-y"
+                  />
+                  <div className="flex justify-end pt-1">
+                    <button
+                      type="button"
+                      onClick={() => applyRefinedContent(refineContent)}
+                      className="px-3.5 py-1.5 rounded-lg border border-zinc-300 dark:border-zinc-700 hover:bg-zinc-100 dark:hover:bg-zinc-800 text-zinc-800 dark:text-zinc-200 text-xs font-medium transition-colors cursor-pointer"
+                    >
+                      Simpan Perubahan Manual Langsung
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Modal Footer */}
+            <div className="p-3.5 px-5 border-t border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900/40 flex items-center justify-between text-xs text-zinc-500">
+              <span>Klik luar atau tombol X untuk membatalkan</span>
+              <button
+                type="button"
+                onClick={closeRefineModal}
+                className="px-3 py-1 rounded-md text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 cursor-pointer"
+              >
+                Tutup
+              </button>
+            </div>
+
+          </div>
+        </div>
+      )}
 
     </div>
   );

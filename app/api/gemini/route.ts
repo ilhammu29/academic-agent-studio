@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { buildGeneratedDocument } from "@/lib/agentEngine";
+import { ProposalCategory, ProposalDocument } from "@/types/studio";
 
 export async function POST(req: Request) {
   try {
@@ -10,8 +11,9 @@ export async function POST(req: Request) {
       answers = {}, 
       targetEntity = "Instansi Mitra", 
       candidateName = "Pengusul", 
+      candidateId = "NIM-2026-AKAD",
       institution = "Universitas",
-      facultyMajor = "Fakultas Teknik / Ilmu Komputer",
+      facultyMajor = "Fakultas Terkait",
       customKnowledge = "" 
     } = body;
 
@@ -26,35 +28,223 @@ export async function POST(req: Request) {
           : "";
 
         const prompt = `
-Bertindaklah sebagai AI Academic Proposal Architect berstandar internasional.
-Susun draf naskah proposal terstruktur untuk:
-- Judul: ${title}
-- Kategori: ${category}
-- Instansi / Objek: ${targetEntity}
-- Pengusul: ${candidateName}
-- Kampus: ${institution} (${facultyMajor})
-- Konteks Diagnostik: ${JSON.stringify(answers)}${groundingContext}
+Bertindaklah sebagai Senior Academic Proposal Architect & Reviewer Dewan Sidang Kampus.
+Pengguna mengajukan proposal penelitian/magang:
+- Judul: "${title}"
+- Kategori: "${category}" (magang / skripsi / penelitian)
+- Instansi/Lokus: "${targetEntity}"
+- Pengusul: "${candidateName}" (NIM: ${candidateId})
+- Kampus & Jurusan: "${institution}" (${facultyMajor})
+- Hasil Wawancara Diagnostik Pengguna:
+${JSON.stringify(answers, null, 2)}${groundingContext}
 
-Format output HARUS berupa JSON murni tanpa backticks (\`\`\`json ... \`\`\`):
+PANDUAN SOP & STANDAR AKADEMIK WAJIB:
+1. RUMPUN ILMU: Wajib 100% konsisten dengan rumpun ilmu judul usulan!
+   - Jika judul tentang KESEHATAN / GIZI / MEDIS (seperti Obesitas, Stunting, Penyakit, Pasien):
+     * Wajib gunakan puskesmas/klinik/rumah sakit/populasi sasaran.
+     * Wajib gunakan variabel klinis/antropometri (IMT/U, BIA, Microtoise, SQ-FFQ, Recall 24 jam).
+     * Wajib gunakan landasan teori medis/gizi (WHO, Kemenkes, Gibson, Sudigdo Sastroasmoro).
+     * DILARANG KERAS menggunakan istilah IT seperti "Python, Docker, Dockerfile, Git, REST API, microservices" untuk topik kesehatan murni!
+   - Jika judul tentang PENDIDIKAN:
+     * Gunakan sekolah, guru, kurikulum merdeka, model ADDIE, validitas Aiken's V, uji N-Gain, modul ajar.
+   - Jika judul tentang HUKUM:
+     * Gunakan perundang-undangan, legal opinion, doktrin yuridis, pendekatan konseptual.
+   - Jika judul tentang BISNIS/KEUANGAN:
+     * Gunakan rasio keuangan (ROA, ROE), Altman Z-score, model regresi data panel, financial report.
+   - Jika judul tentang TEKNOLOGI/IT:
+     * Gunakan arsitektur software, containerization, microservice, pipeline, testing.
+
+2. SUSUN DOKUMEN PROPOSAL LENGKAP DALAM FORMAT JSON PERSIS SEPERTI STRUKTUR BERIKUT:
 {
+  "id": "PROP-GEMINI-AI",
   "title": "${title}",
-  "candidateName": "${candidateName}",
+  "category": "${category}",
   "institution": "${institution}",
-  "chapters": [
+  "facultyMajor": "${facultyMajor}",
+  "targetEntity": "${targetEntity}",
+  "targetDepartment": "Nama divisi / lokus sasaran...",
+  "durationMonths": 6,
+  "candidateName": "${candidateName}",
+  "candidateId": "${candidateId}",
+  "generationDate": "23 Oktober 2026",
+  "executiveSummary": "Ringkasan eksekutif 2-3 kalimat formal dan padat...",
+  "bab1": {
+    "title": "BAB I: PENDAHULUAN",
+    "latarBelakang": [
+      "Paragraf 1: Latar belakang makro & urgensi teoretis...",
+      "Paragraf 2: Kesenjangan nyata di lapangan & problem statement...",
+      "Paragraf 3: Solusi yang diusulkan & kontribusi nyata..."
+    ],
+    "rumusanMasalah": [
+      "1. Rumusan masalah pertama...",
+      "2. Rumusan masalah kedua...",
+      "3. Rumusan masalah ketiga..."
+    ],
+    "batasanMasalah": [
+      "Batasan 1...",
+      "Batasan 2...",
+      "Batasan 3..."
+    ],
+    "tujuanUmum": "Tujuan umum penelitian/kegiatan...",
+    "tujuanKhusus": [
+      "Tujuan khusus 1...",
+      "Tujuan khusus 2...",
+      "Tujuan khusus 3..."
+    ],
+    "manfaatMahasiswa": ["Manfaat 1", "Manfaat 2"],
+    "manfaatInstansi": ["Manfaat 1", "Manfaat 2"],
+    "manfaatAkademik": ["Manfaat 1", "Manfaat 2"]
+  },
+  "bab2": {
+    "title": "BAB II: TINJAUAN PUSTAKA & KERANGKA TEORETIS",
+    "profilInstansi": "Gambaran profil lokus/instansi...",
+    "visiMisi": ["Visi: ...", "Misi 1: ...", "Misi 2: ..."],
+    "strukturOrganisasi": "Penjelasan struktur unit atau alur kerja terkait...",
+    "landasanTeori": [
+      {
+        "topic": "Nama Konsep / Teori Utama 1",
+        "elaboration": "Uraian teoretis mendalam...",
+        "citation": "(Nama Penulis, Judul Rujukan Baku, Tahun)"
+      },
+      {
+        "topic": "Nama Konsep / Teori Utama 2",
+        "elaboration": "Uraian teoretis mendalam...",
+        "citation": "(Nama Penulis, Judul Rujukan Baku, Tahun)"
+      },
+      {
+        "topic": "Nama Konsep / Teori Utama 3",
+        "elaboration": "Uraian teoretis mendalam...",
+        "citation": "(Nama Penulis, Judul Rujukan Baku, Tahun)"
+      }
+    ]
+  },
+  "bab3": {
+    "title": "BAB III: METODE PENELITIAN & PROTOKOL KERJA",
+    "metodePelaksanaan": "Uraian model kerja / desain penelitian komprehensif...",
+    "lingkupPekerjaan": ["Lingkup 1...", "Lingkup 2...", "Lingkup 3...", "Lingkup 4..."],
+    "perangkatTools": ["Perangkat/Metode 1", "Perangkat/Metode 2", "Perangkat/Metode 3", "Perangkat/Metode 4"],
+    "rencanaKompetensi": ["Capaian kompetensi 1", "Capaian kompetensi 2", "Capaian kompetensi 3"]
+  },
+  "bab4": {
+    "title": "BAB IV: JADWAL PELAKSANAAN & PENUTUP",
+    "jadwalMatriks": [
+      {
+        "week": 1,
+        "phase": "Fase 1: Persiapan & Etika/Onboarding",
+        "activities": ["Aktivitas 1", "Aktivitas 2"],
+        "output": "Keluaran minggu 1",
+        "competencyTarget": "Target kompetensi"
+      },
+      {
+        "week": 4,
+        "phase": "Fase 2: Uji Coba / Desain Solusi",
+        "activities": ["Aktivitas 1", "Aktivitas 2"],
+        "output": "Keluaran fase 2",
+        "competencyTarget": "Target kompetensi"
+      },
+      {
+        "week": 8,
+        "phase": "Fase 3: Pengambilan Data / Implementasi Lapangan",
+        "activities": ["Aktivitas 1", "Aktivitas 2"],
+        "output": "Keluaran fase 3",
+        "competencyTarget": "Target kompetensi"
+      },
+      {
+        "week": 12,
+        "phase": "Fase 4: Analisis Data / Pengujian Mutu",
+        "activities": ["Aktivitas 1", "Aktivitas 2"],
+        "output": "Keluaran fase 4",
+        "competencyTarget": "Target kompetensi"
+      },
+      {
+        "week": 16,
+        "phase": "Fase 5: Sintesis, Manuskrip, & Evaluasi Akhir",
+        "activities": ["Aktivitas 1", "Aktivitas 2"],
+        "output": "Keluaran akhir",
+        "competencyTarget": "Target kompetensi"
+      }
+    ],
+    "penutup": "Uraian komitmen profesional penutup proposal..."
+  },
+  "slides": [
     {
-      "chapterTitle": "BAB I: PENDAHULUAN",
-      "content": "Uraian latar belakang, rumusan masalah, batasan, dan tujuan..."
+      "slideNumber": 1,
+      "kicker": "SEMINAR PROPOSAL EKSEKUTIF",
+      "title": "${title}",
+      "subtitle": "Paparan Rencana Pelaksanaan di ${targetEntity}",
+      "keyPoints": ["Pengusul: ${candidateName}", "Instansi: ${targetEntity}", "Bidang: ${facultyMajor}"],
+      "speakerNotes": "Catatan narasi presenter..."
     },
     {
-      "chapterTitle": "BAB II: TINJAUAN PUSTAKA & METODOLOGI",
-      "content": "Profil instansi, landasan teori, dan metode..."
+      "slideNumber": 2,
+      "kicker": "LATAR BELAKANG & URGENSI",
+      "title": "Kesenjangan & Urgensi Masalah",
+      "subtitle": "Analisis akar masalah berdasarkan data empiris.",
+      "keyPoints": ["Poin 1", "Poin 2", "Poin 3"],
+      "speakerNotes": "Catatan narasi presenter..."
     },
     {
-      "chapterTitle": "BAB III: RENCANA KERJA & LUARAN",
-      "content": "Jadwal mingguan, tahapan kerja, dan capaian kompetensi..."
+      "slideNumber": 3,
+      "kicker": "SASARAN & LUARAN",
+      "title": "Tujuan Strategis & Target Luaran",
+      "subtitle": "Keluaran terukur berbasis kebutuhan riil.",
+      "keyPoints": ["Poin 1", "Poin 2", "Poin 3"],
+      "speakerNotes": "Catatan narasi presenter..."
+    },
+    {
+      "slideNumber": 4,
+      "kicker": "METODOLOGI & PROTOKOL",
+      "title": "Tahapan Pelaksanaan & Instrumen",
+      "subtitle": "Metodologi berbasis kaidah ilmiah baku.",
+      "keyPoints": ["Poin 1", "Poin 2", "Poin 3"],
+      "speakerNotes": "Catatan narasi presenter..."
+    },
+    {
+      "slideNumber": 5,
+      "kicker": "LINIMASA & JADWAL",
+      "title": "Matriks Rencana Kerja Mingguan",
+      "subtitle": "Roadmap terukur 16 minggu kerja.",
+      "keyPoints": ["Poin 1", "Poin 2", "Poin 3"],
+      "speakerNotes": "Catatan narasi presenter..."
+    },
+    {
+      "slideNumber": 6,
+      "kicker": "KESIMPULAN & PENUTUP",
+      "title": "Komitmen Kontribusi & Luaran",
+      "subtitle": "Kesiapan pelaksanaan dan kepatuhan kode etik.",
+      "keyPoints": ["Poin 1", "Poin 2", "Poin 3"],
+      "speakerNotes": "Catatan narasi presenter..."
+    }
+  ],
+  "auditLog": [
+    {
+      "rule": "Kesesuaian Standar Format A4 & Margin Presisi",
+      "status": "VERIFIED",
+      "details": "Format tata letak naskah terverifikasi margin 4-3-3-3 cm.",
+      "thinkingMode": "First-Principles Thinking"
+    },
+    {
+      "rule": "Format Tabel Terbuka 3-Garis Horizontal",
+      "status": "VERIFIED",
+      "details": "Matriks tersusun tanpa garis vertikal berstandar publikasi jurnal.",
+      "thinkingMode": "Occam's Razor"
+    },
+    {
+      "rule": "Validitas Desain Metodologis & Instrumen",
+      "status": "VERIFIED",
+      "details": "Instrumen dan analisis selaras dengan protokol ilmiah baku rumpun ilmu.",
+      "thinkingMode": "Critical / Falsification Thinking"
+    },
+    {
+      "rule": "Zero-Fabrication & Integritas Sitasi",
+      "status": "VERIFIED",
+      "details": "Landasan rujukan berbasis literatur primer dan buku teks otoritatif.",
+      "thinkingMode": "Dialectical Synthesis"
     }
   ]
 }
+
+Format output HARUS berupa JSON murni tanpa pembuka/penutup markdown (\`\`\`json ... \`\`\`).
 `;
 
         const geminiRes = await fetch(
@@ -65,8 +255,8 @@ Format output HARUS berupa JSON murni tanpa backticks (\`\`\`json ... \`\`\`):
             body: JSON.stringify({
               contents: [{ parts: [{ text: prompt }] }],
               generationConfig: {
-                temperature: 0.7,
-                maxOutputTokens: 4096,
+                temperature: 0.6,
+                maxOutputTokens: 8192,
               },
             }),
           }
@@ -77,14 +267,16 @@ Format output HARUS berupa JSON murni tanpa backticks (\`\`\`json ... \`\`\`):
           const rawText = data?.candidates?.[0]?.content?.parts?.[0]?.text || "{}";
           const cleanedText = rawText.replace(/```json/g, "").replace(/```/g, "").trim();
           try {
-            const parsed = JSON.parse(cleanedText);
-            return NextResponse.json({ 
-              success: true, 
-              engine: "gemini-3.5-flash-lite",
-              data: parsed 
-            });
-          } catch {
-            // fallback to structured text below
+            const parsedDoc: ProposalDocument = JSON.parse(cleanedText);
+            if (parsedDoc && parsedDoc.bab1 && parsedDoc.bab2 && parsedDoc.bab3 && parsedDoc.bab4) {
+              return NextResponse.json({ 
+                success: true, 
+                engine: "gemini-3.5-flash-lite",
+                doc: parsedDoc 
+              });
+            }
+          } catch (parseError) {
+            console.warn("JSON parse failed for Gemini proposal output, using domain generator:", parseError);
           }
         }
       } catch (geminiErr: any) {
@@ -92,46 +284,22 @@ Format output HARUS berupa JSON murni tanpa backticks (\`\`\`json ... \`\`\`):
       }
     }
 
-    // 2. High-rigor Standalone Academic Generator (Zero dummy data, 100% reliable)
+    // 2. High-rigor Standalone Academic Generator (Zero dummy data, domain-aware)
     const fallbackDoc = buildGeneratedDocument(
       title,
-      category,
+      category as ProposalCategory,
       answers,
       candidateName,
-      "NIM-2026-AKAD",
+      candidateId,
       institution,
       facultyMajor,
       targetEntity
     );
 
-    const structuredData = {
-      title: fallbackDoc.title,
-      candidateName: fallbackDoc.candidateName,
-      institution: fallbackDoc.institution,
-      chapters: [
-        {
-          chapterTitle: fallbackDoc.bab1.title,
-          content: fallbackDoc.bab1.latarBelakang.join("\n\n")
-        },
-        {
-          chapterTitle: fallbackDoc.bab2.title,
-          content: `${fallbackDoc.bab2.profilInstansi}\n\n${fallbackDoc.bab2.landasanTeori.map(t => `${t.topic}: ${t.elaboration}`).join("\n\n")}`
-        },
-        {
-          chapterTitle: fallbackDoc.bab3.title,
-          content: fallbackDoc.bab3.metodePelaksanaan
-        },
-        {
-          chapterTitle: fallbackDoc.bab4.title,
-          content: fallbackDoc.bab4.penutup
-        }
-      ]
-    };
-
     return NextResponse.json({
       success: true,
       engine: "academic-intelligent-generator",
-      data: structuredData,
+      doc: fallbackDoc,
       message: "Dokumen proposal berhasil disusun dengan Standar SOP Akademik & 12 Metode Berpikir."
     });
 

@@ -67,14 +67,33 @@ export default function Home() {
   }, [currentUser]);
 
   // Start Diagnostic Interview
-  const handleStartInterview = () => {
+  const handleStartInterview = async () => {
     if (!title.trim()) {
       alert("Harap tentukan judul proposal terlebih dahulu.");
       return;
     }
-    const qList = generateDiagnosticQuestions(title, category, targetEntity);
-    setQuestions(qList);
+    const fallbackList = generateDiagnosticQuestions(title, category, targetEntity);
+    setQuestions(fallbackList);
     setStage("interview");
+
+    // Fetch dynamic questions from Gemini in background to upgrade suggestions
+    try {
+      const res = await fetch("/api/interview/generate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          title,
+          category,
+          targetEntity
+        })
+      });
+      const data = await res.json();
+      if (data.success && data.questions && Array.isArray(data.questions) && data.questions.length > 0) {
+        setQuestions(data.questions);
+      }
+    } catch (err) {
+      console.warn("Interview questions fetch error, using domain questions:", err);
+    }
   };
 
   // Launch Multi-Agent Orchestrator (Only after interview questions answered!)
@@ -87,7 +106,7 @@ export default function Home() {
 
     setStage("orchestration");
 
-    // Build formal proposal document & tree graph purely based on user's real input
+    // Build initial formal proposal document & tree graph purely based on user's real input
     const doc = buildGeneratedDocument(
       title,
       category,
@@ -103,7 +122,11 @@ export default function Home() {
     setTreeData(tree);
   };
 
-  const handleAgentsFinished = () => {
+  const handleAgentsFinished = (doc?: ProposalDocument) => {
+    if (doc) {
+      setGeneratedDoc(doc);
+      setTreeData(buildVisualTreeGraph(doc));
+    }
     setStage("result");
   };
 
@@ -291,6 +314,7 @@ export default function Home() {
           <DiagnosticInterview
             category={category}
             title={title}
+            targetEntity={targetEntity}
             questions={questions}
             answers={answers}
             setAnswers={setAnswers}
@@ -307,7 +331,9 @@ export default function Home() {
             answers={answers}
             targetEntity={targetEntity}
             candidateName={candidateName}
+            candidateId={candidateId}
             institution={institution}
+            facultyMajor={facultyMajor}
             onComplete={handleAgentsFinished}
           />
         )}

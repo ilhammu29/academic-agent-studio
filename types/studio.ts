@@ -54,6 +54,51 @@ export interface SlideDeckItem {
   speakerNotes: string;
 }
 
+export interface ResearchGapItem {
+  no: number;
+  authorYear: string;
+  titleJournal: string;
+  designSample: string;
+  variables: string;
+  findingsEffect: string;
+  gapDifference: string;
+}
+
+export interface OperationalDefinitionItem {
+  variable: string;
+  definition: string;
+  parameterTool: string;
+  indicatorScale: string;
+}
+
+export interface ApprovalSigner {
+  role: string;
+  name: string;
+  idNumber: string; // NIP / NIDN
+}
+
+export interface ApprovalSheetInfo {
+  title: string;
+  approvalDate: string;
+  primarySigners: ApprovalSigner[];
+  headSigner: ApprovalSigner;
+}
+
+export interface BudgetItem {
+  item: string;
+  category: string;
+  cost: number;
+}
+
+export interface BibliographyItem {
+  id: number;
+  author: string;
+  year: string;
+  title: string;
+  source: string;
+  doiUrl?: string;
+}
+
 export interface ProposalDocument {
   id: string;
   title: string;
@@ -67,6 +112,7 @@ export interface ProposalDocument {
   candidateId: string;
   generationDate: string;
   executiveSummary: string;
+  approvalSheet?: ApprovalSheetInfo;
   bab1: {
     title: string;
     latarBelakang: string[];
@@ -80,10 +126,13 @@ export interface ProposalDocument {
   };
   bab2: {
     title: string;
-    profilInstansi: string;
-    visiMisi: string[];
-    strukturOrganisasi: string;
+    profilInstansi: string; // Used for Magang
+    visiMisi: string[];     // Used for Magang
+    strukturOrganisasi: string; // Used for Magang
     landasanTeori: { topic: string; elaboration: string; citation: string }[];
+    researchGapMatrix?: ResearchGapItem[]; // Used for Skripsi / Penelitian
+    conceptualFramework?: string;          // Used for Skripsi / Penelitian
+    hypotheses?: string[];                 // Used for Skripsi / Penelitian
   };
   bab3: {
     title: string;
@@ -91,13 +140,21 @@ export interface ProposalDocument {
     lingkupPekerjaan: string[];
     perangkatTools: string[];
     rencanaKompetensi: string[];
+    operationalDefinitions?: OperationalDefinitionItem[]; // Used for Skripsi
+    populationSample?: string;                            // Used for Skripsi
+    ethicalConsiderations?: string;                       // Used for Skripsi
+    wbsScope?: string[];                                  // Used for Magang
+    mentorshipModel?: string;                             // Used for Magang
   };
   bab4: {
     title: string;
     jadwalMatriks: WeeklyScheduleItem[];
     rencanaAnggaran?: string;
+    budgetPlan?: BudgetItem[];        // Used for Skripsi
+    disseminationPlan?: string;       // Used for Skripsi
     penutup: string;
   };
+  bibliography?: BibliographyItem[];
   slides: SlideDeckItem[];
   auditLog: {
     rule: string;

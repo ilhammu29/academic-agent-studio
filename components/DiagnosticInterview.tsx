@@ -1,12 +1,13 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import { DiagnosticQuestion, ProposalCategory } from "@/types/studio";
-import { ArrowLeft, ArrowRight, Sparkles, Check } from "lucide-react";
+import { ArrowLeft, ArrowRight, Sparkles, Check, Loader2 } from "lucide-react";
 
 interface DiagnosticInterviewProps {
   category: ProposalCategory;
   title: string;
+  targetEntity?: string;
   questions: DiagnosticQuestion[];
   answers: Record<string, string>;
   setAnswers: React.Dispatch<React.SetStateAction<Record<string, string>>>;
@@ -17,26 +18,73 @@ interface DiagnosticInterviewProps {
 export const DiagnosticInterview: React.FC<DiagnosticInterviewProps> = ({
   category,
   title,
+  targetEntity = "",
   questions,
   answers,
   setAnswers,
   onBack,
   onSubmit
 }) => {
+  const [isGeneratingAll, setIsGeneratingAll] = useState(false);
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
+
+  const showToast = (msg: string) => {
+    setToastMessage(msg);
+    setTimeout(() => setToastMessage(null), 3500);
+  };
+
   const handleAnswerChange = (field: string, val: string) => {
     setAnswers(prev => ({ ...prev, [field]: val }));
   };
 
   const handleApplySingleSuggestion = (q: DiagnosticQuestion) => {
     setAnswers(prev => ({ ...prev, [q.field]: q.aiSuggestion }));
+    showToast(`Saran untuk pertanyaan ${q.field} diterapkan.`);
   };
 
-  const handleApplyAllSuggestions = () => {
-    const updated: Record<string, string> = { ...answers };
-    questions.forEach(q => {
-      updated[q.field] = q.aiSuggestion;
-    });
-    setAnswers(updated);
+  // AI-Powered Auto-Generate All Answers via Gemini
+  const handleAutoGenerateAIAnswers = async () => {
+    setIsGeneratingAll(true);
+    try {
+      const res = await fetch("/api/interview/auto-answers", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          title,
+          category,
+          targetEntity,
+          questions
+        })
+      });
+
+      const data = await res.json();
+      if (data.success && data.answers) {
+        setAnswers(prev => ({
+          ...prev,
+          ...data.answers
+        }));
+        showToast(`Jawaban berhasil disusun oleh ${data.engine === 'gemini-3.5-flash-lite' ? 'Gemini AI' : 'Domain AI Engine'} (${data.domain || 'akademik'})!`);
+      } else {
+        // Fallback to suggestions
+        const updated: Record<string, string> = { ...answers };
+        questions.forEach(q => {
+          updated[q.field] = q.aiSuggestion;
+        });
+        setAnswers(updated);
+        showToast("Jawaban terisi menggunakan saran rekomendasi.");
+      }
+    } catch (err: any) {
+      console.warn("Auto generate answers error:", err);
+      // Fallback to question suggestions
+      const updated: Record<string, string> = { ...answers };
+      questions.forEach(q => {
+        updated[q.field] = q.aiSuggestion;
+      });
+      setAnswers(updated);
+      showToast("Jawaban terisi menggunakan saran rekomendasi.");
+    } finally {
+      setIsGeneratingAll(false);
+    }
   };
 
   const answeredCount = questions.filter(q => !!answers[q.field]?.trim()).length;
@@ -46,6 +94,14 @@ export const DiagnosticInterview: React.FC<DiagnosticInterviewProps> = ({
   return (
     <div className="max-w-3xl mx-auto py-6 sm:py-8 w-full animate-in fade-in duration-200">
       
+      {/* Toast Notification */}
+      {toastMessage && (
+        <div className="fixed top-5 right-5 z-50 bg-zinc-900 border border-zinc-700 text-zinc-100 px-4 py-2.5 rounded-lg shadow-xl text-xs flex items-center gap-2 animate-in slide-in-from-top duration-200">
+          <Sparkles className="w-3.5 h-3.5 text-zinc-300" />
+          <span>{toastMessage}</span>
+        </div>
+      )}
+
       {/* 1. Minimal Header */}
       <div className="mb-8 border-b border-zinc-900 pb-6">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-3">
@@ -58,13 +114,19 @@ export const DiagnosticInterview: React.FC<DiagnosticInterviewProps> = ({
             </p>
           </div>
 
+          {/* AI Auto Generate All Answers Button */}
           <button
             type="button"
-            onClick={handleApplyAllSuggestions}
-            className="self-start sm:self-auto py-1.5 px-3 rounded-lg border border-zinc-800 bg-zinc-900 hover:bg-zinc-800 text-zinc-200 text-xs font-medium transition-colors flex items-center gap-1.5 cursor-pointer flex-shrink-0"
+            onClick={handleAutoGenerateAIAnswers}
+            disabled={isGeneratingAll}
+            className="self-start sm:self-auto py-2 px-3.5 rounded-lg border border-zinc-700 bg-zinc-900 hover:bg-zinc-800 text-zinc-100 text-xs font-semibold transition-colors flex items-center gap-2 cursor-pointer flex-shrink-0 disabled:opacity-50"
           >
-            <Sparkles className="w-3.5 h-3.5 text-zinc-300" />
-            <span>Isi Semua Saran Rekomendasi</span>
+            {isGeneratingAll ? (
+              <Loader2 className="w-3.5 h-3.5 animate-spin text-zinc-300" />
+            ) : (
+              <Sparkles className="w-3.5 h-3.5 text-zinc-200" />
+            )}
+            <span>{isGeneratingAll ? "Menyusun Jawaban dengan AI..." : "✨ Auto-Generate Semua Jawaban (AI)"}</span>
           </button>
         </div>
 
@@ -135,7 +197,7 @@ export const DiagnosticInterview: React.FC<DiagnosticInterviewProps> = ({
                   onClick={() => handleApplySingleSuggestion(q)}
                   className="text-zinc-300 hover:text-white hover:underline text-xs flex-shrink-0 cursor-pointer"
                 >
-                  Terapkan Saran
+                  Terapkan Saran Ini
                 </button>
               </div>
             </div>
