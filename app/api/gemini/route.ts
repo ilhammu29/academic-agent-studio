@@ -1,32 +1,106 @@
-import { NextRequest, NextResponse } from "next/server";
-import { callGeminiGenerate, DEFAULT_GEMINI_KEY, ACADEMIC_SYSTEM_PROMPT } from "@/lib/gemini";
+import { NextResponse } from "next/server";
 
-export async function POST(req: NextRequest) {
+export async function POST(req: Request) {
   try {
     const body = await req.json();
-    const { prompt, systemInstruction, apiKey, model } = body;
+    const { title, category, answers, targetEntity, candidateName, institution, customKnowledge } = body;
 
-    if (!prompt) {
-      return NextResponse.json({ error: "Prompt is required" }, { status: 400 });
+    const apiKey = process.env.GEMINI_API_KEY;
+    if (!apiKey) {
+      return NextResponse.json(
+        { error: "GEMINI_API_KEY belum dikonfigurasi di environment server." },
+        { status: 500 }
+      );
     }
 
-    const key = apiKey || DEFAULT_GEMINI_KEY;
-    const sysPrompt = systemInstruction || ACADEMIC_SYSTEM_PROMPT;
-    const selectedModel = model || "gemini-flash-latest";
+    const groundingContext = customKnowledge
+      ? `\n\n[KNOWLEDGE GROUNDING / REFERENSI KHUSUS DARI PENGGUNA]:\n${customKnowledge}\n(Gunakan referensi khusus di atas sebagai acuan utama dalam menyusun substansi proposal agar sesuai dengan pedoman tersebut).`
+      : "";
 
+    const prompt = `
+Bertindaklah sebagai AI Academic Proposal Architect yang sangat ahli dalam menyusun proposal profesional dan akademik untuk ${category}.
+Buatkan draf proposal lengkap berdasarkan data berikut:
+- Judul: ${title}
+- Target Entitas / Perusahaan: ${targetEntity}
+- Kandidat: ${candidateName}
+- Institusi / Kampus: ${institution}
+- Hasil Wawancara Diagnostik / Konteks Tambahan: ${JSON.stringify(answers)}${groundingContext}
+
+Format output harus berstruktur JSON yang valid dengan struktur berikut:
+{
+  "title": "${title}",
+  "candidateName": "${candidateName}",
+  "institution": "${institution}",
+  "chapters": [
+    {
+      "chapterTitle": "BAB I: PENDAHULUAN",
+      "content": "Latar belakang dan rumusan masalah..."
+    },
+    {
+      "chapterTitle": "BAB II: TINJAUAN PUSTAKA & METODOLOGI",
+      "content": "Metodologi pelaksanaan dan tahapan..."
+    },
+    {
+      "chapterTitle": "BAB III: RENCANA KERJA & LUARAN",
+      "content": "Timeline, milestone, dan hasil yang diharapkan..."
+    }
+  ]
+}
+Pastikan isinya sangat formal, analitis, mendalam, dan langsung berikan format JSON murni tanpa markdown backticks tambahan.
+`;
+
+    const geminiRes = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          contents: [
+            {
+              parts: [{ text: prompt }],
+            },
+          ],
+        }),
+      }
+    );
+
+    if (!geminiRes.ok) {
+      const errText = await geminiRes.text();
+      return NextResponse.json(
+        { error: `Gemini API Error: ${errText}` },
+        { status: geminiRes.status }
+      );
+    }
+
+    const data = await geminiRes.json();
+    const rawText = data?.candidates?.[0]?.content?.parts?.[0]?.text || "{}";
+    const cleanedText = rawText.replace(/```json/g, "").replace(/```/g, "").trim();
+
+    let jsonParsed;
     try {
-      const responseText = await callGeminiGenerate(prompt, sysPrompt, key, selectedModel);
-      return NextResponse.json({ text: responseText, success: true, source: "gemini-live" });
-    } catch (apiErr: any) {
-      // Fallback synthesis if external Google network is restricted or timed out
-      return NextResponse.json({
-        text: null,
-        success: false,
-        fallbackMode: true,
-        message: apiErr.message || "Gemini API unavailable, switched to local engine."
-      });
+      jsonParsed = JSON.parse(cleanedText);
+    } catch (e) {
+      jsonParsed = {
+        title,
+        candidateName,
+        institution,
+        chapters: [
+          {
+            chapterTitle: "HASIL GENERASI AI",
+            content: rawText
+          }
+        ]
+      };
     }
-  } catch (err: any) {
-    return NextResponse.json({ error: err.message }, { status: 500 });
+
+    return NextResponse.json({ success: true, data: jsonParsed });
+  } catch (error: any) {
+    console.error("Gemini API Grounding Error:", error);
+    return NextResponse.json(
+      { error: error.message || "Gagal menghasilkan dokumen dengan grounding." },
+      { status: 500 }
+    );
   }
 }

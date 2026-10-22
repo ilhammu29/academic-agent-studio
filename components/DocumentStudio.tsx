@@ -39,6 +39,51 @@ export const DocumentStudio: React.FC<DocumentStudioProps> = ({
   const [isExportingDocx, setIsExportingDocx] = useState(false);
   const [isExportingPptx, setIsExportingPptx] = useState(false);
   const [isLitModalOpen, setIsLitModalOpen] = useState(false);
+  const [refineSectionTitle, setRefineSectionTitle] = useState<string | null>(null);
+  const [refineContent, setRefineContent] = useState("");
+  const [refineInstruction, setRefineInstruction] = useState("");
+  const [isRefining, setIsRefining] = useState(false);
+
+  const handleRefineWithAI = async (sectionName: string, textToRefine: string) => {
+    setRefineSectionTitle(sectionName);
+    setRefineContent(textToRefine);
+    setRefineInstruction("");
+  };
+
+  const submitAiRefinement = async () => {
+    if (!refineSectionTitle || !refineInstruction.trim()) return;
+    setIsRefining(true);
+    try {
+      const res = await fetch("/api/gemini/refine", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          sectionTitle: refineSectionTitle,
+          currentContent: refineContent,
+          instruction: refineInstruction
+        })
+      });
+      const data = await res.json();
+      if (data.success && data.revisedContent) {
+        // Update local doc content dynamically based on section
+        if (refineSectionTitle.includes("Latar Belakang")) {
+          doc.bab1.latarBelakang = [data.revisedContent];
+        } else if (refineSectionTitle.includes("Metode")) {
+          doc.bab3.metodePelaksanaan = data.revisedContent;
+        } else if (refineSectionTitle.includes("Profil")) {
+          doc.bab2.profilInstansi = data.revisedContent;
+        }
+        alert("Bagian proposal berhasil direvisi oleh AI Gemini!");
+        setRefineSectionTitle(null);
+      } else {
+        alert(data.error || "Gagal merevisi naskah.");
+      }
+    } catch (e: any) {
+      alert(`Terjadi kesalahan: ${e.message}`);
+    } finally {
+      setIsRefining(false);
+    }
+  };
 
   const generateFullMarkdown = () => {
     return `# PROPOSAL ${doc.category.toUpperCase()}
@@ -398,11 +443,64 @@ NIP / NIK.
             </p>
           </div>
 
+          {/* AI Refine Modal/Drawer if active */}
+          {refineSectionTitle && (
+            <div className="mb-8 p-4 rounded-xl border border-zinc-700 bg-zinc-900 text-zinc-100 no-print animate-in fade-in">
+              <h3 className="text-sm font-semibold mb-2 flex items-center justify-between">
+                <span>✨ AI Refine & Revisi Bagian: {refineSectionTitle}</span>
+                <button
+                  type="button"
+                  onClick={() => setRefineSectionTitle(null)}
+                  className="text-xs text-zinc-400 hover:text-zinc-200"
+                >
+                  Tutup
+                </button>
+              </h3>
+              <p className="text-xs text-zinc-400 mb-3">
+                Ketik instruksi revisi (misal: "Perjelas metodologi kuantitatif", "Buat lebih formal", dll):
+              </p>
+              <textarea
+                value={refineInstruction}
+                onChange={(e) => setRefineInstruction(e.target.value)}
+                placeholder="Contoh: Perluas analisis latar belakang dengan memasukkan referensi standar industri terbaru..."
+                className="w-full p-2.5 rounded bg-zinc-950 border border-zinc-800 text-xs text-zinc-200 mb-3 focus:outline-none focus:border-zinc-500"
+                rows={3}
+              />
+              <div className="flex justify-end gap-2">
+                <button
+                  type="button"
+                  onClick={() => setRefineSectionTitle(null)}
+                  className="px-3 py-1.5 rounded bg-zinc-800 text-xs text-zinc-300 hover:bg-zinc-700 cursor-pointer"
+                >
+                  Batal
+                </button>
+                <button
+                  type="button"
+                  disabled={isRefining || !refineInstruction.trim()}
+                  onClick={submitAiRefinement}
+                  className="px-4 py-1.5 rounded bg-zinc-100 text-black font-semibold text-xs hover:bg-white disabled:opacity-50 cursor-pointer flex items-center gap-1.5"
+                >
+                  {isRefining ? <RefreshCw className="w-3.5 h-3.5 animate-spin" /> : <Check className="w-3.5 h-3.5" />}
+                  <span>{isRefining ? "Sedang Merumuskan AI..." : "Terapkan Revisi AI"}</span>
+                </button>
+              </div>
+            </div>
+          )}
+
           {/* BAB I */}
           <section className="mb-10">
-            <h2 className="text-base sm:text-lg font-serif font-bold text-zinc-100 border-b border-zinc-900 pb-2 mb-4 print:text-black print:border-black uppercase">
-              {doc.bab1.title}
-            </h2>
+            <div className="flex items-center justify-between border-b border-zinc-900 pb-2 mb-4 print:border-black">
+              <h2 className="text-base sm:text-lg font-serif font-bold text-zinc-100 print:text-black uppercase">
+                {doc.bab1.title}
+              </h2>
+              <button
+                type="button"
+                onClick={() => handleRefineWithAI("1.1 Latar Belakang Masalah", doc.bab1.latarBelakang.join("\n"))}
+                className="no-print text-[11px] font-mono text-zinc-400 hover:text-zinc-100 bg-zinc-900 px-2 py-1 rounded border border-zinc-800 flex items-center gap-1 cursor-pointer"
+              >
+                <span>✨ Revisi AI Bab 1</span>
+              </button>
+            </div>
 
             <div className="space-y-4 text-xs sm:text-sm text-zinc-300 leading-relaxed text-justify print:text-black font-sans">
               <h3 className="text-sm font-semibold text-zinc-100 print:text-black font-serif">1.1 Latar Belakang Masalah</h3>

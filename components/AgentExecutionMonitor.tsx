@@ -22,25 +22,33 @@ export const AgentExecutionMonitor: React.FC<AgentExecutionMonitorProps> = ({
   useEffect(() => {
     const timestamp = () => new Date().toLocaleTimeString("id-ID", { hour12: false });
 
-    // Initial Gemini API handshake
+    // Initial Gemini API handshake & Real Generation
     fetch("/api/gemini", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        prompt: `Beri 1 baris konfirmasi singkat bahwa Anda siap merancang proposal akademis untuk judul: "${title}"`
+        title,
+        category: "magang / riset akademik",
+        answers: { promptOrigin: "Generated from Academic Agent Studio UI" },
+        targetEntity: "Perusahaan / Instansi Terkait",
+        candidateName: "Mahasiswa / Peneliti",
+        institution: "Universitas"
       })
     })
       .then(res => res.json())
       .then(data => {
-        if (data.success && data.text) {
+        if (data.success) {
           setActiveLogs(l => [
             ...l,
-            { time: timestamp(), agent: "Gemini Engine", text: `Konfirmasi: ${data.text.trim().slice(0, 90)}` }
+            { time: timestamp(), agent: "Gemini AI Engine", text: `Berhasil merumuskan naskah dengan ${data.data?.chapters?.length || 3} Bab utama.` }
           ]);
         }
       })
-      .catch(() => {
-        // quiet fallback
+      .catch((err) => {
+        setActiveLogs(l => [
+          ...l,
+          { time: timestamp(), agent: "Gemini AI Engine", text: `Peringatan: Gagal terhubung ke API (${err.message}). Menggunakan generator lokal.` }
+        ]);
       });
 
     // Step-by-step orchestrator timeline simulation
