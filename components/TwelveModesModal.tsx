@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { X, Brain, Check, Sparkles, BookOpen } from "lucide-react";
+import { X, Brain } from "lucide-react";
 
 interface TwelveModesModalProps {
   isOpen: boolean;
@@ -18,122 +18,116 @@ export const TwelveModesModal: React.FC<TwelveModesModalProps> = ({
     {
       num: "01",
       name: "First-Principles Thinking",
-      desc: "Membedah persoalan ke elemen fisik/biologis paling mendasar (misal: kalori masuk vs kalori keluar, arsitektur data primitif), bukan sekadar meniru analogi umum.",
-      application: "Digunakan pada BAB I: Perumusan Latar Belakang & Rumusan Masalah."
+      desc: "Membedah persoalan ke elemen paling mendasar dan kausalitas objektif, bukan sekadar meniru analogi umum.",
+      application: "Digunakan pada BAB I: Perumusan Latar Belakang Piramida Terbalik & Rumusan Masalah."
     },
     {
       num: "02",
       name: "Second-Order Thinking",
-      desc: "Mempertimbangkan 'dan setelah itu apa?'. Menilai dampak jangka panjang, tracking effect, efek samping klinis, atau konsekuensi pemeliharaan sistem.",
-      application: "Digunakan pada Rasionalisasi Klinis & Kelaikan Etik."
+      desc: "Mempertimbangkan konsekuensi lanjutan dan efek samping jangka panjang setelah solusi diterapkan.",
+      application: "Digunakan pada Rasionalisasi Metodologi & Kelaikan Etik Riset."
     },
     {
       num: "03",
       name: "Inversion Thinking (Mulai dari Akhir)",
-      desc: "Membalik cara pandang: bagaimana skenario proyek ini gagal total? Mengidentifikasi titik kegagalan (bias seleksi, instrumen corrupt) dan memasang pengaman.",
+      desc: "Membalik sudut pandang: mendiagnosis potensi kegagalan sistem atau bias instrumen sebelum menyusun mitigasi.",
       application: "Digunakan pada Batasan Masalah & Kriteria Eksklusi."
     },
     {
       num: "04",
       name: "Pareto Principle (Aturan 80/20)",
       desc: "Menemukan 20% variabel atau modul paling kritis yang menghasilkan 80% dampak luaran konkret.",
-      application: "Digunakan pada Perumusan Tujuan Khusus & Target Deliverables."
+      application: "Digunakan pada Perumusan Tujuan Khusus & Target Capaian."
     },
     {
       num: "05",
       name: "Probabilistic & Bayesian Updating",
-      desc: "Memperbarui keyakinan hipotesis berdasarkan bukti empiris baru (p-value, odds ratio, hasil uji normalitas).",
-      application: "Digunakan pada Rancangan Uji Biostatistika."
+      desc: "Memperbarui hipotesis berdasarkan bukti empiris dan uji signifikansi data terkini.",
+      application: "Digunakan pada Rancangan Uji Inferensial & Analisis Data."
     },
     {
       num: "06",
       name: "Lateral Thinking",
-      desc: "Mencari solusi melompat ke samping di luar prosedur linear konvensional untuk menembus kebuntuan.",
+      desc: "Mencari solusi inovatif di luar prosedur konvensional untuk mengatasi kendala lapangan.",
       application: "Digunakan pada Inovasi Metodologi Pengumpulan Data."
     },
     {
       num: "07",
       name: "Holistic / Systems Thinking",
-      desc: "Melihat ekosistem secara utuh sebagai jejaring saling-terkait (misal: jadwal asrama berinteraksi dengan kantin dan hormon metabolik).",
-      application: "Digunakan pada Kerangka Teori & Kerangka Konsep Bab II."
+      desc: "Melihat ekosistem secara utuh sebagai jejaring saling-terkait antara infrastruktur, proses, dan sumber daya.",
+      application: "Digunakan pada Kerangka Teori & Kerangka Konseptual Bab II."
     },
     {
       num: "08",
       name: "Critical / Falsification Thinking",
-      desc: "Menguji apakah suatu klaim dapat digugurkan (Popperian Falsification). Melarang konfirmasi bias dan menolak fabrikasi data.",
-      application: "Digunakan pada Audit Kualitas & Keaslian Penelitian."
+      desc: "Menguji klaim hipotesis secara ketat, melarang fabrikasi data, dan menjaga integritas rujukan.",
+      application: "Digunakan pada Audit Kualitas Naskah & Turnitin Integrity."
     },
     {
       num: "09",
       name: "Design Thinking",
-      desc: "Berpusat pada pengalaman manusia nyata (santri yang mengisi kuesioner, mentor lapangan yang menerima laporan).",
-      application: "Digunakan pada Desain Kuesioner & Antarmuka Sistem."
+      desc: "Berpusat pada kebutuhan pengguna nyata dan stakeholder lapangan.",
+      application: "Digunakan pada Perancangan Alur Pengguna & Desain Solusi."
     },
     {
       num: "10",
       name: "Temporal / Multi-Horizon Thinking",
-      desc: "Menyeimbangkan target harian, mingguan, dan semesteran dalam matriks linimasa yang realistis.",
+      desc: "Menyeimbangkan target mingguan dan pencapaian akhir dalam matriks linimasa yang realistis.",
       application: "Digunakan pada Matriks Jadwal Kerja Mingguan (Gantt Chart)."
     },
     {
       num: "11",
       name: "Occam's Razor",
-      desc: "Di antara dua penjelasan atau solusi yang setara, pilih yang paling sederhana dan minim asumsi tambahan.",
+      desc: "Memilih metodologi dan arsitektur paling efisien dengan asumsi minimal tanpa over-engineering.",
       application: "Digunakan pada Pemilihan Stack Alat & Format Tabel 3-Garis Presisi."
     },
     {
       num: "12",
       name: "Dialectical Synthesis",
-      desc: "Menemukan titik temu sintesis antara tesis (kebutuhan ideal akademis) dan antitesis (kendala teknis lapangan).",
+      desc: "Menemukan titik temu sintesis antara standar akademik ideal dan batasan operasional di industri.",
       application: "Digunakan pada Kesimpulan, Manfaat 3-Pihak, & Lembar Pengesahan."
     }
   ];
 
   return (
-    <div className="fixed inset-0 z-50 bg-matte-bg/80 backdrop-blur-md flex items-center justify-center p-4">
-      <div className="bg-matte-surface border border-matte-borderLight rounded-2xl w-full max-w-3xl max-h-[90vh] flex flex-col shadow-2xl overflow-hidden">
+    <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+      <div className="bg-zinc-950 border border-zinc-800 rounded-xl w-full max-w-2xl max-h-[85vh] flex flex-col shadow-2xl overflow-hidden">
         
-        {/* Modal Header */}
-        <div className="p-5 border-b border-matte-border flex items-center justify-between gap-4 bg-matte-surface2/60">
-          <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-lg bg-matte-bg border border-champagne/40 text-champagne flex items-center justify-center">
-              <Brain className="w-4 h-4" />
-            </div>
-            <div>
-              <h2 className="text-sm font-serif font-bold text-milk-white">
-                12 Metode Berpikir Tingkat Tinggi (Proprietary Thinking Modes)
-              </h2>
-              <p className="text-[11px] font-mono text-milk-muted">
-                Landasan kognitif yang memandu orkestrasi 5 AI Agent dalam Studio ini
-              </p>
-            </div>
+        {/* Header */}
+        <div className="p-4 border-b border-zinc-900 flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <Brain className="w-4 h-4 text-zinc-300" />
+            <h2 className="text-sm font-semibold text-zinc-100">
+              12 Metode Berpikir Ilmiah
+            </h2>
           </div>
 
           <button
+            type="button"
             onClick={onClose}
-            className="p-1.5 rounded-lg bg-matte-surface hover:bg-matte-border text-milk-muted hover:text-milk-white transition-colors"
+            className="w-7 h-7 rounded hover:bg-zinc-900 text-zinc-400 hover:text-white flex items-center justify-center transition-colors text-sm"
           >
-            <X className="w-4 h-4" />
+            ✕
           </button>
         </div>
 
-        {/* Modal Content */}
-        <div className="p-6 overflow-y-auto space-y-3.5 divide-y divide-matte-border/40">
+        {/* List */}
+        <div className="p-4 sm:p-6 overflow-y-auto space-y-4 divide-y divide-zinc-900">
           {modes.map((m) => (
-            <div key={m.num} className="pt-3.5 first:pt-0">
+            <div key={m.num} className="pt-3 first:pt-0">
               <div className="flex items-start gap-3">
-                <span className="font-mono text-xs font-bold text-champagne bg-matte-bg px-2 py-0.5 rounded border border-matte-border flex-shrink-0">
-                  {m.num}
+                <span className="font-mono text-xs text-zinc-400 flex-shrink-0 pt-0.5">
+                  {m.num}.
                 </span>
                 <div>
-                  <h3 className="text-xs font-serif font-bold text-milk-white">
+                  <h3 className="text-xs sm:text-sm font-medium text-zinc-100">
                     {m.name}
                   </h3>
-                  <p className="text-xs text-milk-soft font-sans mt-0.5 leading-relaxed">
+                  <p className="text-xs text-zinc-400 mt-1 leading-relaxed">
                     {m.desc}
                   </p>
-                  <p className="text-[11px] font-mono text-champagne/90 mt-1">
-                    <span className="text-milk-dim">Penerapan pada Proposal:</span> {m.application}
+                  <p className="text-[11px] text-zinc-500 mt-1">
+                    <span className="text-zinc-400">Penerapan:</span> {m.application}
                   </p>
                 </div>
               </div>
@@ -141,14 +135,14 @@ export const TwelveModesModal: React.FC<TwelveModesModalProps> = ({
           ))}
         </div>
 
-        {/* Modal Footer */}
-        <div className="p-4 border-t border-matte-border bg-matte-bg flex items-center justify-between text-xs font-mono">
-          <span className="text-milk-muted">Tersinkronisasi dengan SOP Academic Campus Pro</span>
+        {/* Footer */}
+        <div className="p-3 border-t border-zinc-900 flex justify-end">
           <button
+            type="button"
             onClick={onClose}
-            className="px-4 py-1.5 rounded-lg bg-champagne hover:bg-champagne-light text-matte-bg font-bold cursor-pointer"
+            className="px-4 py-1.5 rounded-lg bg-zinc-100 hover:bg-white text-black text-xs font-semibold cursor-pointer"
           >
-            Tutup Panduan
+            Tutup
           </button>
         </div>
 

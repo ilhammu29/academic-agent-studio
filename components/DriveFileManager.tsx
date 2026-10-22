@@ -2,10 +2,8 @@
 
 import React, { useState, useEffect } from 'react';
 import { 
-  Folder, 
   FileText, 
   Presentation, 
-  Download, 
   Trash2, 
   Search, 
   Plus, 
@@ -13,13 +11,9 @@ import {
   Grid, 
   List, 
   Clock, 
-  Building2, 
   ExternalLink,
-  ChevronRight,
-  MoreVertical,
-  CheckCircle2,
   FileCode,
-  Layers,
+  Download,
   RefreshCw
 } from 'lucide-react';
 import { SavedProjectRecord, getSavedProjects, deleteProjectRecord } from '@/lib/supabase';
@@ -54,7 +48,7 @@ export default function DriveFileManager({
 
   const handleDelete = async (id: string, e: React.MouseEvent) => {
     e.stopPropagation();
-    if (confirm('Apakah Anda yakin ingin menghapus file ini dari Drive?')) {
+    if (confirm('Apakah Anda yakin ingin menghapus berkas ini dari Drive?')) {
       await deleteProjectRecord(id);
       await fetchFiles();
     }
@@ -87,280 +81,236 @@ export default function DriveFileManager({
   });
 
   return (
-    <div className="w-full flex-1 flex flex-col md:flex-row bg-[#000000] text-white border border-[#27272A] rounded-2xl overflow-hidden shadow-2xl min-h-[640px]">
-      {/* ============================================================ */}
-      {/* DRIVE SIDEBAR (Google Drive Style) */}
-      {/* ============================================================ */}
-      <aside className="w-full md:w-64 bg-[#09090B] border-b md:border-b-0 md:border-r border-[#27272A] p-4 flex flex-col justify-between flex-shrink-0">
+    <div className="w-full flex-1 flex flex-col md:flex-row bg-[#000000] border border-zinc-900 rounded-xl overflow-hidden shadow-xl min-h-[580px] animate-in fade-in duration-200">
+      
+      {/* 1. DRIVE SIDEBAR (Clean & Minimalist) */}
+      <aside className="w-full md:w-56 bg-zinc-950 border-b md:border-b-0 md:border-r border-zinc-900 p-4 flex flex-col justify-between flex-shrink-0">
         <div>
-          {/* New Button */}
+          {/* New Proposal CTA */}
           <button
+            type="button"
             onClick={onNewProposal}
-            className="w-full py-2.5 px-4 rounded-xl bg-white hover:bg-gray-200 text-black font-semibold text-xs transition-all shadow-md flex items-center justify-center gap-2 cursor-pointer mb-6"
+            className="w-full py-2 px-3 rounded-lg bg-zinc-100 hover:bg-white text-black font-semibold text-xs transition-all flex items-center justify-center gap-1.5 cursor-pointer mb-5 shadow-sm"
           >
             <Plus className="w-4 h-4 stroke-[2.5]" />
-            <span>Buat Usulan Baru</span>
+            <span>Usulan Baru</span>
           </button>
 
-          {/* Drive Navigation Folders */}
-          <div className="space-y-1">
+          {/* Folder Categories */}
+          <div className="flex md:flex-col gap-1 overflow-x-auto pb-2 md:pb-0">
             <button
+              type="button"
               onClick={() => setActiveFolder('all')}
-              className={`w-full p-2.5 rounded-xl flex items-center gap-3 text-xs font-medium transition-colors cursor-pointer ${
+              className={`px-3 py-2 rounded-lg flex items-center gap-2 text-xs transition-colors cursor-pointer whitespace-nowrap text-left ${
                 activeFolder === 'all'
-                  ? 'bg-[#18181B] text-white font-semibold'
-                  : 'text-bw-muted hover:text-white hover:bg-[#121214]'
+                  ? 'bg-zinc-900 text-zinc-100 font-medium'
+                  : 'text-zinc-400 hover:text-zinc-200 hover:bg-zinc-900/50'
               }`}
             >
-              <HardDrive className="w-4 h-4 text-white" />
-              <span>Drive Proposal Saya</span>
+              <HardDrive className="w-4 h-4 text-zinc-400" />
+              <span>Semua Usulan</span>
             </button>
 
             <button
+              type="button"
               onClick={() => setActiveFolder('word')}
-              className={`w-full p-2.5 rounded-xl flex items-center gap-3 text-xs font-medium transition-colors cursor-pointer ${
+              className={`px-3 py-2 rounded-lg flex items-center gap-2 text-xs transition-colors cursor-pointer whitespace-nowrap text-left ${
                 activeFolder === 'word'
-                  ? 'bg-[#18181B] text-white font-semibold'
-                  : 'text-bw-muted hover:text-white hover:bg-[#121214]'
+                  ? 'bg-zinc-900 text-zinc-100 font-medium'
+                  : 'text-zinc-400 hover:text-zinc-200 hover:bg-zinc-900/50'
               }`}
             >
-              <FileText className="w-4 h-4 text-white" />
+              <FileText className="w-4 h-4 text-zinc-400" />
               <span>Dokumen Word (.docx)</span>
             </button>
 
             <button
+              type="button"
               onClick={() => setActiveFolder('pptx')}
-              className={`w-full p-2.5 rounded-xl flex items-center gap-3 text-xs font-medium transition-colors cursor-pointer ${
+              className={`px-3 py-2 rounded-lg flex items-center gap-2 text-xs transition-colors cursor-pointer whitespace-nowrap text-left ${
                 activeFolder === 'pptx'
-                  ? 'bg-[#18181B] text-white font-semibold'
-                  : 'text-bw-muted hover:text-white hover:bg-[#121214]'
+                  ? 'bg-zinc-900 text-zinc-100 font-medium'
+                  : 'text-zinc-400 hover:text-zinc-200 hover:bg-zinc-900/50'
               }`}
             >
-              <Presentation className="w-4 h-4 text-white" />
+              <Presentation className="w-4 h-4 text-zinc-400" />
               <span>Slide Sidang (.pptx)</span>
             </button>
 
             <button
+              type="button"
               onClick={() => setActiveFolder('md')}
-              className={`w-full p-2.5 rounded-xl flex items-center gap-3 text-xs font-medium transition-colors cursor-pointer ${
+              className={`px-3 py-2 rounded-lg flex items-center gap-2 text-xs transition-colors cursor-pointer whitespace-nowrap text-left ${
                 activeFolder === 'md'
-                  ? 'bg-[#18181B] text-white font-semibold'
-                  : 'text-bw-muted hover:text-white hover:bg-[#121214]'
+                  ? 'bg-zinc-900 text-zinc-100 font-medium'
+                  : 'text-zinc-400 hover:text-zinc-200 hover:bg-zinc-900/50'
               }`}
             >
-              <FileCode className="w-4 h-4 text-white" />
-              <span>Naskah Markdown & Graf</span>
+              <FileCode className="w-4 h-4 text-zinc-400" />
+              <span>Naskah Markdown</span>
             </button>
           </div>
         </div>
 
-        {/* Cloud Storage Usage Indicator */}
-        <div className="pt-6 border-t border-[#1C1C1F]">
-          <div className="flex items-center justify-between text-[11px] text-bw-muted font-mono mb-2">
-            <span>Penyimpanan Cloud</span>
-            <span className="text-white">12.8 MB / 5 GB</span>
+        {/* Minimal Storage Indicator */}
+        <div className="hidden md:block pt-4 border-t border-zinc-900 text-[11px] text-zinc-500">
+          <div className="flex justify-between mb-1.5">
+            <span>Penyimpanan</span>
+            <span className="text-zinc-400 font-mono">12.8 MB / 5 GB</span>
           </div>
-          <div className="w-full h-1.5 bg-[#18181B] rounded-full overflow-hidden border border-[#27272A]">
-            <div className="w-[12%] h-full bg-white rounded-full" />
+          <div className="w-full h-1 bg-zinc-900 rounded-full overflow-hidden">
+            <div className="w-[10%] h-full bg-zinc-300 rounded-full" />
           </div>
-          <p className="text-[10px] text-bw-dim mt-2 font-mono">
-            Tersinkronisasi aman di Supabase PostgreSQL & Cache Lokal
-          </p>
         </div>
       </aside>
 
-      {/* ============================================================ */}
-      {/* DRIVE MAIN CONTENT AREA */}
-      {/* ============================================================ */}
+      {/* 2. MAIN DRIVE CONTENT AREA */}
       <div className="flex-1 flex flex-col bg-[#000000] overflow-hidden">
-        {/* Drive Top Action Toolbar */}
-        <div className="p-4 border-b border-[#27272A] bg-[#09090B] flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
-          {/* Search Bar */}
-          <div className="relative flex-1 max-w-md">
-            <Search className="absolute left-3 top-2.5 w-4 h-4 text-bw-dim" />
+        
+        {/* Top Search & Filter Bar */}
+        <div className="p-3 sm:p-4 border-b border-zinc-900 bg-zinc-950/60 flex items-center justify-between gap-3">
+          <div className="relative flex-1 max-w-sm">
+            <Search className="absolute left-3 top-2.5 w-4 h-4 text-zinc-500" />
             <input
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Cari file di Drive Proposal..."
-              className="w-full bg-[#121214] border border-[#27272A] rounded-xl pl-9 pr-3 py-1.5 text-xs text-white placeholder-bw-dim focus:outline-none focus:border-white transition-colors"
+              placeholder="Cari usulan atau instansi..."
+              className="w-full bg-zinc-900 border border-zinc-800 rounded-lg pl-9 pr-3 py-1.5 text-xs text-zinc-100 placeholder:text-zinc-600 focus:outline-none focus:border-zinc-500 transition-colors"
             />
           </div>
 
-          {/* View Mode & Refresh */}
-          <div className="flex items-center gap-2 justify-end">
+          <div className="flex items-center gap-1.5">
             <button
+              type="button"
               onClick={() => setViewMode(viewMode === 'list' ? 'grid' : 'list')}
-              className="p-2 rounded-xl bg-[#121214] border border-[#27272A] hover:bg-[#18181B] text-bw-muted hover:text-white transition-colors cursor-pointer"
-              title="Ganti Tampilan Grid / List"
+              className="p-1.5 rounded-lg border border-zinc-800 text-zinc-400 hover:text-zinc-200 hover:bg-zinc-900 transition-colors cursor-pointer"
+              title="Ganti Mode Tampilan"
             >
               {viewMode === 'list' ? <Grid className="w-4 h-4" /> : <List className="w-4 h-4" />}
             </button>
 
             <button
+              type="button"
               onClick={fetchFiles}
-              className="p-2 rounded-xl bg-[#121214] border border-[#27272A] hover:bg-[#18181B] text-bw-muted hover:text-white transition-colors cursor-pointer"
-              title="Segarkan Drive"
+              className="p-1.5 rounded-lg border border-zinc-800 text-zinc-400 hover:text-zinc-200 hover:bg-zinc-900 transition-colors cursor-pointer"
+              title="Segarkan Berkas"
             >
               <RefreshCw className={`w-4 h-4 ${isLoading ? 'animate-spin' : ''}`} />
             </button>
           </div>
         </div>
 
-        {/* File Browser Area */}
-        <div className="flex-1 overflow-y-auto p-4 sm:p-6">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="text-xs font-mono uppercase tracking-wider text-bw-muted">
-              File Proposal Tersimpan ({filtered.length})
-            </h3>
-            <span className="text-[10px] font-mono text-bw-dim">Klik baris untuk membuka proyek</span>
-          </div>
-
+        {/* Content Area */}
+        <div className="flex-1 p-4 sm:p-6 overflow-y-auto">
           {isLoading ? (
-            <div className="py-20 text-center text-bw-dim text-xs flex flex-col items-center gap-2">
-              <RefreshCw className="w-6 h-6 animate-spin text-white" />
-              <span>Memuat file dari Drive Supabase...</span>
+            <div className="py-20 text-center text-zinc-500 text-xs flex flex-col items-center gap-2">
+              <RefreshCw className="w-5 h-5 animate-spin text-zinc-400" />
+              <span>Memuat usulan dari penyimpanan...</span>
             </div>
           ) : filtered.length === 0 ? (
-            <div className="py-20 text-center text-bw-dim text-xs">
-              Drive kosong atau tidak ada file yang cocok dengan pencarian.
+            <div className="py-20 text-center text-zinc-500 text-xs flex flex-col items-center gap-3">
+              <HardDrive className="w-8 h-8 text-zinc-700" />
+              <div>
+                <p className="font-medium text-zinc-300">Belum ada berkas usulan tersimpan</p>
+                <p className="text-zinc-500 mt-1">Buat judul usulan baru pada tahap Topik untuk menyusun proposal otomatis.</p>
+              </div>
+              <button
+                type="button"
+                onClick={onNewProposal}
+                className="mt-2 px-3 py-1.5 rounded-lg bg-zinc-100 text-black text-xs font-medium hover:bg-white transition-all cursor-pointer"
+              >
+                + Mulai Usulan Baru
+              </button>
             </div>
           ) : viewMode === 'list' ? (
-            /* Table / List View (Google Drive Style) */
-            <div className="w-full overflow-x-auto">
-              <table className="w-full text-left text-xs">
-                <thead>
-                  <tr className="border-b border-[#27272A] text-bw-dim font-mono text-[11px]">
-                    <th className="pb-2.5 font-medium">Nama Dokumen</th>
-                    <th className="pb-2.5 font-medium">Kategori</th>
-                    <th className="pb-2.5 font-medium">Instansi Mitra</th>
-                    <th className="pb-2.5 font-medium">Terakhir Diubah</th>
-                    <th className="pb-2.5 text-right font-medium">Aksi Cepat</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-[#18181B]">
-                  {filtered.map((item) => (
-                    <tr
-                      key={item.id}
-                      onClick={() => onLoadProject(item)}
-                      className="hover:bg-[#0E0E10] cursor-pointer group transition-colors"
-                    >
-                      <td className="py-3 pr-4 font-semibold text-white flex items-center gap-2.5">
-                        <div className="w-8 h-8 rounded-lg bg-[#18181B] border border-[#27272A] flex items-center justify-center text-white flex-shrink-0">
-                          <FileText className="w-4 h-4" />
-                        </div>
-                        <span className="truncate max-w-xs sm:max-w-md group-hover:underline">
-                          {item.title}
-                        </span>
-                      </td>
-
-                      <td className="py-3 pr-4 font-mono text-[11px] text-bw-muted">
-                        <span className="px-2 py-0.5 rounded bg-white/10 text-white font-semibold">
-                          {item.category.toUpperCase()}
-                        </span>
-                      </td>
-
-                      <td className="py-3 pr-4 font-mono text-bw-dim truncate max-w-[150px]">
-                        {item.targetEntity || '-'}
-                      </td>
-
-                      <td className="py-3 pr-4 font-mono text-bw-dim text-[11px]">
-                        {new Date(item.updatedAt).toLocaleDateString('id-ID', {
-                          day: 'numeric',
-                          month: 'short',
-                          year: 'numeric'
-                        })}
-                      </td>
-
-                      <td className="py-3 text-right">
-                        <div className="flex items-center justify-end gap-1.5" onClick={(e) => e.stopPropagation()}>
-                          <button
-                            onClick={(e) => handleDownloadWord(item, e)}
-                            className="p-1.5 rounded-lg bg-[#18181B] hover:bg-white hover:text-black text-bw-muted transition-colors cursor-pointer"
-                            title="Unduh File Word (.docx)"
-                          >
-                            <FileText className="w-3.5 h-3.5" />
-                          </button>
-
-                          <button
-                            onClick={(e) => handleDownloadSlide(item, e)}
-                            className="p-1.5 rounded-lg bg-[#18181B] hover:bg-white hover:text-black text-bw-muted transition-colors cursor-pointer"
-                            title="Unduh File Slide (.pptx)"
-                          >
-                            <Presentation className="w-3.5 h-3.5" />
-                          </button>
-
-                          <button
-                            onClick={(e) => handleDelete(item.id, e)}
-                            className="p-1.5 rounded-lg hover:bg-red-950/40 text-bw-dim hover:text-red-400 transition-colors cursor-pointer"
-                            title="Hapus Dokumen"
-                          >
-                            <Trash2 className="w-3.5 h-3.5" />
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          ) : (
-            /* Grid View (Google Drive Grid Cards) */
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3.5">
+            /* LIST VIEW */
+            <div className="divide-y divide-zinc-900 border border-zinc-900 rounded-lg overflow-hidden">
               {filtered.map((item) => (
                 <div
                   key={item.id}
                   onClick={() => onLoadProject(item)}
-                  className="p-4 rounded-xl bg-[#0E0E10] border border-[#27272A] hover:border-white transition-all cursor-pointer group flex flex-col justify-between gap-3"
+                  className="p-3 sm:p-4 hover:bg-zinc-950/80 transition-colors cursor-pointer flex flex-col sm:flex-row sm:items-center justify-between gap-3 group"
                 >
-                  <div>
-                    <div className="flex items-center justify-between mb-2">
-                      <div className="w-8 h-8 rounded-lg bg-[#18181B] border border-[#27272A] flex items-center justify-center text-white">
-                        <FileText className="w-4 h-4" />
-                      </div>
-                      <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-white/10 text-white font-semibold">
-                        {item.category.toUpperCase()}
-                      </span>
-                    </div>
-
-                    <h4 className="text-xs font-semibold text-white group-hover:underline line-clamp-2 leading-relaxed">
-                      {item.title}
-                    </h4>
-
-                    {item.targetEntity && (
-                      <p className="text-[11px] text-bw-dim mt-2 flex items-center gap-1 font-mono">
-                        <Building2 className="w-3 h-3" />
-                        <span className="truncate">{item.targetEntity}</span>
+                  <div className="flex items-start gap-3 flex-1 min-w-0">
+                    <FileText className="w-4 h-4 text-zinc-400 flex-shrink-0 mt-0.5" />
+                    <div className="min-w-0">
+                      <h4 className="text-xs sm:text-sm font-medium text-zinc-100 truncate group-hover:text-white transition-colors">
+                        {item.title}
+                      </h4>
+                      <p className="text-[11px] text-zinc-500 mt-0.5">
+                        {item.targetEntity} &bull; {item.durationMonths} Bulan &bull; Diperbarui: {new Date(item.updatedAt).toLocaleDateString('id-ID')}
                       </p>
-                    )}
+                    </div>
                   </div>
 
-                  <div className="pt-2.5 border-t border-[#1C1C1F] flex items-center justify-between text-[11px] font-mono text-bw-dim">
-                    <span>
-                      {new Date(item.updatedAt).toLocaleDateString('id-ID', {
-                        day: 'numeric',
-                        month: 'short'
-                      })}
-                    </span>
+                  <div className="flex items-center gap-2 self-end sm:self-center" onClick={(e) => e.stopPropagation()}>
+                    <button
+                      type="button"
+                      onClick={(e) => handleDownloadWord(item, e)}
+                      className="px-2.5 py-1 rounded border border-zinc-800 hover:border-zinc-600 text-[11px] text-zinc-300 hover:text-white transition-colors flex items-center gap-1"
+                      title="Unduh DOCX"
+                    >
+                      <Download className="w-3 h-3" /> Word
+                    </button>
 
-                    <div className="flex items-center gap-1" onClick={(e) => e.stopPropagation()}>
+                    <button
+                      type="button"
+                      onClick={(e) => handleDownloadSlide(item, e)}
+                      className="px-2.5 py-1 rounded border border-zinc-800 hover:border-zinc-600 text-[11px] text-zinc-300 hover:text-white transition-colors flex items-center gap-1"
+                      title="Unduh PPTX"
+                    >
+                      <Download className="w-3 h-3" /> Slide
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={(e) => handleDelete(item.id, e)}
+                      className="p-1 rounded text-zinc-600 hover:text-red-400 transition-colors"
+                      title="Hapus Usulan"
+                    >
+                      <Trash2 className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            /* GRID VIEW */
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+              {filtered.map((item) => (
+                <div
+                  key={item.id}
+                  onClick={() => onLoadProject(item)}
+                  className="p-4 rounded-lg border border-zinc-900 bg-zinc-950/60 hover:border-zinc-700 transition-all cursor-pointer flex flex-col justify-between group"
+                >
+                  <div>
+                    <FileText className="w-5 h-5 text-zinc-400 mb-2" />
+                    <h4 className="text-xs sm:text-sm font-medium text-zinc-100 line-clamp-2 group-hover:text-white">
+                      {item.title}
+                    </h4>
+                    <p className="text-[11px] text-zinc-500 mt-1">
+                      {item.targetEntity} &bull; {item.durationMonths} Bulan
+                    </p>
+                  </div>
+
+                  <div className="pt-3 mt-3 border-t border-zinc-900/80 flex items-center justify-between" onClick={(e) => e.stopPropagation()}>
+                    <span className="text-[10px] text-zinc-600">
+                      {new Date(item.updatedAt).toLocaleDateString('id-ID')}
+                    </span>
+                    <div className="flex items-center gap-1.5">
                       <button
+                        type="button"
                         onClick={(e) => handleDownloadWord(item, e)}
-                        className="p-1 hover:text-white"
-                        title="Unduh .docx"
+                        className="p-1 rounded hover:bg-zinc-900 text-zinc-400 hover:text-white transition-colors"
+                        title="Unduh Word"
                       >
-                        <FileText className="w-3.5 h-3.5" />
+                        <Download className="w-3.5 h-3.5" />
                       </button>
                       <button
-                        onClick={(e) => handleDownloadSlide(item, e)}
-                        className="p-1 hover:text-white"
-                        title="Unduh .pptx"
-                      >
-                        <Presentation className="w-3.5 h-3.5" />
-                      </button>
-                      <button
+                        type="button"
                         onClick={(e) => handleDelete(item.id, e)}
-                        className="p-1 hover:text-red-400"
+                        className="p-1 rounded hover:bg-zinc-900 text-zinc-600 hover:text-red-400 transition-colors"
                         title="Hapus"
                       >
                         <Trash2 className="w-3.5 h-3.5" />
@@ -373,6 +323,7 @@ export default function DriveFileManager({
           )}
         </div>
       </div>
+
     </div>
   );
 }
