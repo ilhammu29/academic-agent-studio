@@ -303,6 +303,11 @@ export default function Home() {
         {stage === "orchestration" && (
           <AgentExecutionMonitor
             title={title}
+            category={category}
+            answers={answers}
+            targetEntity={targetEntity}
+            candidateName={candidateName}
+            institution={institution}
             onComplete={handleAgentsFinished}
           />
         )}

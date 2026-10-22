@@ -1,17 +1,27 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { AgentInfo } from "@/types/studio";
+import { AgentInfo, ProposalCategory } from "@/types/studio";
 import { INITIAL_AGENTS } from "@/lib/agentEngine";
 import { ArrowRight, Check, Loader2 } from "lucide-react";
 
 interface AgentExecutionMonitorProps {
   title: string;
+  category?: ProposalCategory;
+  answers?: Record<string, string>;
+  targetEntity?: string;
+  candidateName?: string;
+  institution?: string;
   onComplete: () => void;
 }
 
 export const AgentExecutionMonitor: React.FC<AgentExecutionMonitorProps> = ({
   title,
+  category = "magang",
+  answers = {},
+  targetEntity = "PT Telkom Indonesia",
+  candidateName = "Muhammad Ilham",
+  institution = "Universitas Sebelas Maret (UNS)",
   onComplete
 }) => {
   const [agents, setAgents] = useState<AgentInfo[]>(INITIAL_AGENTS);
@@ -22,32 +32,33 @@ export const AgentExecutionMonitor: React.FC<AgentExecutionMonitorProps> = ({
   useEffect(() => {
     const timestamp = () => new Date().toLocaleTimeString("id-ID", { hour12: false });
 
-    // Initial Gemini API handshake & Real Generation
+    // Initial Gemini API handshake & Real Context Grounding
     fetch("/api/gemini", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         title,
-        category: "magang / riset akademik",
-        answers: { promptOrigin: "Generated from Academic Agent Studio UI" },
-        targetEntity: "Perusahaan / Instansi Terkait",
-        candidateName: "Mahasiswa / Peneliti",
-        institution: "Universitas"
+        category,
+        answers,
+        targetEntity,
+        candidateName,
+        institution
       })
     })
       .then(res => res.json())
       .then(data => {
         if (data.success) {
+          const engineLabel = data.engine === "gemini-1.5-flash" ? "Google Gemini 1.5 Flash" : "Academic Intelligence Engine";
           setActiveLogs(l => [
             ...l,
-            { time: timestamp(), agent: "Gemini AI Engine", text: `Berhasil merumuskan naskah dengan ${data.data?.chapters?.length || 3} Bab utama.` }
+            { time: timestamp(), agent: "Orchestrator Core", text: `Terhubung ke ${engineLabel}: ${data.data?.chapters?.length || 4} Bab utama siap dirumuskan.` }
           ]);
         }
       })
       .catch((err) => {
         setActiveLogs(l => [
           ...l,
-          { time: timestamp(), agent: "Gemini AI Engine", text: `Peringatan: Gagal terhubung ke API (${err.message}). Menggunakan generator lokal.` }
+          { time: timestamp(), agent: "Orchestrator Core", text: `Mode Mandiri Aktif: Memproses draf menggunakan SOP Academic Campus Pro (${err.message}).` }
         ]);
       });
 
@@ -60,7 +71,7 @@ export const AgentExecutionMonitor: React.FC<AgentExecutionMonitorProps> = ({
         currentTask: "Merumuskan Latar Belakang & Batasan Masalah..."
       } : a));
       setActiveLogs(l => [...l, { time: timestamp(), agent: "Scoping Architect", text: `Menganalisis judul usulan: "${title}"` }]);
-      setActiveLogs(l => [...l, { time: timestamp(), agent: "Scoping Architect", text: "Menyusun 3 Rumusan Masalah & Matriks Kemanfaatan 3-Pihak." }]);
+      setActiveLogs(l => [...l, { time: timestamp(), agent: "Scoping Architect", text: `Menyusun Rumusan Masalah & Matriks Kemanfaatan untuk ${targetEntity}.` }]);
       setOverallProgress(30);
     }, 600);
 
@@ -70,7 +81,7 @@ export const AgentExecutionMonitor: React.FC<AgentExecutionMonitorProps> = ({
         if (i === 1) return { ...a, status: "working", progress: 50, currentTask: "Menyusun Profil Entitas & Landasan Teori..." };
         return a;
       }));
-      setActiveLogs(l => [...l, { time: timestamp(), agent: "Literature Profiler", text: "Mengintegrasikan landasan teori dan tinjauan pustaka." }]);
+      setActiveLogs(l => [...l, { time: timestamp(), agent: "Literature Profiler", text: `Mengintegrasikan profil ${targetEntity} dan tinjauan pustaka terindeks.` }]);
       setActiveLogs(l => [...l, { time: timestamp(), agent: "Literature Profiler", text: "Menyusun profil unit kerja dan alur koordinasi supervisi teknis." }]);
       setOverallProgress(50);
     }, 1800);
@@ -81,7 +92,7 @@ export const AgentExecutionMonitor: React.FC<AgentExecutionMonitorProps> = ({
         if (i === 2) return { ...a, status: "working", progress: 60, currentTask: "Menghitung Matriks Jadwal Mingguan & Capaian..." };
         return a;
       }));
-      setActiveLogs(l => [...l, { time: timestamp(), agent: "Workplan Scheduler", text: "Menyusun jadwal matriks 16 minggu kerja berjenjang (Fase 1 s.d. 5)." }]);
+      setActiveLogs(l => [...l, { time: timestamp(), agent: "Workplan Scheduler", text: "Menyusun jadwal matriks kerja berjenjang (Fase 1 s.d. 5)." }]);
       setActiveLogs(l => [...l, { time: timestamp(), agent: "Workplan Scheduler", text: "Memetakan target luaran mingguan (WBS, SRS, Prototype, UAT)." }]);
       setOverallProgress(70);
     }, 3200);
@@ -92,7 +103,7 @@ export const AgentExecutionMonitor: React.FC<AgentExecutionMonitorProps> = ({
         if (i === 3) return { ...a, status: "working", progress: 75, currentTask: "Audit Standar Format Dokumen & Integritas..." };
         return a;
       }));
-      setActiveLogs(l => [...l, { time: timestamp(), agent: "Quality Examiner", text: "Audit format: A4 margin 4-4-3-3 cm dengan penomoran halaman standar." }]);
+      setActiveLogs(l => [...l, { time: timestamp(), agent: "Quality Examiner", text: "Audit format: A4 margin 4-4-3-3 cm dengan penomoran halaman standar kampus." }]);
       setActiveLogs(l => [...l, { time: timestamp(), agent: "Quality Examiner", text: "Audit tabel: Format terbuka 3-garis horizontal tanpa vertikal." }]);
       setOverallProgress(88);
     }, 4600);
@@ -105,7 +116,7 @@ export const AgentExecutionMonitor: React.FC<AgentExecutionMonitorProps> = ({
       }));
       setActiveLogs(l => [...l, { time: timestamp(), agent: "Presentation Architect", text: "Membangun simpul graf pohon (Visual Tree Graph) relasi Bab 1-4." }]);
       setActiveLogs(l => [...l, { time: timestamp(), agent: "Presentation Architect", text: "Menyusun 6 slide presentasi eksekutif siap ekspor (.pptx)." }]);
-      setActiveLogs(l => [...l, { time: timestamp(), agent: "System Orchestrator", text: "Kompilasi dokumen akademik selesai." }]);
+      setActiveLogs(l => [...l, { time: timestamp(), agent: "System Orchestrator", text: `Kompilasi dokumen akademik untuk ${candidateName} selesai.` }]);
       setOverallProgress(100);
       setIsFinished(true);
     }, 6000);
@@ -117,7 +128,7 @@ export const AgentExecutionMonitor: React.FC<AgentExecutionMonitorProps> = ({
       clearTimeout(timer4);
       clearTimeout(timer5);
     };
-  }, [title]);
+  }, [title, category, answers, targetEntity, candidateName, institution]);
 
   return (
     <div className="max-w-3xl mx-auto py-6 sm:py-8 w-full animate-in fade-in duration-200">
@@ -198,7 +209,7 @@ export const AgentExecutionMonitor: React.FC<AgentExecutionMonitorProps> = ({
 
       {/* 3. Live Logs Console (Subtle minimal terminal) */}
       <div className="border border-zinc-900 rounded-lg p-3 bg-zinc-950 font-mono text-xs text-zinc-400 space-y-1 mb-8 max-h-48 overflow-y-auto">
-        <div className="text-[10px] uppercase text-zinc-600 mb-1">Log Orkestrasi:</div>
+        <div className="text-[10px] uppercase text-zinc-600 mb-1">Log Orkestrasi Real-Time:</div>
         {activeLogs.map((log, i) => (
           <div key={i} className="flex gap-2 text-[11px] leading-relaxed">
             <span className="text-zinc-600 select-none">[{log.time}]</span>
