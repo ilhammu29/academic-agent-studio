@@ -22,6 +22,27 @@ export const AgentExecutionMonitor: React.FC<AgentExecutionMonitorProps> = ({
   useEffect(() => {
     const timestamp = () => new Date().toLocaleTimeString("id-ID", { hour12: false });
 
+    // Initial Gemini API handshake
+    fetch("/api/gemini", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        prompt: `Beri 1 baris konfirmasi singkat bahwa Anda siap merancang proposal akademis untuk judul: "${title}"`
+      })
+    })
+      .then(res => res.json())
+      .then(data => {
+        if (data.success && data.text) {
+          setActiveLogs(l => [
+            ...l,
+            { time: timestamp(), agent: "Gemini Engine", text: `[Live Handshake]: ${data.text.trim().slice(0, 100)}...` }
+          ]);
+        }
+      })
+      .catch(() => {
+        // quiet fallback
+      });
+
     // Step-by-step orchestrator timeline simulation
     const timer1 = setTimeout(() => {
       setAgents(prev => prev.map((a, i) => i === 0 ? {

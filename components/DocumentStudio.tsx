@@ -3,6 +3,10 @@
 import React, { useState } from "react";
 import { ProposalDocument, TreeNode } from "@/types/studio";
 import { VisualTreeGraph } from "./VisualTreeGraph";
+import DefenseSimulator from "./DefenseSimulator";
+import LiteratureSearchModal from "./LiteratureSearchModal";
+import { generateAcademicProposalDocx, downloadDocxBlob } from "@/lib/docxExporter";
+import { generateAcademicProposalPptx } from "@/lib/pptxExporter";
 import { 
   FileText, 
   Network, 
@@ -20,7 +24,11 @@ import {
   Clock,
   Layers,
   ChevronRight,
-  ExternalLink
+  ExternalLink,
+  ShieldAlert,
+  BookOpen,
+  RefreshCw,
+  FileDown
 } from "lucide-react";
 
 interface DocumentStudioProps {
@@ -34,9 +42,12 @@ export const DocumentStudio: React.FC<DocumentStudioProps> = ({
   treeData,
   onReset
 }) => {
-  const [activeTab, setActiveTab] = useState<"naskah" | "tree" | "jadwal" | "slides" | "audit">("naskah");
+  const [activeTab, setActiveTab] = useState<"naskah" | "tree" | "jadwal" | "slides" | "audit" | "defense">("naskah");
   const [copied, setCopied] = useState(false);
   const [activeSlideIndex, setActiveSlideIndex] = useState(0);
+  const [isExportingDocx, setIsExportingDocx] = useState(false);
+  const [isExportingPptx, setIsExportingPptx] = useState(false);
+  const [isLitModalOpen, setIsLitModalOpen] = useState(false);
 
   const generateFullMarkdown = () => {
     return `# PROPOSAL ${doc.category.toUpperCase()}
@@ -175,6 +186,29 @@ NIP / NIK.
     URL.revokeObjectURL(url);
   };
 
+  const handleDownloadDocx = async () => {
+    setIsExportingDocx(true);
+    try {
+      const blob = await generateAcademicProposalDocx(doc);
+      downloadDocxBlob(blob, `Proposal_${doc.category.toUpperCase()}_${doc.candidateName.replace(/\s+/g, "_")}.docx`);
+    } catch (err) {
+      console.error("Gagal mengekspor DOCX:", err);
+    } finally {
+      setIsExportingDocx(false);
+    }
+  };
+
+  const handleDownloadPptx = async () => {
+    setIsExportingPptx(true);
+    try {
+      await generateAcademicProposalPptx(doc);
+    } catch (err) {
+      console.error("Gagal mengekspor PPTX:", err);
+    } finally {
+      setIsExportingPptx(false);
+    }
+  };
+
   const handlePrint = () => {
     window.print();
   };
@@ -187,13 +221,13 @@ NIP / NIK.
         <div>
           <div className="flex items-center gap-2 mb-1.5">
             <span className="text-[10px] font-mono font-bold uppercase tracking-widest text-champagne px-2 py-0.5 rounded border border-champagne/30 bg-champagne/10">
-              Dokumen Terverifikasi &bull; Siap Ekspor
+              Dokumen Terverifikasi &bull; Siap Ekspor Fisik
             </span>
             <span className="text-xs font-mono text-milk-muted">
               ID: {doc.id}
             </span>
           </div>
-          <h1 className="text-lg md:text-xl font-serif font-bold text-milk-white">
+          <h1 className="text-lg md:text-xl font-bold text-milk-white">
             {doc.title}
           </h1>
           <p className="text-xs text-milk-muted font-sans mt-0.5">
@@ -201,35 +235,77 @@ NIP / NIK.
           </p>
         </div>
 
-        {/* Action Buttons */}
+        {/* Action Buttons: DOCX, PPTX, MD, PRINT */}
         <div className="flex items-center flex-wrap gap-2">
+          {/* Real Word DOCX Download Button */}
           <button
-            onClick={handleCopy}
-            className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-matte-surface2 hover:bg-matte-border border border-matte-borderLight text-xs font-mono text-milk-soft hover:text-milk-white transition-all cursor-pointer"
+            onClick={handleDownloadDocx}
+            disabled={isExportingDocx}
+            className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-sky-600 hover:bg-sky-500 text-white text-xs font-semibold shadow-md shadow-sky-600/20 transition-all cursor-pointer"
+            title="Unduh dokumen Microsoft Word (.docx) berstandar penomoran halaman kampus"
           >
-            {copied ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5 text-champagne" />}
-            <span>{copied ? "Tersalin!" : "Salin Markdown"}</span>
+            {isExportingDocx ? (
+              <>
+                <RefreshCw className="w-3.5 h-3.5 animate-spin" />
+                <span>Menyusun Word...</span>
+              </>
+            ) : (
+              <>
+                <FileDown className="w-3.5 h-3.5" />
+                <span>Unduh Word (.docx)</span>
+              </>
+            )}
+          </button>
+
+          {/* Real PowerPoint PPTX Download Button */}
+          <button
+            onClick={handleDownloadPptx}
+            disabled={isExportingPptx}
+            className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-[#D4B996] hover:bg-[#EAD7BF] text-black text-xs font-semibold shadow-md transition-all cursor-pointer"
+            title="Unduh slide presentasi 16:9 (.pptx) eksekutif"
+          >
+            {isExportingPptx ? (
+              <>
+                <RefreshCw className="w-3.5 h-3.5 animate-spin" />
+                <span>Menyusun PPTX...</span>
+              </>
+            ) : (
+              <>
+                <Presentation className="w-3.5 h-3.5" />
+                <span>Unduh Slide (.pptx)</span>
+              </>
+            )}
+          </button>
+
+          {/* Semantic Scholar Search Trigger */}
+          <button
+            onClick={() => setIsLitModalOpen(true)}
+            className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-[#141A26] hover:bg-[#1E2638] border border-purple-500/40 text-purple-300 text-xs font-medium transition-all cursor-pointer"
+            title="Buka pencarian paper terindeks & matriks PRISMA 2020"
+          >
+            <BookOpen className="w-3.5 h-3.5 text-purple-400" />
+            <span>Literatur PRISMA</span>
           </button>
 
           <button
-            onClick={handleDownload}
-            className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-matte-surface2 hover:bg-matte-border border border-matte-borderLight text-xs font-mono text-milk-soft hover:text-milk-white transition-all cursor-pointer"
+            onClick={handleCopy}
+            className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-matte-surface2 hover:bg-matte-border border border-matte-borderLight text-xs font-mono text-milk-soft hover:text-milk-white transition-all cursor-pointer"
           >
-            <Download className="w-3.5 h-3.5 text-champagne" />
-            <span>Unduh .md</span>
+            {copied ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5 text-champagne" />}
+            <span>{copied ? "Tersalin!" : "Markdown"}</span>
           </button>
 
           <button
             onClick={handlePrint}
-            className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-champagne hover:bg-champagne-light text-matte-bg text-xs font-mono font-bold transition-all shadow-md shadow-champagne/10 cursor-pointer"
+            className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-[#141A26] hover:bg-[#1E2638] text-milk-soft text-xs border border-matte-borderLight transition-all cursor-pointer"
           >
             <Printer className="w-3.5 h-3.5" />
-            <span>Cetak / Simpan PDF</span>
+            <span>Cetak PDF</span>
           </button>
 
           <button
             onClick={onReset}
-            className="px-3 py-2 rounded-xl text-xs font-mono text-milk-muted hover:text-milk-white transition-colors ml-2"
+            className="px-3 py-2 rounded-xl text-xs font-mono text-milk-muted hover:text-red-400 transition-colors ml-1"
           >
             + Buat Baru
           </button>
@@ -242,7 +318,7 @@ NIP / NIK.
           onClick={() => setActiveTab("naskah")}
           className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-mono font-bold transition-all whitespace-nowrap cursor-pointer ${
             activeTab === "naskah"
-              ? "bg-champagne text-matte-bg shadow-md shadow-champagne/15"
+              ? "bg-[#00A3FF] text-white shadow-md shadow-sky-500/20"
               : "bg-matte-surface border border-matte-border text-milk-muted hover:text-milk-soft"
           }`}
         >
@@ -251,10 +327,22 @@ NIP / NIK.
         </button>
 
         <button
+          onClick={() => setActiveTab("defense")}
+          className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-mono font-bold transition-all whitespace-nowrap cursor-pointer ${
+            activeTab === "defense"
+              ? "bg-red-500 text-white shadow-md shadow-red-500/20"
+              : "bg-matte-surface border border-red-500/40 text-red-300 hover:text-white"
+          }`}
+        >
+          <ShieldAlert className="w-4 h-4" />
+          <span>Simulasi Sidang Sempro (Defense)</span>
+        </button>
+
+        <button
           onClick={() => setActiveTab("tree")}
           className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-mono font-bold transition-all whitespace-nowrap cursor-pointer ${
             activeTab === "tree"
-              ? "bg-champagne text-matte-bg shadow-md shadow-champagne/15"
+              ? "bg-[#00A3FF] text-white shadow-md shadow-sky-500/20"
               : "bg-matte-surface border border-matte-border text-milk-muted hover:text-milk-soft"
           }`}
         >
@@ -266,7 +354,7 @@ NIP / NIK.
           onClick={() => setActiveTab("jadwal")}
           className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-mono font-bold transition-all whitespace-nowrap cursor-pointer ${
             activeTab === "jadwal"
-              ? "bg-champagne text-matte-bg shadow-md shadow-champagne/15"
+              ? "bg-[#00A3FF] text-white shadow-md shadow-sky-500/20"
               : "bg-matte-surface border border-matte-border text-milk-muted hover:text-milk-soft"
           }`}
         >
@@ -278,7 +366,7 @@ NIP / NIK.
           onClick={() => setActiveTab("slides")}
           className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-mono font-bold transition-all whitespace-nowrap cursor-pointer ${
             activeTab === "slides"
-              ? "bg-champagne text-matte-bg shadow-md shadow-champagne/15"
+              ? "bg-[#00A3FF] text-white shadow-md shadow-sky-500/20"
               : "bg-matte-surface border border-matte-border text-milk-muted hover:text-milk-soft"
           }`}
         >
@@ -290,7 +378,7 @@ NIP / NIK.
           onClick={() => setActiveTab("audit")}
           className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-mono font-bold transition-all whitespace-nowrap cursor-pointer ${
             activeTab === "audit"
-              ? "bg-champagne text-matte-bg shadow-md shadow-champagne/15"
+              ? "bg-[#00A3FF] text-white shadow-md shadow-sky-500/20"
               : "bg-matte-surface border border-matte-border text-milk-muted hover:text-milk-soft"
           }`}
         >
@@ -707,6 +795,26 @@ NIP / NIK.
           </div>
         </div>
       )}
+
+      {/* TAB 6: SIMULASI SIDANG SEMPRO (DEFENSE SIMULATOR) */}
+      {activeTab === "defense" && (
+        <DefenseSimulator doc={doc} />
+      )}
+
+      {/* MODAL: PENCARIAN LITERATUR SEMANTIC SCHOLAR & PRISMA */}
+      <LiteratureSearchModal
+        isOpen={isLitModalOpen}
+        onClose={() => setIsLitModalOpen(false)}
+        initialQuery={doc.title}
+        onAddPaperToProposal={(paper) => {
+          // Add newly found paper to Bab II theory
+          doc.bab2.landasanTeori.push({
+            topic: `Kajian Terindeks: ${paper.title}`,
+            elaboration: paper.abstract || "Kajian primer mengenai metodologi komparatif.",
+            citation: `${paper.authors.map(a => a.name).join(", ")} (${paper.year || 2024}). ${paper.venue}. DOI: ${paper.doi || "Tersedia"}`
+          });
+        }}
+      />
 
     </div>
   );
