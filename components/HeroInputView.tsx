@@ -14,7 +14,8 @@ import {
   RefreshCw,
   FolderKanban,
   Check,
-  BookOpen
+  BookOpen,
+  Cpu
 } from "lucide-react";
 import { TitleRecommendation, getAiTitleRecommendations } from "@/lib/titleGenerator";
 
@@ -70,9 +71,11 @@ export const HeroInputView: React.FC<HeroInputViewProps> = ({
   const [recommendations, setRecommendations] = useState<TitleRecommendation[]>([]);
   const [isLoadingRecs, setIsLoadingRecs] = useState(false);
   const [papersCount, setPapersCount] = useState<number | null>(null);
+  const [recommenderMode, setRecommenderMode] = useState<"ai-pure" | "literature">("ai-pure");
 
-  const handleFetchAiTitles = async (kw?: string) => {
+  const handleFetchAiTitles = async (kw?: string, targetMode?: "ai-pure" | "literature") => {
     const target = (kw !== undefined ? kw : keywordInput).trim() || "Informatika & AI";
+    const mode = targetMode || recommenderMode;
     setIsLoadingRecs(true);
     setActiveSearchTopic(target);
     setKeywordInput(target);
@@ -81,7 +84,7 @@ export const HeroInputView: React.FC<HeroInputViewProps> = ({
       const res = await fetch("/api/academic/recommend-titles", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ query: target })
+        body: JSON.stringify({ query: target, mode })
       });
 
       if (res.ok) {
@@ -97,7 +100,7 @@ export const HeroInputView: React.FC<HeroInputViewProps> = ({
       console.warn("API title recommendation fetch error, running local fallback:", err);
     }
 
-    const localResults = await getAiTitleRecommendations(target);
+    const localResults = await getAiTitleRecommendations(target, mode);
     setRecommendations(localResults);
     setPapersCount(localResults.length);
     setIsLoadingRecs(false);
@@ -106,7 +109,7 @@ export const HeroInputView: React.FC<HeroInputViewProps> = ({
   const handleOpenAiRecommender = () => {
     setIsAiRecommenderOpen(true);
     if (recommendations.length === 0) {
-      handleFetchAiTitles("Informatika & AI");
+      handleFetchAiTitles("Informatika & AI", recommenderMode);
     }
   };
 
@@ -136,7 +139,7 @@ export const HeroInputView: React.FC<HeroInputViewProps> = ({
           Perumusan Usulan Proposal Akademik
         </h1>
         <p className="text-sm text-zinc-400 mt-2 max-w-lg mx-auto leading-relaxed">
-          Ketikkan judul usulan Anda atau minta rekomendasi dari paper ilmiah terkini. Sistem akan melakukan wawancara diagnostik sebelum dokumen disusun.
+          Ketikkan judul usulan Anda atau minta rekomendasi dari AI / rujukan jurnal terkini. Sistem akan melakukan wawancara diagnostik sebelum dokumen disusun.
         </p>
       </div>
 
@@ -152,7 +155,7 @@ export const HeroInputView: React.FC<HeroInputViewProps> = ({
           >
             <Sparkles className="w-3.5 h-3.5 text-zinc-300" />
             <span className="underline underline-offset-4 decoration-zinc-700 hover:decoration-white font-medium">
-              Rekomendasi Judul dari Jurnal
+              Rekomendasi Judul (AI & Jurnal)
             </span>
           </button>
 
@@ -306,22 +309,24 @@ export const HeroInputView: React.FC<HeroInputViewProps> = ({
         )}
       </div>
 
-      {/* 4. MODAL: REKOMENDASI JUDUL BERBASIS LITERATUR */}
+      {/* 4. MODAL: REKOMENDASI JUDUL ILMIAH */}
       {isAiRecommenderOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-sm animate-in fade-in duration-150">
           <div className="w-full max-w-2xl bg-zinc-950 border border-zinc-800 rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[88vh]">
             
             {/* Modal Header */}
-            <div className="px-5 py-4 border-b border-zinc-900 flex items-center justify-between">
+            <div className="px-5 py-3.5 border-b border-zinc-900 flex items-center justify-between">
               <div>
                 <div className="flex items-center gap-2">
-                  <BookOpen className="w-4 h-4 text-zinc-300" />
+                  <Sparkles className="w-4 h-4 text-zinc-300" />
                   <h3 className="text-sm font-semibold text-zinc-100">
-                    Rekomendasi Judul Berbasis Literatur Ilmiah
+                    Generator Rekomendasi Judul Proposal
                   </h3>
                 </div>
                 <p className="text-xs text-zinc-400 mt-0.5">
-                  Terintegrasi rujukan jurnal OpenAlex & Crossref dengan identifikasi celah riset
+                  {recommenderMode === "ai-pure" 
+                    ? "Mode Murni AI: Merumuskan judul yang alami dan presisi sesuai rumpun ilmunya" 
+                    : "Mode Literatur: Menautkan judul dengan publikasi terindeks OpenAlex & Crossref"}
                 </p>
               </div>
               <button
@@ -330,6 +335,41 @@ export const HeroInputView: React.FC<HeroInputViewProps> = ({
                 className="w-7 h-7 rounded-md hover:bg-zinc-900 text-zinc-400 hover:text-white flex items-center justify-center transition-colors cursor-pointer text-sm"
               >
                 ✕
+              </button>
+            </div>
+
+            {/* Mode Switcher Tabs */}
+            <div className="grid grid-cols-2 p-1.5 bg-zinc-900/60 border-b border-zinc-900 text-xs gap-1.5">
+              <button
+                type="button"
+                onClick={() => {
+                  setRecommenderMode("ai-pure");
+                  handleFetchAiTitles(keywordInput, "ai-pure");
+                }}
+                className={`flex items-center justify-center gap-1.5 py-1.5 px-3 rounded-lg font-medium transition-colors cursor-pointer ${
+                  recommenderMode === "ai-pure"
+                    ? "bg-zinc-100 text-black shadow-sm font-semibold"
+                    : "text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800/60"
+                }`}
+              >
+                <Sparkles className="w-3.5 h-3.5" />
+                <span>AI Smart Generator (Murni AI)</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => {
+                  setRecommenderMode("literature");
+                  handleFetchAiTitles(keywordInput, "literature");
+                }}
+                className={`flex items-center justify-center gap-1.5 py-1.5 px-3 rounded-lg font-medium transition-colors cursor-pointer ${
+                  recommenderMode === "literature"
+                    ? "bg-zinc-100 text-black shadow-sm font-semibold"
+                    : "text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800/60"
+                }`}
+              >
+                <BookOpen className="w-3.5 h-3.5" />
+                <span>Berbasis Literatur Jurnal & DOI</span>
               </button>
             </div>
 
@@ -343,7 +383,11 @@ export const HeroInputView: React.FC<HeroInputViewProps> = ({
                     value={keywordInput}
                     onChange={(e) => setKeywordInput(e.target.value)}
                     onKeyDown={(e) => e.key === "Enter" && handleFetchAiTitles()}
-                    placeholder="Ketik topik minat (misal: AI Medis, Pertanian Organik, Sistem ERP, Hukum Siber)..."
+                    placeholder={
+                      recommenderMode === "ai-pure"
+                        ? "Ketik topik/bidang Anda (misal: Obesitas Remaja, Pemasaran UMKM, Kurikulum Merdeka)..."
+                        : "Ketik kata kunci pencarian jurnal (misal: Deep Learning, Pertanian Organik, Pidana Siber)..."
+                    }
                     className="w-full bg-zinc-900 border border-zinc-800 rounded-lg pl-9 pr-3 py-2 text-xs text-zinc-100 placeholder:text-zinc-600 focus:outline-none focus:border-zinc-500 transition-colors"
                   />
                 </div>
@@ -355,11 +399,11 @@ export const HeroInputView: React.FC<HeroInputViewProps> = ({
                 >
                   {isLoadingRecs ? (
                     <>
-                      <RefreshCw className="w-3.5 h-3.5 animate-spin" /> Menganalisis...
+                      <RefreshCw className="w-3.5 h-3.5 animate-spin" /> Merumuskan...
                     </>
                   ) : (
                     <>
-                      <Sparkles className="w-3.5 h-3.5" /> Cari
+                      <Sparkles className="w-3.5 h-3.5" /> Rumuskan
                     </>
                   )}
                 </button>
@@ -367,7 +411,7 @@ export const HeroInputView: React.FC<HeroInputViewProps> = ({
 
               {/* Quick Domain Topic Chips */}
               <div className="flex items-center gap-1.5 overflow-x-auto pb-1 text-[11px] scrollbar-none">
-                <span className="text-zinc-500 text-[10px] uppercase font-mono mr-1 flex-shrink-0">Kategori:</span>
+                <span className="text-zinc-500 text-[10px] uppercase font-mono mr-1 flex-shrink-0">Pilihan Cepat:</span>
                 {POPULAR_DOMAINS.map((domain, idx) => (
                   <button
                     key={idx}
@@ -389,9 +433,12 @@ export const HeroInputView: React.FC<HeroInputViewProps> = ({
             <div className="px-5 py-2.5 bg-zinc-900/30 border-b border-zinc-900 flex items-center justify-between text-xs text-zinc-400">
               <span className="truncate">
                 Topik: <span className="text-zinc-200 font-medium">{activeSearchTopic}</span>
+                <span className="ml-2 text-[10px] text-zinc-500 font-mono">
+                  ({recommenderMode === "ai-pure" ? "Mode: AI Murni" : "Mode: Literatur Jurnal"})
+                </span>
               </span>
               <span className="text-[11px] font-mono text-zinc-500 flex-shrink-0">
-                {isLoadingRecs ? "Mengakses basis data..." : `${recommendations.length} Usulan Terverifikasi`}
+                {isLoadingRecs ? "Sedang memproses..." : `${recommendations.length} Usulan Terverifikasi`}
               </span>
             </div>
 
@@ -400,7 +447,11 @@ export const HeroInputView: React.FC<HeroInputViewProps> = ({
               {isLoadingRecs ? (
                 <div className="py-14 text-center text-zinc-400 text-xs flex flex-col items-center justify-center gap-2.5">
                   <RefreshCw className="w-5 h-5 animate-spin text-zinc-300" />
-                  <span>Menelusuri literatur primer terindeks dan merumuskan usulan proposal...</span>
+                  <span>
+                    {recommenderMode === "ai-pure"
+                      ? "AI Gemini sedang menganalisis topik dan merumuskan usulan proposal akademik..."
+                      : "Menelusuri database OpenAlex & Crossref dan merumuskan usulan berbasis jurnal..."}
+                  </span>
                 </div>
               ) : recommendations.length === 0 ? (
                 <div className="py-14 text-center text-zinc-500 text-xs">
@@ -438,7 +489,7 @@ export const HeroInputView: React.FC<HeroInputViewProps> = ({
 
                     <div className="p-2.5 rounded bg-zinc-900/40 border border-zinc-900 mb-2">
                       <span className="text-[10px] font-mono uppercase tracking-wider text-zinc-500 block mb-0.5">
-                        Celah Riset (Research Gap):
+                        Celah Riset / Urgensi Masalah:
                       </span>
                       <p className="text-xs text-zinc-300 leading-relaxed">
                         {rec.researchGap}
@@ -447,7 +498,7 @@ export const HeroInputView: React.FC<HeroInputViewProps> = ({
 
                     <div className="text-[11px] text-zinc-400 grid grid-cols-1 sm:grid-cols-2 gap-1 font-sans">
                       <div>
-                        <span className="text-zinc-500">Instansi / Mitra:</span> {rec.entity} ({rec.durationMonths} Bulan)
+                        <span className="text-zinc-500">Target Instansi / Mitra:</span> {rec.entity} ({rec.durationMonths} Bulan)
                       </div>
                       <div className="truncate">
                         <span className="text-zinc-500">Rujukan:</span> {rec.referenceJournal}

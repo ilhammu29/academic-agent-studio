@@ -13,13 +13,13 @@ export interface TitleRecommendation {
 }
 
 /**
- * Generate academic title recommendations based on real journal literature or keywords
- * Multi-layer pipeline:
- * Layer 1: Unified Server API (/api/academic/recommend-titles) with OpenAlex + Crossref + Gemini AI
- * Layer 2: Client-side literature query + dynamic academic heuristic synthesis
+ * Generate academic title recommendations
+ * Mode 1: 'ai-pure' (Default): Pure AI-driven title determination tailored to the specific field of study
+ * Mode 2: 'literature': Titling anchored directly to retrieved peer-reviewed papers (OpenAlex/Crossref)
  */
 export async function getAiTitleRecommendations(
-  keywordOrTopic: string = "Informatika"
+  keywordOrTopic: string = "Informatika",
+  mode: "ai-pure" | "literature" = "ai-pure"
 ): Promise<TitleRecommendation[]> {
   const cleanQuery = keywordOrTopic.trim();
   if (!cleanQuery) return [];
@@ -34,7 +34,7 @@ export async function getAiTitleRecommendations(
     const res = await fetch(apiUrl, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ query: cleanQuery }),
+      body: JSON.stringify({ query: cleanQuery, mode }),
       signal: AbortSignal.timeout(8000)
     });
 
@@ -48,78 +48,136 @@ export async function getAiTitleRecommendations(
     console.warn("Server title recommendation API failed or timed out, activating local synthesis:", apiErr?.message);
   }
 
-  // 2. Secondary: Client-Side Literature Search & Heuristic Synthesis
+  // 2. Secondary: Client-Side Domain-Aware Synthesis (Zero Forced IT Jargon)
   try {
-    const papers = await searchSemanticScholarPapers(cleanQuery, 4);
+    const papers = mode === "literature" ? await searchSemanticScholarPapers(cleanQuery, 4) : [];
     const titleCase = cleanQuery.charAt(0).toUpperCase() + cleanQuery.slice(1);
     const kw = cleanQuery.toLowerCase();
 
-    let defaultEntityMagang = "PT Telkom Indonesia (Persero) Tbk / Mitra Industri Terkait";
-    let defaultEntitySkripsi = "Laboratorium Riset Terpadu Kampus";
-    let defaultJournal = "Jurnal Riset Terakreditasi SINTA & Scopus (2024)";
-
-    if (kw.includes("medis") || kw.includes("kesehatan") || kw.includes("dokter") || kw.includes("gizi") || kw.includes("farmasi")) {
-      defaultEntityMagang = "RSUP Dr. Sardjito / Dinas Kesehatan";
-      defaultEntitySkripsi = "Fakultas Kedokteran & RS Akademik";
-      defaultJournal = "The Lancet & Jurnal Kesehatan Masyarakat (2024)";
-    } else if (kw.includes("pertanian") || kw.includes("pangan") || kw.includes("tanah")) {
-      defaultEntityMagang = "PT Pupuk Indonesia / Balai Penerapan Standar Pertanian";
-      defaultEntitySkripsi = "Laboratorium Agroteknologi & Ilmu Tanah";
-      defaultJournal = "Jurnal Ilmu Pertanian Indonesia & Crop Science (2024)";
-    } else if (kw.includes("pendidikan") || kw.includes("guru") || kw.includes("sekolah")) {
-      defaultEntityMagang = "Dinas Pendidikan Provinsi / LPMP";
-      defaultEntitySkripsi = "Pusat Riset Pedagogi & Kurikulum";
-      defaultJournal = "Jurnal Pendidikan Karakter (2024)";
-    } else if (kw.includes("ekonomi") || kw.includes("bisnis") || kw.includes("akuntansi")) {
-      defaultEntityMagang = "Bank Indonesia / Kantor Akuntan Publik / FinTech";
-      defaultEntitySkripsi = "Pusat Kajian Ekonomi Terapan";
-      defaultJournal = "Journal of Business Research (2024)";
+    // Health & Clinical Domain (e.g. Obesitas, Stunting, Diabetes)
+    if (
+      kw.includes("obesitas") ||
+      kw.includes("medis") ||
+      kw.includes("kesehatan") ||
+      kw.includes("gizi") ||
+      kw.includes("dokter") ||
+      kw.includes("klinis") ||
+      kw.includes("stunting") ||
+      kw.includes("diabetes")
+    ) {
+      return [
+        {
+          id: "rec-med-1",
+          title: `Analisis Faktor Risiko dan Pengaruh Pola Konsumsi terhadap Kejadian ${titleCase} pada Populasi Remaja Urban`,
+          category: "skripsi",
+          entity: "RSUP Dr. Sardjito / Laboratorium Gizi Klinis FK-KMK",
+          durationMonths: 6,
+          referenceJournal: "The Lancet & Jurnal Gizi Klinik Indonesia (2024)",
+          researchGap: `Kesenjangan antara pemahaman gizi teoritis dengan kebiasaan sedentary lifestyle dan konsumsi fast food pada ${cleanQuery}.`,
+          thinkingMode: "First-Principles Thinking"
+        },
+        {
+          id: "rec-med-2",
+          title: `Evaluasi Program Intervensi Gizi Seimbang dan Modifikasi Perilaku Hidup Sehat dalam Pengendalian ${titleCase}`,
+          category: "magang",
+          entity: "Dinas Kesehatan Kota & Unit Pelayanan Terpadu Puskesmas",
+          durationMonths: 6,
+          referenceJournal: "Asia Pacific Journal of Clinical Nutrition (2024)",
+          researchGap: `Kurangnya evaluasi longitudinal terhadap retensi kepatuhan diet dan aktivitas fisik pasca-intervensi pada ${cleanQuery}.`,
+          thinkingMode: "Probabilistic & Bayesian Updating"
+        },
+        {
+          id: "rec-med-3",
+          title: `Korelasi Kadar Profil Lipid Serum dan Indeks Massa Tubuh (IMT) terhadap Risiko Komorbiditas Pasien ${titleCase}`,
+          category: "skripsi",
+          entity: "Rumah Sakit Akademik / Laboratorium Patologi Klinik",
+          durationMonths: 6,
+          referenceJournal: "Journal of Clinical Medicine & Endocrinology (2023)",
+          researchGap: `Belum dipetakannya variasi biomarker inflamasi spesifik pada penderita ${cleanQuery} usia produktif.`,
+          thinkingMode: "Critical / Falsification Thinking"
+        },
+        {
+          id: "rec-med-4",
+          title: `Perancangan Program Manajemen Terpadu dan Edukasi Preventif Pencegahan ${titleCase} Berbasis Komunitas`,
+          category: "magang",
+          entity: "Pusat Promosi Kesehatan / NGO Kesehatan Masyarakat",
+          durationMonths: 6,
+          referenceJournal: "BMC Public Health & Jurnal Kesehatan Masyarakat (2024)",
+          researchGap: `Tingginya stigma berat badan dan rendahnya keterlibatan keluarga dalam program pendampingan pasien ${cleanQuery}.`,
+          thinkingMode: "Systems / Holistic Thinking"
+        }
+      ];
     }
 
+    // Education Domain
+    if (kw.includes("pendidikan") || kw.includes("guru") || kw.includes("sekolah") || kw.includes("belajar") || kw.includes("siswa")) {
+      return [
+        {
+          id: "rec-edu-1",
+          title: `Efektivitas Pendekatan Pembelajaran Berdiferensiasi dalam Meningkatkan Kemampuan Berpikir Kritis Siswa pada Materi ${titleCase}`,
+          category: "skripsi",
+          entity: "Laboratorium Pedagogi & Sekolah Menengah Mitra Kampus",
+          durationMonths: 6,
+          referenceJournal: "Jurnal Pendidikan Karakter & Cakrawala Pendidikan (2024)",
+          researchGap: `Keterbatasan instrumen asesmen formatif adaptif yang dapat mengakomodasi gaya belajar heterogen siswa pada ${cleanQuery}.`,
+          thinkingMode: "First-Principles Thinking"
+        },
+        {
+          id: "rec-edu-2",
+          title: `Implementasi Manajemen Mutu Pembelajaran dan Evaluasi Ketercapaian Kurikulum Terpadu Berbasis ${titleCase}`,
+          category: "magang",
+          entity: "Dinas Pendidikan Provinsi / LPMP",
+          durationMonths: 6,
+          referenceJournal: "Educational Management Administration & Leadership (2024)",
+          researchGap: `Kesenjangan standarisasi kompetensi guru dalam merancang perangkat ajar kontekstual pada ${cleanQuery}.`,
+          thinkingMode: "Occam's Razor"
+        }
+      ];
+    }
+
+    // General Technology / Engineering Default
     const p1 = papers[0];
     const p2 = papers[1];
-    const p3 = papers[2];
-    const p4 = papers[3];
 
     return [
       {
         id: "rec-local-1",
-        title: p1 ? `Implementasi dan Benchmarking Metode ${titleCase} pada Lingkungan Kerja Industri` : `Implementasi Pipeline Otomasi dan Evaluasi Kinerja ${titleCase} pada Lingkungan Industri`,
+        title: `Rancang Bangun dan Evaluasi Kinerja Sistem Terpadu Berbasis ${titleCase} pada Skala Operasional`,
         category: "magang",
-        entity: defaultEntityMagang,
+        entity: "PT Telkom Indonesia (Persero) Tbk / Mitra Industri Terkait",
         durationMonths: 6,
-        referenceJournal: p1 ? `${p1.venue || "Publikasi Ilmiah Terindeks"} (${p1.year || 2024})` : defaultJournal,
-        researchGap: p1?.researchGap || `Kesenjangan antara kerangka teoritis dengan keandalan operasional riil pada ${cleanQuery}.`,
+        referenceJournal: p1 ? `${p1.venue} (${p1.year})` : "IEEE Transactions on Software Engineering (2024)",
+        researchGap: `Kesenjangan antara kerangka teoritis dengan keandalan latensi dan throughput saat menangani beban kerja riil pada ${cleanQuery}.`,
         thinkingMode: "First-Principles Thinking"
       },
       {
         id: "rec-local-2",
-        title: p2 ? `Analisis Komparatif dan Optimasi Algoritma ${titleCase} Berbasis Standar Empiris` : `Analisis Komparatif Efektivitas dan Uji Validitas Metodologi ${titleCase}`,
+        title: `Analisis Komparatif Efisiensi dan Uji Validitas Metodologi ${titleCase} Berbasis Standar Empiris`,
         category: "skripsi",
-        entity: defaultEntitySkripsi,
+        entity: "Laboratorium Riset Terpadu Rekayasa & Sistem",
         durationMonths: 6,
-        referenceJournal: p2 ? `${p2.venue || "Publikasi Ilmiah Terindeks"} (${p2.year || 2024})` : defaultJournal,
-        researchGap: p2?.researchGap || `Keterbatasan pengujian empiris berskala riil dan minimnya parameter evaluasi objektif pada ${cleanQuery}.`,
+        referenceJournal: p2 ? `${p2.venue} (${p2.year})` : "ACM Computing Surveys & Knowledge Systems (2024)",
+        researchGap: `Keterbatasan evaluasi empiris independen yang terstandarisasi untuk membandingkan akurasi pada ${cleanQuery}.`,
         thinkingMode: "Critical / Falsification Thinking"
       },
       {
         id: "rec-local-3",
-        title: p3 ? `Perancangan Arsitektur Sistem Terintegrasi Berbasis ${titleCase} untuk Akselerasi Layanan` : `Perancangan Kerangka Kerja dan Manajemen Risiko Operasional Sistem ${titleCase}`,
+        title: `Implementasi Otomasi Pipeline Observabilitas dan Manajemen Risiko Sistem ${titleCase}`,
         category: "magang",
-        entity: defaultEntityMagang,
+        entity: "Perusahaan Enterprise / Startup Digital Terkemuka",
         durationMonths: 6,
-        referenceJournal: p3 ? `${p3.venue || "Publikasi Ilmiah Terindeks"} (${p3.year || 2024})` : defaultJournal,
-        researchGap: `Tingginya friksi proses manual yang memicu hambatan skalabilitas dan perlunya otomasi tata kelola pada ${cleanQuery}.`,
+        referenceJournal: "IEEE Cloud Computing & Distributed Systems (2023)",
+        researchGap: `Tingginya friksi penanganan insiden manual yang memicu down-time layanan pada ${cleanQuery}.`,
         thinkingMode: "Occam's Razor"
       },
       {
         id: "rec-local-4",
-        title: p4 ? `Studi Eksperimental Dampak Multi-Variabel ${titleCase} Berdasarkan Kerangka Analisis Terstandarisasi` : `Studi Kelayakan Strategis dan Pemodelan Kausalitas Pengaruh Variabel Penentu terhadap ${titleCase}`,
+        title: `Studi Kelayakan Strategis dan Pemodelan Kausalitas Dampak Implementasi ${titleCase} terhadap Efisiensi Kerja`,
         category: "penelitian",
-        entity: defaultEntitySkripsi,
+        entity: "Pusat Studi Rekayasa dan Inovasi Teknologi",
         durationMonths: 6,
-        referenceJournal: p4 ? `${p4.venue || "Publikasi Ilmiah Terindeks"} (${p4.year || 2024})` : defaultJournal,
-        researchGap: `Belum terpetakannya korelasi kausal antar variabel determinan dan konsekuensi jangka panjang penerapan ${cleanQuery}.`,
+        referenceJournal: "Journal of Systems Architecture (2024)",
+        researchGap: `Belum terpetakannya korelasi variabel penentu terhadap keberhasilan adaptasi sistemik pada penerapan ${cleanQuery}.`,
         thinkingMode: "Systems / Holistic Thinking"
       }
     ];

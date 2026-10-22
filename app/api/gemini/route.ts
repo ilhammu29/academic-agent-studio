@@ -58,7 +58,7 @@ Format output HARUS berupa JSON murni tanpa backticks (\`\`\`json ... \`\`\`):
 `;
 
         const geminiRes = await fetch(
-          `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`,
+          `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash-lite:generateContent?key=${apiKey}`,
           {
             method: "POST",
             headers: { "Content-Type": "application/json" },
@@ -80,7 +80,7 @@ Format output HARUS berupa JSON murni tanpa backticks (\`\`\`json ... \`\`\`):
             const parsed = JSON.parse(cleanedText);
             return NextResponse.json({ 
               success: true, 
-              engine: "gemini-1.5-flash",
+              engine: "gemini-3.5-flash-lite",
               data: parsed 
             });
           } catch {
