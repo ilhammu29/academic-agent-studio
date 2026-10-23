@@ -1,5 +1,5 @@
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
-import { ProposalDocument, TreeNode } from '@/types/studio';
+import { ProposalDocument, TreeNode, StudioStage, ProposalCategory } from '@/types/studio';
 
 export interface UserProfile {
   id: string;
@@ -15,10 +15,10 @@ export interface SavedProjectRecord {
   id: string;
   userId: string;
   title: string;
-  category: 'magang' | 'skripsi' | 'penelitian';
+  category: ProposalCategory;
   targetEntity: string;
   durationMonths: number;
-  stage: 'input' | 'interview' | 'orchestration' | 'result' | 'drive';
+  stage: StudioStage;
   answers: Record<string, string>;
   documentData?: ProposalDocument;
   treeGraph?: TreeNode | TreeNode[];

@@ -80,7 +80,7 @@ export default function AppShell({
       id: 'chat',
       label: 'Klinik Bimbingan & Konsultasi',
       icon: MessageSquare,
-      isActive: false,
+      isActive: currentStage === 'consultation',
       onClick: () => {
         if (onOpenConsultation) onOpenConsultation();
       }

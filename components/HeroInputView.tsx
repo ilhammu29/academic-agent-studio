@@ -16,7 +16,13 @@ import {
   Landmark,
   GraduationCap,
   SlidersHorizontal,
-  MessageSquare
+  MessageSquare,
+  Search,
+  Globe,
+  Bot,
+  Sparkles,
+  Check,
+  RefreshCw
 } from "lucide-react";
 import { TitleRecommendation, getAiTitleRecommendations } from "@/lib/titleGenerator";
 
@@ -111,40 +117,76 @@ export const HeroInputView: React.FC<HeroInputViewProps> = ({
 }) => {
   const [showParameters, setShowParameters] = useState(false);
   const [isAiRecommenderOpen, setIsAiRecommenderOpen] = useState(false);
-  const [recommendations, setRecommendations] = useState<TitleRecommendation[]>([]);
-  const [isLoadingRecs, setIsLoadingRecs] = useState(false);
-  const [searchTopic, setSearchTopic] = useState("Informatika & AI");
+  const [recommenderKeyword, setRecommenderKeyword] = useState("Obesitas");
+  const [recommenderTab, setRecommenderTab] = useState<"ai" | "internet">("ai");
+  const [aiRecs, setAiRecs] = useState<TitleRecommendation[]>([]);
+  const [internetRecs, setInternetRecs] = useState<TitleRecommendation[]>([]);
+  const [isLoadingAi, setIsLoadingAi] = useState(false);
+  const [isLoadingInternet, setIsLoadingInternet] = useState(false);
 
-  const handleFetchAiTitles = async (kw?: string) => {
-    const target = kw || searchTopic;
-    setIsLoadingRecs(true);
-    try {
-      const res = await fetch("/api/academic/recommend-titles", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ query: target, mode: "ai-pure" })
-      });
-      if (res.ok) {
-        const data = await res.json();
-        if (data.success && Array.isArray(data.recommendations) && data.recommendations.length > 0) {
-          setRecommendations(data.recommendations);
-          setIsLoadingRecs(false);
-          return;
+  const handleFetchRecommendations = async (kw: string) => {
+    const target = kw.trim();
+    if (!target) return;
+    setRecommenderKeyword(target);
+    setIsLoadingAi(true);
+    setIsLoadingInternet(true);
+
+    // 1. Fetch AI pure recommendations
+    (async () => {
+      try {
+        const res = await fetch("/api/academic/recommend-titles", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ query: target, mode: "ai-pure" })
+        });
+        if (res.ok) {
+          const data = await res.json();
+          if (data.success && Array.isArray(data.recommendations) && data.recommendations.length > 0) {
+            setAiRecs(data.recommendations);
+            setIsLoadingAi(false);
+            return;
+          }
         }
+      } catch (e) {
+        console.warn("AI title recs error, fallback local:", e);
       }
-    } catch (err) {
-      console.warn("API title recommendation fetch error, fallback local:", err);
-    }
-    const localResults = await getAiTitleRecommendations(target, "ai-pure");
-    setRecommendations(localResults);
-    setIsLoadingRecs(false);
+      const local = await getAiTitleRecommendations(target, "ai-pure");
+      setAiRecs(local);
+      setIsLoadingAi(false);
+    })();
+
+    // 2. Fetch Internet literature recommendations
+    (async () => {
+      try {
+        const res = await fetch("/api/academic/recommend-titles", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ query: target, mode: "literature" })
+        });
+        if (res.ok) {
+          const data = await res.json();
+          if (data.success && Array.isArray(data.recommendations) && data.recommendations.length > 0) {
+            setInternetRecs(data.recommendations);
+            setIsLoadingInternet(false);
+            return;
+          }
+        }
+      } catch (e) {
+        console.warn("Internet title recs error, fallback local:", e);
+      }
+      const local = await getAiTitleRecommendations(target, "literature");
+      setInternetRecs(local);
+      setIsLoadingInternet(false);
+    })();
   };
 
-  const handleOpenAiRecommender = () => {
+  const handleOpenAiRecommender = (initialKw?: string | React.MouseEvent) => {
+    const queryToUse = typeof initialKw === "string" && initialKw.trim()
+      ? initialKw.trim()
+      : title.trim() || recommenderKeyword || "Obesitas";
+    setRecommenderKeyword(queryToUse);
     setIsAiRecommenderOpen(true);
-    if (recommendations.length === 0) {
-      handleFetchAiTitles("Informatika & AI");
-    }
+    handleFetchRecommendations(queryToUse);
   };
 
   const handleApplyTitle = (rec: TitleRecommendation) => {
@@ -165,7 +207,10 @@ export const HeroInputView: React.FC<HeroInputViewProps> = ({
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === "Enter") {
       e.preventDefault();
-      if (title.trim()) {
+      // If user typed a short keyword like "obesitas" or "ai", give them recommendations!
+      if (title.trim().length > 0 && title.trim().split(" ").length <= 3) {
+        handleOpenAiRecommender(title.trim());
+      } else if (title.trim()) {
         onSubmit();
       }
     }
@@ -215,15 +260,15 @@ export const HeroInputView: React.FC<HeroInputViewProps> = ({
 
           {/* PROMINENT QUICK ACTIONS TOOLBAR (AI Generate, Konsultasi, Format Kampus, Parameter) */}
           <div className="w-full mt-6 flex flex-wrap items-center gap-2 text-xs">
-            {/* 1. Tombol Rekomendasi Judul (AI) */}
+            {/* 1. Tombol Rekomendasi Judul (AI & Internet) */}
             <button
               type="button"
-              onClick={handleOpenAiRecommender}
+              onClick={() => handleOpenAiRecommender()}
               className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 hover:border-zinc-400 dark:hover:border-zinc-700 text-zinc-800 dark:text-zinc-200 font-medium transition-all shadow-2xs cursor-pointer group hover:bg-zinc-50 dark:hover:bg-zinc-850"
-              title="Cari ide judul akademik terindeks dan gap riset terkini"
+              title="Cari ide judul akademik berbasis AI dan jurnal ilmiah riil dari internet"
             >
               <Lightbulb className="w-3.5 h-3.5 text-amber-500 group-hover:scale-110 transition-transform" />
-              <span>Rekomendasi Judul AI</span>
+              <span>Generator Judul (AI & Internet)</span>
             </button>
 
             {/* 2. Tombol Konsultasi Masalah Magang (AI Mentor) */}
@@ -232,10 +277,10 @@ export const HeroInputView: React.FC<HeroInputViewProps> = ({
                 type="button"
                 onClick={onOpenConsultation}
                 className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800/80 hover:border-emerald-400 text-emerald-800 dark:text-emerald-300 font-medium transition-all shadow-2xs cursor-pointer"
-                title="Bimbingan menemukan masalah lapangan dan membedah alur riset"
+                title="Bimbingan interaktif menemukan masalah lapangan dan membedah alur riset"
               >
                 <MessageSquare className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
-                <span>Konsultasi Ide & Masalah</span>
+                <span>AI Mentor & Konsultasi Ide</span>
               </button>
             )}
 
@@ -312,26 +357,27 @@ export const HeroInputView: React.FC<HeroInputViewProps> = ({
           )}
 
           {/* Hero Input Capsule (Giant rounded-full pill) */}
-          <div className="w-full mt-4 bg-white dark:bg-zinc-900 border border-zinc-300 dark:border-zinc-800 rounded-full p-2 pl-4 pr-2.5 flex items-center gap-3 shadow-md shadow-zinc-200/50 dark:shadow-none hover:border-zinc-400 dark:hover:border-zinc-700 transition-all focus-within:border-zinc-500 dark:focus-within:border-zinc-500 focus-within:ring-2 focus-within:ring-zinc-200/60 dark:focus-within:ring-zinc-800">
-            {/* AI Idea Quick Trigger Button on Left of input */}
-            <button
-              type="button"
-              onClick={handleOpenAiRecommender}
-              title="Buka saran judul AI otomatis"
-              className="p-1.5 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 text-zinc-600 dark:text-zinc-400 hover:text-amber-500 transition-colors cursor-pointer flex-shrink-0"
-            >
-              <Lightbulb className="w-4 h-4 text-amber-500" />
-            </button>
-
+          <div className="w-full mt-4 bg-white dark:bg-zinc-900 border border-zinc-300 dark:border-zinc-800 rounded-full p-2 pl-4 pr-2.5 flex items-center gap-2.5 shadow-md shadow-zinc-200/50 dark:shadow-none hover:border-zinc-400 dark:hover:border-zinc-700 transition-all focus-within:border-zinc-500 dark:focus-within:border-zinc-500 focus-within:ring-2 focus-within:ring-zinc-200/60 dark:focus-within:ring-zinc-800">
             {/* Input Field */}
             <input
               type="text"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               onKeyDown={handleKeyDown}
-              placeholder="Tulis judul usulan atau deskripsi singkat..."
+              placeholder="Tuliskan judul usulan atau ketik topik (contoh: obesitas, AI, supply chain)..."
               className="w-full bg-transparent border-none outline-none text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-400 text-sm sm:text-base font-normal py-2"
             />
+
+            {/* Quick Action: Search & Generate Title */}
+            <button
+              type="button"
+              onClick={() => handleOpenAiRecommender(title.trim())}
+              title="Generate usulan judul berdasarkan kata kunci ini (AI & Internet)"
+              className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-zinc-100 hover:bg-zinc-200 dark:bg-zinc-800 dark:hover:bg-zinc-750 text-zinc-800 dark:text-zinc-200 font-semibold text-xs transition-colors flex-shrink-0 cursor-pointer shadow-2xs"
+            >
+              <Lightbulb className="w-3.5 h-3.5 text-amber-500" />
+              <span>Cari Ide Judul</span>
+            </button>
 
             {/* Circular Dark Submit Button with Arrow Right */}
             <button
@@ -470,88 +516,259 @@ export const HeroInputView: React.FC<HeroInputViewProps> = ({
       </div>
 
       {/* ============================================================ */}
-      {/* 3. AI RESEARCH EXPLORATION SLIDE-OVER MODAL                  */}
+      {/* 3. DUAL-ENGINE TITLE GENERATOR MODAL (AI + LIVE INTERNET)    */}
       {/* ============================================================ */}
       {isAiRecommenderOpen && (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-xs z-50 flex items-center justify-center p-4 animate-in fade-in duration-150">
-          <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl w-full max-w-2xl max-h-[85vh] flex flex-col shadow-2xl overflow-hidden animate-in zoom-in-95 duration-150">
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-xs z-50 flex items-center justify-center p-4 animate-in fade-in duration-150">
+          <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl w-full max-w-3xl max-h-[90vh] flex flex-col shadow-2xl overflow-hidden animate-in zoom-in-95 duration-150">
             
             {/* Modal Header */}
-            <div className="px-6 py-4 border-b border-zinc-200 dark:border-zinc-800 flex items-center justify-between">
-              <div className="flex items-center gap-2.5">
-                <div className="w-8 h-8 rounded-full bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center">
-                  <TrendingUp className="w-4 h-4 text-zinc-900 dark:text-zinc-100" />
+            <div className="px-6 py-4 border-b border-zinc-200 dark:border-zinc-800 flex items-center justify-between bg-zinc-50/80 dark:bg-zinc-950/80">
+              <div className="flex items-center gap-3">
+                <div className="w-9 h-9 rounded-xl bg-amber-100 dark:bg-amber-950/60 border border-amber-300 dark:border-amber-800 flex items-center justify-center text-amber-700 dark:text-amber-400">
+                  <Lightbulb className="w-5 h-5" />
                 </div>
                 <div>
-                  <h3 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">
-                    Eksplorasi Ide Judul Riset Terindeks
+                  <h3 className="text-sm sm:text-base font-bold text-zinc-900 dark:text-zinc-100 flex items-center gap-2">
+                    <span>Generator Rekomendasi Judul Proposal</span>
+                    <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-zinc-200 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300">
+                      DUAL ENGINE
+                    </span>
                   </h3>
                   <p className="text-[11px] text-zinc-500 dark:text-zinc-400">
-                    Katalog judul berbasis gap riset akademik aktual dan terindeks
+                    Hasilkan usulan judul berbasis penalaran AI cerdas atau sumber jurnal riil dari internet
                   </p>
                 </div>
               </div>
               <button
+                type="button"
                 onClick={() => setIsAiRecommenderOpen(false)}
-                className="w-8 h-8 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 flex items-center justify-center text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-100 cursor-pointer"
+                className="w-8 h-8 rounded-full hover:bg-zinc-200 dark:hover:bg-zinc-800 flex items-center justify-center text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-100 cursor-pointer transition-colors"
               >
                 ✕
               </button>
             </div>
 
-            {/* Topic Filter Chips */}
-            <div className="px-6 py-3 border-b border-zinc-200 dark:border-zinc-800 flex items-center gap-2 overflow-x-auto scrollbar-none bg-zinc-50 dark:bg-zinc-950">
-              {["Informatika & AI", "Medis & Kesehatan", "Teknik & Manufaktur", "Manajemen & Bisnis", "Pendidikan & Guru"].map((domain) => (
+            {/* Keyword Input Box & Quick Presets */}
+            <div className="p-4 sm:p-5 border-b border-zinc-200 dark:border-zinc-800 bg-zinc-50/50 dark:bg-zinc-950/40 space-y-3">
+              <div className="flex items-center gap-2">
+                <div className="relative flex-1">
+                  <Search className="w-4 h-4 text-zinc-400 absolute left-3.5 top-3" />
+                  <input
+                    type="text"
+                    value={recommenderKeyword}
+                    onChange={(e) => setRecommenderKeyword(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") {
+                        e.preventDefault();
+                        handleFetchRecommendations(recommenderKeyword);
+                      }
+                    }}
+                    placeholder="Ketik topik atau kata kunci usulan (misal: obesitas, AI, IoT, supply chain, stunting, fintech)..."
+                    className="w-full pl-10 pr-3 py-2.5 text-xs sm:text-sm rounded-xl bg-white dark:bg-zinc-900 border border-zinc-300 dark:border-zinc-800 focus:outline-none focus:border-zinc-500 text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-400 font-sans shadow-inner"
+                  />
+                </div>
                 <button
-                  key={domain}
-                  onClick={() => {
-                    setSearchTopic(domain);
-                    handleFetchAiTitles(domain);
-                  }}
-                  className={`px-3 py-1 rounded-full text-xs whitespace-nowrap transition-colors cursor-pointer ${
-                    searchTopic === domain
-                      ? "bg-zinc-950 text-white dark:bg-zinc-100 dark:text-black font-semibold"
-                      : "bg-white dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 border border-zinc-200 dark:border-zinc-700 hover:border-zinc-400"
-                  }`}
+                  type="button"
+                  onClick={() => handleFetchRecommendations(recommenderKeyword)}
+                  disabled={isLoadingAi || isLoadingInternet || !recommenderKeyword.trim()}
+                  className="px-4 py-2.5 rounded-xl bg-zinc-950 hover:bg-black dark:bg-zinc-100 dark:hover:bg-white text-white dark:text-zinc-950 text-xs font-semibold flex items-center gap-1.5 cursor-pointer shadow-xs disabled:opacity-40 whitespace-nowrap transition-all"
                 >
-                  {domain}
+                  {isLoadingAi || isLoadingInternet ? (
+                    <RefreshCw className="w-3.5 h-3.5 animate-spin" />
+                  ) : (
+                    <Sparkles className="w-3.5 h-3.5" />
+                  )}
+                  <span>Generate Judul</span>
                 </button>
-              ))}
+              </div>
+
+              {/* Quick Keyword Preset Chips */}
+              <div className="flex items-center gap-1.5 overflow-x-auto scrollbar-none text-xs">
+                <span className="text-[11px] font-mono text-zinc-400 whitespace-nowrap mr-1">
+                  Preset Cepat:
+                </span>
+                {[
+                  "Obesitas & Gizi",
+                  "Kecerdasan Buatan (AI)",
+                  "IoT & Triase Medis",
+                  "Supply Chain Retail",
+                  "Fintech & Perbankan",
+                  "Pendidikan Adaptif"
+                ].map((chip) => (
+                  <button
+                    key={chip}
+                    type="button"
+                    onClick={() => {
+                      setRecommenderKeyword(chip);
+                      handleFetchRecommendations(chip);
+                    }}
+                    className="px-2.5 py-1 rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 hover:bg-zinc-100 dark:hover:bg-zinc-800 text-zinc-700 dark:text-zinc-300 whitespace-nowrap text-[11px] font-medium transition-colors cursor-pointer shadow-2xs"
+                  >
+                    {chip}
+                  </button>
+                ))}
+              </div>
             </div>
 
-            {/* Titles List */}
-            <div className="p-6 overflow-y-auto space-y-3.5 flex-1">
-              {isLoadingRecs ? (
-                <div className="py-12 text-center text-xs text-zinc-500 dark:text-zinc-400 flex flex-col items-center gap-2">
-                  <div className="w-5 h-5 border-2 border-zinc-300 border-t-zinc-900 rounded-full animate-spin" />
-                  <span>Memindai literatur dan merumuskan judul riset...</span>
-                </div>
-              ) : (
-                recommendations.map((rec, i) => (
-                  <div
-                    key={i}
-                    onClick={() => handleApplyTitle(rec)}
-                    className="p-4 rounded-xl border border-zinc-200 dark:border-zinc-800 hover:border-zinc-900 dark:hover:border-zinc-100 bg-white dark:bg-zinc-900/60 transition-all cursor-pointer group shadow-2xs"
-                  >
-                    <div className="flex items-start justify-between gap-3">
-                      <div className="flex-1">
-                        <span className="text-[10px] font-semibold uppercase px-2 py-0.5 rounded bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300">
-                          {rec.category} • {rec.durationMonths} Bulan
-                        </span>
-                        <h4 className="text-xs sm:text-sm font-semibold text-zinc-900 dark:text-zinc-100 mt-2 group-hover:text-black dark:group-hover:text-white leading-snug">
-                          {rec.title}
-                        </h4>
-                        <p className="text-[11px] text-zinc-600 dark:text-zinc-400 mt-1 line-clamp-2">
-                          {rec.researchGap || rec.referenceJournal}
-                        </p>
-                      </div>
-                      <button className="px-3 py-1.5 rounded-lg bg-zinc-950 dark:bg-zinc-100 text-white dark:text-black text-xs font-medium opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap shadow-xs">
-                        Pilih Judul
-                      </button>
+            {/* TWO OUTPUT TABS: 1. Penalaran AI vs 2. Sumber Internet Riil */}
+            <div className="px-6 pt-3 border-b border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 flex items-center gap-4 text-xs font-semibold">
+              <button
+                type="button"
+                onClick={() => setRecommenderTab("ai")}
+                className={`pb-3 px-1 border-b-2 transition-colors cursor-pointer flex items-center gap-2 ${
+                  recommenderTab === "ai"
+                    ? "border-zinc-950 dark:border-zinc-100 text-zinc-950 dark:text-zinc-100"
+                    : "border-transparent text-zinc-500 hover:text-zinc-900 dark:text-zinc-400"
+                }`}
+              >
+                <Bot className="w-4 h-4 text-indigo-500" />
+                <span>1. Rekomendasi Berdasarkan AI</span>
+                <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300">
+                  {aiRecs.length}
+                </span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setRecommenderTab("internet")}
+                className={`pb-3 px-1 border-b-2 transition-colors cursor-pointer flex items-center gap-2 ${
+                  recommenderTab === "internet"
+                    ? "border-zinc-950 dark:border-zinc-100 text-zinc-950 dark:text-zinc-100"
+                    : "border-transparent text-zinc-500 hover:text-zinc-900 dark:text-zinc-400"
+                }`}
+              >
+                <Globe className="w-4 h-4 text-emerald-500" />
+                <span>2. Berdasarkan Sumber Internet (Jurnal Ilmiah Riil)</span>
+                <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300">
+                  {internetRecs.length}
+                </span>
+              </button>
+            </div>
+
+            {/* Recommendations List Container */}
+            <div className="p-5 sm:p-6 overflow-y-auto space-y-3.5 flex-1">
+              {/* Tab 1: AI Reasoned Titles */}
+              {recommenderTab === "ai" && (
+                <>
+                  {isLoadingAi ? (
+                    <div className="py-14 text-center text-xs text-zinc-500 dark:text-zinc-400 flex flex-col items-center gap-2.5">
+                      <div className="w-6 h-6 border-2 border-zinc-300 border-t-zinc-900 rounded-full animate-spin" />
+                      <span className="font-medium">Merumuskan usulan judul berbasis penalaran AI Gemini (First-Principles)...</span>
                     </div>
-                  </div>
-                ))
+                  ) : aiRecs.length === 0 ? (
+                    <div className="py-12 text-center text-xs text-zinc-400">
+                      Ketik topik di atas lalu klik <strong>Generate Judul</strong>.
+                    </div>
+                  ) : (
+                    aiRecs.map((rec, i) => (
+                      <div
+                        key={rec.id || i}
+                        className="p-4 rounded-xl border border-zinc-200 dark:border-zinc-800 hover:border-zinc-400 dark:hover:border-zinc-600 bg-white dark:bg-zinc-900/70 transition-all shadow-2xs group"
+                      >
+                        <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3">
+                          <div className="flex-1 space-y-1.5">
+                            <div className="flex items-center gap-2">
+                              <span className="text-[10px] font-mono font-bold uppercase px-2 py-0.5 rounded bg-zinc-100 dark:bg-zinc-800 text-zinc-800 dark:text-zinc-200">
+                                {rec.category.toUpperCase()} • {rec.durationMonths} BULAN
+                              </span>
+                              {rec.thinkingMode && (
+                                <span className="text-[10px] font-mono text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-950/60 px-2 py-0.5 rounded border border-indigo-200 dark:border-indigo-900">
+                                  {rec.thinkingMode}
+                                </span>
+                              )}
+                            </div>
+
+                            <h4 className="text-xs sm:text-sm font-serif font-bold text-zinc-950 dark:text-zinc-50 leading-snug">
+                              {rec.title}
+                            </h4>
+
+                            <div className="text-[11px] text-zinc-600 dark:text-zinc-400 space-y-0.5 pt-1">
+                              <p><strong>Lokus Rekomendasi:</strong> {rec.entity}</p>
+                              <p className="line-clamp-2"><strong>Celah Masalah (Gap):</strong> {rec.researchGap}</p>
+                            </div>
+                          </div>
+
+                          <button
+                            type="button"
+                            onClick={() => handleApplyTitle(rec)}
+                            className="px-3.5 py-2 rounded-lg bg-zinc-950 hover:bg-black dark:bg-zinc-100 dark:hover:bg-white text-white dark:text-zinc-950 text-xs font-semibold whitespace-nowrap transition-all shadow-xs flex items-center justify-center gap-1.5 cursor-pointer self-end sm:self-center"
+                          >
+                            <span>Gunakan Judul Ini</span>
+                            <ArrowRight className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
+                      </div>
+                    ))
+                  )}
+                </>
               )}
+
+              {/* Tab 2: Live Internet / Journal Grounded Titles */}
+              {recommenderTab === "internet" && (
+                <>
+                  {isLoadingInternet ? (
+                    <div className="py-14 text-center text-xs text-zinc-500 dark:text-zinc-400 flex flex-col items-center gap-2.5">
+                      <div className="w-6 h-6 border-2 border-emerald-300 border-t-emerald-600 rounded-full animate-spin" />
+                      <span className="font-medium">Memindai literatur jurnal ilmiah riil dari internet (OpenAlex & CrossRef)...</span>
+                    </div>
+                  ) : internetRecs.length === 0 ? (
+                    <div className="py-12 text-center text-xs text-zinc-400">
+                      Ketik topik di atas lalu klik <strong>Generate Judul</strong>.
+                    </div>
+                  ) : (
+                    internetRecs.map((rec, i) => (
+                      <div
+                        key={rec.id || i}
+                        className="p-4 rounded-xl border border-zinc-200 dark:border-zinc-800 hover:border-emerald-500 dark:hover:border-emerald-600 bg-white dark:bg-zinc-900/70 transition-all shadow-2xs group"
+                      >
+                        <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3">
+                          <div className="flex-1 space-y-1.5">
+                            <div className="flex items-center gap-2 flex-wrap">
+                              <span className="text-[10px] font-mono font-bold uppercase px-2 py-0.5 rounded bg-emerald-50 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800">
+                                {rec.category.toUpperCase()} • {rec.durationMonths} BULAN
+                              </span>
+                              <span className="text-[10px] font-mono text-zinc-600 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800 px-2 py-0.5 rounded border border-zinc-200 dark:border-zinc-700">
+                                🌐 {rec.referenceJournal}
+                              </span>
+                            </div>
+
+                            <h4 className="text-xs sm:text-sm font-serif font-bold text-zinc-950 dark:text-zinc-50 leading-snug">
+                              {rec.title}
+                            </h4>
+
+                            <div className="text-[11px] text-zinc-600 dark:text-zinc-400 space-y-0.5 pt-1">
+                              <p><strong>Lokus Rekomendasi:</strong> {rec.entity}</p>
+                              <p className="line-clamp-2"><strong>Landasan Riset:</strong> {rec.researchGap}</p>
+                            </div>
+                          </div>
+
+                          <button
+                            type="button"
+                            onClick={() => handleApplyTitle(rec)}
+                            className="px-3.5 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold whitespace-nowrap transition-all shadow-xs flex items-center justify-center gap-1.5 cursor-pointer self-end sm:self-center"
+                          >
+                            <span>Gunakan Judul Ini</span>
+                            <ArrowRight className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
+                      </div>
+                    ))
+                  )}
+                </>
+              )}
+            </div>
+
+            {/* Modal Footer */}
+            <div className="px-6 py-3 border-t border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-950 flex items-center justify-between text-[11px] text-zinc-500 font-mono">
+              <span>*Judul yang dipilih akan langsung otomatis mengisi usulan Anda di beranda</span>
+              <button
+                type="button"
+                onClick={() => setIsAiRecommenderOpen(false)}
+                className="px-3 py-1 rounded-lg border border-zinc-200 dark:border-zinc-800 text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 transition-colors cursor-pointer"
+              >
+                Tutup
+              </button>
             </div>
 
           </div>

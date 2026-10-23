@@ -10,6 +10,7 @@ import { DocumentStudio } from "@/components/DocumentStudio";
 import { TwelveModesModal } from "@/components/TwelveModesModal";
 import { CampusGuidelineModal } from "@/components/CampusGuidelineModal";
 import { AcademicConsultationModal } from "@/components/AcademicConsultationModal";
+import { ConsultationStudio } from "@/components/ConsultationStudio";
 import { CAMPUS_PRESETS } from "@/lib/campusPresets";
 import ScreenLoader from "@/components/ScreenLoader";
 import AuthModal from "@/components/AuthModal";
@@ -301,7 +302,7 @@ export default function Home() {
         onOpenTwelveModes={() => setIsThinkingModalOpen(true)}
         onOpenDatabase={() => setIsDatabaseDrawerOpen(true)}
         onOpenAuth={() => setIsAuthModalOpen(true)}
-        onOpenConsultation={() => setIsConsultationModalOpen(true)}
+        onOpenConsultation={() => setStage("consultation")}
         onOpenGuidelines={() => setIsGuidelineModalOpen(true)}
         onResetSession={handleResetSession}
         activeCategory={category}
@@ -328,8 +329,30 @@ export default function Home() {
             onOpenDatabase={() => setIsDatabaseDrawerOpen(true)}
             onOpenDrive={() => setStage("drive")}
             onOpenGuidelineModal={() => setIsGuidelineModalOpen(true)}
-            onOpenConsultation={() => setIsConsultationModalOpen(true)}
+            onOpenConsultation={() => setStage("consultation")}
             activeCampusName={campusGuideline?.campusName}
+          />
+        )}
+
+        {/* Stage: Dedicated Full-Page AI Consultation Chatbot & Workbench */}
+        {stage === "consultation" && (
+          <ConsultationStudio
+            category={category}
+            setCategory={setCategory}
+            targetEntity={targetEntity}
+            setTargetEntity={setTargetEntity}
+            currentTitle={title}
+            setTitle={setTitle}
+            durationMonths={durationMonths}
+            setDurationMonths={setDurationMonths}
+            onBackToHero={() => setStage("input")}
+            onProceedWithTitle={(newTitle, newEntity, newCat, newDur) => {
+              setTitle(newTitle);
+              if (newEntity) setTargetEntity(newEntity);
+              if (newCat) setCategory(newCat);
+              if (newDur) setDurationMonths(newDur);
+              setStage("input");
+            }}
           />
         )}
 
