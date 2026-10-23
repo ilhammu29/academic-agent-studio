@@ -160,34 +160,34 @@ export const AgentExecutionMonitor: React.FC<AgentExecutionMonitorProps> = ({
     <div className="max-w-3xl mx-auto py-6 sm:py-8 w-full animate-in fade-in duration-200">
       
       {/* 1. Header */}
-      <div className="mb-8 border-b border-zinc-900 pb-6">
+      <div className="mb-8 border-b border-zinc-200 dark:border-zinc-850 pb-6">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-2">
           <div>
-            <h2 className="text-xl sm:text-2xl font-semibold text-zinc-100 tracking-tight">
+            <h2 className="text-xl sm:text-2xl font-semibold text-zinc-900 dark:text-zinc-100 tracking-tight">
               Penyusunan & Verifikasi Dokumen
             </h2>
-            <p className="text-xs sm:text-sm text-zinc-400 mt-1">
-              Topik: <span className="text-zinc-200 italic font-medium">"{title}"</span>
+            <p className="text-xs sm:text-sm text-zinc-500 dark:text-zinc-400 mt-1">
+              Topik: <span className="text-zinc-800 dark:text-zinc-200 italic font-medium">"{title}"</span>
             </p>
           </div>
 
-          <div className="flex items-center gap-2 self-start sm:self-auto text-xs font-mono text-zinc-400">
+          <div className="flex items-center gap-2 self-start sm:self-auto text-xs font-mono text-zinc-500 dark:text-zinc-400">
             {isFinished ? (
-              <span className="flex items-center gap-1.5 text-zinc-200">
-                <Check className="w-4 h-4 text-zinc-100" /> Selesai 100%
+              <span className="flex items-center gap-1.5 text-emerald-600 dark:text-emerald-400 font-semibold">
+                <Check className="w-4 h-4 text-emerald-500" /> Selesai 100%
               </span>
             ) : (
-              <span className="flex items-center gap-1.5 text-zinc-400">
-                <Loader2 className="w-3.5 h-3.5 animate-spin text-zinc-200" /> Memproses {overallProgress}%
+              <span className="flex items-center gap-1.5 text-zinc-600 dark:text-zinc-400">
+                <Loader2 className="w-3.5 h-3.5 animate-spin text-zinc-800 dark:text-zinc-200" /> Memproses {overallProgress}%
               </span>
             )}
           </div>
         </div>
 
         {/* Minimal Progress Bar */}
-        <div className="w-full bg-zinc-900 h-1 rounded-full overflow-hidden mt-3">
+        <div className="w-full bg-zinc-200 dark:bg-zinc-850 h-1.5 rounded-full overflow-hidden mt-3">
           <div
-            className="h-full bg-zinc-100 transition-all duration-300"
+            className="h-full bg-zinc-900 dark:bg-zinc-100 transition-all duration-300 rounded-full"
             style={{ width: `${overallProgress}%` }}
           />
         </div>
@@ -202,24 +202,24 @@ export const AgentExecutionMonitor: React.FC<AgentExecutionMonitorProps> = ({
           return (
             <div
               key={agent.id}
-              className="flex items-center justify-between py-3 border-b border-zinc-900/80 last:border-b-0"
+              className="flex items-center justify-between py-3 border-b border-zinc-200 dark:border-zinc-850 last:border-b-0"
             >
               <div className="flex items-center gap-3">
                 <div className="w-6 h-6 rounded-full flex items-center justify-center text-xs font-mono">
                   {isDone ? (
-                    <Check className="w-4 h-4 text-zinc-100" />
+                    <Check className="w-4 h-4 text-emerald-500" />
                   ) : isWorking ? (
-                    <Loader2 className="w-4 h-4 animate-spin text-zinc-300" />
+                    <Loader2 className="w-4 h-4 animate-spin text-zinc-800 dark:text-zinc-200" />
                   ) : (
-                    <span className="text-zinc-600">{idx + 1}</span>
+                    <span className="text-zinc-400 dark:text-zinc-600">{idx + 1}</span>
                   )}
                 </div>
 
                 <div>
-                  <h3 className={`text-xs sm:text-sm font-medium ${isDone || isWorking ? 'text-zinc-100' : 'text-zinc-500'}`}>
+                  <h3 className={`text-xs sm:text-sm font-medium ${isDone || isWorking ? 'text-zinc-900 dark:text-zinc-100 font-semibold' : 'text-zinc-500'}`}>
                     {agent.name}
                   </h3>
-                  <p className="text-xs text-zinc-500 mt-0.5">
+                  <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-0.5">
                     {agent.currentTask}
                   </p>
                 </div>
@@ -234,13 +234,13 @@ export const AgentExecutionMonitor: React.FC<AgentExecutionMonitorProps> = ({
       </div>
 
       {/* 3. Live Logs Console (Subtle minimal terminal) */}
-      <div className="border border-zinc-900 rounded-lg p-3 bg-zinc-950 font-mono text-xs text-zinc-400 space-y-1 mb-8 max-h-48 overflow-y-auto">
-        <div className="text-[10px] uppercase text-zinc-600 mb-1">Log Orkestrasi Real-Time:</div>
+      <div className="border border-zinc-200 dark:border-zinc-800 rounded-xl p-3.5 bg-zinc-50 dark:bg-zinc-950 font-mono text-xs text-zinc-600 dark:text-zinc-400 space-y-1 mb-8 max-h-48 overflow-y-auto shadow-2xs">
+        <div className="text-[10px] uppercase text-zinc-500 dark:text-zinc-500 mb-1 font-semibold">Log Orkestrasi Real-Time:</div>
         {activeLogs.map((log, i) => (
           <div key={i} className="flex gap-2 text-[11px] leading-relaxed">
-            <span className="text-zinc-600 select-none">[{log.time}]</span>
-            <span className="text-zinc-300">{log.agent}:</span>
-            <span className="text-zinc-400">{log.text}</span>
+            <span className="text-zinc-400 dark:text-zinc-600 select-none">[{log.time}]</span>
+            <span className="text-zinc-900 dark:text-zinc-300 font-medium">{log.agent}:</span>
+            <span className="text-zinc-600 dark:text-zinc-400">{log.text}</span>
           </div>
         ))}
       </div>
@@ -251,7 +251,7 @@ export const AgentExecutionMonitor: React.FC<AgentExecutionMonitorProps> = ({
           <button
             type="button"
             onClick={handleFinish}
-            className="w-full sm:w-auto px-6 py-3 rounded-lg bg-zinc-100 hover:bg-white text-black font-semibold text-xs transition-all flex items-center justify-center gap-2 cursor-pointer shadow-lg"
+            className="w-full sm:w-auto px-6 py-3 rounded-xl bg-zinc-900 hover:bg-black text-white dark:bg-zinc-100 dark:hover:bg-white dark:text-black font-semibold text-xs transition-all flex items-center justify-center gap-2 cursor-pointer shadow-sm"
           >
             <span>Buka Naskah Proposal & Slide Studio</span>
             <ArrowRight className="w-4 h-4" />

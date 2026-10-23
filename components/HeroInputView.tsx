@@ -47,6 +47,44 @@ const POPULAR_DOMAINS = [
   "Hukum & Kebijakan"
 ];
 
+const QUICK_TOPIC_TEMPLATES = [
+  {
+    label: "🤖 AI & RAG",
+    title: "Implementasi Retrieval-Augmented Generation (RAG) untuk Akselerasi Manajemen Pengetahuan Akademik",
+    entity: "PT Telekomunikasi Indonesia",
+    category: "skripsi" as ProposalCategory,
+    duration: 6
+  },
+  {
+    label: "🏥 Triase Medis IoT",
+    title: "Analisis Efektivitas Sistem Triase Berbasis IoT dan Machine Learning pada Instalasi Gawat Darurat",
+    entity: "RSUP Dr. Sardjito",
+    category: "skripsi" as ProposalCategory,
+    duration: 6
+  },
+  {
+    label: "💼 Supply Chain Retail",
+    title: "Optimasi Efisiensi Distribusi Rantai Pasok Retail Menggunakan Predictive Analytics",
+    entity: "PT Unilever Indonesia",
+    category: "magang" as ProposalCategory,
+    duration: 4
+  },
+  {
+    label: "⚙️ Presisi Manufaktur",
+    title: "Rancang Bangun Sistem Monitoring Preventif Mesin CNC Berbasis Edge Computing",
+    entity: "PT Astra Otoparts",
+    category: "skripsi" as ProposalCategory,
+    duration: 6
+  },
+  {
+    label: "📚 Edukasi Adaptif",
+    title: "Evaluasi Efektivitas Platform Pembelajaran Adaptif Berbasis AI terhadap Retensi Belajar Siswa",
+    entity: "Dinas Pendidikan Provinsi",
+    category: "skripsi" as ProposalCategory,
+    duration: 4
+  }
+];
+
 export const HeroInputView: React.FC<HeroInputViewProps> = ({
   category,
   setCategory,
@@ -135,26 +173,26 @@ export const HeroInputView: React.FC<HeroInputViewProps> = ({
       
       {/* 1. Sleek Minimal Typography & Heading */}
       <div className="text-center mb-8 px-4 w-full">
-        <h1 className="text-2xl sm:text-4xl font-semibold tracking-tight text-zinc-100 leading-tight">
+        <h1 className="text-2xl sm:text-4xl font-semibold tracking-tight text-zinc-900 dark:text-zinc-100 leading-tight">
           Perumusan Usulan Proposal Akademik
         </h1>
-        <p className="text-sm text-zinc-400 mt-2 max-w-lg mx-auto leading-relaxed">
-          Ketikkan judul usulan Anda atau minta rekomendasi dari AI / rujukan jurnal terkini. Sistem akan melakukan wawancara diagnostik sebelum dokumen disusun.
+        <p className="text-sm text-zinc-600 dark:text-zinc-400 mt-2 max-w-lg mx-auto leading-relaxed">
+          Ketikkan judul usulan Anda atau pilih inspirasi topik di bawah. Sistem akan memandu wawancara diagnostik sebelum dokumen lengkap disusun.
         </p>
       </div>
 
-      {/* 2. Sleek Command Input Surface (No bulky cardbox) */}
-      <div className="w-full bg-zinc-950/80 border border-zinc-800/80 rounded-2xl p-3 sm:p-4 transition-all focus-within:border-zinc-500 shadow-xl mb-4">
+      {/* 2. Sleek Command Input Surface (Light & Dark Adaptive) */}
+      <div className="w-full bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-2xl p-3.5 sm:p-4.5 transition-all focus-within:border-zinc-400 dark:focus-within:border-zinc-500 shadow-sm dark:shadow-2xl mb-4">
         
         {/* Top Action Row inside input */}
-        <div className="flex items-center justify-between pb-2 mb-2 border-b border-zinc-900 text-xs">
+        <div className="flex items-center justify-between pb-2 mb-2 border-b border-zinc-100 dark:border-zinc-900 text-xs">
           <button
             type="button"
             onClick={handleOpenAiRecommender}
-            className="flex items-center gap-1.5 text-zinc-300 hover:text-white transition-colors cursor-pointer text-xs"
+            className="flex items-center gap-1.5 text-zinc-700 dark:text-zinc-300 hover:text-black dark:hover:text-white transition-colors cursor-pointer text-xs"
           >
-            <Sparkles className="w-3.5 h-3.5 text-zinc-300" />
-            <span className="underline underline-offset-4 decoration-zinc-700 hover:decoration-white font-medium">
+            <Sparkles className="w-3.5 h-3.5 text-amber-500" />
+            <span className="underline underline-offset-4 decoration-zinc-300 dark:decoration-zinc-700 hover:decoration-black dark:hover:decoration-white font-medium">
               Rekomendasi Judul (AI & Jurnal)
             </span>
           </button>
@@ -162,7 +200,7 @@ export const HeroInputView: React.FC<HeroInputViewProps> = ({
           <button
             type="button"
             onClick={() => setShowConfig(!showConfig)}
-            className="flex items-center gap-1 text-xs text-zinc-400 hover:text-zinc-200 transition-colors cursor-pointer"
+            className="flex items-center gap-1 text-xs text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-200 transition-colors cursor-pointer"
           >
             <SlidersHorizontal className="w-3 h-3" />
             <span>{showConfig ? "Tutup Parameter" : "Instansi & Durasi"}</span>
@@ -172,9 +210,9 @@ export const HeroInputView: React.FC<HeroInputViewProps> = ({
 
         {/* Expandable Parameters */}
         {showConfig && (
-          <div className="py-3 mb-3 border-b border-zinc-900 grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs animate-in fade-in duration-150">
+          <div className="py-3 mb-3 border-b border-zinc-100 dark:border-zinc-900 grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs animate-in fade-in duration-150">
             <div>
-              <label className="text-[11px] text-zinc-400 block mb-1">
+              <label className="text-[11px] text-zinc-600 dark:text-zinc-400 block mb-1">
                 Instansi Mitra / Kampus
               </label>
               <input
@@ -182,18 +220,18 @@ export const HeroInputView: React.FC<HeroInputViewProps> = ({
                 value={targetEntity}
                 onChange={(e) => setTargetEntity(e.target.value)}
                 placeholder="Contoh: PT Telkom / RS Sardjito"
-                className="w-full bg-zinc-900 border border-zinc-800 rounded-lg px-2.5 py-1.5 text-zinc-100 placeholder:text-zinc-600 text-xs focus:outline-none focus:border-zinc-500 transition-colors"
+                className="w-full bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-lg px-2.5 py-1.5 text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-400 dark:placeholder:text-zinc-600 text-xs focus:outline-none focus:border-zinc-400 dark:focus:border-zinc-500 transition-colors"
               />
             </div>
 
             <div>
-              <label className="text-[11px] text-zinc-400 block mb-1">
+              <label className="text-[11px] text-zinc-600 dark:text-zinc-400 block mb-1">
                 Durasi Kegiatan
               </label>
               <select
                 value={durationMonths}
                 onChange={(e) => setDurationMonths(Number(e.target.value))}
-                className="w-full bg-zinc-900 border border-zinc-800 rounded-lg px-2.5 py-1.5 text-zinc-100 text-xs focus:outline-none focus:border-zinc-500 transition-colors"
+                className="w-full bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-lg px-2.5 py-1.5 text-zinc-900 dark:text-zinc-100 text-xs focus:outline-none focus:border-zinc-400 dark:focus:border-zinc-500 transition-colors"
               >
                 <option value={1}>1 Bulan (4 Minggu)</option>
                 <option value={3}>3 Bulan (12 Minggu - PKL)</option>
@@ -203,7 +241,7 @@ export const HeroInputView: React.FC<HeroInputViewProps> = ({
             </div>
 
             <div>
-              <label className="text-[11px] text-zinc-400 block mb-1">
+              <label className="text-[11px] text-zinc-600 dark:text-zinc-400 block mb-1">
                 Nama Pengusul
               </label>
               <input
@@ -211,7 +249,7 @@ export const HeroInputView: React.FC<HeroInputViewProps> = ({
                 value={candidateName}
                 onChange={(e) => setCandidateName(e.target.value)}
                 placeholder="Nama Lengkap Anda"
-                className="w-full bg-zinc-900 border border-zinc-800 rounded-lg px-2.5 py-1.5 text-zinc-100 placeholder:text-zinc-600 text-xs focus:outline-none focus:border-zinc-500 transition-colors"
+                className="w-full bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-lg px-2.5 py-1.5 text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-400 dark:placeholder:text-zinc-600 text-xs focus:outline-none focus:border-zinc-400 dark:focus:border-zinc-500 transition-colors"
               />
             </div>
           </div>
@@ -225,12 +263,12 @@ export const HeroInputView: React.FC<HeroInputViewProps> = ({
             onChange={(e) => setTitle(e.target.value)}
             onKeyDown={handleKeyDown}
             placeholder="Ketikkan judul proposal magang, skripsi, atau riset yang ingin disusun..."
-            className="w-full bg-transparent text-zinc-100 placeholder:text-zinc-600 text-sm sm:text-base focus:outline-none resize-none leading-relaxed"
+            className="w-full bg-transparent text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-400 dark:placeholder:text-zinc-600 text-sm sm:text-base focus:outline-none resize-none leading-relaxed"
           />
         </div>
 
         {/* Bottom Control Bar */}
-        <div className="flex items-center justify-between pt-3 mt-1 border-t border-zinc-900">
+        <div className="flex items-center justify-between pt-3 mt-1 border-t border-zinc-100 dark:border-zinc-900">
           {/* Category Tabs */}
           <div className="flex items-center gap-1">
             <button
@@ -238,8 +276,8 @@ export const HeroInputView: React.FC<HeroInputViewProps> = ({
               onClick={() => setCategory("magang")}
               className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs transition-colors cursor-pointer ${
                 category === "magang"
-                  ? "bg-zinc-100 text-black font-medium"
-                  : "text-zinc-400 hover:text-zinc-200 hover:bg-zinc-900"
+                  ? "bg-zinc-900 text-white dark:bg-zinc-100 dark:text-black font-semibold shadow-xs"
+                  : "text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-200 hover:bg-zinc-100 dark:hover:bg-zinc-900"
               }`}
             >
               <Briefcase className="w-3.5 h-3.5" />
@@ -251,8 +289,8 @@ export const HeroInputView: React.FC<HeroInputViewProps> = ({
               onClick={() => setCategory("skripsi")}
               className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs transition-colors cursor-pointer ${
                 category === "skripsi"
-                  ? "bg-zinc-100 text-black font-medium"
-                  : "text-zinc-400 hover:text-zinc-200 hover:bg-zinc-900"
+                  ? "bg-zinc-900 text-white dark:bg-zinc-100 dark:text-black font-semibold shadow-xs"
+                  : "text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-200 hover:bg-zinc-100 dark:hover:bg-zinc-900"
               }`}
             >
               <GraduationCap className="w-3.5 h-3.5" />
@@ -264,8 +302,8 @@ export const HeroInputView: React.FC<HeroInputViewProps> = ({
               onClick={() => setCategory("penelitian")}
               className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs transition-colors cursor-pointer ${
                 category === "penelitian"
-                  ? "bg-zinc-100 text-black font-medium"
-                  : "text-zinc-400 hover:text-zinc-200 hover:bg-zinc-900"
+                  ? "bg-zinc-900 text-white dark:bg-zinc-100 dark:text-black font-semibold shadow-xs"
+                  : "text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-200 hover:bg-zinc-100 dark:hover:bg-zinc-900"
               }`}
             >
               <FlaskConical className="w-3.5 h-3.5" />
@@ -279,10 +317,35 @@ export const HeroInputView: React.FC<HeroInputViewProps> = ({
             onClick={onSubmit}
             disabled={!title.trim()}
             title="Lanjut ke Wawancara Diagnostik"
-            className="w-8 h-8 rounded-full bg-zinc-100 hover:bg-white active:scale-95 disabled:opacity-20 disabled:pointer-events-none text-black flex items-center justify-center transition-all cursor-pointer flex-shrink-0"
+            className="w-8 h-8 rounded-full bg-zinc-900 hover:bg-black text-white dark:bg-zinc-100 dark:hover:bg-white dark:text-black active:scale-95 disabled:opacity-20 disabled:pointer-events-none flex items-center justify-center transition-all cursor-pointer flex-shrink-0 shadow-xs"
           >
             <ArrowUp className="w-4 h-4 stroke-[2.5]" />
           </button>
+        </div>
+      </div>
+
+      {/* Quick Topic Starter Chips */}
+      <div className="w-full mb-4">
+        <div className="flex items-center gap-1.5 mb-2 px-1 text-[11px] font-mono text-zinc-500 dark:text-zinc-400">
+          <Sparkles className="w-3.5 h-3.5 text-zinc-400" />
+          <span>Inspirasi Topik Cepat (1-Klik Terapkan):</span>
+        </div>
+        <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none">
+          {QUICK_TOPIC_TEMPLATES.map((item, idx) => (
+            <button
+              key={idx}
+              type="button"
+              onClick={() => {
+                setTitle(item.title);
+                setTargetEntity(item.entity);
+                setCategory(item.category);
+                setDurationMonths(item.duration);
+              }}
+              className="px-3 py-1.5 rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900/80 hover:bg-zinc-100 dark:hover:bg-zinc-800 text-xs font-medium text-zinc-700 dark:text-zinc-300 whitespace-nowrap transition-all cursor-pointer shadow-xs hover:border-zinc-300 dark:hover:border-zinc-700 active:scale-95"
+            >
+              <span>{item.label}</span>
+            </button>
+          ))}
         </div>
       </div>
 

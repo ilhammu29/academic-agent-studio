@@ -10,6 +10,7 @@ import { TurnitinPreCheckModal } from "./TurnitinPreCheckModal";
 import { ResearchInstrumentModal } from "./ResearchInstrumentModal";
 import { ApprovalSheetModal } from "./ApprovalSheetModal";
 import { ResearchFlowchart } from "./ResearchFlowchart";
+import { AcademicCopilotDrawer } from "./AcademicCopilotDrawer";
 import { generateAcademicProposalDocx, downloadDocxBlob } from "@/lib/docxExporter";
 import { generateAcademicProposalPptx } from "@/lib/pptxExporter";
 import { generateBibTeX, generateRIS, downloadCitationFile } from "@/lib/bibtexExporter";
@@ -35,7 +36,10 @@ import {
   CheckCircle2,
   ClipboardList,
   FileSignature,
-  BookmarkCheck
+  BookmarkCheck,
+  ChevronDown,
+  Compass,
+  Bot
 } from "lucide-react";
 
 interface DocumentStudioProps {
@@ -60,6 +64,34 @@ export const DocumentStudio: React.FC<DocumentStudioProps> = ({
   const [isInstrumentModalOpen, setIsInstrumentModalOpen] = useState(false);
   const [isApprovalModalOpen, setIsApprovalModalOpen] = useState(false);
   const [citationStyle, setCitationStyle] = useState<"apa" | "ieee">("apa");
+  
+  // Co-Pilot & Dropdown states
+  const [isCopilotOpen, setIsCopilotOpen] = useState(false);
+  const [isToolsDropdownOpen, setIsToolsDropdownOpen] = useState(false);
+  const [isExportDropdownOpen, setIsExportDropdownOpen] = useState(false);
+  const toolsDropdownRef = useRef<HTMLDivElement>(null);
+  const exportDropdownRef = useRef<HTMLDivElement>(null);
+
+  // Close dropdowns on outside click
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (toolsDropdownRef.current && !toolsDropdownRef.current.contains(event.target as Node)) {
+        setIsToolsDropdownOpen(false);
+      }
+      if (exportDropdownRef.current && !exportDropdownRef.current.contains(event.target as Node)) {
+        setIsExportDropdownOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  const scrollToSection = (id: string) => {
+    const el = document.getElementById(id);
+    if (el) {
+      el.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+  };
   
   // History & Auto-save states
   const [history, setHistory] = useState<ProposalDocument[]>([doc]);
@@ -393,189 +425,301 @@ NIP / NIK.
         </div>
       )}
 
-      {/* 1. Sleek Action Bar & Document Metadata */}
-      <div className="pb-6 mb-6 border-b border-zinc-900 flex flex-col md:flex-row md:items-center justify-between gap-4 no-print">
-        <div>
-          <div className="flex items-center gap-2 mb-1">
-            <h1 className="text-lg sm:text-xl font-semibold text-zinc-100 tracking-tight leading-snug">
-              {currentDoc.title}
-            </h1>
+      {/* 1. Sleek Consolidated Action Bar & Document Metadata */}
+      <div className="pb-5 mb-5 border-b border-zinc-200 dark:border-zinc-850 flex flex-col lg:flex-row lg:items-center justify-between gap-4 no-print">
+        {/* Left Cluster: Category, Saved Status, Title, Author Info */}
+        <div className="space-y-1.5 min-w-0">
+          <div className="flex items-center gap-2 flex-wrap">
+            <span className="text-[10px] uppercase font-mono tracking-wider px-2.5 py-0.5 rounded-full bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 font-semibold border border-zinc-200 dark:border-zinc-700/50">
+              {currentDoc.category === "magang" ? "Magang Industri" : currentDoc.category === "skripsi" ? "Skripsi / TA" : "Tesis & Riset"}
+            </span>
             {lastSaved && (
-              <span className="hidden sm:inline-flex items-center gap-1 text-[10px] font-mono text-zinc-400 bg-zinc-900 px-2 py-0.5 rounded border border-zinc-800">
-                <CheckCircle2 className="w-3 h-3 text-emerald-400" />
+              <span className="inline-flex items-center gap-1 text-[10px] font-mono text-zinc-500 dark:text-zinc-400">
+                <CheckCircle2 className="w-3 h-3 text-emerald-500" />
                 <span>Auto-saved {lastSaved}</span>
               </span>
             )}
           </div>
-          <p className="text-xs text-zinc-400">
-            Pengusul: <span className="text-zinc-200 font-medium">{currentDoc.candidateName}</span> &bull; {currentDoc.targetEntity} &bull; {currentDoc.durationMonths} Bulan
+          <h1 className="text-base sm:text-lg font-bold text-zinc-900 dark:text-zinc-100 tracking-tight leading-snug line-clamp-1" title={currentDoc.title}>
+            {currentDoc.title}
+          </h1>
+          <p className="text-xs text-zinc-500 dark:text-zinc-400 flex items-center gap-2 flex-wrap">
+            <span className="text-zinc-800 dark:text-zinc-200 font-medium">{currentDoc.candidateName}</span>
+            <span>&bull;</span>
+            <span>{currentDoc.targetEntity}</span>
+            <span>&bull;</span>
+            <span>{currentDoc.durationMonths} Bulan</span>
           </p>
         </div>
 
-        {/* Action Buttons: Undo/Redo, DOCX, PPTX, BibTeX, Turnitin, Literature, MD, Print */}
-        <div className="flex items-center flex-wrap gap-2">
+        {/* Right Cluster: Undo/Redo, APA/IEEE switch, Tools dropdown, Export dropdown, Copilot button */}
+        <div className="flex items-center flex-wrap gap-2 lg:self-center">
           {/* Undo & Redo History */}
-          <div className="flex items-center border border-zinc-800 rounded-lg overflow-hidden bg-zinc-900">
+          <div className="flex items-center border border-zinc-200 dark:border-zinc-800 rounded-lg overflow-hidden bg-white dark:bg-zinc-900 shadow-xs">
             <button
               type="button"
               onClick={handleUndo}
               disabled={historyIndex <= 0}
-              className="p-1.5 hover:bg-zinc-800 disabled:opacity-30 text-zinc-300 transition-colors cursor-pointer"
+              className="p-2 hover:bg-zinc-100 dark:hover:bg-zinc-800 disabled:opacity-30 text-zinc-600 dark:text-zinc-400 transition-colors cursor-pointer"
               title="Undo perubahan naskah"
             >
               <RotateCcw className="w-3.5 h-3.5" />
             </button>
-            <div className="w-[1px] h-4 bg-zinc-800"></div>
+            <div className="w-[1px] h-4 bg-zinc-200 dark:bg-zinc-800"></div>
             <button
               type="button"
               onClick={handleRedo}
               disabled={historyIndex >= history.length - 1}
-              className="p-1.5 hover:bg-zinc-800 disabled:opacity-30 text-zinc-300 transition-colors cursor-pointer"
+              className="p-2 hover:bg-zinc-100 dark:hover:bg-zinc-800 disabled:opacity-30 text-zinc-600 dark:text-zinc-400 transition-colors cursor-pointer"
               title="Redo perubahan naskah"
             >
               <RotateCw className="w-3.5 h-3.5" />
             </button>
           </div>
 
-          {/* Word DOCX Button */}
-          <button
-            type="button"
-            onClick={handleDownloadDocx}
-            disabled={isExportingDocx}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-zinc-100 hover:bg-white text-black text-xs font-semibold transition-all cursor-pointer shadow-sm"
-            title="Unduh dokumen Microsoft Word (.docx) berstandar penomoran halaman kampus"
-          >
-            {isExportingDocx ? (
-              <>
-                <RefreshCw className="w-3.5 h-3.5 animate-spin" />
-                <span>Menyusun Word...</span>
-              </>
-            ) : (
-              <>
-                <FileDown className="w-3.5 h-3.5" />
-                <span>Unduh Word (.docx)</span>
-              </>
-            )}
-          </button>
-
-          {/* PowerPoint PPTX Button */}
-          <button
-            type="button"
-            onClick={handleDownloadPptx}
-            disabled={isExportingPptx}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-zinc-900 hover:bg-zinc-800 text-zinc-200 border border-zinc-800 text-xs font-medium transition-all cursor-pointer"
-            title="Unduh slide presentasi 16:9 (.pptx) eksekutif"
-          >
-            {isExportingPptx ? (
-              <>
-                <RefreshCw className="w-3.5 h-3.5 animate-spin" />
-                <span>Menyusun PPTX...</span>
-              </>
-            ) : (
-              <>
-                <Presentation className="w-3.5 h-3.5" />
-                <span>Unduh Slide (.pptx)</span>
-              </>
-            )}
-          </button>
-
-          {/* Audit Turnitin Pre-Check */}
-          <button
-            type="button"
-            onClick={() => setIsTurnitinModalOpen(true)}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-zinc-900 hover:bg-zinc-800 text-zinc-200 border border-zinc-800 text-xs font-medium transition-all cursor-pointer"
-            title="Audit Turnitin, frasa klise AI, dan orisinalitas naskah"
-          >
-            <ShieldCheck className="w-3.5 h-3.5 text-zinc-300" />
-            <span>Audit Turnitin</span>
-          </button>
-
-          {/* Research Instruments & Questionnaire Trigger */}
-          <button
-            type="button"
-            onClick={() => setIsInstrumentModalOpen(true)}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-zinc-900 hover:bg-zinc-800 text-zinc-300 border border-zinc-800 text-xs font-medium transition-all cursor-pointer"
-            title="Buka Generator Instrumen Riset & Angket Kuesioner (Lampiran Bab III)"
-          >
-            <ClipboardList className="w-3.5 h-3.5 text-zinc-400" />
-            <span>Instrumen Riset</span>
-          </button>
-
-          {/* Approval Sheet Customizer Trigger */}
-          <button
-            type="button"
-            onClick={() => setIsApprovalModalOpen(true)}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-zinc-900 hover:bg-zinc-800 text-zinc-300 border border-zinc-800 text-xs font-medium transition-all cursor-pointer"
-            title="Kustomisasi data dosen pembimbing dan penguji pada lembar pengesahan"
-          >
-            <FileSignature className="w-3.5 h-3.5 text-zinc-400" />
-            <span>Pengesahan</span>
-          </button>
-
-          {/* Citation Style Switcher Pill */}
+          {/* Citation Switcher Pill */}
           <button
             type="button"
             onClick={() => setCitationStyle(prev => prev === "apa" ? "ieee" : "apa")}
-            className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-zinc-900 hover:bg-zinc-800 text-zinc-300 border border-zinc-800 text-xs font-mono transition-all cursor-pointer"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 hover:bg-zinc-50 dark:hover:bg-zinc-800 text-zinc-700 dark:text-zinc-300 text-xs font-mono transition-all cursor-pointer shadow-xs"
             title="Ganti format kutipan & daftar pustaka antara APA 7th Edition dan IEEE"
           >
-            <BookmarkCheck className="w-3.5 h-3.5 text-zinc-400" />
-            <span>{citationStyle === "apa" ? "Sitasi: APA" : "Sitasi: IEEE"}</span>
+            <BookmarkCheck className="w-3.5 h-3.5 text-zinc-500 dark:text-zinc-400" />
+            <span>{citationStyle === "apa" ? "APA 7th" : "IEEE"}</span>
           </button>
 
-          {/* Export BibTeX Button */}
-          <button
-            type="button"
-            onClick={handleExportBibTeX}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-zinc-900 hover:bg-zinc-800 text-zinc-300 border border-zinc-800 text-xs font-medium transition-all cursor-pointer"
-            title="Unduh berkas BibTeX (.bib) untuk Mendeley & Zotero"
-          >
-            <BookMarked className="w-3.5 h-3.5 text-zinc-400" />
-            <span>BibTeX</span>
-          </button>
+          {/* Dropdown 1: Alat Riset */}
+          <div className="relative" ref={toolsDropdownRef}>
+            <button
+              type="button"
+              onClick={() => {
+                setIsToolsDropdownOpen(!isToolsDropdownOpen);
+                setIsExportDropdownOpen(false);
+              }}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-xs font-medium transition-all cursor-pointer shadow-xs ${
+                isToolsDropdownOpen
+                  ? "bg-zinc-900 text-white dark:bg-zinc-100 dark:text-black border-zinc-900 dark:border-zinc-100"
+                  : "border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 hover:bg-zinc-50 dark:hover:bg-zinc-800 text-zinc-800 dark:text-zinc-200"
+              }`}
+            >
+              <ClipboardList className="w-3.5 h-3.5" />
+              <span>Alat Riset</span>
+              <ChevronDown className={`w-3.5 h-3.5 transition-transform ${isToolsDropdownOpen ? "rotate-180" : ""}`} />
+            </button>
 
-          {/* Literature Search Trigger */}
-          <button
-            type="button"
-            onClick={() => setIsLitModalOpen(true)}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-zinc-900 hover:bg-zinc-800 text-zinc-300 border border-zinc-800 text-xs font-medium transition-all cursor-pointer"
-            title="Pencarian paper terindeks & matriks PRISMA"
-          >
-            <BookOpen className="w-3.5 h-3.5 text-zinc-400" />
-            <span>Literatur Jurnal</span>
-          </button>
+            {isToolsDropdownOpen && (
+              <div className="absolute right-0 mt-2 w-60 rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-1.5 shadow-xl z-30 animate-in fade-in zoom-in-95 duration-100">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsToolsDropdownOpen(false);
+                    setIsTurnitinModalOpen(true);
+                  }}
+                  className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-medium text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors text-left cursor-pointer"
+                >
+                  <ShieldCheck className="w-4 h-4 text-emerald-500 flex-shrink-0" />
+                  <div>
+                    <p className="font-semibold text-zinc-900 dark:text-zinc-100">Audit Turnitin & Anti-Slop</p>
+                    <p className="text-[10px] text-zinc-500">Cek orisinalitas & indikator klise AI</p>
+                  </div>
+                </button>
 
-          {/* Copy Markdown */}
-          <button
-            type="button"
-            onClick={handleCopy}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-zinc-900 hover:bg-zinc-800 text-zinc-300 border border-zinc-800 text-xs font-medium transition-all cursor-pointer"
-          >
-            {copied ? <Check className="w-3.5 h-3.5 text-zinc-100" /> : <Copy className="w-3.5 h-3.5 text-zinc-400" />}
-            <span>{copied ? "Tersalin" : "Markdown"}</span>
-          </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsToolsDropdownOpen(false);
+                    setIsInstrumentModalOpen(true);
+                  }}
+                  className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-medium text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors text-left cursor-pointer"
+                >
+                  <ClipboardList className="w-4 h-4 text-blue-500 flex-shrink-0" />
+                  <div>
+                    <p className="font-semibold text-zinc-900 dark:text-zinc-100">Instrumen Riset & Angket</p>
+                    <p className="text-[10px] text-zinc-500">Skala Likert, Wawancara, & Observasi</p>
+                  </div>
+                </button>
 
-          {/* Print PDF */}
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsToolsDropdownOpen(false);
+                    setIsApprovalModalOpen(true);
+                  }}
+                  className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-medium text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors text-left cursor-pointer"
+                >
+                  <FileSignature className="w-4 h-4 text-amber-500 flex-shrink-0" />
+                  <div>
+                    <p className="font-semibold text-zinc-900 dark:text-zinc-100">Lembar Pengesahan Dosen</p>
+                    <p className="text-[10px] text-zinc-500">Data Pembimbing & NIP Kaprodi</p>
+                  </div>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsToolsDropdownOpen(false);
+                    setIsLitModalOpen(true);
+                  }}
+                  className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-medium text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors text-left cursor-pointer"
+                >
+                  <BookOpen className="w-4 h-4 text-purple-500 flex-shrink-0" />
+                  <div>
+                    <p className="font-semibold text-zinc-900 dark:text-zinc-100">Literatur Jurnal & Matriks</p>
+                    <p className="text-[10px] text-zinc-500">Pencarian paper & sintesis PRISMA</p>
+                  </div>
+                </button>
+              </div>
+            )}
+          </div>
+
+          {/* Dropdown 2: Unduh & Ekspor */}
+          <div className="relative" ref={exportDropdownRef}>
+            <button
+              type="button"
+              onClick={() => {
+                setIsExportDropdownOpen(!isExportDropdownOpen);
+                setIsToolsDropdownOpen(false);
+              }}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-xs font-medium transition-all cursor-pointer shadow-xs ${
+                isExportDropdownOpen
+                  ? "bg-zinc-900 text-white dark:bg-zinc-100 dark:text-black border-zinc-900 dark:border-zinc-100"
+                  : "border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 hover:bg-zinc-50 dark:hover:bg-zinc-800 text-zinc-800 dark:text-zinc-200"
+              }`}
+            >
+              <FileDown className="w-3.5 h-3.5" />
+              <span>Ekspor</span>
+              <ChevronDown className={`w-3.5 h-3.5 transition-transform ${isExportDropdownOpen ? "rotate-180" : ""}`} />
+            </button>
+
+            {isExportDropdownOpen && (
+              <div className="absolute right-0 mt-2 w-60 rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-1.5 shadow-xl z-30 animate-in fade-in zoom-in-95 duration-100">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsExportDropdownOpen(false);
+                    handleDownloadDocx();
+                  }}
+                  disabled={isExportingDocx}
+                  className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-medium text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors text-left cursor-pointer"
+                >
+                  <FileDown className="w-4 h-4 text-blue-500 flex-shrink-0" />
+                  <div>
+                    <p className="font-semibold text-zinc-900 dark:text-zinc-100">
+                      {isExportingDocx ? "Menyusun Word..." : "Dokumen Word (.docx)"}
+                    </p>
+                    <p className="text-[10px] text-zinc-500">Standar nomor halaman & margin kampus</p>
+                  </div>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsExportDropdownOpen(false);
+                    handleDownloadPptx();
+                  }}
+                  disabled={isExportingPptx}
+                  className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-medium text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors text-left cursor-pointer"
+                >
+                  <Presentation className="w-4 h-4 text-orange-500 flex-shrink-0" />
+                  <div>
+                    <p className="font-semibold text-zinc-900 dark:text-zinc-100">
+                      {isExportingPptx ? "Menyusun Slide..." : "Slide Sidang (.pptx)"}
+                    </p>
+                    <p className="text-[10px] text-zinc-500">Format eksekutif 16:9 siap presentasi</p>
+                  </div>
+                </button>
+
+                <div className="my-1 border-t border-zinc-200 dark:border-zinc-800"></div>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsExportDropdownOpen(false);
+                    handleExportBibTeX();
+                  }}
+                  className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-medium text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors text-left cursor-pointer"
+                >
+                  <BookMarked className="w-4 h-4 text-zinc-400 flex-shrink-0" />
+                  <div>
+                    <p className="font-semibold text-zinc-900 dark:text-zinc-100">Kutipan BibTeX (.bib)</p>
+                    <p className="text-[10px] text-zinc-500">Untuk Mendeley & Zotero</p>
+                  </div>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsExportDropdownOpen(false);
+                    handleExportRIS();
+                  }}
+                  className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-medium text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors text-left cursor-pointer"
+                >
+                  <BookmarkCheck className="w-4 h-4 text-zinc-400 flex-shrink-0" />
+                  <div>
+                    <p className="font-semibold text-zinc-900 dark:text-zinc-100">Kutipan RIS (.ris)</p>
+                    <p className="text-[10px] text-zinc-500">Untuk EndNote & RefWorks</p>
+                  </div>
+                </button>
+
+                <div className="my-1 border-t border-zinc-200 dark:border-zinc-800"></div>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsExportDropdownOpen(false);
+                    handleCopy();
+                  }}
+                  className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-medium text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors text-left cursor-pointer"
+                >
+                  <Copy className="w-4 h-4 text-zinc-400 flex-shrink-0" />
+                  <div>
+                    <p className="font-semibold text-zinc-900 dark:text-zinc-100">
+                      {copied ? "Tersalin ke Clipboard" : "Salin Markdown (.md)"}
+                    </p>
+                    <p className="text-[10px] text-zinc-500">Naskah lengkap format Markdown</p>
+                  </div>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsExportDropdownOpen(false);
+                    handlePrint();
+                  }}
+                  className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-medium text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors text-left cursor-pointer"
+                >
+                  <Printer className="w-4 h-4 text-zinc-400 flex-shrink-0" />
+                  <div>
+                    <p className="font-semibold text-zinc-900 dark:text-zinc-100">Cetak Dokumen / PDF</p>
+                    <p className="text-[10px] text-zinc-500">Tata letak cetak A4 langsung</p>
+                  </div>
+                </button>
+              </div>
+            )}
+          </div>
+
+          {/* Co-Pilot AI Slide-over Drawer Trigger */}
           <button
             type="button"
-            onClick={handlePrint}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-zinc-900 hover:bg-zinc-800 text-zinc-400 hover:text-zinc-200 border border-zinc-800 text-xs transition-all cursor-pointer"
-            title="Cetak format cetak PDF"
+            onClick={() => setIsCopilotOpen(true)}
+            className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg bg-zinc-900 hover:bg-black text-white dark:bg-zinc-100 dark:hover:bg-white dark:text-black text-xs font-semibold shadow-sm transition-all cursor-pointer"
+            title="Buka asisten Co-Pilot AI untuk konsultasi metodologi & simulasi penguji"
           >
-            <Printer className="w-3.5 h-3.5" />
+            <Sparkles className="w-3.5 h-3.5" />
+            <span>Co-Pilot AI</span>
           </button>
         </div>
       </div>
 
       {/* 2. Sleek Tab Navigation */}
-      <div className="flex items-center gap-1 border-b border-zinc-900 pb-2 mb-6 overflow-x-auto no-print">
+      <div className="flex items-center gap-1 border-b border-zinc-200 dark:border-zinc-850 pb-2 mb-4 overflow-x-auto no-print">
         <button
           type="button"
           onClick={() => setActiveTab("naskah")}
           className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors whitespace-nowrap cursor-pointer ${
             activeTab === "naskah"
-              ? "bg-zinc-100 text-black font-semibold"
-              : "text-zinc-400 hover:text-zinc-200 hover:bg-zinc-900"
+              ? "bg-zinc-900 text-white dark:bg-zinc-100 dark:text-black font-semibold shadow-xs"
+              : "text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 hover:bg-zinc-100 dark:hover:bg-zinc-900"
           }`}
         >
           <FileText className="w-3.5 h-3.5" />
@@ -587,8 +731,8 @@ NIP / NIK.
           onClick={() => setActiveTab("defense")}
           className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors whitespace-nowrap cursor-pointer ${
             activeTab === "defense"
-              ? "bg-zinc-100 text-black font-semibold"
-              : "text-zinc-400 hover:text-zinc-200 hover:bg-zinc-900"
+              ? "bg-zinc-900 text-white dark:bg-zinc-100 dark:text-black font-semibold shadow-xs"
+              : "text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 hover:bg-zinc-100 dark:hover:bg-zinc-900"
           }`}
         >
           <ShieldAlert className="w-3.5 h-3.5" />
@@ -600,8 +744,8 @@ NIP / NIK.
           onClick={() => setActiveTab("tree")}
           className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors whitespace-nowrap cursor-pointer ${
             activeTab === "tree"
-              ? "bg-zinc-100 text-black font-semibold"
-              : "text-zinc-400 hover:text-zinc-200 hover:bg-zinc-900"
+              ? "bg-zinc-900 text-white dark:bg-zinc-100 dark:text-black font-semibold shadow-xs"
+              : "text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 hover:bg-zinc-100 dark:hover:bg-zinc-900"
           }`}
         >
           <Network className="w-3.5 h-3.5" />
@@ -613,8 +757,8 @@ NIP / NIK.
           onClick={() => setActiveTab("jadwal")}
           className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors whitespace-nowrap cursor-pointer ${
             activeTab === "jadwal"
-              ? "bg-zinc-100 text-black font-semibold"
-              : "text-zinc-400 hover:text-zinc-200 hover:bg-zinc-900"
+              ? "bg-zinc-900 text-white dark:bg-zinc-100 dark:text-black font-semibold shadow-xs"
+              : "text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 hover:bg-zinc-100 dark:hover:bg-zinc-900"
           }`}
         >
           <CalendarDays className="w-3.5 h-3.5" />
@@ -626,8 +770,8 @@ NIP / NIK.
           onClick={() => setActiveTab("slides")}
           className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors whitespace-nowrap cursor-pointer ${
             activeTab === "slides"
-              ? "bg-zinc-100 text-black font-semibold"
-              : "text-zinc-400 hover:text-zinc-200 hover:bg-zinc-900"
+              ? "bg-zinc-900 text-white dark:bg-zinc-100 dark:text-black font-semibold shadow-xs"
+              : "text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 hover:bg-zinc-100 dark:hover:bg-zinc-900"
           }`}
         >
           <Presentation className="w-3.5 h-3.5" />
@@ -639,8 +783,8 @@ NIP / NIK.
           onClick={() => setActiveTab("revisionMatrix")}
           className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors whitespace-nowrap cursor-pointer ${
             activeTab === "revisionMatrix"
-              ? "bg-zinc-100 text-black font-semibold"
-              : "text-zinc-400 hover:text-zinc-200 hover:bg-zinc-900"
+              ? "bg-zinc-900 text-white dark:bg-zinc-100 dark:text-black font-semibold shadow-xs"
+              : "text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 hover:bg-zinc-100 dark:hover:bg-zinc-900"
           }`}
         >
           <FileCheck2 className="w-3.5 h-3.5" />
@@ -652,8 +796,8 @@ NIP / NIK.
           onClick={() => setActiveTab("audit")}
           className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors whitespace-nowrap cursor-pointer ${
             activeTab === "audit"
-              ? "bg-zinc-100 text-black font-semibold"
-              : "text-zinc-400 hover:text-zinc-200 hover:bg-zinc-900"
+              ? "bg-zinc-900 text-white dark:bg-zinc-100 dark:text-black font-semibold shadow-xs"
+              : "text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 hover:bg-zinc-100 dark:hover:bg-zinc-900"
           }`}
         >
           <ShieldCheck className="w-3.5 h-3.5" />
@@ -661,53 +805,111 @@ NIP / NIK.
         </button>
       </div>
 
+      {/* QUICK JUMP OUTLINE RAIL (Only for Naskah Tab) */}
+      {activeTab === "naskah" && (
+        <div className="flex items-center gap-1.5 pb-4 mb-6 overflow-x-auto text-[11px] font-mono no-print">
+          <span className="text-zinc-400 dark:text-zinc-500 flex items-center gap-1 mr-1 text-[11px]">
+            <Compass className="w-3.5 h-3.5" /> Lompat Cepat:
+          </span>
+          <button
+            type="button"
+            onClick={() => scrollToSection("section-ringkasan")}
+            className="px-2.5 py-1 rounded-md bg-zinc-100 dark:bg-zinc-900 text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 hover:bg-zinc-200 dark:hover:bg-zinc-800 whitespace-nowrap transition-colors cursor-pointer"
+          >
+            Ringkasan
+          </button>
+          <button
+            type="button"
+            onClick={() => scrollToSection("section-bab1")}
+            className="px-2.5 py-1 rounded-md bg-zinc-100 dark:bg-zinc-900 text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 hover:bg-zinc-200 dark:hover:bg-zinc-800 whitespace-nowrap transition-colors cursor-pointer"
+          >
+            Bab I: Pendahuluan
+          </button>
+          <button
+            type="button"
+            onClick={() => scrollToSection("section-bab2")}
+            className="px-2.5 py-1 rounded-md bg-zinc-100 dark:bg-zinc-900 text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 hover:bg-zinc-200 dark:hover:bg-zinc-800 whitespace-nowrap transition-colors cursor-pointer"
+          >
+            Bab II: Kajian Pustaka
+          </button>
+          <button
+            type="button"
+            onClick={() => scrollToSection("section-bab3")}
+            className="px-2.5 py-1 rounded-md bg-zinc-100 dark:bg-zinc-900 text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 hover:bg-zinc-200 dark:hover:bg-zinc-800 whitespace-nowrap transition-colors cursor-pointer"
+          >
+            Bab III: Metodologi
+          </button>
+          <button
+            type="button"
+            onClick={() => scrollToSection("section-bab4")}
+            className="px-2.5 py-1 rounded-md bg-zinc-100 dark:bg-zinc-900 text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 hover:bg-zinc-200 dark:hover:bg-zinc-800 whitespace-nowrap transition-colors cursor-pointer"
+          >
+            Bab IV: Rencana Kerja
+          </button>
+          <button
+            type="button"
+            onClick={() => scrollToSection("section-pustaka")}
+            className="px-2.5 py-1 rounded-md bg-zinc-100 dark:bg-zinc-900 text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 hover:bg-zinc-200 dark:hover:bg-zinc-800 whitespace-nowrap transition-colors cursor-pointer"
+          >
+            Daftar Pustaka
+          </button>
+          <button
+            type="button"
+            onClick={() => scrollToSection("section-pengesahan")}
+            className="px-2.5 py-1 rounded-md bg-zinc-100 dark:bg-zinc-900 text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 hover:bg-zinc-200 dark:hover:bg-zinc-800 whitespace-nowrap transition-colors cursor-pointer"
+          >
+            Lembar Pengesahan
+          </button>
+        </div>
+      )}
+
       {/* TAB 1: NASKAH PROPOSAL LENGKAP */}
       {activeTab === "naskah" && (
-        <article className="bg-zinc-950 p-6 sm:p-12 rounded-xl border border-zinc-900 font-serif print:bg-white print:text-black print:p-0 print:border-none">
+        <article className="bg-white dark:bg-zinc-950 p-6 sm:p-12 rounded-2xl border border-zinc-200 dark:border-zinc-900 shadow-sm font-serif text-zinc-900 dark:text-zinc-100 print:bg-white print:text-black print:p-0 print:border-none print:shadow-none">
           
           {/* Cover Header */}
-          <div className="text-center pb-8 border-b border-zinc-900 print:border-black mb-8">
-            <div className="text-xs font-mono uppercase tracking-widest text-zinc-400 print:text-gray-700">
+          <div className="text-center pb-8 border-b border-zinc-200 dark:border-zinc-850 print:border-black mb-8">
+            <div className="text-xs font-mono uppercase tracking-widest text-zinc-500 dark:text-zinc-400 print:text-gray-700">
               PROPOSAL {currentDoc.category.toUpperCase()}
             </div>
-            <h1 className="text-xl sm:text-2xl font-serif font-bold text-zinc-100 mt-2 leading-snug print:text-black">
+            <h1 className="text-xl sm:text-2xl font-serif font-bold text-zinc-900 dark:text-zinc-100 mt-2 leading-snug print:text-black">
               {currentDoc.title}
             </h1>
-            <p className="text-xs sm:text-sm font-sans text-zinc-400 mt-3 max-w-xl mx-auto print:text-gray-700">
+            <p className="text-xs sm:text-sm font-sans text-zinc-600 dark:text-zinc-400 mt-3 max-w-xl mx-auto print:text-gray-700">
               Diajukan untuk Memenuhi Prasyarat Kurikulum Akademik pada {currentDoc.facultyMajor}, {currentDoc.institution}
             </p>
 
-            <div className="mt-6 pt-4 border-t border-zinc-900/60 max-w-md mx-auto text-center font-sans text-xs space-y-1 text-zinc-300 print:text-black">
-              <p className="font-semibold text-zinc-200 print:text-black">{currentDoc.candidateName}</p>
+            <div className="mt-6 pt-4 border-t border-zinc-200 dark:border-zinc-850/60 max-w-md mx-auto text-center font-sans text-xs space-y-1 text-zinc-700 dark:text-zinc-300 print:text-black">
+              <p className="font-semibold text-zinc-900 dark:text-zinc-200 print:text-black">{currentDoc.candidateName}</p>
               <p className="text-zinc-500 font-mono print:text-gray-700">NIM: {currentDoc.candidateId}</p>
-              <p className="text-zinc-400 print:text-black">{currentDoc.institution} &bull; {currentDoc.generationDate}</p>
+              <p className="text-zinc-600 dark:text-zinc-400 print:text-black">{currentDoc.institution} &bull; {currentDoc.generationDate}</p>
             </div>
           </div>
 
           {/* Executive Summary */}
-          <div className="mb-10 p-4 sm:p-5 rounded-lg bg-zinc-900/60 border border-zinc-900 print:border-gray-300 print:bg-gray-50">
+          <div id="section-ringkasan" className="mb-10 p-4 sm:p-5 rounded-xl bg-zinc-50 dark:bg-zinc-900/60 border border-zinc-200 dark:border-zinc-850 print:border-gray-300 print:bg-gray-50">
             <div className="flex items-center justify-between mb-2">
-              <h3 className="text-xs font-mono font-semibold uppercase tracking-wider text-zinc-300 print:text-black">
+              <h3 className="text-xs font-mono font-semibold uppercase tracking-wider text-zinc-800 dark:text-zinc-300 print:text-black">
                 Ringkasan Eksekutif
               </h3>
               <button
                 type="button"
                 onClick={() => handleRefineWithAI("executiveSummary", "Ringkasan Eksekutif", currentDoc.executiveSummary)}
-                className="no-print text-[11px] font-mono text-zinc-400 hover:text-zinc-100 bg-zinc-900 px-2 py-0.5 rounded border border-zinc-800 flex items-center gap-1 cursor-pointer transition-colors"
+                className="no-print text-[11px] font-mono text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 bg-white dark:bg-zinc-900 px-2 py-0.5 rounded border border-zinc-200 dark:border-zinc-800 flex items-center gap-1 cursor-pointer transition-colors shadow-xs"
               >
-                <Sparkles className="w-3 h-3 text-zinc-400" />
+                <Sparkles className="w-3 h-3 text-zinc-500 dark:text-zinc-400" />
                 <span>Revisi AI</span>
               </button>
             </div>
-            <p className="text-xs sm:text-sm text-zinc-300 leading-relaxed font-sans print:text-black">
+            <p className="text-xs sm:text-sm text-zinc-700 dark:text-zinc-300 leading-relaxed font-sans print:text-black">
               {currentDoc.executiveSummary}
             </p>
           </div>
 
           {/* BAB I */}
-          <section className="mb-10">
-            <div className="border-b border-zinc-900 pb-2 mb-4 print:border-black">
-              <h2 className="text-base sm:text-lg font-serif font-bold text-zinc-100 print:text-black uppercase">
+          <section id="section-bab1" className="mb-10">
+            <div className="border-b border-zinc-200 dark:border-zinc-850 pb-2 mb-4 print:border-black">
+              <h2 className="text-base sm:text-lg font-serif font-bold text-zinc-900 dark:text-zinc-100 print:text-black uppercase">
                 {currentDoc.bab1.title}
               </h2>
             </div>
@@ -782,9 +984,9 @@ NIP / NIK.
           </section>
 
           {/* BAB II */}
-          <section className="mb-10">
-            <div className="border-b border-zinc-900 pb-2 mb-4 print:border-black">
-              <h2 className="text-base sm:text-lg font-serif font-bold text-zinc-100 print:text-black uppercase">
+          <section id="section-bab2" className="mb-10">
+            <div className="border-b border-zinc-200 dark:border-zinc-850 pb-2 mb-4 print:border-black">
+              <h2 className="text-base sm:text-lg font-serif font-bold text-zinc-900 dark:text-zinc-100 print:text-black uppercase">
                 {currentDoc.bab2.title}
               </h2>
             </div>
@@ -906,9 +1108,9 @@ NIP / NIK.
           </section>
 
           {/* BAB III */}
-          <section className="mb-10">
-            <div className="border-b border-zinc-900 pb-2 mb-4 print:border-black">
-              <h2 className="text-base sm:text-lg font-serif font-bold text-zinc-100 print:text-black uppercase">
+          <section id="section-bab3" className="mb-10">
+            <div className="border-b border-zinc-200 dark:border-zinc-850 pb-2 mb-4 print:border-black">
+              <h2 className="text-base sm:text-lg font-serif font-bold text-zinc-900 dark:text-zinc-100 print:text-black uppercase">
                 {currentDoc.bab3.title}
               </h2>
             </div>
@@ -916,18 +1118,18 @@ NIP / NIK.
             {/* Visual Pipeline Flowchart */}
             <ResearchFlowchart doc={currentDoc} />
 
-            <div className="flex items-center justify-between p-3 rounded-xl bg-zinc-900/60 border border-zinc-800 no-print mb-4">
+            <div className="flex items-center justify-between p-3 rounded-xl bg-zinc-50 dark:bg-zinc-900/60 border border-zinc-200 dark:border-zinc-800 no-print mb-4">
               <div className="flex items-center gap-2">
-                <ClipboardList className="w-4 h-4 text-zinc-300" />
+                <ClipboardList className="w-4 h-4 text-zinc-500 dark:text-zinc-300" />
                 <div>
-                  <span className="font-semibold text-zinc-200 text-xs">Instrumen Riset & Angket Pengumpulan Data</span>
-                  <p className="text-[11px] text-zinc-400">Tersedia kuesioner Skala Likert 1-5, pedoman wawancara, dan checklist observasi</p>
+                  <span className="font-semibold text-zinc-800 dark:text-zinc-200 text-xs">Instrumen Riset & Angket Pengumpulan Data</span>
+                  <p className="text-[11px] text-zinc-500 dark:text-zinc-400">Tersedia kuesioner Skala Likert 1-5, pedoman wawancara, dan checklist observasi</p>
                 </div>
               </div>
               <button
                 type="button"
                 onClick={() => setIsInstrumentModalOpen(true)}
-                className="px-3 py-1.5 rounded-lg bg-zinc-100 hover:bg-white text-zinc-950 font-semibold text-xs transition-colors cursor-pointer"
+                className="px-3 py-1.5 rounded-lg bg-zinc-900 dark:bg-zinc-100 hover:bg-black dark:hover:bg-white text-white dark:text-black font-semibold text-xs transition-colors cursor-pointer shadow-xs"
               >
                 Lihat Instrumen
               </button>
@@ -1044,22 +1246,22 @@ NIP / NIK.
           </section>
 
           {/* BAB IV: MATRIKS TABEL AKADEMIK (3 Garis Horizontal Standar) */}
-          <section className="mb-10">
-            <div className="border-b border-zinc-900 pb-2 mb-4 print:border-black">
-              <h2 className="text-base sm:text-lg font-serif font-bold text-zinc-100 print:text-black uppercase">
+          <section id="section-bab4" className="mb-10">
+            <div className="border-b border-zinc-200 dark:border-zinc-850 pb-2 mb-4 print:border-black">
+              <h2 className="text-base sm:text-lg font-serif font-bold text-zinc-900 dark:text-zinc-100 print:text-black uppercase">
                 {currentDoc.bab4.title}
               </h2>
             </div>
 
-            <h3 className="text-sm font-semibold text-zinc-100 print:text-black font-serif mb-3">
+            <h3 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100 print:text-black font-serif mb-3">
               Tabel 4.1 {currentDoc.category === "magang" ? "Matriks Rencana Kerja Mingguan (Logbook)" : "Jadwal Pelaksanaan Penelitian (Gantt Chart)"}
             </h3>
 
             {/* Academic 3-line Table */}
             <div className="overflow-x-auto my-4">
-              <table className="w-full text-left text-xs font-sans border-t-2 border-b-2 border-zinc-200 print:border-black">
+              <table className="w-full text-left text-xs font-sans border-t-2 border-b-2 border-zinc-300 dark:border-zinc-700 print:border-black">
                 <thead>
-                  <tr className="border-b border-zinc-800 print:border-black font-semibold text-zinc-100 print:text-black">
+                  <tr className="border-b border-zinc-200 dark:border-zinc-800 print:border-black font-semibold text-zinc-900 dark:text-zinc-100 print:text-black">
                     <th className="py-2 px-3">Minggu</th>
                     <th className="py-2 px-3">Tahap Pelaksanaan</th>
                     <th className="py-2 px-3">Rincian Aktivitas</th>
@@ -1161,26 +1363,26 @@ NIP / NIK.
 
           {/* DAFTAR PUSTAKA (Standar APA 7th Edition / IEEE) */}
           {currentDoc.bibliography && currentDoc.bibliography.length > 0 && (
-            <section className="mb-10 pt-6 border-t border-zinc-900 print:border-black">
-              <div className="border-b border-zinc-900 pb-2 mb-4 print:border-black flex items-center justify-between">
-                <h2 className="text-base sm:text-lg font-serif font-bold text-zinc-100 print:text-black uppercase">
+            <section id="section-pustaka" className="mb-10 pt-6 border-t border-zinc-200 dark:border-zinc-850 print:border-black">
+              <div className="border-b border-zinc-200 dark:border-zinc-850 pb-2 mb-4 print:border-black flex items-center justify-between">
+                <h2 className="text-base sm:text-lg font-serif font-bold text-zinc-900 dark:text-zinc-100 print:text-black uppercase">
                   DAFTAR PUSTAKA ({citationStyle === "apa" ? "STANDAR APA 7TH EDITION" : "STANDAR IEEE"})
                 </h2>
-                <span className="no-print text-[10px] font-mono px-2 py-0.5 rounded bg-zinc-900 text-zinc-400 border border-zinc-800">
+                <span className="no-print text-[10px] font-mono px-2 py-0.5 rounded bg-zinc-100 dark:bg-zinc-900 text-zinc-600 dark:text-zinc-400 border border-zinc-200 dark:border-zinc-800">
                   {citationStyle === "apa" ? "Format: Nama, Tahun" : "Format: Numerik [N]"}
                 </span>
               </div>
-              <div className="space-y-3 text-xs text-zinc-300 print:text-black font-sans">
+              <div className="space-y-3 text-xs text-zinc-700 dark:text-zinc-300 print:text-black font-sans">
                 {currentDoc.bibliography.map((bib, bIdx) => (
                   <p key={bib.id} className="pl-6 -indent-6 leading-relaxed">
                     {citationStyle === "ieee" ? (
                       <>
-                        <span className="font-mono font-bold text-zinc-100 mr-1.5">[{bIdx + 1}]</span>
-                        <span className="text-zinc-200 print:text-black">{bib.author}</span>, "{bib.title}," <em>{bib.source}</em>, {bib.year}.
+                        <span className="font-mono font-bold text-zinc-900 dark:text-zinc-100 mr-1.5">[{bIdx + 1}]</span>
+                        <span className="text-zinc-800 dark:text-zinc-200 print:text-black">{bib.author}</span>, "{bib.title}," <em>{bib.source}</em>, {bib.year}.
                       </>
                     ) : (
                       <>
-                        <span className="font-medium text-zinc-200 print:text-black">{bib.author}</span> ({bib.year}). <em>{bib.title}</em>. {bib.source}
+                        <span className="font-medium text-zinc-800 dark:text-zinc-200 print:text-black">{bib.author}</span> ({bib.year}). <em>{bib.title}</em>. {bib.source}
                       </>
                     )}
                     {bib.doiUrl && (
@@ -1195,18 +1397,18 @@ NIP / NIK.
           )}
 
           {/* Lembar Pengesahan Formal */}
-          <div className="pt-8 mt-10 border-t border-zinc-900 print:border-black font-sans text-xs relative">
+          <div id="section-pengesahan" className="pt-8 mt-10 border-t border-zinc-200 dark:border-zinc-850 print:border-black font-sans text-xs relative">
             <div className="flex items-center justify-between mb-2">
-              <h3 className="font-serif font-bold text-sm text-zinc-100 uppercase tracking-wider print:text-black text-center flex-1">
+              <h3 className="font-serif font-bold text-sm text-zinc-900 dark:text-zinc-100 uppercase tracking-wider print:text-black text-center flex-1">
                 {currentDoc.approvalSheet?.title || "LEMBAR PENGESAHAN PROPOSAL"}
               </h3>
               <button
                 type="button"
                 onClick={() => setIsApprovalModalOpen(true)}
-                className="no-print text-[11px] font-mono text-zinc-400 hover:text-zinc-100 bg-zinc-900 px-2.5 py-1 rounded-lg border border-zinc-800 flex items-center gap-1.5 cursor-pointer transition-colors"
+                className="no-print text-[11px] font-mono text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 bg-white dark:bg-zinc-900 px-2.5 py-1 rounded-lg border border-zinc-200 dark:border-zinc-800 flex items-center gap-1.5 cursor-pointer transition-colors shadow-xs"
                 title="Kustomisasi tanda tangan dosen pembimbing dan kaprodi"
               >
-                <FileSignature className="w-3.5 h-3.5 text-zinc-400" />
+                <FileSignature className="w-3.5 h-3.5 text-zinc-500 dark:text-zinc-400" />
                 <span>Edit Tanda Tangan</span>
               </button>
             </div>
@@ -1274,12 +1476,12 @@ NIP / NIK.
 
       {/* TAB 3: MATRIKS JADWAL */}
       {activeTab === "jadwal" && (
-        <div className="bg-zinc-950 p-6 rounded-xl border border-zinc-900">
+        <div className="bg-white dark:bg-zinc-950 p-6 rounded-2xl border border-zinc-200 dark:border-zinc-850 shadow-sm">
           <div className="flex items-center justify-between gap-4 mb-6">
-            <h2 className="text-base sm:text-lg font-semibold text-zinc-100">
+            <h2 className="text-base sm:text-lg font-semibold text-zinc-900 dark:text-zinc-100">
               Rencana Jadwal Mingguan Terintegrasi
             </h2>
-            <span className="text-xs font-mono text-zinc-400">
+            <span className="text-xs font-mono text-zinc-500 dark:text-zinc-400">
               Durasi: {currentDoc.durationMonths} Bulan
             </span>
           </div>
@@ -1288,18 +1490,18 @@ NIP / NIK.
             {currentDoc.bab4.jadwalMatriks.map((item, idx) => (
               <div
                 key={idx}
-                className="p-3.5 rounded-lg border border-zinc-900 bg-zinc-900/30 flex flex-col md:flex-row md:items-center justify-between gap-3"
+                className="p-3.5 rounded-xl border border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900/30 flex flex-col md:flex-row md:items-center justify-between gap-3"
               >
                 <div className="flex items-start gap-3">
-                  <div className="w-10 h-10 rounded bg-zinc-900 text-zinc-200 flex flex-col items-center justify-center font-mono font-bold flex-shrink-0">
+                  <div className="w-10 h-10 rounded-lg bg-zinc-200 dark:bg-zinc-900 text-zinc-800 dark:text-zinc-200 flex flex-col items-center justify-center font-mono font-bold flex-shrink-0">
                     <span className="text-[9px] uppercase text-zinc-500">MG</span>
                     <span className="text-xs">{item.week}</span>
                   </div>
                   <div>
-                    <h3 className="text-xs sm:text-sm font-medium text-zinc-100">
+                    <h3 className="text-xs sm:text-sm font-semibold text-zinc-900 dark:text-zinc-100">
                       {item.phase}
                     </h3>
-                    <p className="text-xs text-zinc-400 mt-0.5">
+                    <p className="text-xs text-zinc-600 dark:text-zinc-400 mt-0.5">
                       {item.activities.join(" • ")}
                     </p>
                     <p className="text-[11px] text-zinc-500 mt-0.5">
@@ -1310,7 +1512,7 @@ NIP / NIK.
 
                 <div className="md:text-right flex-shrink-0 text-xs">
                   <span className="text-zinc-500 block text-[11px]">Output:</span>
-                  <span className="font-mono text-zinc-200">{item.output}</span>
+                  <span className="font-mono text-zinc-800 dark:text-zinc-200 font-medium">{item.output}</span>
                 </div>
               </div>
             ))}
@@ -1320,21 +1522,21 @@ NIP / NIK.
 
       {/* TAB 4: SLIDE PRESENTASI 16:9 */}
       {activeTab === "slides" && (
-        <div className="bg-zinc-950 p-6 rounded-xl border border-zinc-900">
+        <div className="bg-white dark:bg-zinc-950 p-6 rounded-2xl border border-zinc-200 dark:border-zinc-850 shadow-sm">
           <div className="flex items-center justify-between gap-4 mb-4">
-            <h2 className="text-base sm:text-lg font-semibold text-zinc-100">
+            <h2 className="text-base sm:text-lg font-semibold text-zinc-900 dark:text-zinc-100">
               Slide Presentasi Ringkasan (16:9)
             </h2>
             
             <div className="flex items-center gap-2 text-xs">
-              <span className="text-zinc-400 font-mono">
+              <span className="text-zinc-500 dark:text-zinc-400 font-mono">
                 Slide {activeSlideIndex + 1} / {currentDoc.slides.length}
               </span>
               <button
                 type="button"
                 disabled={activeSlideIndex === 0}
                 onClick={() => setActiveSlideIndex(prev => prev - 1)}
-                className="px-2.5 py-1 rounded bg-zinc-900 hover:bg-zinc-800 disabled:opacity-30 cursor-pointer text-zinc-200 text-xs"
+                className="px-2.5 py-1 rounded bg-zinc-100 dark:bg-zinc-900 hover:bg-zinc-200 dark:hover:bg-zinc-800 disabled:opacity-30 cursor-pointer text-zinc-800 dark:text-zinc-200 text-xs transition-colors"
               >
                 Prev
               </button>
@@ -1342,7 +1544,7 @@ NIP / NIK.
                 type="button"
                 disabled={activeSlideIndex === currentDoc.slides.length - 1}
                 onClick={() => setActiveSlideIndex(prev => prev + 1)}
-                className="px-2.5 py-1 rounded bg-zinc-900 hover:bg-zinc-800 disabled:opacity-30 cursor-pointer text-zinc-200 text-xs"
+                className="px-2.5 py-1 rounded bg-zinc-100 dark:bg-zinc-900 hover:bg-zinc-200 dark:hover:bg-zinc-800 disabled:opacity-30 cursor-pointer text-zinc-800 dark:text-zinc-200 text-xs transition-colors"
               >
                 Next
               </button>
@@ -1351,22 +1553,22 @@ NIP / NIK.
 
           {/* Active 16:9 Screen */}
           {currentDoc.slides[activeSlideIndex] && (
-            <div className="w-full aspect-[16/9] max-h-[480px] rounded-lg bg-black border border-zinc-900 p-6 sm:p-10 flex flex-col justify-between relative shadow-xl overflow-hidden">
+            <div className="w-full aspect-[16/9] max-h-[480px] rounded-xl bg-zinc-900 text-white border border-zinc-800 p-6 sm:p-10 flex flex-col justify-between relative shadow-xl overflow-hidden">
               <div>
                 <span className="text-xs font-mono uppercase text-zinc-400 tracking-wider">
                   {currentDoc.slides[activeSlideIndex].kicker}
                 </span>
-                <h3 className="text-lg sm:text-2xl font-bold text-zinc-100 mt-2 leading-tight">
+                <h3 className="text-lg sm:text-2xl font-bold text-white mt-2 leading-tight">
                   {currentDoc.slides[activeSlideIndex].title}
                 </h3>
-                <p className="text-xs sm:text-sm text-zinc-400 mt-1">
+                <p className="text-xs sm:text-sm text-zinc-300 mt-1">
                   {currentDoc.slides[activeSlideIndex].subtitle}
                 </p>
 
                 <div className="mt-6 space-y-2.5">
                   {currentDoc.slides[activeSlideIndex].keyPoints.map((pt, pIdx) => (
-                    <div key={pIdx} className="flex items-start gap-2.5 text-xs sm:text-sm text-zinc-300">
-                      <span className="w-4 h-4 rounded-full bg-zinc-900 text-zinc-300 font-mono text-[10px] flex items-center justify-center font-bold flex-shrink-0 mt-0.5">
+                    <div key={pIdx} className="flex items-start gap-2.5 text-xs sm:text-sm text-zinc-200">
+                      <span className="w-4 h-4 rounded-full bg-zinc-800 text-zinc-200 font-mono text-[10px] flex items-center justify-center font-bold flex-shrink-0 mt-0.5">
                         {pIdx + 1}
                       </span>
                       <span>{pt}</span>
@@ -1375,7 +1577,7 @@ NIP / NIK.
                 </div>
               </div>
 
-              <div className="pt-3 border-t border-zinc-900 flex items-center justify-between text-[11px] text-zinc-500 font-mono">
+              <div className="pt-3 border-t border-zinc-800 flex items-center justify-between text-[11px] text-zinc-400 font-mono">
                 <span>{currentDoc.institution} &bull; {currentDoc.candidateName}</span>
                 <span>Slide {activeSlideIndex + 1} / {currentDoc.slides.length}</span>
               </div>
@@ -1383,11 +1585,11 @@ NIP / NIK.
           )}
 
           {/* Speaker Notes */}
-          <div className="mt-3 p-3 rounded bg-zinc-900/60 border border-zinc-900">
-            <span className="text-[11px] text-zinc-400 font-medium block mb-1">
+          <div className="mt-4 p-3.5 rounded-xl bg-zinc-50 dark:bg-zinc-900/60 border border-zinc-200 dark:border-zinc-800">
+            <span className="text-[11px] text-zinc-500 dark:text-zinc-400 font-medium block mb-1">
               Catatan Presenter:
             </span>
-            <p className="text-xs text-zinc-300 italic leading-relaxed">
+            <p className="text-xs text-zinc-700 dark:text-zinc-300 italic leading-relaxed">
               "{currentDoc.slides[activeSlideIndex]?.speakerNotes}"
             </p>
           </div>
@@ -1396,12 +1598,12 @@ NIP / NIK.
 
       {/* TAB 5: AUDIT KUALITAS */}
       {activeTab === "audit" && (
-        <div className="bg-zinc-950 p-6 rounded-xl border border-zinc-900">
+        <div className="bg-white dark:bg-zinc-950 p-6 rounded-2xl border border-zinc-200 dark:border-zinc-850 shadow-sm">
           <div className="flex items-center justify-between gap-4 mb-6">
-            <h2 className="text-base sm:text-lg font-semibold text-zinc-100">
+            <h2 className="text-base sm:text-lg font-semibold text-zinc-900 dark:text-zinc-100">
               Hasil Audit Kepatuhan Dokumen
             </h2>
-            <span className="text-xs text-zinc-300">
+            <span className="text-xs font-semibold text-emerald-600 dark:text-emerald-400">
               Lolos Verifikasi 100%
             </span>
           </div>
@@ -1410,24 +1612,24 @@ NIP / NIK.
             {currentDoc.auditLog.map((log, idx) => (
               <div
                 key={idx}
-                className="p-3.5 rounded-lg border border-zinc-900 bg-zinc-900/30 flex items-start justify-between gap-4"
+                className="p-3.5 rounded-xl border border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900/30 flex items-start justify-between gap-4"
               >
                 <div className="flex items-start gap-3">
-                  <Check className="w-4 h-4 text-zinc-200 flex-shrink-0 mt-0.5" />
+                  <Check className="w-4 h-4 text-emerald-500 flex-shrink-0 mt-0.5" />
                   <div>
-                    <h3 className="text-xs sm:text-sm font-medium text-zinc-100">
+                    <h3 className="text-xs sm:text-sm font-semibold text-zinc-900 dark:text-zinc-100">
                       {log.rule}
                     </h3>
-                    <p className="text-xs text-zinc-400 mt-0.5">
+                    <p className="text-xs text-zinc-600 dark:text-zinc-400 mt-0.5">
                       {log.details}
                     </p>
-                    <span className="text-[11px] text-zinc-500 mt-1 inline-block">
+                    <span className="text-[11px] text-zinc-500 mt-1 inline-block font-mono">
                       Pilar: {log.thinkingMode}
                     </span>
                   </div>
                 </div>
 
-                <span className="text-xs font-mono text-zinc-300 flex-shrink-0">
+                <span className="text-xs font-mono font-medium text-emerald-600 dark:text-emerald-400 flex-shrink-0">
                   {log.status}
                 </span>
               </div>
@@ -1499,6 +1701,13 @@ NIP / NIK.
           setToastMessage("Lembar pengesahan resmi berhasil diperbarui!");
           setTimeout(() => setToastMessage(null), 3000);
         }}
+      />
+
+      {/* CO-PILOT AI INTERACTIVE SLIDE-OVER DRAWER */}
+      <AcademicCopilotDrawer
+        isOpen={isCopilotOpen}
+        onClose={() => setIsCopilotOpen(false)}
+        doc={currentDoc}
       />
 
       {/* FLOATING ACADEMIC AI REVISION MODAL DIALOG */}
