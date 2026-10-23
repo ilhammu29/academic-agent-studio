@@ -321,20 +321,20 @@ export async function generateAcademicProposalDocx(doc: ProposalDocument): Promi
       {
         properties: standardPageProperties,
         children: [
-          createHeading1("LEMBAR PENGESAHAN"),
+          createHeading1(doc.approvalSheet?.title || "LEMBAR PENGESAHAN PROPOSAL"),
           new Paragraph({ spacing: { after: 200 } }),
           createBodyParagraph(`Judul Proposal: ${doc.title}`),
           createBodyParagraph(`Nama Mahasiswa: ${doc.candidateName} (NIM: ${doc.candidateId})`),
           createBodyParagraph(`Program Studi: ${doc.facultyMajor}`),
           createBodyParagraph(`Instansi Tujuan: ${doc.targetEntity} (${doc.targetDepartment})`),
           createBodyParagraph(`Waktu Pelaksanaan: ${doc.durationMonths} Bulan (${doc.bab4.jadwalMatriks.length * 4 || 16} Minggu Kerja Penuh)`),
-          new Paragraph({ spacing: { after: 400 } }),
+          new Paragraph({ spacing: { after: 300 } }),
           new Paragraph({
             alignment: AlignmentType.RIGHT,
-            spacing: { after: 400 },
+            spacing: { after: 300 },
             children: [
               new TextRun({
-                text: `Disetujui pada tanggal: ${doc.generationDate}`,
+                text: doc.approvalSheet?.approvalDate ? `Disahkan: ${doc.approvalSheet.approvalDate}` : `Disetujui pada tanggal: ${doc.generationDate}`,
                 font: FONT_FAMILY,
                 size: 24,
               }),
@@ -359,21 +359,47 @@ export async function generateAcademicProposalDocx(doc: ProposalDocument): Promi
                   new TableCell({
                     width: { size: 50, type: WidthType.PERCENTAGE },
                     children: [
-                      new Paragraph({ alignment: AlignmentType.CENTER, children: [new TextRun({ text: "Dosen Pembimbing Akademik,", font: FONT_FAMILY, bold: true })] }),
-                      new Paragraph({ spacing: { before: 800 }, alignment: AlignmentType.CENTER, children: [new TextRun({ text: "( Dr. Eng. Ir. Hendra S., M.T. )", font: FONT_FAMILY, underline: {} })] }),
-                      new Paragraph({ alignment: AlignmentType.CENTER, children: [new TextRun({ text: "NIP. 19780512 200501 1 002", font: FONT_FAMILY })] }),
+                      new Paragraph({ alignment: AlignmentType.CENTER, children: [new TextRun({ text: doc.approvalSheet?.primarySigners?.[0]?.role || "Dosen Pembimbing Akademik,", font: FONT_FAMILY, bold: true })] }),
+                      new Paragraph({ spacing: { before: 800 }, alignment: AlignmentType.CENTER, children: [new TextRun({ text: `( ${doc.approvalSheet?.primarySigners?.[0]?.name || "Dr. Ir. Suharyanto, M.Sc."} )`, font: FONT_FAMILY, underline: {} })] }),
+                      new Paragraph({ alignment: AlignmentType.CENTER, children: [new TextRun({ text: doc.approvalSheet?.primarySigners?.[0]?.idNumber || "NIP. 19780512 200312 1 002", font: FONT_FAMILY })] }),
                     ],
                   }),
                   new TableCell({
                     width: { size: 50, type: WidthType.PERCENTAGE },
                     children: [
-                      new Paragraph({ alignment: AlignmentType.CENTER, children: [new TextRun({ text: `Pembimbing Lapangan / Mitra,`, font: FONT_FAMILY, bold: true })] }),
-                      new Paragraph({ spacing: { before: 800 }, alignment: AlignmentType.CENTER, children: [new TextRun({ text: `( Lead Mentor ${doc.targetEntity} )`, font: FONT_FAMILY, underline: {} })] }),
-                      new Paragraph({ alignment: AlignmentType.CENTER, children: [new TextRun({ text: "NIK / NIP Mitra Terkait", font: FONT_FAMILY })] }),
+                      new Paragraph({ alignment: AlignmentType.CENTER, children: [new TextRun({ text: doc.approvalSheet?.primarySigners?.[1]?.role || (doc.category === "magang" ? "Pembimbing Lapangan / Mitra," : "Dosen Pembimbing Pendamping,"), font: FONT_FAMILY, bold: true })] }),
+                      new Paragraph({ spacing: { before: 800 }, alignment: AlignmentType.CENTER, children: [new TextRun({ text: `( ${doc.approvalSheet?.primarySigners?.[1]?.name || (doc.category === "magang" ? `Lead Mentor ${doc.targetEntity}` : "Dian Pratama, M.Kom.")} )`, font: FONT_FAMILY, underline: {} })] }),
+                      new Paragraph({ alignment: AlignmentType.CENTER, children: [new TextRun({ text: doc.approvalSheet?.primarySigners?.[1]?.idNumber || "NIP / NIK Mitra Terkait", font: FONT_FAMILY })] }),
                     ],
                   }),
                 ],
               }),
+            ],
+          }),
+          new Paragraph({
+            alignment: AlignmentType.CENTER,
+            spacing: { before: 500, after: 80 },
+            children: [
+              new TextRun({ text: "Mengetahui,", font: FONT_FAMILY, size: 24 }),
+            ],
+          }),
+          new Paragraph({
+            alignment: AlignmentType.CENTER,
+            spacing: { after: 700 },
+            children: [
+              new TextRun({ text: doc.approvalSheet?.headSigner?.role || "Ketua Program Studi", font: FONT_FAMILY, bold: true, size: 24 }),
+            ],
+          }),
+          new Paragraph({
+            alignment: AlignmentType.CENTER,
+            children: [
+              new TextRun({ text: `( ${doc.approvalSheet?.headSigner?.name || "Prof. Dr. Ir. Budi Hartono, M.Sc."} )`, font: FONT_FAMILY, bold: true, underline: {}, size: 24 }),
+            ],
+          }),
+          new Paragraph({
+            alignment: AlignmentType.CENTER,
+            children: [
+              new TextRun({ text: doc.approvalSheet?.headSigner?.idNumber || "NIP. 19680315 199303 1 001", font: FONT_FAMILY, size: 22 }),
             ],
           }),
         ],

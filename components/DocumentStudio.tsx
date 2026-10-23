@@ -7,6 +7,9 @@ import DefenseSimulator from "./DefenseSimulator";
 import LiteratureSearchModal from "./LiteratureSearchModal";
 import { RevisionMatrixManager } from "./RevisionMatrixManager";
 import { TurnitinPreCheckModal } from "./TurnitinPreCheckModal";
+import { ResearchInstrumentModal } from "./ResearchInstrumentModal";
+import { ApprovalSheetModal } from "./ApprovalSheetModal";
+import { ResearchFlowchart } from "./ResearchFlowchart";
 import { generateAcademicProposalDocx, downloadDocxBlob } from "@/lib/docxExporter";
 import { generateAcademicProposalPptx } from "@/lib/pptxExporter";
 import { generateBibTeX, generateRIS, downloadCitationFile } from "@/lib/bibtexExporter";
@@ -29,7 +32,10 @@ import {
   RotateCcw,
   RotateCw,
   BookMarked,
-  CheckCircle2
+  CheckCircle2,
+  ClipboardList,
+  FileSignature,
+  BookmarkCheck
 } from "lucide-react";
 
 interface DocumentStudioProps {
@@ -51,6 +57,9 @@ export const DocumentStudio: React.FC<DocumentStudioProps> = ({
   const [isExportingPptx, setIsExportingPptx] = useState(false);
   const [isLitModalOpen, setIsLitModalOpen] = useState(false);
   const [isTurnitinModalOpen, setIsTurnitinModalOpen] = useState(false);
+  const [isInstrumentModalOpen, setIsInstrumentModalOpen] = useState(false);
+  const [isApprovalModalOpen, setIsApprovalModalOpen] = useState(false);
+  const [citationStyle, setCitationStyle] = useState<"apa" | "ieee">("apa");
   
   // History & Auto-save states
   const [history, setHistory] = useState<ProposalDocument[]>([doc]);
@@ -481,6 +490,39 @@ NIP / NIK.
             <span>Audit Turnitin</span>
           </button>
 
+          {/* Research Instruments & Questionnaire Trigger */}
+          <button
+            type="button"
+            onClick={() => setIsInstrumentModalOpen(true)}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-zinc-900 hover:bg-zinc-800 text-zinc-300 border border-zinc-800 text-xs font-medium transition-all cursor-pointer"
+            title="Buka Generator Instrumen Riset & Angket Kuesioner (Lampiran Bab III)"
+          >
+            <ClipboardList className="w-3.5 h-3.5 text-zinc-400" />
+            <span>Instrumen Riset</span>
+          </button>
+
+          {/* Approval Sheet Customizer Trigger */}
+          <button
+            type="button"
+            onClick={() => setIsApprovalModalOpen(true)}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-zinc-900 hover:bg-zinc-800 text-zinc-300 border border-zinc-800 text-xs font-medium transition-all cursor-pointer"
+            title="Kustomisasi data dosen pembimbing dan penguji pada lembar pengesahan"
+          >
+            <FileSignature className="w-3.5 h-3.5 text-zinc-400" />
+            <span>Pengesahan</span>
+          </button>
+
+          {/* Citation Style Switcher Pill */}
+          <button
+            type="button"
+            onClick={() => setCitationStyle(prev => prev === "apa" ? "ieee" : "apa")}
+            className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-zinc-900 hover:bg-zinc-800 text-zinc-300 border border-zinc-800 text-xs font-mono transition-all cursor-pointer"
+            title="Ganti format kutipan & daftar pustaka antara APA 7th Edition dan IEEE"
+          >
+            <BookmarkCheck className="w-3.5 h-3.5 text-zinc-400" />
+            <span>{citationStyle === "apa" ? "Sitasi: APA" : "Sitasi: IEEE"}</span>
+          </button>
+
           {/* Export BibTeX Button */}
           <button
             type="button"
@@ -871,6 +913,26 @@ NIP / NIK.
               </h2>
             </div>
 
+            {/* Visual Pipeline Flowchart */}
+            <ResearchFlowchart doc={currentDoc} />
+
+            <div className="flex items-center justify-between p-3 rounded-xl bg-zinc-900/60 border border-zinc-800 no-print mb-4">
+              <div className="flex items-center gap-2">
+                <ClipboardList className="w-4 h-4 text-zinc-300" />
+                <div>
+                  <span className="font-semibold text-zinc-200 text-xs">Instrumen Riset & Angket Pengumpulan Data</span>
+                  <p className="text-[11px] text-zinc-400">Tersedia kuesioner Skala Likert 1-5, pedoman wawancara, dan checklist observasi</p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setIsInstrumentModalOpen(true)}
+                className="px-3 py-1.5 rounded-lg bg-zinc-100 hover:bg-white text-zinc-950 font-semibold text-xs transition-colors cursor-pointer"
+              >
+                Lihat Instrumen
+              </button>
+            </div>
+
             <div className="space-y-4 text-xs sm:text-sm text-zinc-300 leading-relaxed text-justify print:text-black font-sans">
               {currentDoc.category === "magang" ? (
                 /* Format Khusus Magang: Metode Kerja, WBS, Perangkat, Kompetensi */
@@ -1097,18 +1159,30 @@ NIP / NIK.
             </p>
           </section>
 
-          {/* DAFTAR PUSTAKA (Standar APA 7th Edition) */}
+          {/* DAFTAR PUSTAKA (Standar APA 7th Edition / IEEE) */}
           {currentDoc.bibliography && currentDoc.bibliography.length > 0 && (
             <section className="mb-10 pt-6 border-t border-zinc-900 print:border-black">
-              <div className="border-b border-zinc-900 pb-2 mb-4 print:border-black">
+              <div className="border-b border-zinc-900 pb-2 mb-4 print:border-black flex items-center justify-between">
                 <h2 className="text-base sm:text-lg font-serif font-bold text-zinc-100 print:text-black uppercase">
-                  DAFTAR PUSTAKA
+                  DAFTAR PUSTAKA ({citationStyle === "apa" ? "STANDAR APA 7TH EDITION" : "STANDAR IEEE"})
                 </h2>
+                <span className="no-print text-[10px] font-mono px-2 py-0.5 rounded bg-zinc-900 text-zinc-400 border border-zinc-800">
+                  {citationStyle === "apa" ? "Format: Nama, Tahun" : "Format: Numerik [N]"}
+                </span>
               </div>
               <div className="space-y-3 text-xs text-zinc-300 print:text-black font-sans">
-                {currentDoc.bibliography.map((bib) => (
+                {currentDoc.bibliography.map((bib, bIdx) => (
                   <p key={bib.id} className="pl-6 -indent-6 leading-relaxed">
-                    <span className="font-medium text-zinc-200 print:text-black">{bib.author}</span> ({bib.year}). <em>{bib.title}</em>. {bib.source}
+                    {citationStyle === "ieee" ? (
+                      <>
+                        <span className="font-mono font-bold text-zinc-100 mr-1.5">[{bIdx + 1}]</span>
+                        <span className="text-zinc-200 print:text-black">{bib.author}</span>, "{bib.title}," <em>{bib.source}</em>, {bib.year}.
+                      </>
+                    ) : (
+                      <>
+                        <span className="font-medium text-zinc-200 print:text-black">{bib.author}</span> ({bib.year}). <em>{bib.title}</em>. {bib.source}
+                      </>
+                    )}
                     {bib.doiUrl && (
                       <span className="block pl-0 font-mono text-[10px] text-zinc-500 print:text-gray-600 mt-0.5">
                         DOI/URL: {bib.doiUrl}
@@ -1121,10 +1195,21 @@ NIP / NIK.
           )}
 
           {/* Lembar Pengesahan Formal */}
-          <div className="pt-8 mt-10 border-t border-zinc-900 print:border-black font-sans text-xs">
-            <h3 className="text-center font-serif font-bold text-sm text-zinc-100 uppercase tracking-wider mb-2 print:text-black">
-              {currentDoc.approvalSheet?.title || "LEMBAR PENGESAHAN PROPOSAL"}
-            </h3>
+          <div className="pt-8 mt-10 border-t border-zinc-900 print:border-black font-sans text-xs relative">
+            <div className="flex items-center justify-between mb-2">
+              <h3 className="font-serif font-bold text-sm text-zinc-100 uppercase tracking-wider print:text-black text-center flex-1">
+                {currentDoc.approvalSheet?.title || "LEMBAR PENGESAHAN PROPOSAL"}
+              </h3>
+              <button
+                type="button"
+                onClick={() => setIsApprovalModalOpen(true)}
+                className="no-print text-[11px] font-mono text-zinc-400 hover:text-zinc-100 bg-zinc-900 px-2.5 py-1 rounded-lg border border-zinc-800 flex items-center gap-1.5 cursor-pointer transition-colors"
+                title="Kustomisasi tanda tangan dosen pembimbing dan kaprodi"
+              >
+                <FileSignature className="w-3.5 h-3.5 text-zinc-400" />
+                <span>Edit Tanda Tangan</span>
+              </button>
+            </div>
             <p className="text-center text-[11px] text-zinc-500 font-mono mb-8 print:text-gray-600">
               Disahkan di {currentDoc.institution}, Tanggal: {currentDoc.approvalSheet?.approvalDate || currentDoc.generationDate}
             </p>
@@ -1390,6 +1475,29 @@ NIP / NIK.
           }));
           setToastMessage(`Paper "${paper.title.slice(0, 40)}..." berhasil ditambahkan ke Bab 2!`);
           setTimeout(() => setToastMessage(null), 4000);
+        }}
+      />
+
+      {/* MODAL: GENERATOR INSTRUMEN RISET & KUESIONER */}
+      <ResearchInstrumentModal
+        isOpen={isInstrumentModalOpen}
+        onClose={() => setIsInstrumentModalOpen(false)}
+        doc={currentDoc}
+      />
+
+      {/* MODAL: KUSTOMISASI LEMBAR PENGESAHAN */}
+      <ApprovalSheetModal
+        isOpen={isApprovalModalOpen}
+        onClose={() => setIsApprovalModalOpen(false)}
+        doc={currentDoc}
+        onSave={(info) => {
+          setCurrentDoc(prev => {
+            const updated = { ...prev, approvalSheet: info };
+            pushToHistory(updated);
+            return updated;
+          });
+          setToastMessage("Lembar pengesahan resmi berhasil diperbarui!");
+          setTimeout(() => setToastMessage(null), 3000);
         }}
       />
 
