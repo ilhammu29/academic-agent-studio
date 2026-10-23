@@ -10,7 +10,7 @@ import { TurnitinPreCheckModal } from "./TurnitinPreCheckModal";
 import { ResearchInstrumentModal } from "./ResearchInstrumentModal";
 import { ApprovalSheetModal } from "./ApprovalSheetModal";
 import { CampusGuidelineModal } from "./CampusGuidelineModal";
-import { ResearchFlowchart } from "./ResearchFlowchart";
+import { AcademicFlowchartDiagram } from "./AcademicFlowchartDiagram";
 import { AcademicCopilotDrawer } from "./AcademicCopilotDrawer";
 import { generateAcademicProposalDocx, downloadDocxBlob } from "@/lib/docxExporter";
 import { generateAcademicProposalPptx } from "@/lib/pptxExporter";
@@ -67,6 +67,7 @@ export const DocumentStudio: React.FC<DocumentStudioProps> = ({
   const [isApprovalModalOpen, setIsApprovalModalOpen] = useState(false);
   const [isGuidelineModalOpen, setIsGuidelineModalOpen] = useState(false);
   const [citationStyle, setCitationStyle] = useState<"apa" | "ieee">("apa");
+  const [showMarginRuler, setShowMarginRuler] = useState(false);
   
   // Co-Pilot & Dropdown states
   const [isCopilotOpen, setIsCopilotOpen] = useState(false);
@@ -836,7 +837,7 @@ NIP / NIK.
 
       {/* QUICK JUMP OUTLINE RAIL (Only for Naskah Tab) */}
       {activeTab === "naskah" && (
-        <div className="flex items-center gap-1.5 pb-4 mb-6 overflow-x-auto text-[11px] font-mono no-print">
+        <div className="flex items-center gap-1.5 pb-4 mb-4 overflow-x-auto text-[11px] font-mono no-print">
           <span className="text-zinc-400 dark:text-zinc-500 flex items-center gap-1 mr-1 text-[11px]">
             <Compass className="w-3.5 h-3.5" /> Lompat Cepat:
           </span>
@@ -877,6 +878,13 @@ NIP / NIK.
           </button>
           <button
             type="button"
+            onClick={() => scrollToSection("section-bab5")}
+            className="px-2.5 py-1 rounded-md bg-zinc-100 dark:bg-zinc-900 text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 hover:bg-zinc-200 dark:hover:bg-zinc-800 whitespace-nowrap transition-colors cursor-pointer"
+          >
+            Bab V: Kesimpulan & Mitigasi
+          </button>
+          <button
+            type="button"
             onClick={() => scrollToSection("section-pustaka")}
             className="px-2.5 py-1 rounded-md bg-zinc-100 dark:bg-zinc-900 text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 hover:bg-zinc-200 dark:hover:bg-zinc-800 whitespace-nowrap transition-colors cursor-pointer"
           >
@@ -889,12 +897,90 @@ NIP / NIK.
           >
             Lembar Pengesahan
           </button>
+          <button
+            type="button"
+            onClick={() => scrollToSection("section-lampiran")}
+            className="px-2.5 py-1 rounded-md bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 hover:bg-indigo-100 whitespace-nowrap transition-colors cursor-pointer"
+          >
+            Lampiran Lengkap
+          </button>
+        </div>
+      )}
+
+      {/* INTERACTIVE CAMPUS FORMAT INSPECTOR BAR */}
+      {activeTab === "naskah" && (
+        <div className="mb-4 p-3 rounded-xl bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 shadow-xs flex flex-wrap items-center justify-between gap-3 text-xs no-print">
+          <div className="flex flex-wrap items-center gap-2">
+            <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-indigo-50 dark:bg-indigo-950/60 text-indigo-700 dark:text-indigo-300 font-semibold border border-indigo-200 dark:border-indigo-800/80">
+              <Landmark className="w-3.5 h-3.5" />
+              <span>Format: {currentDoc.campusGuideline?.campusName || "Standar Dikti"}</span>
+            </div>
+
+            <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-zinc-100 dark:bg-zinc-800/80 text-zinc-700 dark:text-zinc-300 font-mono text-[11px]">
+              <span>Margin: Kiri {currentDoc.campusGuideline?.margins?.leftCm ?? 4}cm • Atas {currentDoc.campusGuideline?.margins?.topCm ?? 4}cm • Kanan {currentDoc.campusGuideline?.margins?.rightCm ?? 3}cm • Bawah {currentDoc.campusGuideline?.margins?.bottomCm ?? 3}cm</span>
+            </div>
+
+            <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-zinc-100 dark:bg-zinc-800/80 text-zinc-700 dark:text-zinc-300 font-mono text-[11px]">
+              <span>Font: {currentDoc.campusGuideline?.typography?.fontFamily || "Times New Roman"} • Spasi {currentDoc.campusGuideline?.typography?.lineSpacing || 1.5}</span>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-2">
+            {/* Toggle Ruler Guide */}
+            <button
+              type="button"
+              onClick={() => setShowMarginRuler(!showMarginRuler)}
+              className={`px-2.5 py-1 rounded-md border text-xs font-medium transition-colors cursor-pointer flex items-center gap-1.5 ${
+                showMarginRuler
+                  ? "bg-indigo-600 text-white border-indigo-600 shadow-xs"
+                  : "bg-zinc-50 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 border-zinc-200 dark:border-zinc-700 hover:bg-zinc-100"
+              }`}
+            >
+              <span>{showMarginRuler ? "✓ Batas Margin Aktif" : "Tampilkan Batas Margin (Ruler)"}</span>
+            </button>
+
+            {/* Change Guideline */}
+            <button
+              type="button"
+              onClick={() => setIsGuidelineModalOpen(true)}
+              className="px-2.5 py-1 rounded-md bg-zinc-900 text-white dark:bg-zinc-100 dark:text-black font-semibold text-xs hover:bg-black dark:hover:bg-white transition-colors cursor-pointer shadow-xs"
+            >
+              Pindai / Ubah Format
+            </button>
+          </div>
         </div>
       )}
 
       {/* TAB 1: NASKAH PROPOSAL LENGKAP */}
       {activeTab === "naskah" && (
-        <article className="bg-white dark:bg-zinc-950 p-6 sm:p-12 rounded-2xl border border-zinc-200 dark:border-zinc-900 shadow-sm font-serif text-zinc-900 dark:text-zinc-100 print:bg-white print:text-black print:p-0 print:border-none print:shadow-none">
+        <article 
+          style={{
+            fontFamily: `${currentDoc.campusGuideline?.typography?.fontFamily || "Times New Roman"}, serif`,
+            lineHeight: currentDoc.campusGuideline?.typography?.lineSpacing === 2.0 ? "2.0" : "1.65",
+            paddingTop: `${(currentDoc.campusGuideline?.margins?.topCm ?? 4) * 9}px`,
+            paddingBottom: `${(currentDoc.campusGuideline?.margins?.bottomCm ?? 3) * 9}px`,
+            paddingLeft: `${(currentDoc.campusGuideline?.margins?.leftCm ?? 4) * 9}px`,
+            paddingRight: `${(currentDoc.campusGuideline?.margins?.rightCm ?? 3) * 9}px`,
+          }}
+          className="relative bg-white dark:bg-zinc-950 rounded-2xl border border-zinc-200 dark:border-zinc-900 shadow-sm text-zinc-900 dark:text-zinc-100 print:bg-white print:text-black print:p-0 print:border-none print:shadow-none transition-all duration-200"
+        >
+          {/* Visual Dashed Margin Guideline Overlay when ruler is toggled */}
+          {showMarginRuler && (
+            <div className="absolute inset-0 pointer-events-none border-2 border-dashed border-indigo-400/40 dark:border-indigo-500/40 rounded-xl m-2 p-2 flex flex-col justify-between text-[10px] font-mono text-indigo-600 dark:text-indigo-400 no-print z-10">
+              <div className="flex justify-between items-center bg-indigo-50/80 dark:bg-indigo-950/80 px-2 py-0.5 rounded shadow-xs">
+                <span>▲ Margin Atas: {currentDoc.campusGuideline?.margins?.topCm ?? 4} cm</span>
+                <span>Standar Kertas A4 (21 x 29.7 cm)</span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="bg-indigo-50/80 dark:bg-indigo-950/80 px-1.5 py-0.5 rounded shadow-xs">◀ Kiri: {currentDoc.campusGuideline?.margins?.leftCm ?? 4} cm</span>
+                <span className="bg-indigo-50/80 dark:bg-indigo-950/80 px-1.5 py-0.5 rounded shadow-xs">Kanan: {currentDoc.campusGuideline?.margins?.rightCm ?? 3} cm ▶</span>
+              </div>
+              <div className="flex justify-between items-center bg-indigo-50/80 dark:bg-indigo-950/80 px-2 py-0.5 rounded shadow-xs">
+                <span>▼ Margin Bawah: {currentDoc.campusGuideline?.margins?.bottomCm ?? 3} cm</span>
+                <span>Font: {currentDoc.campusGuideline?.typography?.fontFamily || "Times New Roman"} • Spasi: {currentDoc.campusGuideline?.typography?.lineSpacing || 1.5}</span>
+              </div>
+            </div>
+          )}
           
           {/* Cover Header */}
           <div className="text-center pb-8 border-b border-zinc-200 dark:border-zinc-850 print:border-black mb-8">
@@ -943,15 +1029,15 @@ NIP / NIK.
               </h2>
             </div>
 
-            <div className="space-y-4 text-xs sm:text-sm text-zinc-300 leading-relaxed text-justify print:text-black font-sans">
+            <div className="space-y-4 text-xs sm:text-sm text-zinc-800 dark:text-zinc-300 leading-relaxed text-justify print:text-black font-sans">
               <div className="flex items-center justify-between pt-1">
-                <h3 className="text-sm font-semibold text-zinc-100 print:text-black font-serif">1.1 Latar Belakang Masalah</h3>
+                <h3 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100 print:text-black font-serif">1.1 Latar Belakang Masalah</h3>
                 <button
                   type="button"
                   onClick={() => handleRefineWithAI("bab1.latarBelakang", "1.1 Latar Belakang Masalah", currentDoc.bab1.latarBelakang.join("\n\n"))}
-                  className="no-print text-[11px] font-mono text-zinc-400 hover:text-zinc-100 bg-zinc-900 px-2 py-0.5 rounded border border-zinc-800 flex items-center gap-1 cursor-pointer transition-colors"
+                  className="no-print text-[11px] font-mono text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-100 bg-zinc-100 dark:bg-zinc-900 px-2 py-0.5 rounded border border-zinc-200 dark:border-zinc-800 flex items-center gap-1 cursor-pointer transition-colors shadow-xs"
                 >
-                  <Sparkles className="w-3 h-3 text-zinc-400" />
+                  <Sparkles className="w-3 h-3 text-zinc-500 dark:text-zinc-400" />
                   <span>Revisi AI</span>
                 </button>
               </div>
@@ -960,13 +1046,13 @@ NIP / NIK.
               ))}
 
               <div className="flex items-center justify-between pt-2">
-                <h3 className="text-sm font-semibold text-zinc-100 print:text-black font-serif">1.2 Rumusan Masalah</h3>
+                <h3 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100 print:text-black font-serif">1.2 Rumusan Masalah</h3>
                 <button
                   type="button"
                   onClick={() => handleRefineWithAI("bab1.rumusanMasalah", "1.2 Rumusan Masalah", currentDoc.bab1.rumusanMasalah.join("\n"))}
-                  className="no-print text-[11px] font-mono text-zinc-400 hover:text-zinc-100 bg-zinc-900 px-2 py-0.5 rounded border border-zinc-800 flex items-center gap-1 cursor-pointer transition-colors"
+                  className="no-print text-[11px] font-mono text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-100 bg-zinc-100 dark:bg-zinc-900 px-2 py-0.5 rounded border border-zinc-200 dark:border-zinc-800 flex items-center gap-1 cursor-pointer transition-colors shadow-xs"
                 >
-                  <Sparkles className="w-3 h-3 text-zinc-400" />
+                  <Sparkles className="w-3 h-3 text-zinc-500 dark:text-zinc-400" />
                   <span>Revisi AI</span>
                 </button>
               </div>
@@ -976,14 +1062,14 @@ NIP / NIK.
                 ))}
               </ol>
 
-              <h3 className="text-sm font-semibold text-zinc-100 print:text-black font-serif pt-2">1.3 Batasan Masalah</h3>
+              <h3 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100 print:text-black font-serif pt-2">1.3 Batasan Masalah</h3>
               <ul className="list-disc pl-6 space-y-1">
                 {currentDoc.bab1.batasanMasalah.map((b, i) => (
                   <li key={i}>{b}</li>
                 ))}
               </ul>
 
-              <h3 className="text-sm font-semibold text-zinc-100 print:text-black font-serif pt-2">1.4 Tujuan Kegiatan</h3>
+              <h3 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100 print:text-black font-serif pt-2">1.4 Tujuan Kegiatan</h3>
               <p><strong>Tujuan Umum:</strong> {currentDoc.bab1.tujuanUmum}</p>
               <p className="pt-1"><strong>Tujuan Khusus:</strong></p>
               <ul className="list-disc pl-6 space-y-1">
@@ -992,7 +1078,7 @@ NIP / NIK.
                 ))}
               </ul>
 
-              <h3 className="text-sm font-semibold text-zinc-100 print:text-black font-serif pt-2">1.5 Manfaat Kegiatan</h3>
+              <h3 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100 print:text-black font-serif pt-2">1.5 Manfaat Kegiatan</h3>
               <div className="space-y-2">
                 <p><strong>1. Bagi Mahasiswa:</strong></p>
                 <ul className="list-disc pl-6 space-y-0.5">
@@ -1037,35 +1123,38 @@ NIP / NIK.
                   </div>
                   <p className="indent-6">{currentDoc.bab2.profilInstansi}</p>
                   
-                  <div className="p-3 bg-zinc-900/60 rounded border border-zinc-900 print:bg-gray-50 print:border-gray-300">
-                    <p className="font-semibold text-xs text-zinc-200 mb-1 print:text-black">Visi & Misi:</p>
-                    <ul className="space-y-1 text-xs">
+                  <div className="p-3 bg-zinc-50 dark:bg-zinc-900/60 rounded-xl border border-zinc-200 dark:border-zinc-800 print:bg-gray-50 print:border-gray-300">
+                    <p className="font-semibold text-xs text-zinc-900 dark:text-zinc-200 mb-1 print:text-black">Visi & Misi:</p>
+                    <ul className="space-y-1 text-xs text-zinc-700 dark:text-zinc-300">
                       {currentDoc.bab2.visiMisi.map((v, i) => <li key={i}>{v}</li>)}
                     </ul>
                   </div>
 
                   <p className="indent-6">{currentDoc.bab2.strukturOrganisasi}</p>
 
-                  <h3 className="text-sm font-semibold text-zinc-100 print:text-black font-serif pt-2">2.2 Landasan Teori Terapan & Standar Industri</h3>
+                  <h3 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100 print:text-black font-serif pt-2">2.2 Landasan Teori Terapan & Standar Industri</h3>
                   <div className="space-y-3">
                     {currentDoc.bab2.landasanTeori.map((theory, i) => (
-                      <div key={i} className="p-3 rounded bg-zinc-900/40 border border-zinc-900 print:border-gray-200">
-                        <h4 className="text-xs font-semibold text-zinc-100 print:text-black mb-1">{theory.topic}</h4>
-                        <p className="text-xs text-zinc-300 print:text-black">{theory.elaboration}</p>
+                      <div key={i} className="p-3.5 rounded-xl bg-zinc-50 dark:bg-zinc-900/40 border border-zinc-200 dark:border-zinc-800 print:border-gray-200">
+                        <h4 className="text-xs font-semibold text-zinc-900 dark:text-zinc-100 print:text-black mb-1">{theory.topic}</h4>
+                        <p className="text-xs text-zinc-700 dark:text-zinc-300 print:text-black">{theory.elaboration}</p>
                         <p className="text-[11px] text-zinc-500 font-mono mt-1 print:text-gray-600">Rujukan: {theory.citation}</p>
                       </div>
                     ))}
                   </div>
+
+                  {/* Diagram Alur Kerangka Konseptual & Berpikir */}
+                  <AcademicFlowchartDiagram doc={currentDoc} type="conceptual" />
                 </>
               ) : (
                 /* Format Khusus Skripsi/Penelitian: Tinjauan Pustaka, Matriks Keaslian 7 Kolom, Kerangka Konsep, Hipotesis */
                 <>
-                  <h3 className="text-sm font-semibold text-zinc-100 print:text-black font-serif">2.1 Tinjauan Teoretis Variabel Penelitian</h3>
+                  <h3 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100 print:text-black font-serif">2.1 Tinjauan Teoretis Variabel Penelitian</h3>
                   <div className="space-y-3">
                     {currentDoc.bab2.landasanTeori.map((theory, i) => (
-                      <div key={i} className="p-3 rounded bg-zinc-900/40 border border-zinc-900 print:border-gray-200">
-                        <h4 className="text-xs font-semibold text-zinc-100 print:text-black mb-1">{theory.topic}</h4>
-                        <p className="text-xs text-zinc-300 print:text-black">{theory.elaboration}</p>
+                      <div key={i} className="p-3.5 rounded-xl bg-zinc-50 dark:bg-zinc-900/40 border border-zinc-200 dark:border-zinc-800 print:border-gray-200">
+                        <h4 className="text-xs font-semibold text-zinc-900 dark:text-zinc-100 print:text-black mb-1">{theory.topic}</h4>
+                        <p className="text-xs text-zinc-700 dark:text-zinc-300 print:text-black">{theory.elaboration}</p>
                         <p className="text-[11px] text-zinc-500 font-mono mt-1 print:text-gray-600">Rujukan Otoritatif: {theory.citation}</p>
                       </div>
                     ))}
@@ -1074,13 +1163,13 @@ NIP / NIK.
                   {/* Matriks Keaslian Penelitian (SOP 7-Kolom PRISMA 2020) */}
                   {currentDoc.bab2.researchGapMatrix && currentDoc.bab2.researchGapMatrix.length > 0 && (
                     <div className="pt-2">
-                      <h3 className="text-sm font-semibold text-zinc-100 print:text-black font-serif mb-2">
+                      <h3 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100 print:text-black font-serif mb-2">
                         2.2 Matriks Keaslian Penelitian (Research Gap & State-of-the-Art)
                       </h3>
                       <div className="overflow-x-auto my-3">
-                        <table className="w-full text-left text-xs font-sans border-t-2 border-b-2 border-zinc-200 print:border-black">
+                        <table className="w-full text-left text-xs font-sans border-t-2 border-b-2 border-zinc-300 dark:border-zinc-700 print:border-black">
                           <thead>
-                            <tr className="border-b border-zinc-800 print:border-black font-semibold text-zinc-100 print:text-black">
+                            <tr className="border-b border-zinc-200 dark:border-zinc-800 print:border-black font-semibold text-zinc-900 dark:text-zinc-100 print:text-black">
                               <th className="py-2 px-2.5">No</th>
                               <th className="py-2 px-2.5">Penulis & Tahun</th>
                               <th className="py-2 px-2.5">Judul & Jurnal</th>
@@ -1090,16 +1179,16 @@ NIP / NIK.
                               <th className="py-2 px-2.5">Celah & Perbedaan Studi Ini</th>
                             </tr>
                           </thead>
-                          <tbody className="divide-y divide-zinc-900 print:divide-gray-300 text-zinc-300 print:text-black text-[11px]">
+                          <tbody className="divide-y divide-zinc-200 dark:divide-zinc-800 print:divide-gray-300 text-zinc-700 dark:text-zinc-300 print:text-black text-[11px]">
                             {currentDoc.bab2.researchGapMatrix.map((item, idx) => (
                               <tr key={idx} className="align-top">
                                 <td className="py-2 px-2.5 font-mono font-medium">{item.no}</td>
-                                <td className="py-2 px-2.5 font-medium text-zinc-200 print:text-black whitespace-nowrap">{item.authorYear}</td>
+                                <td className="py-2 px-2.5 font-medium text-zinc-900 dark:text-zinc-200 print:text-black whitespace-nowrap">{item.authorYear}</td>
                                 <td className="py-2 px-2.5 italic">{item.titleJournal}</td>
                                 <td className="py-2 px-2.5">{item.designSample}</td>
                                 <td className="py-2 px-2.5">{item.variables}</td>
                                 <td className="py-2 px-2.5">{item.findingsEffect}</td>
-                                <td className="py-2 px-2.5 font-medium text-zinc-200 print:text-black bg-zinc-900/30 print:bg-gray-50">{item.gapDifference}</td>
+                                <td className="py-2 px-2.5 font-medium text-zinc-900 dark:text-zinc-200 print:text-black bg-zinc-50 dark:bg-zinc-900/40 print:bg-gray-50">{item.gapDifference}</td>
                               </tr>
                             ))}
                           </tbody>
@@ -1114,19 +1203,22 @@ NIP / NIK.
                   {/* Kerangka Konseptual & Hipotesis */}
                   {currentDoc.bab2.conceptualFramework && (
                     <div className="pt-2">
-                      <h3 className="text-sm font-semibold text-zinc-100 print:text-black font-serif mb-1">
+                      <h3 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100 print:text-black font-serif mb-1">
                         2.3 Kerangka Konsep Penelitian
                       </h3>
                       <p className="indent-6">{currentDoc.bab2.conceptualFramework}</p>
                     </div>
                   )}
 
+                  {/* Diagram Alur Kerangka Konseptual & Berpikir */}
+                  <AcademicFlowchartDiagram doc={currentDoc} type="conceptual" />
+
                   {currentDoc.bab2.hypotheses && currentDoc.bab2.hypotheses.length > 0 && (
                     <div className="pt-2">
-                      <h3 className="text-sm font-semibold text-zinc-100 print:text-black font-serif mb-1">
+                      <h3 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100 print:text-black font-serif mb-1">
                         2.4 Hipotesis Penelitian
                       </h3>
-                      <ul className="list-disc pl-6 space-y-1 text-xs">
+                      <ul className="list-disc pl-6 space-y-1 text-xs text-zinc-700 dark:text-zinc-300">
                         {currentDoc.bab2.hypotheses.map((h, i) => <li key={i}>{h}</li>)}
                       </ul>
                     </div>
@@ -1144,8 +1236,8 @@ NIP / NIK.
               </h2>
             </div>
 
-            {/* Visual Pipeline Flowchart */}
-            <ResearchFlowchart doc={currentDoc} />
+            {/* Academic Visual Methodology Flowchart Diagram (Standar Bagan Alir Resmi) */}
+            <AcademicFlowchartDiagram doc={currentDoc} type="methodology" />
 
             <div className="flex items-center justify-between p-3 rounded-xl bg-zinc-50 dark:bg-zinc-900/60 border border-zinc-200 dark:border-zinc-800 no-print mb-4">
               <div className="flex items-center gap-2">
@@ -1164,34 +1256,34 @@ NIP / NIK.
               </button>
             </div>
 
-            <div className="space-y-4 text-xs sm:text-sm text-zinc-300 leading-relaxed text-justify print:text-black font-sans">
+            <div className="space-y-4 text-xs sm:text-sm text-zinc-800 dark:text-zinc-300 leading-relaxed text-justify print:text-black font-sans">
               {currentDoc.category === "magang" ? (
                 /* Format Khusus Magang: Metode Kerja, WBS, Perangkat, Kompetensi */
                 <>
                   <div className="flex items-center justify-between">
-                    <h3 className="text-sm font-semibold text-zinc-100 print:text-black font-serif">3.1 Metode Pelaksanaan Kerja</h3>
+                    <h3 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100 print:text-black font-serif">3.1 Metode Pelaksanaan Kerja</h3>
                     <button
                       type="button"
                       onClick={() => handleRefineWithAI("bab3.metodePelaksanaan", "3.1 Metode Pelaksanaan Kerja", currentDoc.bab3.metodePelaksanaan)}
-                      className="no-print text-[11px] font-mono text-zinc-400 hover:text-zinc-100 bg-zinc-900 px-2 py-0.5 rounded border border-zinc-800 flex items-center gap-1 cursor-pointer transition-colors"
+                      className="no-print text-[11px] font-mono text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-100 bg-zinc-100 dark:bg-zinc-900 px-2 py-0.5 rounded border border-zinc-200 dark:border-zinc-800 flex items-center gap-1 cursor-pointer transition-colors shadow-xs"
                     >
-                      <Sparkles className="w-3 h-3 text-zinc-400" />
+                      <Sparkles className="w-3 h-3 text-zinc-500 dark:text-zinc-400" />
                       <span>Revisi AI</span>
                     </button>
                   </div>
                   <p className="indent-6">{currentDoc.bab3.metodePelaksanaan}</p>
 
-                  <h3 className="text-sm font-semibold text-zinc-100 print:text-black font-serif pt-2">3.2 Lingkup Penugasan (Work Breakdown Structure)</h3>
+                  <h3 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100 print:text-black font-serif pt-2">3.2 Lingkup Penugasan (Work Breakdown Structure)</h3>
                   <ol className="list-decimal pl-6 space-y-1">
                     {(currentDoc.bab3.wbsScope || currentDoc.bab3.lingkupPekerjaan).map((l, i) => <li key={i}>{l}</li>)}
                   </ol>
 
-                  <h3 className="text-sm font-semibold text-zinc-100 print:text-black font-serif pt-2">3.3 Lingkungan Kerja, Tools, & SOP</h3>
+                  <h3 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100 print:text-black font-serif pt-2">3.3 Lingkungan Kerja, Tools, & SOP</h3>
                   <ul className="list-disc pl-6 space-y-1">
                     {currentDoc.bab3.perangkatTools.map((p, i) => <li key={i}>{p}</li>)}
                   </ul>
 
-                  <h3 className="text-sm font-semibold text-zinc-100 print:text-black font-serif pt-2">3.4 Target Capaian Hard & Soft Skills</h3>
+                  <h3 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100 print:text-black font-serif pt-2">3.4 Target Capaian Hard & Soft Skills</h3>
                   <ul className="list-disc pl-6 space-y-1">
                     {currentDoc.bab3.rencanaKompetensi.map((k, i) => <li key={i}>{k}</li>)}
                   </ul>
@@ -1373,21 +1465,93 @@ NIP / NIK.
             )}
 
             <div className="flex items-center justify-between pt-3 mb-2">
-              <h3 className="text-sm font-semibold text-zinc-100 print:text-black font-serif">
+              <h3 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100 print:text-black font-serif">
                 {currentDoc.category === "magang" ? "4.2 Penutup" : "4.4 Penutup"}
               </h3>
               <button
                 type="button"
                 onClick={() => handleRefineWithAI("bab4.penutup", "Penutup Proposal", currentDoc.bab4.penutup)}
-                className="no-print text-[11px] font-mono text-zinc-400 hover:text-zinc-100 bg-zinc-900 px-2 py-0.5 rounded border border-zinc-800 flex items-center gap-1 cursor-pointer transition-colors"
+                className="no-print text-[11px] font-mono text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-100 bg-zinc-100 dark:bg-zinc-900 px-2 py-0.5 rounded border border-zinc-200 dark:border-zinc-800 flex items-center gap-1 cursor-pointer transition-colors shadow-xs"
               >
-                <Sparkles className="w-3 h-3 text-zinc-400" />
+                <Sparkles className="w-3 h-3 text-zinc-500 dark:text-zinc-400" />
                 <span>Revisi AI</span>
               </button>
             </div>
-            <p className="text-xs sm:text-sm text-zinc-300 leading-relaxed indent-6 font-sans print:text-black">
+            <p className="text-xs sm:text-sm text-zinc-800 dark:text-zinc-300 leading-relaxed indent-6 font-sans print:text-black">
               {currentDoc.bab4.penutup}
             </p>
+          </section>
+
+          {/* BAB V: KESIMPULAN, REKOMENDASI KONTRIBUSI, & MITIGASI RISIKO */}
+          <section id="section-bab5" className="mb-10">
+            <div className="border-b border-zinc-200 dark:border-zinc-850 pb-2 mb-4 print:border-black">
+              <h2 className="text-base sm:text-lg font-serif font-bold text-zinc-900 dark:text-zinc-100 print:text-black uppercase">
+                {currentDoc.bab5?.title || (currentDoc.category === "magang" ? "BAB V: PENUTUP, KONTRIBUSI, & MITIGASI RISIKO" : "BAB V: KESIMPULAN, REKOMENDASI KONTRIBUSI, & MITIGASI RISIKO")}
+              </h2>
+            </div>
+
+            <div className="space-y-4 text-xs sm:text-sm text-zinc-800 dark:text-zinc-300 leading-relaxed text-justify print:text-black font-sans">
+              <h3 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100 print:text-black font-serif pt-1">
+                5.1 Kesimpulan Rencana Usulan
+              </h3>
+              <ul className="list-disc pl-6 space-y-1.5">
+                {(currentDoc.bab5?.kesimpulanUsulan || [
+                  `Usulan pelaksanaan kegiatan dengan topik "${currentDoc.title}" pada ${currentDoc.targetEntity} telah dirancang secara sistematis berbasis kebutuhan lapangan dan kaidah ilmiah yang ketat.`,
+                  `Rancangan kerja berfase (Fase 1 s.d. 5) telah mengantisipasi seluruh risiko teknis dan menyelaraskan target luaran dengan standar capaian kompetensi kurikulum perguruan tinggi.`,
+                  `Keterlibatan aktif pembimbing akademik dan mentor lapangan industri menjadi kunci ketercapaian seluruh target luaran tepat waktu.`
+                ]).map((k, i) => (
+                  <li key={i}>{k}</li>
+                ))}
+              </ul>
+
+              <h3 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100 print:text-black font-serif pt-2">
+                5.2 Rekomendasi Kontribusi Strategis
+              </h3>
+              <div className="space-y-2">
+                {(currentDoc.bab5?.kontribusiPraktis || [
+                  `Bagi ${currentDoc.targetEntity}: Memberikan solusi aplikatif teruji dan prototipe kerja yang dapat mengurangi inefisiensi proses operasional eksisting.`,
+                  `Bagi Civitas Akademika (${currentDoc.institution}): Memperkaya basis studi kasus nyata dan memperkuat jejaring kemitraan strategis dengan dunia usaha/industri.`,
+                  `Bagi Mahasiswa/Peneliti: Mengasah kompetensi analitis tingkat tinggi (HOTS), kedisiplinan kerja, serta etika profesionalisme.`
+                ]).map((c, i) => (
+                  <p key={i}>• {c}</p>
+                ))}
+              </div>
+
+              <h3 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100 print:text-black font-serif pt-2 mb-2">
+                5.3 Matriks Mitigasi Risiko Pelaksanaan (Contingency Plan)
+              </h3>
+              <div className="overflow-x-auto my-3">
+                <table className="w-full text-left text-xs font-sans border-t-2 border-b-2 border-zinc-300 dark:border-zinc-700 print:border-black">
+                  <thead>
+                    <tr className="border-b border-zinc-200 dark:border-zinc-850 print:border-black font-semibold text-zinc-900 dark:text-zinc-100 print:text-black">
+                      <th className="py-2 px-3">No</th>
+                      <th className="py-2 px-3">Potensi Hambatan / Risiko</th>
+                      <th className="py-2 px-3">Rencana Aksi Mitigasi (Preventif/Korektif)</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-zinc-200 dark:divide-zinc-800 print:divide-gray-300 text-zinc-700 dark:text-zinc-300 print:text-black text-[11px]">
+                    {(currentDoc.bab5?.mitigasiRisiko || [
+                      { risiko: "Keterlambatan perizinan administratif atau otorisasi akses data", mitigasi: "Pengajuan surat pengantar resmi sejak Minggu ke-1 dan penyiapan dataset sekunder sebagai penyangga (buffer)." },
+                      { risiko: "Kendala teknis instalasi tools atau ketidaksesuaian alat ukur", mitigasi: "Pelaksanaan kalibrasi instrumen dan pre-flight testing pada fase persiapan awal." },
+                      { risiko: "Keterbatasan waktu supervisi berkala dengan mentor lapangan", mitigasi: "Penerapan sistem pelaporan asinkron melalui logbook mingguan digital terpusat." }
+                    ]).map((m, idx) => (
+                      <tr key={idx} className="align-top">
+                        <td className="py-2 px-3 font-mono font-medium text-zinc-900 dark:text-zinc-200 print:text-black">{idx + 1}</td>
+                        <td className="py-2 px-3 font-medium text-zinc-900 dark:text-zinc-100 print:text-black">{m.risiko}</td>
+                        <td className="py-2 px-3">{m.mitigasi}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+
+              <h3 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100 print:text-black font-serif pt-2">
+                5.4 Rencana Keberlanjutan Proyek (Sustainability Plan)
+              </h3>
+              <p className="indent-6">
+                {currentDoc.bab5?.sustainabilityPlan || `Seluruh artefak hasil pelaksanaan, meliputi dokumentasi teknis, lembar SOP, kode sumber/dataset tervalidasi, serta panduan operasional diserahkan secara resmi melalui Berita Acara Serah Terima kepada unit terkait di ${currentDoc.targetEntity} agar dapat dipelihara dan dikembangkan secara berkelanjutan.`}
+              </p>
+            </div>
           </section>
 
           {/* DAFTAR PUSTAKA (Standar APA 7th Edition / IEEE) */}
@@ -1480,10 +1644,10 @@ NIP / NIK.
             {/* Ketua Program Studi Approval */}
             {currentDoc.approvalSheet?.headSigner && (
               <div className="mt-12 text-center">
-                <p className="text-zinc-400 print:text-black mb-16 leading-tight">
-                  Mengetahui,<br /><strong>{currentDoc.approvalSheet.headSigner.role}</strong>
+                <p className="text-zinc-500 dark:text-zinc-400 print:text-black mb-16 leading-tight">
+                  Mengetahui,<br /><strong className="text-zinc-800 dark:text-zinc-200">{currentDoc.approvalSheet.headSigner.role}</strong>
                 </p>
-                <p className="font-semibold text-zinc-200 print:text-black underline underline-offset-4">
+                <p className="font-semibold text-zinc-900 dark:text-zinc-200 print:text-black underline underline-offset-4">
                   {currentDoc.approvalSheet.headSigner.name}
                 </p>
                 <p className="text-zinc-500 font-mono print:text-gray-600 mt-0.5">
@@ -1492,6 +1656,82 @@ NIP / NIK.
               </div>
             )}
           </div>
+
+          {/* LAMPIRAN-LAMPIRAN AKADEMIK */}
+          <section id="section-lampiran" className="mt-12 pt-8 border-t-2 border-zinc-300 dark:border-zinc-800 print:border-black font-sans">
+            <div className="border-b border-zinc-200 dark:border-zinc-850 pb-2 mb-6 print:border-black text-center">
+              <span className="text-[10px] font-mono uppercase tracking-widest text-zinc-500 dark:text-zinc-400 block mb-1">
+                BERKAS PENDUKUNG & INSTRUMEN BAKU
+              </span>
+              <h2 className="text-base sm:text-lg font-serif font-bold text-zinc-900 dark:text-zinc-100 print:text-black uppercase">
+                LAMPIRAN-LAMPIRAN DOKUMEN USULAN
+              </h2>
+            </div>
+
+            <div className="space-y-6">
+              {(currentDoc.appendices || [
+                {
+                  id: "lampiran_a",
+                  title: "Lampiran A: Pedoman Wawancara & Instrumen Pengumpulan Data",
+                  content: `Pedoman instrumen ini dirancang untuk mengumpulkan data empiris pada ${currentDoc.targetEntity}. Terdiri dari instrumen kuesioner berskala Likert 1-5, rubrik observasi lapangan terstruktur, dan panduan wawancara mendalam.`,
+                  tableRows: [
+                    { col1: "Item 01", col2: "Tingkat relevansi masalah operasional dengan kebutuhan riil unit kerja sasaran", col3: "Skala Likert 1-5 & Catatan Kualitatif" },
+                    { col1: "Item 02", col2: "Ketersediaan dokumentasi SOP eksisting dan kepatuhan pengguna terhadap prosedur", col3: "Checklist Observasi Langsung" },
+                    { col1: "Item 03", col2: "Efektivitas integrasi alat ukur/sistem yang diusulkan terhadap waktu siklus kerja", col3: "Metrik Kinerja & Uji Waktu Kerja" },
+                    { col1: "Item 04", col2: "Tingkat kepuasan pengguna akhir (User Acceptance Testing) terhadap luaran fungsional", col3: "Kuesioner UAT (4 Parameter Kunci)" }
+                  ]
+                },
+                {
+                  id: "lampiran_b",
+                  title: "Lampiran B: Matriks Logbook Mingguan Aktivitas Lapangan & Bukti Capaian",
+                  content: "Logbook berkala ini merekam kehadiran, aktivitas harian, bimbingan berkala, dan luaran mingguan selama 16 minggu pelaksanaan kegiatan akademik.",
+                  tableRows: [
+                    { col1: "Bulan I (Minggu 1-4)", col2: "Orientasi lingkungan kerja, perizinan, WBS, dan penyusunan instrumen spesifikasi", col3: "Logbook Ditandatangani & Dokumen Spesifikasi" },
+                    { col1: "Bulan II (Minggu 5-8)", col2: "Pengambilan data primer/lapangan, kalibrasi instrumen, dan pembangunan prototipe awal", col3: "Dataset Terverifikasi & Draf Bab III" },
+                    { col1: "Bulan III (Minggu 9-12)", col2: "Implementasi inti, pengujian fungsionalitas, evaluasi bersama mentor, dan perbaikan", col3: "Berita Acara Uji Hasil & Revisi" },
+                    { col1: "Bulan IV (Minggu 13-16)", col2: "Penyusunan laporan komprehensif lengkap, manuskrip publikasi, dan seminar pertanggungjawaban", col3: "Naskah Lengkap & Lembar Pengesahan" }
+                  ]
+                },
+                {
+                  id: "lampiran_c",
+                  title: "Lampiran C: Surat Pernyataan Pakta Integritas & Bebas Fabrikasi Data",
+                  content: `Pernyataan tertulis bermeterai dari mahasiswa pengusul (${currentDoc.candidateName}, NIM: ${currentDoc.candidateId}) yang menyatakan bahwa seluruh data, metodologi, dan naskah yang diajukan adalah orisinal, bebas dari unsur fabrikasi, falsifikasi, dan plagiarisme, serta menjunjung tinggi kerahasiaan informasi internal ${currentDoc.targetEntity}.`
+                }
+              ]).map((app, aIdx) => (
+                <div key={app.id || aIdx} className="p-4 sm:p-5 rounded-xl bg-zinc-50 dark:bg-zinc-900/40 border border-zinc-200 dark:border-zinc-800 print:bg-white print:border-gray-300">
+                  <h3 className="text-xs sm:text-sm font-semibold font-serif text-zinc-900 dark:text-zinc-100 mb-2 print:text-black">
+                    {app.title}
+                  </h3>
+                  <p className="text-xs text-zinc-700 dark:text-zinc-300 mb-3 leading-relaxed">
+                    {app.content}
+                  </p>
+
+                  {app.tableRows && app.tableRows.length > 0 && (
+                    <div className="overflow-x-auto my-2">
+                      <table className="w-full text-left text-xs font-sans border-t-2 border-b-2 border-zinc-300 dark:border-zinc-700 print:border-black">
+                        <thead>
+                          <tr className="border-b border-zinc-200 dark:border-zinc-850 print:border-black font-semibold text-zinc-900 dark:text-zinc-100 print:text-black">
+                            <th className="py-2 px-2.5">Indikator / Periode</th>
+                            <th className="py-2 px-2.5">Aktivitas & Parameter</th>
+                            <th className="py-2 px-2.5">Metode Verifikasi / Bukti</th>
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y divide-zinc-200 dark:divide-zinc-800 print:divide-gray-300 text-zinc-700 dark:text-zinc-300 print:text-black text-[11px]">
+                          {app.tableRows.map((r, rIdx) => (
+                            <tr key={rIdx} className="align-top">
+                              <td className="py-2 px-2.5 font-mono font-medium text-zinc-900 dark:text-zinc-200 print:text-black">{r.col1}</td>
+                              <td className="py-2 px-2.5">{r.col2}</td>
+                              <td className="py-2 px-2.5 font-mono text-[10px]">{r.col3}</td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          </section>
 
         </article>
       )}

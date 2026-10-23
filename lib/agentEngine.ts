@@ -797,12 +797,70 @@ export function buildGeneratedDocument(
       mentorshipModel: isMagang ? "Supervisi berkala mingguan (weekly standup) bersama pembimbing lapangan industri dan evaluasi tengah periode bersama dosen pembimbing akademik kampus." : undefined
     },
     bab4: {
-      title: isMagang ? "BAB IV: JADWAL PELAKSANAAN & PENUTUP" : "BAB IV: JADWAL PENELITIAN, ANGGARAN, & PENUTUP",
+      title: isMagang ? "BAB IV: JADWAL PELAKSANAAN & RENCANA ANGGARAN" : "BAB IV: JADWAL PENELITIAN & RENCANA ANGGARAN",
       jadwalMatriks: weeklySchedule,
       budgetPlan: budgetPlan,
       disseminationPlan: isMagang ? undefined : `Hasil penelitian akan disusun menjadi artikel ilmiah berstandar IMRAD dan disubmit ke jurnal nasional terakreditasi SINTA (peringkat 2-4) atau jurnal internasional bereputasi bidang terkait.`,
       penutup: `Demikian proposal ini disusun dengan itikad baik dan komitmen profesional yang tinggi sebagai landasan pelaksanaan kegiatan di ${targetEntity || "instansi mitra"}. Besar harapan kami agar pihak manajemen dan dewan penguji berkenan memberikan kesempatan, arahan, serta bimbingan kepada mahasiswa untuk merealisasikan rencana kerja ini demi tercapainya manfaat optimal bagi kedua belah pihak.`
     },
+    bab5: {
+      title: isMagang ? "BAB V: KESIMPULAN, REKOMENDASI, & MITIGASI RISIKO" : "BAB V: KESIMPULAN, REKOMENDASI KONTRIBUSI, & MITIGASI RISIKO",
+      kesimpulanUsulan: [
+        `Usulan pelaksanaan kegiatan dengan topik "${title}" pada ${targetEntity || "instansi mitra"} memiliki relevansi strategis dan urgensi empiris yang tinggi.`,
+        `Rancangan metodologi berfase (Fase 1 s.d. 5) telah mengintegrasikan standar operasional prosedur baku dan instrumen tervalidasi guna menjamin akurasi luaran.`,
+        `Kolaborasi terstruktur antara pembimbing akademik (${institution}) dan mentor lapangan (${targetEntity}) menjamin ketercapaian target luaran 100%.`
+      ],
+      kontribusiPraktis: [
+        `Bagi ${targetEntity || "Instansi Mitra"}: Menghasilkan prototipe teruji, dokumentasi alur kerja baku, serta rekomendasi solutif berbasis data lapangan guna mereduksi inefisiensi.`,
+        `Bagi Civitas Akademika (${institution}): Memperkaya basis data studi kasus empiris, mengonversi capaian ke dalam 20 SKS kurikulum merdeka, serta membuka peluang riset lanjutan.`,
+        `Bagi Mahasiswa/Peneliti: Mengasah kompetensi analitis tingkat tinggi (Higher Order Thinking Skills), etika profesi, serta kesiapan integrasi ke dunia kerja profesional.`
+      ],
+      mitigasiRisiko: [
+        {
+          risiko: "Keterlambatan perizinan administratif atau otorisasi akses data primer",
+          mitigasi: "Inisiasi surat pengantar resmi sejak Minggu ke-1, pengurusan klirens etik lebih awal, dan penyiapan dataset sekunder terverifikasi sebagai penyangga (buffer)."
+        },
+        {
+          risiko: "Ketidakcocokan spesifikasi alat ukur atau kendala teknis lingkungan implementasi",
+          mitigasi: "Pelaksanaan kalibrasi instrumen dan pre-flight test pada fase awal orientasi sebelum pengumpulan data skala penuh dimulai."
+        },
+        {
+          risiko: "Keterbatasan waktu supervisi berkala dengan mentor lapangan",
+          mitigasi: "Penerapan sistem pelaporan asinkron melalui logbook mingguan digital terstruktur dan penetapan jadwal asistensi hybrid tetap."
+        }
+      ],
+      sustainabilityPlan: `Seluruh artefak hasil pelaksanaan, meliputi dokumentasi teknis, lembar SOP, kode sumber/dataset tervalidasi, serta panduan operasional diserahkan secara resmi melalui Berita Acara Serah Terima kepada unit terkait di ${targetEntity} agar dapat dipelihara dan dikembangkan secara mandiri dan berkelanjutan.`
+    },
+    appendices: [
+      {
+        id: "lampiran_a",
+        title: "Lampiran A: Pedoman Wawancara & Instrumen Pengumpulan Data",
+        content: `Pedoman instrumen ini dirancang untuk mengumpulkan data empiris pada ${targetEntity}. Terdiri dari instrumen kuesioner berskala Likert 1-5, rubrik observasi lapangan terstruktur, dan panduan wawancara mendalam dengan pemangku kepentingan unit kerja.`,
+        tableRows: [
+          { col1: "Item 01", col2: "Tingkat relevansi masalah operasional dengan kebutuhan riil unit kerja sasaran", col3: "Skala Likert 1-5 & Catatan Kualitatif" },
+          { col1: "Item 02", col2: "Ketersediaan dokumentasi SOP eksisting dan kepatuhan pengguna terhadap prosedur", col3: "Checklist Observasi Langsung" },
+          { col1: "Item 03", col2: "Efektivitas integrasi alat ukur/sistem yang diusulkan terhadap waktu siklus kerja", col3: "Metrik Kinerja & Uji Waktu Kerja" },
+          { col1: "Item 04", col2: "Tingkat kepuasan pengguna akhir (User Acceptance Testing) terhadap luaran fungsional", col3: "Kuesioner UAT (4 Parameter Kunci)" }
+        ]
+      },
+      {
+        id: "lampiran_b",
+        title: "Lampiran B: Matriks Logbook Mingguan Aktivitas Lapangan & Bukti Capaian",
+        content: `Logbook berkala ini merekam kehadiran, aktivitas harian, bimbingan berkala, dan luaran mingguan selama 16 minggu pelaksanaan kegiatan akademik.`,
+        tableRows: [
+          { col1: "Bulan I (Minggu 1-4)", col2: "Orientasi lingkungan kerja, perizinan, WBS, dan penyusunan instrumen spesifikasi", col3: "Logbook Ditandatangani & Dokumen Spesifikasi" },
+          { col1: "Bulan II (Minggu 5-8)", col2: "Pengambilan data primer/lapangan, kalibrasi instrumen, dan pembangunan prototipe awal", col3: "Dataset Terverifikasi & Draf Bab III" },
+          { col1: "Bulan III (Minggu 9-12)", col2: "Implementasi inti, pengujian fungsionalitas, evaluasi bersama mentor, dan perbaikan", col3: "Berita Acara Uji Hasil & Revisi" },
+          { col1: "Bulan IV (Minggu 13-16)", col2: "Penyusunan laporan komprehensif lengkap, manuskrip publikasi, dan seminar pertanggungjawaban", col3: "Naskah Lengkap & Lembar Pengesahan" }
+        ]
+      },
+      {
+        id: "lampiran_c",
+        title: "Lampiran C: Surat Pernyataan Pakta Integritas & Bebas Fabrikasi Data",
+        content: `Pernyataan tertulis bermeterai dari mahasiswa pengusul (${candidateName}, NIM: ${candidateId}) yang menyatakan bahwa seluruh data, metodologi, dan naskah yang diajukan adalah orisinal, bebas dari unsur fabrikasi, falsifikasi, dan plagiarisme, serta menjunjung tinggi kerahasiaan informasi internal ${targetEntity}.`
+      }
+    ],
+    documentDepth: "comprehensive",
     bibliography: bibliography,
     slides: [
       {
@@ -1053,6 +1111,38 @@ export function buildVisualTreeGraph(doc: ProposalDocument): TreeNode {
             thinkingMode: "Second-Order Thinking",
             description: "Format tanda tangan dosen pembimbing dan pimpinan instansi mitra.",
             contentSnippet: doc.bab4.penutup
+          }
+        ]
+      },
+      {
+        id: "bab5",
+        label: doc.bab5?.title || "BAB V: KESIMPULAN & MITIGASI RISIKO",
+        type: "chapter",
+        category: "Sintesis & Risiko",
+        status: "ready",
+        thinkingMode: "Inversion Thinking",
+        description: "Kesimpulan strategis usulan, rekomendasi kontribusi 3 pihak, dan matriks mitigasi risiko.",
+        contentSnippet: doc.bab5?.kesimpulanUsulan?.[0] || "Kesimpulan komprehensif rencana kerja usulan.",
+        children: [
+          {
+            id: "bab5_kontribusi",
+            label: "5.1 Rekomendasi Kontribusi",
+            type: "section",
+            category: "Impact",
+            status: "ready",
+            thinkingMode: "Pareto Principle",
+            description: "Kontribusi nyata bagi instansi, kampus, dan peneliti.",
+            contentSnippet: doc.bab5?.kontribusiPraktis?.join(" | ") || "Kontribusi bagi instansi dan kampus."
+          },
+          {
+            id: "bab5_mitigasi",
+            label: "5.2 Matriks Mitigasi Risiko",
+            type: "section",
+            category: "Mitigasi",
+            status: "ready",
+            thinkingMode: "Inversion Thinking",
+            description: "Skenario kontinjensi dan mitigasi hambatan teknis maupun perizinan.",
+            contentSnippet: `${doc.bab5?.mitigasiRisiko?.length || 3} skenario mitigasi risiko disiapkan.`
           }
         ]
       }

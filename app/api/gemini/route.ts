@@ -166,6 +166,47 @@ PANDUAN SOP & STANDAR AKADEMIK WAJIB:
     ],
     "penutup": "Uraian komitmen profesional penutup proposal..."
   },
+  "bab5": {
+    "title": "BAB V: KESIMPULAN, REKOMENDASI KONTRIBUSI, & MITIGASI RISIKO",
+    "kesimpulanUsulan": [
+      "Kesimpulan strategis usulan 1...",
+      "Kesimpulan strategis usulan 2...",
+      "Kesimpulan strategis usulan 3..."
+    ],
+    "kontribusiPraktis": [
+      "Kontribusi konkret bagi instansi/lokus...",
+      "Kontribusi konkret bagi civitas akademika...",
+      "Kontribusi peningkatan kompetensi mahasiswa..."
+    ],
+    "mitigasiRisiko": [
+      { "risiko": "Risiko perizinan / akses data...", "mitigasi": "Langkah mitigasi preventif..." },
+      { "risiko": "Kendala teknis / kalibrasi tools...", "mitigasi": "Langkah mitigasi teknis..." },
+      { "risiko": "Kendala waktu supervisi berkala...", "mitigasi": "Sistem pelaporan asinkron logbook..." }
+    ],
+    "sustainabilityPlan": "Rencana pemeliharaan artefak luaran dan transfer knowledge berkelanjutan..."
+  },
+  "appendices": [
+    {
+      "id": "lampiran_a",
+      "title": "Lampiran A: Pedoman Wawancara & Instrumen Pengumpulan Data",
+      "content": "Uraian instrumen kuesioner dan pedoman wawancara...",
+      "tableRows": [
+        { "col1": "Item 01", "col2": "Relevansi masalah operasional dengan kebutuhan riil", "col3": "Skala Likert 1-5" },
+        { "col1": "Item 02", "col2": "Ketersediaan SOP eksisting dan kepatuhan prosedur", "col3": "Checklist Observasi" }
+      ]
+    },
+    {
+      "id": "lampiran_b",
+      "title": "Lampiran B: Matriks Logbook Mingguan Aktivitas Lapangan",
+      "content": "Pencatatan aktivitas mingguan 16 minggu kerja...",
+      "tableRows": [
+        { "col1": "Bulan I (Mg 1-4)", "col2": "Orientasi, WBS, dan spesifikasi kebutuhan", "col3": "Logbook Terverifikasi" },
+        { "col1": "Bulan II (Mg 5-8)", "col2": "Pengumpulan data & prototipe awal", "col3": "Dataset Tervalidasi" },
+        { "col1": "Bulan III (Mg 9-12)", "col2": "Implementasi & pengujian mutu UAT", "col3": "Berita Acara Uji" },
+        { "col1": "Bulan IV (Mg 13-16)", "col2": "Finalisasi laporan komprehensif & seminar", "col3": "Naskah Lengkap" }
+      ]
+    }
+  ],
   "slides": [
     {
       "slideNumber": 1,
@@ -269,6 +310,21 @@ Format output HARUS berupa JSON murni tanpa pembuka/penutup markdown (\`\`\`json
           try {
             const parsedDoc: ProposalDocument = JSON.parse(cleanedText);
             if (parsedDoc && parsedDoc.bab1 && parsedDoc.bab2 && parsedDoc.bab3 && parsedDoc.bab4) {
+              // Ensure comprehensive sections (Bab 5, appendices, bibliography) are guaranteed
+              const baseline = buildGeneratedDocument(
+                title,
+                category as ProposalCategory,
+                answers,
+                candidateName,
+                candidateId,
+                institution,
+                facultyMajor,
+                targetEntity
+              );
+              if (!parsedDoc.bab5) parsedDoc.bab5 = baseline.bab5;
+              if (!parsedDoc.appendices) parsedDoc.appendices = baseline.appendices;
+              if (!parsedDoc.bibliography) parsedDoc.bibliography = baseline.bibliography;
+
               return NextResponse.json({ 
                 success: true, 
                 engine: "gemini-3.5-flash-lite",

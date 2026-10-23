@@ -187,6 +187,20 @@ export interface ProposalDocument {
     disseminationPlan?: string;       // Used for Skripsi
     penutup: string;
   };
+  bab5?: {
+    title: string;
+    kesimpulanUsulan: string[];
+    kontribusiPraktis: string[];
+    mitigasiRisiko: { risiko: string; mitigasi: string }[];
+    sustainabilityPlan?: string;
+  };
+  appendices?: {
+    id: string;
+    title: string;
+    content: string;
+    tableRows?: { col1: string; col2: string; col3: string }[];
+  }[];
+  documentDepth?: 'proposal' | 'comprehensive';
   bibliography?: BibliographyItem[];
   slides: SlideDeckItem[];
   auditLog: {

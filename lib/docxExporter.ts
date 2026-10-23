@@ -41,6 +41,7 @@ export async function generateAcademicProposalDocx(doc: ProposalDocument): Promi
   const rightCm = guideline?.margins?.rightCm ?? 3;
   const bottomCm = guideline?.margins?.bottomCm ?? 3;
   const lineSpacingTwip = guideline?.typography?.lineSpacing === 2.0 ? 480 : 360;
+  const isMagang = doc.category === "magang";
 
   // Reusable Paragraph styling
   const createHeading1 = (text: string) =>
@@ -640,6 +641,202 @@ export async function generateAcademicProposalDocx(doc: ProposalDocument): Promi
 
           createHeading2("4.2 Penutup"),
           createBodyParagraph(doc.bab4.penutup),
+        ],
+      },
+
+      // ==========================================
+      // SECTION 8: BAB V KESIMPULAN & MITIGASI RISIKO
+      // ==========================================
+      {
+        properties: standardPageProperties,
+        ...chapterHeadersFooters,
+        children: [
+          createHeading1(doc.bab5?.title || (isMagang ? "BAB V: PENUTUP & REKOMENDASI" : "BAB V: KESIMPULAN & REKOMENDASI KONTRIBUSI")),
+          
+          createHeading2("5.1 Kesimpulan Rencana Usulan"),
+          ...(doc.bab5?.kesimpulanUsulan || [
+            `Usulan pelaksanaan kegiatan dengan topik "${doc.title}" pada ${doc.targetEntity} telah dirancang secara sistematis memenuhi kaidah akademik.`,
+            `Seluruh tahapan kerja dan beban waktu telah diselaraskan dengan standar capaian kompetensi kurikulum.`
+          ]).map(k => createBulletItem(k)),
+
+          createHeading2("5.2 Rekomendasi Kontribusi Strategis"),
+          ...(doc.bab5?.kontribusiPraktis || [
+            `Bagi ${doc.targetEntity}: Memberikan solusi aplikatif untuk mengatasi kendala operasional.`,
+            `Bagi ${doc.institution}: Memperkuat jalinan kolaborasi dan dokumentasi studi kasus nyata.`
+          ]).map(c => createBulletItem(c)),
+
+          createHeading2("5.3 Matriks Mitigasi Risiko Pelaksanaan"),
+          new Table({
+            width: { size: 100, type: WidthType.PERCENTAGE },
+            rows: [
+              new TableRow({
+                tableHeader: true,
+                children: [
+                  new TableCell({
+                    borders: tableHeaderBorders,
+                    width: { size: 10, type: WidthType.PERCENTAGE },
+                    children: [new Paragraph({ alignment: AlignmentType.CENTER, children: [new TextRun({ text: "No", bold: true, font: FONT_FAMILY, size: 22 })] })],
+                  }),
+                  new TableCell({
+                    borders: tableHeaderBorders,
+                    width: { size: 45, type: WidthType.PERCENTAGE },
+                    children: [new Paragraph({ alignment: AlignmentType.CENTER, children: [new TextRun({ text: "Potensi Risiko / Hambatan", bold: true, font: FONT_FAMILY, size: 22 })] })],
+                  }),
+                  new TableCell({
+                    borders: tableHeaderBorders,
+                    width: { size: 45, type: WidthType.PERCENTAGE },
+                    children: [new Paragraph({ alignment: AlignmentType.CENTER, children: [new TextRun({ text: "Rencana Aksi Mitigasi (Preventif/Korektif)", bold: true, font: FONT_FAMILY, size: 22 })] })],
+                  }),
+                ],
+              }),
+              ...(doc.bab5?.mitigasiRisiko || [
+                { risiko: "Keterlambatan perizinan akses data", mitigasi: "Pengajuan surat pengantar resmi sejak awal dan penyiapan data sekunder." },
+                { risiko: "Kendala teknis instalasi tools", mitigasi: "Uji coba konfigurasi pada fase persiapan orientasi." }
+              ]).map((m, idx, arr) => {
+                const borders = idx === arr.length - 1 ? tableLastRowBorders : tableRowBorders;
+                return new TableRow({
+                  children: [
+                    new TableCell({
+                      borders,
+                      children: [new Paragraph({ alignment: AlignmentType.CENTER, children: [new TextRun({ text: String(idx + 1), font: FONT_FAMILY, size: 20 })] })],
+                    }),
+                    new TableCell({
+                      borders,
+                      children: [new Paragraph({ alignment: AlignmentType.LEFT, children: [new TextRun({ text: m.risiko, font: FONT_FAMILY, size: 20, bold: true })] })],
+                    }),
+                    new TableCell({
+                      borders,
+                      children: [new Paragraph({ alignment: AlignmentType.JUSTIFIED, children: [new TextRun({ text: m.mitigasi, font: FONT_FAMILY, size: 20 })] })],
+                    }),
+                  ],
+                });
+              }),
+            ],
+          }),
+
+          createHeading2("5.4 Rencana Keberlanjutan Proyek (Sustainability Plan)"),
+          createBodyParagraph(doc.bab5?.sustainabilityPlan || `Seluruh artefak hasil pekerjaan dan dokumentasi diserahkan secara resmi kepada pihak ${doc.targetEntity} disertai sesi transfer knowledge untuk pemanfaatan berkelanjutan.`),
+        ],
+      },
+
+      // ==========================================
+      // SECTION 9: DAFTAR PUSTAKA
+      // ==========================================
+      {
+        properties: standardPageProperties,
+        ...chapterHeadersFooters,
+        children: [
+          createHeading1("DAFTAR PUSTAKA"),
+          new Paragraph({ spacing: { after: 200 } }),
+          ...(doc.bibliography || []).map((b, bIdx) =>
+            new Paragraph({
+              alignment: AlignmentType.JUSTIFIED,
+              spacing: { after: 140, line: lineSpacingTwip },
+              indent: { left: 720, hanging: 720 },
+              children: [
+                new TextRun({
+                  text: `${b.author} (${b.year}). `,
+                  bold: true,
+                  font: FONT_FAMILY,
+                  size: 22,
+                }),
+                new TextRun({
+                  text: `${b.title}. `,
+                  italics: true,
+                  font: FONT_FAMILY,
+                  size: 22,
+                }),
+                new TextRun({
+                  text: `${b.source}.`,
+                  font: FONT_FAMILY,
+                  size: 22,
+                }),
+                ...(b.doiUrl ? [
+                  new TextRun({
+                    text: ` DOI: ${b.doiUrl}`,
+                    font: FONT_FAMILY,
+                    size: 18,
+                    color: "555555",
+                  })
+                ] : []),
+              ],
+            })
+          ),
+        ],
+      },
+
+      // ==========================================
+      // SECTION 10: LAMPIRAN-LAMPIRAN
+      // ==========================================
+      {
+        properties: standardPageProperties,
+        ...chapterHeadersFooters,
+        children: [
+          createHeading1("LAMPIRAN-LAMPIRAN"),
+          new Paragraph({ spacing: { after: 200 } }),
+
+          ...(doc.appendices || [
+            {
+              id: "lampiran_a",
+              title: "Lampiran A: Pedoman Wawancara & Instrumen Pengumpulan Data",
+              content: `Pedoman instrumen ini dirancang untuk pengumpulan data primer dan sekunder di ${doc.targetEntity}.`
+            },
+            {
+              id: "lampiran_b",
+              title: "Lampiran B: Matriks Logbook Mingguan Aktivitas Lapangan",
+              content: "Matriks logbook pencatatan kehadiran dan keluaran mingguan terstruktur."
+            }
+          ]).flatMap((app) => [
+            createHeading2(app.title),
+            createBodyParagraph(app.content),
+            ...(app.tableRows && app.tableRows.length > 0 ? [
+              new Table({
+                width: { size: 100, type: WidthType.PERCENTAGE },
+                rows: [
+                  new TableRow({
+                    tableHeader: true,
+                    children: [
+                      new TableCell({
+                        borders: tableHeaderBorders,
+                        width: { size: 20, type: WidthType.PERCENTAGE },
+                        children: [new Paragraph({ alignment: AlignmentType.CENTER, children: [new TextRun({ text: "Indikator / Minggu", bold: true, font: FONT_FAMILY, size: 22 })] })],
+                      }),
+                      new TableCell({
+                        borders: tableHeaderBorders,
+                        width: { size: 50, type: WidthType.PERCENTAGE },
+                        children: [new Paragraph({ alignment: AlignmentType.CENTER, children: [new TextRun({ text: "Fokus Kegiatan & Parameter Evaluasi", bold: true, font: FONT_FAMILY, size: 22 })] })],
+                      }),
+                      new TableCell({
+                        borders: tableHeaderBorders,
+                        width: { size: 30, type: WidthType.PERCENTAGE },
+                        children: [new Paragraph({ alignment: AlignmentType.CENTER, children: [new TextRun({ text: "Metode Verifikasi / Output", bold: true, font: FONT_FAMILY, size: 22 })] })],
+                      }),
+                    ],
+                  }),
+                  ...app.tableRows.map((r, rIdx, arr) => {
+                    const borders = rIdx === arr.length - 1 ? tableLastRowBorders : tableRowBorders;
+                    return new TableRow({
+                      children: [
+                        new TableCell({
+                          borders,
+                          children: [new Paragraph({ alignment: AlignmentType.CENTER, children: [new TextRun({ text: r.col1, font: FONT_FAMILY, size: 20, bold: true })] })],
+                        }),
+                        new TableCell({
+                          borders,
+                          children: [new Paragraph({ alignment: AlignmentType.LEFT, children: [new TextRun({ text: r.col2, font: FONT_FAMILY, size: 20 })] })],
+                        }),
+                        new TableCell({
+                          borders,
+                          children: [new Paragraph({ alignment: AlignmentType.LEFT, children: [new TextRun({ text: r.col3, font: FONT_FAMILY, size: 20 })] })],
+                        }),
+                      ],
+                    });
+                  }),
+                ],
+              }),
+              new Paragraph({ spacing: { after: 200 } }),
+            ] : []),
+          ]),
         ],
       },
     ],
