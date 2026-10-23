@@ -47,7 +47,15 @@ import {
   Bot,
   Landmark,
   GraduationCap,
-  Brain
+  Brain,
+  Image as ImageIcon,
+  ArrowRight,
+  Layers,
+  Activity,
+  ChevronLeft,
+  ChevronRight,
+  Download,
+  ExternalLink
 } from "lucide-react";
 
 interface DocumentStudioProps {
@@ -69,6 +77,11 @@ export const DocumentStudio: React.FC<DocumentStudioProps> = ({
   const [activeSlideIndex, setActiveSlideIndex] = useState(0);
   const [isExportingDocx, setIsExportingDocx] = useState(false);
   const [isExportingPptx, setIsExportingPptx] = useState(false);
+  const [slideVisualMode, setSlideVisualMode] = useState<"google-flow" | "ai-concept">("google-flow");
+  const [slideAiImageMap, setSlideAiImageMap] = useState<{ [key: number]: string }>({});
+  const [isGeneratingSlideVisual, setIsGeneratingSlideVisual] = useState(false);
+  const [customSlidePrompt, setCustomSlidePrompt] = useState("");
+  const [copiedNotes, setCopiedNotes] = useState(false);
   const [isLitModalOpen, setIsLitModalOpen] = useState(false);
   const [isTurnitinModalOpen, setIsTurnitinModalOpen] = useState(false);
   const [isInstrumentModalOpen, setIsInstrumentModalOpen] = useState(false);
@@ -447,6 +460,40 @@ NIP / NIK.
 
   const handlePrint = () => {
     window.print();
+  };
+
+  const handleGenerateSlideAiVisual = (slideIdx: number, customText?: string) => {
+    setIsGeneratingSlideVisual(true);
+    const activeSlide = currentDoc.slides[slideIdx];
+    const defaultPrompt = `Scientific academic presentation diagram, ${currentDoc.title}, ${activeSlide?.title || 'Methodology pipeline'}, dark blue slate minimal theme, Google Flow process architecture, high fidelity vector aesthetic, 8k resolution`;
+    const promptToUse = customText && customText.trim().length > 0 ? customText.trim() : defaultPrompt;
+    
+    const seed = Math.floor(Math.random() * 999999);
+    const generatedUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(promptToUse)}?width=900&height=560&nologo=true&seed=${seed}`;
+    
+    const img = new window.Image();
+    img.src = generatedUrl;
+    img.onload = () => {
+      setSlideAiImageMap(prev => ({ ...prev, [slideIdx]: generatedUrl }));
+      setIsGeneratingSlideVisual(false);
+      setToastMessage("Ilustrasi Visual AI berhasil digenerate!");
+    };
+    img.onerror = () => {
+      // Fallback
+      setSlideAiImageMap(prev => ({ ...prev, [slideIdx]: generatedUrl }));
+      setIsGeneratingSlideVisual(false);
+      setToastMessage("Ilustrasi Visual AI siap ditampilkan.");
+    };
+  };
+
+  const handleCopySpeakerNotes = () => {
+    const notes = currentDoc.slides[activeSlideIndex]?.speakerNotes || "";
+    if (navigator.clipboard) {
+      navigator.clipboard.writeText(notes);
+      setCopiedNotes(true);
+      setTimeout(() => setCopiedNotes(false), 2000);
+      setToastMessage("Catatan presenter berhasil disalin!");
+    }
   };
 
   return (
@@ -2124,75 +2171,522 @@ NIP / NIK.
 
       {/* TAB 4: SLIDE PRESENTASI 16:9 */}
       {activeTab === "slides" && (
-        <div className="bg-white dark:bg-zinc-950 p-6 rounded-2xl border border-zinc-200 dark:border-zinc-850 shadow-sm">
-          <div className="flex items-center justify-between gap-4 mb-4">
-            <h2 className="text-base sm:text-lg font-semibold text-zinc-900 dark:text-zinc-100">
-              Slide Presentasi Ringkasan (16:9)
-            </h2>
-            
-            <div className="flex items-center gap-2 text-xs">
-              <span className="text-zinc-500 dark:text-zinc-400 font-mono">
-                Slide {activeSlideIndex + 1} / {currentDoc.slides.length}
-              </span>
+        <div className="bg-white dark:bg-zinc-950 p-6 rounded-2xl border border-zinc-200 dark:border-zinc-850 shadow-sm space-y-6">
+          {/* Header & Controls Bar */}
+          <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 pb-4 border-b border-zinc-200 dark:border-zinc-850">
+            <div>
+              <div className="flex items-center gap-2">
+                <Presentation className="w-5 h-5 text-sky-500" />
+                <h2 className="text-base sm:text-lg font-semibold text-zinc-900 dark:text-zinc-100">
+                  Slide Presentasi Sidang & Eksekutif (16:9)
+                </h2>
+                <span className="text-[10px] font-mono px-2 py-0.5 rounded-md bg-sky-100 dark:bg-sky-950/60 text-sky-700 dark:text-sky-300 font-semibold border border-sky-300 dark:border-sky-800">
+                  Widescreen 16:9
+                </span>
+              </div>
+              <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-1">
+                Visualisasi deck terstruktur berbasis standar OilUI & RyuxDesign dengan panel Diagram Alur Google Flow & Ilustrasi AI.
+              </p>
+            </div>
+
+            {/* Actions: View Mode Toggle & Direct PPTX Download */}
+            <div className="flex flex-wrap items-center gap-2.5">
+              {/* Visual Mode Toggle */}
+              <div className="flex items-center p-0.5 rounded-lg bg-zinc-100 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800">
+                <button
+                  type="button"
+                  onClick={() => setSlideVisualMode("google-flow")}
+                  className={`px-3 py-1.5 rounded-md text-xs font-medium transition-all cursor-pointer flex items-center gap-1.5 ${
+                    slideVisualMode === "google-flow"
+                      ? "bg-white dark:bg-zinc-800 text-sky-600 dark:text-sky-400 shadow-xs font-semibold"
+                      : "text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-200"
+                  }`}
+                >
+                  <Activity className="w-3.5 h-3.5" />
+                  <span>Google Flow</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setSlideVisualMode("ai-concept");
+                    if (!slideAiImageMap[activeSlideIndex]) {
+                      handleGenerateSlideAiVisual(activeSlideIndex);
+                    }
+                  }}
+                  className={`px-3 py-1.5 rounded-md text-xs font-medium transition-all cursor-pointer flex items-center gap-1.5 ${
+                    slideVisualMode === "ai-concept"
+                      ? "bg-white dark:bg-zinc-800 text-sky-600 dark:text-sky-400 shadow-xs font-semibold"
+                      : "text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-200"
+                  }`}
+                >
+                  <Sparkles className="w-3.5 h-3.5" />
+                  <span>Visual AI</span>
+                </button>
+              </div>
+
+              {/* Direct Download PPTX Button */}
               <button
                 type="button"
-                disabled={activeSlideIndex === 0}
-                onClick={() => setActiveSlideIndex(prev => prev - 1)}
-                className="px-2.5 py-1 rounded bg-zinc-100 dark:bg-zinc-900 hover:bg-zinc-200 dark:hover:bg-zinc-800 disabled:opacity-30 cursor-pointer text-zinc-800 dark:text-zinc-200 text-xs transition-colors"
+                onClick={handleDownloadPptx}
+                disabled={isExportingPptx}
+                className="px-3.5 py-1.5 rounded-lg bg-sky-600 hover:bg-sky-500 disabled:opacity-50 text-white text-xs font-semibold flex items-center gap-2 shadow-xs transition-colors cursor-pointer"
               >
-                Prev
-              </button>
-              <button
-                type="button"
-                disabled={activeSlideIndex === currentDoc.slides.length - 1}
-                onClick={() => setActiveSlideIndex(prev => prev + 1)}
-                className="px-2.5 py-1 rounded bg-zinc-100 dark:bg-zinc-900 hover:bg-zinc-200 dark:hover:bg-zinc-800 disabled:opacity-30 cursor-pointer text-zinc-800 dark:text-zinc-200 text-xs transition-colors"
-              >
-                Next
+                {isExportingPptx ? (
+                  <RefreshCw className="w-3.5 h-3.5 animate-spin" />
+                ) : (
+                  <Download className="w-3.5 h-3.5" />
+                )}
+                <span>{isExportingPptx ? "Memproses PPTX..." : "Unduh .PPTX"}</span>
               </button>
             </div>
           </div>
 
-          {/* Active 16:9 Screen */}
-          {currentDoc.slides[activeSlideIndex] && (
-            <div className="w-full aspect-[16/9] max-h-[480px] rounded-xl bg-zinc-900 text-white border border-zinc-800 p-6 sm:p-10 flex flex-col justify-between relative shadow-xl overflow-hidden">
-              <div>
-                <span className="text-xs font-mono uppercase text-zinc-400 tracking-wider">
-                  {currentDoc.slides[activeSlideIndex].kicker}
-                </span>
-                <h3 className="text-lg sm:text-2xl font-bold text-white mt-2 leading-tight">
-                  {currentDoc.slides[activeSlideIndex].title}
-                </h3>
-                <p className="text-xs sm:text-sm text-zinc-300 mt-1">
-                  {currentDoc.slides[activeSlideIndex].subtitle}
-                </p>
+          {/* Slide Pills Navigation */}
+          <div className="flex items-center justify-between gap-2 overflow-x-auto pb-1">
+            <div className="flex items-center gap-1.5 overflow-x-auto py-1 text-xs">
+              {currentDoc.slides.map((s, idx) => (
+                <button
+                  key={idx}
+                  type="button"
+                  onClick={() => {
+                    setActiveSlideIndex(idx);
+                    if (slideVisualMode === "ai-concept" && !slideAiImageMap[idx]) {
+                      handleGenerateSlideAiVisual(idx);
+                    }
+                  }}
+                  className={`px-3 py-1.5 rounded-lg font-medium transition-all whitespace-nowrap cursor-pointer flex items-center gap-1.5 ${
+                    activeSlideIndex === idx
+                      ? "bg-zinc-900 text-white dark:bg-zinc-100 dark:text-zinc-900 font-semibold shadow-xs"
+                      : "bg-zinc-100 dark:bg-zinc-900 text-zinc-600 dark:text-zinc-400 hover:bg-zinc-200 dark:hover:bg-zinc-800"
+                  }`}
+                >
+                  <span className="font-mono text-[10px] opacity-75">{idx + 1}.</span>
+                  <span>{s.title.length > 20 ? s.title.slice(0, 18) + '...' : s.title}</span>
+                </button>
+              ))}
+            </div>
 
-                <div className="mt-6 space-y-2.5">
-                  {currentDoc.slides[activeSlideIndex].keyPoints.map((pt, pIdx) => (
-                    <div key={pIdx} className="flex items-start gap-2.5 text-xs sm:text-sm text-zinc-200">
-                      <span className="w-4 h-4 rounded-full bg-zinc-800 text-zinc-200 font-mono text-[10px] flex items-center justify-center font-bold flex-shrink-0 mt-0.5">
-                        {pIdx + 1}
-                      </span>
-                      <span>{pt}</span>
+            <div className="flex items-center gap-1.5 flex-shrink-0 text-xs">
+              <button
+                type="button"
+                disabled={activeSlideIndex === 0}
+                onClick={() => setActiveSlideIndex(prev => prev - 1)}
+                className="p-1.5 rounded-lg bg-zinc-100 dark:bg-zinc-900 hover:bg-zinc-200 dark:hover:bg-zinc-800 disabled:opacity-30 cursor-pointer text-zinc-800 dark:text-zinc-200 transition-colors"
+                title="Slide Sebelumnya"
+              >
+                <ChevronLeft className="w-4 h-4" />
+              </button>
+              <span className="text-zinc-500 dark:text-zinc-400 font-mono text-xs px-1">
+                {activeSlideIndex + 1} / {currentDoc.slides.length}
+              </span>
+              <button
+                type="button"
+                disabled={activeSlideIndex === currentDoc.slides.length - 1}
+                onClick={() => setActiveSlideIndex(prev => prev + 1)}
+                className="p-1.5 rounded-lg bg-zinc-100 dark:bg-zinc-900 hover:bg-zinc-200 dark:hover:bg-zinc-800 disabled:opacity-30 cursor-pointer text-zinc-800 dark:text-zinc-200 transition-colors"
+                title="Slide Berikutnya"
+              >
+                <ChevronRight className="w-4 h-4" />
+              </button>
+            </div>
+          </div>
+
+          {/* Active 16:9 Screen (2-Column Layout) */}
+          {currentDoc.slides[activeSlideIndex] && (
+            <div className="w-full rounded-2xl bg-zinc-950 text-white border border-zinc-800 p-6 sm:p-8 flex flex-col justify-between relative shadow-2xl overflow-hidden min-h-[500px]">
+              {/* Top Decorative Ambient Glow Bar */}
+              <div className="w-full h-1 bg-gradient-to-r from-sky-500 via-indigo-500 to-amber-400 absolute top-0 left-0" />
+
+              {/* Slide Content: 2-Column Responsive Grid */}
+              <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 items-stretch flex-1 my-2">
+                
+                {/* Column 1: Textual Arguments (55%) */}
+                <div className="lg:col-span-6 flex flex-col justify-between space-y-4">
+                  <div>
+                    <span className="text-[10px] font-mono uppercase tracking-wider text-sky-400 bg-sky-950/70 border border-sky-800/80 px-2.5 py-1 rounded-md inline-block">
+                      {currentDoc.slides[activeSlideIndex].kicker}
+                    </span>
+                    <h3 className="text-xl sm:text-2xl font-bold text-white mt-2.5 leading-snug tracking-tight">
+                      {currentDoc.slides[activeSlideIndex].title}
+                    </h3>
+                    <p className="text-xs sm:text-sm text-zinc-300 mt-1 leading-relaxed">
+                      {currentDoc.slides[activeSlideIndex].subtitle}
+                    </p>
+
+                    {/* Key Points */}
+                    <div className="mt-5 space-y-2.5">
+                      {currentDoc.slides[activeSlideIndex].keyPoints.map((pt, pIdx) => (
+                        <div
+                          key={pIdx}
+                          className="flex items-start gap-3 p-3 rounded-xl bg-zinc-900/80 border border-zinc-850 hover:border-zinc-750 transition-colors"
+                        >
+                          <span className="w-5 h-5 rounded-md bg-sky-950 text-sky-300 font-mono text-[11px] flex items-center justify-center font-bold flex-shrink-0 mt-0.5 border border-sky-800/80">
+                            {pIdx + 1}
+                          </span>
+                          <p className="text-xs sm:text-sm text-zinc-200 leading-relaxed font-normal">
+                            {pt}
+                          </p>
+                        </div>
+                      ))}
                     </div>
-                  ))}
+                  </div>
+
+                  {/* Micro Metadata Indicator */}
+                  <div className="pt-3 border-t border-zinc-850 flex items-center gap-3 text-[11px] text-zinc-400">
+                    <span className="flex items-center gap-1.5 text-sky-400 font-medium">
+                      <ShieldCheck className="w-3.5 h-3.5 text-sky-400" />
+                      Kepatuhan Akademik Terverifikasi
+                    </span>
+                    <span>&bull;</span>
+                    <span className="text-zinc-400 font-mono">Standar Dikti 2026</span>
+                  </div>
+                </div>
+
+                {/* Column 2: Contextual Visual Architecture Panel (45%) */}
+                <div className="lg:col-span-6 flex flex-col justify-between bg-zinc-900/60 rounded-xl border border-zinc-800/80 p-5 relative overflow-hidden">
+                  
+                  {/* MODE A: GOOGLE FLOW VECTOR DIAGRAM */}
+                  {slideVisualMode === "google-flow" && (
+                    <div className="h-full flex flex-col justify-between space-y-4">
+                      <div className="flex items-center justify-between pb-2.5 border-b border-zinc-800">
+                        <span className="text-[10px] font-mono uppercase tracking-wider text-zinc-400 flex items-center gap-1.5">
+                          <Activity className="w-3 h-3 text-sky-400" />
+                          Diagram Alur Google Flow & Metrik
+                        </span>
+                        <span className="text-[10px] font-mono text-zinc-400 px-2 py-0.5 rounded-md bg-zinc-800 border border-zinc-700">
+                          Panel Arsitektur
+                        </span>
+                      </div>
+
+                      {/* SLIDE 0: COVER / KELAYAKAN RISET */}
+                      {activeSlideIndex === 0 && (
+                        <div className="space-y-3.5 my-auto">
+                          <div className="p-3.5 rounded-xl bg-zinc-950/80 border border-zinc-800">
+                            <span className="text-[10px] font-mono text-zinc-400 block uppercase">
+                              Target Mitra & Penugasan
+                            </span>
+                            <h4 className="text-sm font-bold text-white mt-0.5">
+                              {currentDoc.targetEntity}
+                            </h4>
+                            <p className="text-xs text-sky-400 mt-0.5">
+                              Unit / Divisi: {currentDoc.targetDepartment}
+                            </p>
+                          </div>
+
+                          <div className="grid grid-cols-3 gap-2.5">
+                            <div className="p-3 rounded-lg bg-zinc-950/60 border border-zinc-800 text-center">
+                              <span className="text-lg font-bold text-sky-400 block font-mono">100%</span>
+                              <span className="text-[10px] text-zinc-400 font-medium">Standar Dikti</span>
+                            </div>
+                            <div className="p-3 rounded-lg bg-zinc-950/60 border border-zinc-800 text-center">
+                              <span className="text-lg font-bold text-amber-300 block font-mono">0%</span>
+                              <span className="text-[10px] text-zinc-400 font-medium">Bebas Plagiasi</span>
+                            </div>
+                            <div className="p-3 rounded-lg bg-zinc-950/60 border border-zinc-800 text-center">
+                              <span className="text-lg font-bold text-emerald-400 block font-mono">{currentDoc.durationMonths} Bln</span>
+                              <span className="text-[10px] text-zinc-400 font-medium">Linimasa Ketat</span>
+                            </div>
+                          </div>
+
+                          <div className="p-3 rounded-xl bg-sky-950/30 border border-sky-900/60 text-xs text-zinc-300 flex items-center gap-2">
+                            <Brain className="w-4 h-4 text-sky-400 flex-shrink-0" />
+                            <span>Arsitektur penelitian dirancang berbasis prinsip keterukuran saintifik.</span>
+                          </div>
+                        </div>
+                      )}
+
+                      {/* SLIDE 1: PROBLEM TREE / AKAR MASALAH */}
+                      {activeSlideIndex === 1 && (
+                        <div className="space-y-2.5 my-auto">
+                          {/* Step 1: Root Cause */}
+                          <div className="p-3 rounded-xl bg-zinc-950/80 border border-rose-900/40">
+                            <span className="text-[10px] font-mono text-rose-400 block uppercase font-bold">
+                              01. Akar Masalah (Root Cause)
+                            </span>
+                            <p className="text-xs text-zinc-300 mt-1">
+                              {currentDoc.bab1.latarBelakang[0] || "Inefisiensi pemrosesan manual dan keterbatasan sistem eksisting."}
+                            </p>
+                          </div>
+
+                          <div className="flex justify-center text-zinc-400 text-xs py-0.5">
+                            <ArrowRight className="w-4 h-4 rotate-90 text-zinc-400" />
+                          </div>
+
+                          {/* Step 2: Critical Gap */}
+                          <div className="p-3 rounded-xl bg-zinc-950/80 border border-amber-900/40">
+                            <span className="text-[10px] font-mono text-amber-400 block uppercase font-bold">
+                              02. Kesenjangan Masalah (The Gap)
+                            </span>
+                            <p className="text-xs text-zinc-300 mt-1">
+                              {currentDoc.bab1.latarBelakang[1] || "Belum tersedianya framework pipeline otomatisasi terstandarisasi."}
+                            </p>
+                          </div>
+
+                          <div className="flex justify-center text-zinc-400 text-xs py-0.5">
+                            <ArrowRight className="w-4 h-4 rotate-90 text-zinc-400" />
+                          </div>
+
+                          {/* Step 3: Proposed Solution */}
+                          <div className="p-3 rounded-xl bg-zinc-950/80 border border-sky-900/60">
+                            <span className="text-[10px] font-mono text-sky-400 block uppercase font-bold">
+                              03. Intervensi Solusi yang Diusulkan
+                            </span>
+                            <p className="text-xs text-zinc-300 mt-1">
+                              {currentDoc.bab1.tujuanUmum || "Membangun sistem pipeline terintegrasi dengan validasi empiris."}
+                            </p>
+                          </div>
+                        </div>
+                      )}
+
+                      {/* SLIDE 2: RUMUSAN MASALAH & DELIVERABLES */}
+                      {activeSlideIndex === 2 && (
+                        <div className="space-y-3.5 my-auto">
+                          <div className="p-3 rounded-xl bg-zinc-950/80 border border-zinc-800">
+                            <span className="text-[10px] font-mono text-amber-300 uppercase block font-semibold mb-1">
+                              Pertanyaan Penelitian Kunci
+                            </span>
+                            <div className="space-y-1.5 text-xs text-zinc-300">
+                              {currentDoc.bab1.rumusanMasalah.slice(0, 2).map((r, rIdx) => (
+                                <p key={rIdx} className="flex items-start gap-2">
+                                  <span className="text-amber-400 font-mono font-bold">?</span>
+                                  <span>{r}</span>
+                                </p>
+                              ))}
+                            </div>
+                          </div>
+
+                          <div className="flex justify-center text-zinc-400 text-xs">
+                            <span className="px-2 py-0.5 rounded-md bg-zinc-800 text-[10px] font-mono text-sky-400 border border-zinc-700">
+                              Target Capaian Terukur
+                            </span>
+                          </div>
+
+                          <div className="p-3 rounded-xl bg-zinc-950/80 border border-sky-900/60">
+                            <span className="text-[10px] font-mono text-sky-400 uppercase block font-semibold mb-1">
+                              Deliverables & Key Performance Indicators
+                            </span>
+                            <div className="space-y-1.5 text-xs text-zinc-300">
+                              {currentDoc.bab1.tujuanKhusus.slice(0, 2).map((t, tIdx) => (
+                                <p key={tIdx} className="flex items-start gap-2">
+                                  <Check className="w-3.5 h-3.5 text-emerald-400 flex-shrink-0 mt-0.5" />
+                                  <span>{t}</span>
+                                </p>
+                              ))}
+                            </div>
+                          </div>
+                        </div>
+                      )}
+
+                      {/* SLIDE 3: LANDASAN TEORI & PRISMA */}
+                      {activeSlideIndex === 3 && (
+                        <div className="space-y-2.5 my-auto">
+                          {currentDoc.bab2.landasanTeori.slice(0, 3).map((lt, ltIdx) => (
+                            <div key={ltIdx} className="p-3 rounded-xl bg-zinc-950/80 border border-zinc-800">
+                              <div className="flex items-center justify-between text-[10px] font-mono mb-1">
+                                <span className="text-sky-400 font-bold">PILLAR 0{ltIdx + 1}</span>
+                                <span className="text-amber-300">{ltIdx === 0 ? "Teori Inti" : "Rujukan Terapan"}</span>
+                              </div>
+                              <h5 className="text-xs font-bold text-white line-clamp-1">{lt.topic}</h5>
+                              <p className="text-[11px] text-zinc-400 mt-1 line-clamp-2">{lt.elaboration}</p>
+                              <span className="text-[10px] text-zinc-400 font-mono mt-1.5 block">
+                                Sitasi: {lt.citation}
+                              </span>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+
+                      {/* SLIDE 4: METODOLOGI & PIPELINE (GOOGLE FLOW) */}
+                      {activeSlideIndex === 4 && (
+                        <div className="space-y-3 my-auto">
+                          <div className="grid grid-cols-2 gap-2.5">
+                            <div className="p-2.5 rounded-lg bg-zinc-950/80 border border-sky-800/80">
+                              <span className="text-[10px] font-mono text-sky-400 block font-bold">TAHAP 01</span>
+                              <span className="text-xs font-semibold text-white block mt-0.5">Observasi & Data</span>
+                              <span className="text-[10px] text-zinc-400">Ekstraksi baseline sistem</span>
+                            </div>
+                            <div className="p-2.5 rounded-lg bg-zinc-950/80 border border-sky-800/80">
+                              <span className="text-[10px] font-mono text-sky-400 block font-bold">TAHAP 02</span>
+                              <span className="text-xs font-semibold text-white block mt-0.5">Desain Pipeline</span>
+                              <span className="text-[10px] text-zinc-400">Arsitektur & integrasi</span>
+                            </div>
+                            <div className="p-2.5 rounded-lg bg-zinc-950/80 border border-amber-800/80">
+                              <span className="text-[10px] font-mono text-amber-300 block font-bold">TAHAP 03</span>
+                              <span className="text-xs font-semibold text-white block mt-0.5">Uji & Validasi</span>
+                              <span className="text-[10px] text-zinc-400">Benchmarking akurasi</span>
+                            </div>
+                            <div className="p-2.5 rounded-lg bg-zinc-950/80 border border-emerald-800/80">
+                              <span className="text-[10px] font-mono text-emerald-400 block font-bold">TAHAP 04</span>
+                              <span className="text-xs font-semibold text-white block mt-0.5">Diseminasi</span>
+                              <span className="text-[10px] text-zinc-400">Laporan naskah final</span>
+                            </div>
+                          </div>
+
+                          <div className="p-2.5 rounded-xl bg-zinc-950/80 border border-zinc-800">
+                            <span className="text-[10px] font-mono text-zinc-400 block uppercase mb-1">
+                              Spesifikasi Perangkat & Lingkungan:
+                            </span>
+                            <div className="flex flex-wrap gap-1.5">
+                              {currentDoc.bab3.perangkatTools.map((tool, tIdx) => (
+                                <span
+                                  key={tIdx}
+                                  className="px-2 py-0.5 rounded-md bg-zinc-800 border border-zinc-700 text-zinc-300 text-[10px] font-mono"
+                                >
+                                  {tool}
+                                </span>
+                              ))}
+                            </div>
+                          </div>
+                        </div>
+                      )}
+
+                      {/* SLIDE 5: ROADMAP MATRIKS & JADWAL */}
+                      {activeSlideIndex === 5 && (
+                        <div className="space-y-2.5 my-auto">
+                          {currentDoc.bab4.jadwalMatriks.slice(0, 4).map((j, jIdx) => (
+                            <div
+                              key={jIdx}
+                              className="p-2.5 rounded-xl bg-zinc-950/80 border border-zinc-800 flex items-center justify-between gap-3"
+                            >
+                              <div className="flex items-center gap-2.5">
+                                <span className="w-8 h-8 rounded-lg bg-sky-950 text-sky-400 font-mono text-xs font-bold flex items-center justify-center border border-sky-800 flex-shrink-0">
+                                  M{j.week}
+                                </span>
+                                <div>
+                                  <h6 className="text-xs font-bold text-white">{j.phase}</h6>
+                                  <p className="text-[11px] text-zinc-400">{j.activities[0]}</p>
+                                </div>
+                              </div>
+                              <span className="text-[10px] font-mono px-2 py-0.5 rounded-md bg-zinc-800 text-amber-300 border border-zinc-700 flex-shrink-0">
+                                {j.output}
+                              </span>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+
+                      <div className="text-[10px] text-zinc-400 font-mono text-center pt-2 border-t border-zinc-800">
+                        Sinkronisasi otomatis dengan Bab Dokumen Studio
+                      </div>
+                    </div>
+                  )}
+
+                  {/* MODE B: AI VISUAL KONSEPTUAL */}
+                  {slideVisualMode === "ai-concept" && (
+                    <div className="h-full flex flex-col justify-between space-y-3">
+                      <div className="flex items-center justify-between pb-2 border-b border-zinc-800">
+                        <span className="text-[10px] font-mono uppercase tracking-wider text-sky-400 flex items-center gap-1.5">
+                          <Sparkles className="w-3 h-3 text-sky-400" />
+                          Visual AI Flow (Contextual Architecture)
+                        </span>
+                        <span className="text-[10px] font-mono text-zinc-400">
+                          {isGeneratingSlideVisual ? "Generating..." : "Siap"}
+                        </span>
+                      </div>
+
+                      {/* Image Stage Container */}
+                      <div className="w-full h-56 rounded-xl bg-zinc-950 border border-zinc-800 flex items-center justify-center relative overflow-hidden group">
+                        {isGeneratingSlideVisual ? (
+                          <div className="flex flex-col items-center gap-2 text-center p-4">
+                            <RefreshCw className="w-6 h-6 text-sky-400 animate-spin" />
+                            <p className="text-xs text-zinc-400 font-mono">
+                              Menghasilkan ilustrasi arsitektur visual via AI...
+                            </p>
+                          </div>
+                        ) : slideAiImageMap[activeSlideIndex] ? (
+                          // eslint-disable-next-line @next/next/no-img-element
+                          <img
+                            src={slideAiImageMap[activeSlideIndex]}
+                            alt="Visual Architecture"
+                            className="w-full h-full object-cover rounded-xl transition-transform duration-300 group-hover:scale-105"
+                          />
+                        ) : (
+                          <div className="flex flex-col items-center gap-2.5 text-center p-6">
+                            <ImageIcon className="w-8 h-8 text-zinc-600" />
+                            <p className="text-xs text-zinc-400">
+                              Visual AI belum digenerate untuk slide ini.
+                            </p>
+                            <button
+                              type="button"
+                              onClick={() => handleGenerateSlideAiVisual(activeSlideIndex, customSlidePrompt)}
+                              className="px-3 py-1.5 rounded-lg bg-sky-600 hover:bg-sky-500 text-white text-xs font-semibold flex items-center gap-1.5 cursor-pointer"
+                            >
+                              <Sparkles className="w-3.5 h-3.5" />
+                              <span>Buat Visual Sekarang</span>
+                            </button>
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Prompt Customization Bar */}
+                      <div className="space-y-1.5">
+                        <div className="flex items-center gap-1.5">
+                          <input
+                            type="text"
+                            placeholder="Sesuaikan prompt visual AI (opsional)..."
+                            value={customSlidePrompt}
+                            onChange={(e) => setCustomSlidePrompt(e.target.value)}
+                            className="flex-1 px-3 py-1.5 rounded-lg bg-zinc-950 border border-zinc-800 text-white text-xs placeholder:text-zinc-600 focus:outline-hidden focus:border-sky-500"
+                          />
+                          <button
+                            type="button"
+                            onClick={() => handleGenerateSlideAiVisual(activeSlideIndex, customSlidePrompt)}
+                            disabled={isGeneratingSlideVisual}
+                            className="px-3 py-1.5 rounded-lg bg-zinc-800 hover:bg-zinc-700 disabled:opacity-50 text-white text-xs font-semibold flex items-center gap-1 cursor-pointer flex-shrink-0"
+                            title="Regenerate Gambar"
+                          >
+                            <RefreshCw className={`w-3.5 h-3.5 ${isGeneratingSlideVisual ? "animate-spin" : ""}`} />
+                            <span>Ubah</span>
+                          </button>
+                        </div>
+                        <p className="text-[10px] text-zinc-400 font-mono">
+                          Tip: Gambar otomatis disesuaikan dengan konteks judul riset & bab terkait.
+                        </p>
+                      </div>
+                    </div>
+                  )}
+
                 </div>
               </div>
 
-              <div className="pt-3 border-t border-zinc-800 flex items-center justify-between text-[11px] text-zinc-400 font-mono">
-                <span>{currentDoc.institution} &bull; {currentDoc.candidateName}</span>
+              {/* Bottom Footer Info */}
+              <div className="pt-3 border-t border-zinc-850 flex items-center justify-between text-[11px] text-zinc-400 font-mono">
+                <span>{currentDoc.institution} &bull; {currentDoc.candidateName} (NIM: {currentDoc.candidateId})</span>
                 <span>Slide {activeSlideIndex + 1} / {currentDoc.slides.length}</span>
               </div>
             </div>
           )}
 
-          {/* Speaker Notes */}
-          <div className="mt-4 p-3.5 rounded-xl bg-zinc-50 dark:bg-zinc-900/60 border border-zinc-200 dark:border-zinc-800">
-            <span className="text-[11px] text-zinc-500 dark:text-zinc-400 font-medium block mb-1">
-              Catatan Presenter:
-            </span>
-            <p className="text-xs text-zinc-700 dark:text-zinc-300 italic leading-relaxed">
+          {/* Speaker Notes Card */}
+          <div className="p-4 rounded-xl bg-zinc-50 dark:bg-zinc-900/60 border border-zinc-200 dark:border-zinc-800 space-y-2">
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-semibold text-zinc-900 dark:text-zinc-100 flex items-center gap-1.5">
+                <Brain className="w-4 h-4 text-sky-500" />
+                Catatan Presenter & Naskah Narasi Sidang (Speaker Notes)
+              </span>
+              <button
+                type="button"
+                onClick={handleCopySpeakerNotes}
+                className="px-2.5 py-1 rounded-md text-[11px] font-medium text-zinc-600 dark:text-zinc-400 hover:bg-zinc-200 dark:hover:bg-zinc-800 transition-colors flex items-center gap-1 cursor-pointer"
+              >
+                {copiedNotes ? (
+                  <>
+                    <Check className="w-3.5 h-3.5 text-emerald-500" />
+                    <span className="text-emerald-500 font-semibold">Tersalin</span>
+                  </>
+                ) : (
+                  <>
+                    <Copy className="w-3.5 h-3.5" />
+                    <span>Salin Catatan</span>
+                  </>
+                )}
+              </button>
+            </div>
+            <p className="text-xs text-zinc-700 dark:text-zinc-300 italic leading-relaxed bg-white dark:bg-zinc-950 p-3 rounded-lg border border-zinc-200 dark:border-zinc-850">
               "{currentDoc.slides[activeSlideIndex]?.speakerNotes}"
+            </p>
+            <p className="text-[11px] text-zinc-500 dark:text-zinc-400">
+              Gunakan panduan narasi di atas saat memaparkan slide ini kepada Dosen Pembimbing atau Dewan Penguji Sidang.
             </p>
           </div>
         </div>

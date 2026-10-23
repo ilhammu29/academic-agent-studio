@@ -227,6 +227,19 @@ export async function generateAcademicProposalPptx(doc: ProposalDocument): Promi
       }
     );
 
+    // Connector Arrow 1 -> 2
+    slide.addText("➔", {
+      x: 4.45,
+      y: 3.8,
+      w: 0.38,
+      h: 0.4,
+      fontSize: 14,
+      bold: true,
+      color: ACCENT_CYAN,
+      fontFace: FONT_PRIMARY,
+      align: "center",
+    });
+
     // Card 2: Permasalahan Riil
     slide.addShape(pptx.ShapeType.roundRect, {
       x: 4.8,
@@ -261,6 +274,19 @@ export async function generateAcademicProposalPptx(doc: ProposalDocument): Promi
         align: "justify",
       }
     );
+
+    // Connector Arrow 2 -> 3
+    slide.addText("➔", {
+      x: 8.45,
+      y: 3.8,
+      w: 0.38,
+      h: 0.4,
+      fontSize: 14,
+      bold: true,
+      color: ACCENT_CYAN,
+      fontFace: FONT_PRIMARY,
+      align: "center",
+    });
 
     // Card 3: Solusi yang Diusulkan
     slide.addShape(pptx.ShapeType.roundRect, {
@@ -516,50 +542,109 @@ export async function generateAcademicProposalPptx(doc: ProposalDocument): Promi
       color: TEXT_WHITE,
     });
 
-    slide.addShape(pptx.ShapeType.roundRect, {
-      x: 0.8,
-      y: 1.7,
-      w: 11.7,
-      h: 2.0,
-      rectRadius: 0.1,
-      fill: { color: CARD_BG },
-      line: { color: CARD_BORDER, width: 1 },
-    });
+    // ----------------------------------------------------
+    // GOOGLE FLOW PIPELINE VISUAL (4 TAHAPAN PROSES)
+    // ----------------------------------------------------
+    const flowSteps = [
+      {
+        no: "01",
+        label: "AKUISISI DATA",
+        desc: "Pengumpulan dataset & observasi lapangan",
+        accent: ACCENT_CYAN,
+      },
+      {
+        no: "02",
+        label: "PIPELINE DESAIN",
+        desc: "Pemodelan arsitektur & pipeline sistem",
+        accent: ACCENT_CYAN,
+      },
+      {
+        no: "03",
+        label: "UJI & VALIDASI",
+        desc: "Benchmarking akurasi & mitigasi eror",
+        accent: ACCENT_CHAMPAGNE,
+      },
+      {
+        no: "04",
+        label: "DISEMINASI",
+        desc: "Evaluasi luaran & laporan terstandarisasi",
+        accent: ACCENT_CYAN,
+      },
+    ];
 
-    slide.addText("METODE & KERANGKA KERJA UTAMA", {
-      x: 1.1,
-      y: 1.9,
-      w: 11.0,
-      h: 0.3,
-      fontSize: 10,
-      bold: true,
-      color: ACCENT_CYAN,
-      fontFace: FONT_PRIMARY,
-    });
-    slide.addText(doc.bab3.metodePelaksanaan, {
-      x: 1.1,
-      y: 2.3,
-      w: 11.1,
-      h: 1.2,
-      fontSize: 11,
-      color: TEXT_WHITE,
-      fontFace: FONT_PRIMARY,
-      align: "justify",
+    flowSteps.forEach((step, sIdx) => {
+      const cardX = 0.8 + sIdx * 3.0;
+      slide.addShape(pptx.ShapeType.roundRect, {
+        x: cardX,
+        y: 1.6,
+        w: 2.6,
+        h: 1.8,
+        rectRadius: 0.08,
+        fill: { color: CARD_BG },
+        line: { color: step.accent, width: 1.2 },
+      });
+
+      slide.addText(`TAHAP ${step.no}`, {
+        x: cardX + 0.15,
+        y: 1.75,
+        w: 2.3,
+        h: 0.25,
+        fontSize: 9,
+        bold: true,
+        color: step.accent,
+        fontFace: FONT_PRIMARY,
+      });
+
+      slide.addText(step.label, {
+        x: cardX + 0.15,
+        y: 2.05,
+        w: 2.3,
+        h: 0.4,
+        fontSize: 11,
+        bold: true,
+        color: TEXT_WHITE,
+        fontFace: FONT_PRIMARY,
+      });
+
+      slide.addText(step.desc, {
+        x: cardX + 0.15,
+        y: 2.45,
+        w: 2.3,
+        h: 0.8,
+        fontSize: 9,
+        color: TEXT_MUTED,
+        fontFace: FONT_PRIMARY,
+      });
+
+      // Connector Arrow between step cards
+      if (sIdx < flowSteps.length - 1) {
+        slide.addText("➔", {
+          x: cardX + 2.58,
+          y: 2.3,
+          w: 0.45,
+          h: 0.4,
+          fontSize: 16,
+          bold: true,
+          color: ACCENT_CYAN,
+          fontFace: FONT_PRIMARY,
+          align: "center",
+        });
+      }
     });
 
     // Subcard: Lingkup Kerja
     slide.addShape(pptx.ShapeType.roundRect, {
       x: 0.8,
-      y: 4.0,
+      y: 3.7,
       w: 5.7,
-      h: 2.5,
+      h: 2.8,
       rectRadius: 0.1,
       fill: { color: CARD_BG },
       line: { color: CARD_BORDER, width: 1 },
     });
-    slide.addText("RUANG LINGKUP PENUGASAN", {
+    slide.addText("RUANG LINGKUP PENUGASAN (SCOPE)", {
       x: 1.1,
-      y: 4.2,
+      y: 3.9,
       w: 5.1,
       h: 0.3,
       fontSize: 10,
@@ -567,11 +652,11 @@ export async function generateAcademicProposalPptx(doc: ProposalDocument): Promi
       color: ACCENT_CHAMPAGNE,
       fontFace: FONT_PRIMARY,
     });
-    slide.addText(doc.bab3.lingkupPekerjaan.slice(0, 3).map((l, i) => `${i + 1}. ${l}`).join("\n"), {
+    slide.addText(doc.bab3.lingkupPekerjaan.slice(0, 4).map((l, i) => `${i + 1}. ${l}`).join("\n"), {
       x: 1.1,
-      y: 4.6,
+      y: 4.3,
       w: 5.1,
-      h: 1.7,
+      h: 2.0,
       fontSize: 10,
       color: TEXT_MUTED,
       fontFace: FONT_PRIMARY,
@@ -580,16 +665,16 @@ export async function generateAcademicProposalPptx(doc: ProposalDocument): Promi
     // Subcard: Tools & Lingkungan Kerja
     slide.addShape(pptx.ShapeType.roundRect, {
       x: 6.8,
-      y: 4.0,
+      y: 3.7,
       w: 5.7,
-      h: 2.5,
+      h: 2.8,
       rectRadius: 0.1,
       fill: { color: CARD_BG },
       line: { color: CARD_BORDER, width: 1 },
     });
     slide.addText("SPESIFIKASI TOOLS & LINGKUNGAN KERJA", {
       x: 7.1,
-      y: 4.2,
+      y: 3.9,
       w: 5.1,
       h: 0.3,
       fontSize: 10,
@@ -599,9 +684,9 @@ export async function generateAcademicProposalPptx(doc: ProposalDocument): Promi
     });
     slide.addText(doc.bab3.perangkatTools.map((p) => `• ${p}`).join("\n"), {
       x: 7.1,
-      y: 4.6,
+      y: 4.3,
       w: 5.1,
-      h: 1.7,
+      h: 2.0,
       fontSize: 10,
       color: TEXT_MUTED,
       fontFace: FONT_PRIMARY,
