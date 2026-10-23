@@ -15,7 +15,8 @@ import {
   FolderKanban,
   Check,
   BookOpen,
-  Cpu
+  Cpu,
+  Landmark
 } from "lucide-react";
 import { TitleRecommendation, getAiTitleRecommendations } from "@/lib/titleGenerator";
 
@@ -35,6 +36,8 @@ interface HeroInputViewProps {
   onSubmit: () => void;
   onOpenDatabase?: () => void;
   onOpenDrive?: () => void;
+  onOpenGuidelineModal?: () => void;
+  activeCampusName?: string;
 }
 
 const POPULAR_DOMAINS = [
@@ -100,7 +103,9 @@ export const HeroInputView: React.FC<HeroInputViewProps> = ({
   setCandidateId,
   onSubmit,
   onOpenDatabase,
-  onOpenDrive
+  onOpenDrive,
+  onOpenGuidelineModal,
+  activeCampusName
 }) => {
   const [showConfig, setShowConfig] = useState(false);
   const [isAiRecommenderOpen, setIsAiRecommenderOpen] = useState(false);
@@ -186,16 +191,32 @@ export const HeroInputView: React.FC<HeroInputViewProps> = ({
         
         {/* Top Action Row inside input */}
         <div className="flex items-center justify-between pb-2 mb-2 border-b border-zinc-100 dark:border-zinc-900 text-xs">
-          <button
-            type="button"
-            onClick={handleOpenAiRecommender}
-            className="flex items-center gap-1.5 text-zinc-700 dark:text-zinc-300 hover:text-black dark:hover:text-white transition-colors cursor-pointer text-xs"
-          >
-            <Sparkles className="w-3.5 h-3.5 text-amber-500" />
-            <span className="underline underline-offset-4 decoration-zinc-300 dark:decoration-zinc-700 hover:decoration-black dark:hover:decoration-white font-medium">
-              Rekomendasi Judul (AI & Jurnal)
-            </span>
-          </button>
+          <div className="flex items-center gap-3">
+            <button
+              type="button"
+              onClick={handleOpenAiRecommender}
+              className="flex items-center gap-1.5 text-zinc-700 dark:text-zinc-300 hover:text-black dark:hover:text-white transition-colors cursor-pointer text-xs"
+            >
+              <Sparkles className="w-3.5 h-3.5 text-amber-500" />
+              <span className="underline underline-offset-4 decoration-zinc-300 dark:decoration-zinc-700 hover:decoration-black dark:hover:decoration-white font-medium">
+                Rekomendasi Judul (AI)
+              </span>
+            </button>
+
+            {onOpenGuidelineModal && (
+              <button
+                type="button"
+                onClick={onOpenGuidelineModal}
+                className="hidden sm:flex items-center gap-1.5 text-indigo-600 dark:text-indigo-400 hover:text-indigo-800 dark:hover:text-indigo-200 transition-colors cursor-pointer text-xs font-medium"
+                title="Pindai PDF atau pilih preset format kampus Anda"
+              >
+                <Landmark className="w-3.5 h-3.5 text-indigo-500" />
+                <span className="underline underline-offset-4 decoration-indigo-300 dark:decoration-indigo-700">
+                  {activeCampusName ? `Format: ${activeCampusName.split("(")[0].trim()}` : "Format Kampus (Scan AI)"}
+                </span>
+              </button>
+            )}
+          </div>
 
           <button
             type="button"
@@ -350,21 +371,32 @@ export const HeroInputView: React.FC<HeroInputViewProps> = ({
       </div>
 
       {/* 3. Sleek Quick Links */}
-      <div className="w-full flex items-center justify-between text-xs text-zinc-500 px-1">
+      <div className="w-full flex items-center justify-between text-xs text-zinc-500 px-1 flex-wrap gap-2">
         <button
           type="button"
           onClick={handleOpenAiRecommender}
-          className="text-zinc-400 hover:text-zinc-200 transition-colors flex items-center gap-1.5 cursor-pointer text-xs"
+          className="text-zinc-500 hover:text-zinc-800 dark:hover:text-zinc-200 transition-colors flex items-center gap-1.5 cursor-pointer text-xs"
         >
           <Sparkles className="w-3.5 h-3.5 text-zinc-400" />
           <span>Eksplorasi Ide Judul Riset Terindeks</span>
         </button>
 
+        {onOpenGuidelineModal && (
+          <button
+            type="button"
+            onClick={onOpenGuidelineModal}
+            className="text-indigo-600 dark:text-indigo-400 hover:underline transition-colors flex items-center gap-1.5 cursor-pointer text-xs font-medium"
+          >
+            <Landmark className="w-3.5 h-3.5 text-indigo-500" />
+            <span>Pindai PDF Pedoman Kampus (AI)</span>
+          </button>
+        )}
+
         {onOpenDrive && (
           <button
             type="button"
             onClick={onOpenDrive}
-            className="text-zinc-400 hover:text-zinc-200 transition-colors flex items-center gap-1.5 cursor-pointer text-xs"
+            className="text-zinc-500 hover:text-zinc-800 dark:hover:text-zinc-200 transition-colors flex items-center gap-1.5 cursor-pointer text-xs"
           >
             <FolderKanban className="w-3.5 h-3.5 text-zinc-400" />
             <span>Buka Drive Penyimpanan</span>

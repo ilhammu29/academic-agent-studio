@@ -9,6 +9,7 @@ import { RevisionMatrixManager } from "./RevisionMatrixManager";
 import { TurnitinPreCheckModal } from "./TurnitinPreCheckModal";
 import { ResearchInstrumentModal } from "./ResearchInstrumentModal";
 import { ApprovalSheetModal } from "./ApprovalSheetModal";
+import { CampusGuidelineModal } from "./CampusGuidelineModal";
 import { ResearchFlowchart } from "./ResearchFlowchart";
 import { AcademicCopilotDrawer } from "./AcademicCopilotDrawer";
 import { generateAcademicProposalDocx, downloadDocxBlob } from "@/lib/docxExporter";
@@ -39,7 +40,8 @@ import {
   BookmarkCheck,
   ChevronDown,
   Compass,
-  Bot
+  Bot,
+  Landmark
 } from "lucide-react";
 
 interface DocumentStudioProps {
@@ -63,6 +65,7 @@ export const DocumentStudio: React.FC<DocumentStudioProps> = ({
   const [isTurnitinModalOpen, setIsTurnitinModalOpen] = useState(false);
   const [isInstrumentModalOpen, setIsInstrumentModalOpen] = useState(false);
   const [isApprovalModalOpen, setIsApprovalModalOpen] = useState(false);
+  const [isGuidelineModalOpen, setIsGuidelineModalOpen] = useState(false);
   const [citationStyle, setCitationStyle] = useState<"apa" | "ieee">("apa");
   
   // Co-Pilot & Dropdown states
@@ -433,6 +436,17 @@ NIP / NIK.
             <span className="text-[10px] uppercase font-mono tracking-wider px-2.5 py-0.5 rounded-full bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 font-semibold border border-zinc-200 dark:border-zinc-700/50">
               {currentDoc.category === "magang" ? "Magang Industri" : currentDoc.category === "skripsi" ? "Skripsi / TA" : "Tesis & Riset"}
             </span>
+            <button
+              type="button"
+              onClick={() => setIsGuidelineModalOpen(true)}
+              title="Klik untuk memilih preset kampus (UGM, UI, ITB, dll.) atau memindai PDF buku pedoman kampus Anda"
+              className="inline-flex items-center gap-1.5 text-[10px] font-mono px-2.5 py-0.5 rounded-full bg-indigo-50 dark:bg-indigo-950/50 hover:bg-indigo-100 dark:hover:bg-indigo-900/60 text-indigo-700 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-800/60 transition-colors cursor-pointer"
+            >
+              <Landmark className="w-3 h-3 text-indigo-500" />
+              <span>
+                Format: {currentDoc.campusGuideline?.campusName || "Standar Dikti"} ({currentDoc.campusGuideline?.margins ? `${currentDoc.campusGuideline.margins.leftCm}-${currentDoc.campusGuideline.margins.topCm}-${currentDoc.campusGuideline.margins.rightCm}-${currentDoc.campusGuideline.margins.bottomCm} cm` : "4-4-3-3 cm"})
+              </span>
+            </button>
             {lastSaved && (
               <span className="inline-flex items-center gap-1 text-[10px] font-mono text-zinc-500 dark:text-zinc-400">
                 <CheckCircle2 className="w-3 h-3 text-emerald-500" />
@@ -508,7 +522,22 @@ NIP / NIK.
             </button>
 
             {isToolsDropdownOpen && (
-              <div className="absolute right-0 mt-2 w-60 rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-1.5 shadow-xl z-30 animate-in fade-in zoom-in-95 duration-100">
+              <div className="absolute right-0 mt-2 w-64 rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-1.5 shadow-xl z-30 animate-in fade-in zoom-in-95 duration-100">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsToolsDropdownOpen(false);
+                    setIsGuidelineModalOpen(true);
+                  }}
+                  className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-medium text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors text-left cursor-pointer"
+                >
+                  <Landmark className="w-4 h-4 text-indigo-500 flex-shrink-0" />
+                  <div>
+                    <p className="font-semibold text-zinc-900 dark:text-zinc-100">Format Kampus & Panduan (AI)</p>
+                    <p className="text-[10px] text-zinc-500">Pindai PDF / Pilih Preset Kampus Populer</p>
+                  </div>
+                </button>
+
                 <button
                   type="button"
                   onClick={() => {
@@ -1700,6 +1729,29 @@ NIP / NIK.
           });
           setToastMessage("Lembar pengesahan resmi berhasil diperbarui!");
           setTimeout(() => setToastMessage(null), 3000);
+        }}
+      />
+
+      {/* MODAL: FORMAT KAMPUS & AI GUIDELINE SCANNER */}
+      <CampusGuidelineModal
+        isOpen={isGuidelineModalOpen}
+        onClose={() => setIsGuidelineModalOpen(false)}
+        currentGuideline={currentDoc.campusGuideline}
+        onApplyGuideline={(guideline) => {
+          setCurrentDoc(prev => {
+            const updated = { 
+              ...prev, 
+              campusGuideline: guideline,
+              institution: guideline.campusName.split("(")[0].trim() || prev.institution
+            };
+            pushToHistory(updated);
+            return updated;
+          });
+          if (guideline.citationStyle) {
+            setCitationStyle(guideline.citationStyle === "ieee" ? "ieee" : "apa");
+          }
+          setToastMessage(`Format resmi ${guideline.campusName} berhasil diterapkan ke Naskah & Dokumen Word!`);
+          setTimeout(() => setToastMessage(null), 3500);
         }}
       />
 

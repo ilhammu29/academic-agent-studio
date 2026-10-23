@@ -1,13 +1,15 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { ProposalCategory, StudioStage, DiagnosticQuestion, ProposalDocument, TreeNode } from "@/types/studio";
+import { ProposalCategory, StudioStage, DiagnosticQuestion, ProposalDocument, TreeNode, CampusGuideline } from "@/types/studio";
 import AppShell from "@/components/AppShell";
 import { HeroInputView } from "@/components/HeroInputView";
 import { DiagnosticInterview } from "@/components/DiagnosticInterview";
 import { AgentExecutionMonitor } from "@/components/AgentExecutionMonitor";
 import { DocumentStudio } from "@/components/DocumentStudio";
 import { TwelveModesModal } from "@/components/TwelveModesModal";
+import { CampusGuidelineModal } from "@/components/CampusGuidelineModal";
+import { CAMPUS_PRESETS } from "@/lib/campusPresets";
 import ScreenLoader from "@/components/ScreenLoader";
 import AuthModal from "@/components/AuthModal";
 import DatabaseDrawer from "@/components/DatabaseDrawer";
@@ -53,6 +55,10 @@ export default function Home() {
   const [isThinkingModalOpen, setIsThinkingModalOpen] = useState(false);
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [isDatabaseDrawerOpen, setIsDatabaseDrawerOpen] = useState(false);
+
+  // Campus Guideline & Formatting State
+  const [campusGuideline, setCampusGuideline] = useState<CampusGuideline>(CAMPUS_PRESETS[0]);
+  const [isGuidelineModalOpen, setIsGuidelineModalOpen] = useState(false);
 
   // Check Supabase status on mount
   useEffect(() => {
@@ -117,6 +123,7 @@ export default function Home() {
       facultyMajor,
       targetEntity
     );
+    doc.campusGuideline = campusGuideline;
     const tree = buildVisualTreeGraph(doc);
     setGeneratedDoc(doc);
     setTreeData(tree);
@@ -124,6 +131,9 @@ export default function Home() {
 
   const handleAgentsFinished = (doc?: ProposalDocument) => {
     if (doc) {
+      if (!doc.campusGuideline) {
+        doc.campusGuideline = campusGuideline;
+      }
       setGeneratedDoc(doc);
       setTreeData(buildVisualTreeGraph(doc));
     }
@@ -204,6 +214,9 @@ export default function Home() {
       facultyMajor,
       targetEntity
     );
+    if (!docToSave.campusGuideline && campusGuideline) {
+      docToSave.campusGuideline = campusGuideline;
+    }
     const treeToSave = treeData || buildVisualTreeGraph(docToSave);
 
     const record: SavedProjectRecord = {
@@ -238,6 +251,9 @@ export default function Home() {
       setCandidateId(project.documentData.candidateId);
       setInstitution(project.documentData.institution);
       setFacultyMajor(project.documentData.facultyMajor);
+      if (project.documentData.campusGuideline) {
+        setCampusGuideline(project.documentData.campusGuideline);
+      }
     } else {
       const doc = buildGeneratedDocument(
         project.title,
@@ -249,6 +265,7 @@ export default function Home() {
         facultyMajor,
         project.targetEntity || ""
       );
+      doc.campusGuideline = campusGuideline;
       setGeneratedDoc(doc);
     }
 
@@ -306,6 +323,8 @@ export default function Home() {
             onSubmit={handleStartInterview}
             onOpenDatabase={() => setIsDatabaseDrawerOpen(true)}
             onOpenDrive={() => setStage("drive")}
+            onOpenGuidelineModal={() => setIsGuidelineModalOpen(true)}
+            activeCampusName={campusGuideline?.campusName}
           />
         )}
 
@@ -334,6 +353,7 @@ export default function Home() {
             candidateId={candidateId}
             institution={institution}
             facultyMajor={facultyMajor}
+            campusGuideline={campusGuideline}
             onComplete={handleAgentsFinished}
           />
         )}
@@ -379,6 +399,22 @@ export default function Home() {
         onClose={() => setIsDatabaseDrawerOpen(false)}
         onLoadProject={handleLoadProject}
         onSaveCurrentProject={handleSaveCurrentProject}
+      />
+
+      {/* 6. Campus Formatting & Guidelines Scanner Modal */}
+      <CampusGuidelineModal
+        isOpen={isGuidelineModalOpen}
+        onClose={() => setIsGuidelineModalOpen(false)}
+        currentGuideline={campusGuideline}
+        onApplyGuideline={(guideline) => {
+          setCampusGuideline(guideline);
+          if (generatedDoc) {
+            setGeneratedDoc({
+              ...generatedDoc,
+              campusGuideline: guideline
+            });
+          }
+        }}
       />
     </>
   );

@@ -33,8 +33,14 @@ import { ProposalDocument } from "@/types/studio";
 const cmToDxa = (cm: number) => Math.round(cm * 567);
 
 export async function generateAcademicProposalDocx(doc: ProposalDocument): Promise<Blob> {
-  const FONT_FAMILY = "Times New Roman";
+  const guideline = doc.campusGuideline;
+  const FONT_FAMILY = guideline?.typography?.fontFamily || "Times New Roman";
   const PRIMARY_COLOR = "000000";
+  const topCm = guideline?.margins?.topCm ?? 4;
+  const leftCm = guideline?.margins?.leftCm ?? 4;
+  const rightCm = guideline?.margins?.rightCm ?? 3;
+  const bottomCm = guideline?.margins?.bottomCm ?? 3;
+  const lineSpacingTwip = guideline?.typography?.lineSpacing === 2.0 ? 480 : 360;
 
   // Reusable Paragraph styling
   const createHeading1 = (text: string) =>
@@ -141,15 +147,15 @@ export async function generateAcademicProposalDocx(doc: ProposalDocument): Promi
     right: noBorder,
   };
 
-  // Section Page setup
+  // Section Page setup (Configured with exact university margins)
   const standardPageProperties = {
     page: {
       size: { width: 11906, height: 16838 }, // A4
       margin: {
-        top: cmToDxa(4),
-        left: cmToDxa(4),
-        right: cmToDxa(3),
-        bottom: cmToDxa(3),
+        top: cmToDxa(topCm),
+        left: cmToDxa(leftCm),
+        right: cmToDxa(rightCm),
+        bottom: cmToDxa(bottomCm),
       },
     },
   };

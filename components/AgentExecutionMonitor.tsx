@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useRef } from "react";
-import { AgentInfo, ProposalCategory, ProposalDocument } from "@/types/studio";
+import { AgentInfo, ProposalCategory, ProposalDocument, CampusGuideline } from "@/types/studio";
 import { INITIAL_AGENTS, buildGeneratedDocument } from "@/lib/agentEngine";
 import { ArrowRight, Check, Loader2 } from "lucide-react";
 
@@ -14,6 +14,7 @@ interface AgentExecutionMonitorProps {
   candidateId?: string;
   institution?: string;
   facultyMajor?: string;
+  campusGuideline?: CampusGuideline;
   onComplete: (doc?: ProposalDocument) => void;
 }
 
@@ -26,6 +27,7 @@ export const AgentExecutionMonitor: React.FC<AgentExecutionMonitorProps> = ({
   candidateId = "NIM-2026-AKAD",
   institution = "Universitas",
   facultyMajor = "Program Studi Terkait",
+  campusGuideline,
   onComplete
 }) => {
   const [agents, setAgents] = useState<AgentInfo[]>(INITIAL_AGENTS);
@@ -40,7 +42,7 @@ export const AgentExecutionMonitor: React.FC<AgentExecutionMonitorProps> = ({
     const timestamp = () => new Date().toLocaleTimeString("id-ID", { hour12: false });
 
     // Initial fallback doc ready immediately
-    generatedDocRef.current = buildGeneratedDocument(
+    const initialDoc = buildGeneratedDocument(
       title,
       category,
       answers,
@@ -50,6 +52,10 @@ export const AgentExecutionMonitor: React.FC<AgentExecutionMonitorProps> = ({
       facultyMajor,
       targetEntity
     );
+    if (campusGuideline) {
+      initialDoc.campusGuideline = campusGuideline;
+    }
+    generatedDocRef.current = initialDoc;
 
     // Call Gemini API to generate the full authentic academic proposal document
     fetch("/api/gemini", {
@@ -69,7 +75,11 @@ export const AgentExecutionMonitor: React.FC<AgentExecutionMonitorProps> = ({
       .then(res => res.json())
       .then(data => {
         if (data.success && data.doc) {
-          generatedDocRef.current = data.doc;
+          const loadedDoc: ProposalDocument = data.doc;
+          if (campusGuideline) {
+            loadedDoc.campusGuideline = campusGuideline;
+          }
+          generatedDocRef.current = loadedDoc;
           const engineLabel = data.engine === "gemini-3.5-flash-lite" ? "Google Gemini 3.5 Flash Lite" : "Academic Intelligence Engine";
           setActiveLogs(l => [
             ...l,
@@ -125,7 +135,11 @@ export const AgentExecutionMonitor: React.FC<AgentExecutionMonitorProps> = ({
         if (i === 3) return { ...a, status: "working", progress: 75, currentTask: "Audit Standar Format Dokumen & Integritas..." };
         return a;
       }));
-      setActiveLogs(l => [...l, { time: timestamp(), agent: "Quality Examiner", text: "Audit format: A4 margin 4-4-3-3 cm dengan penomoran halaman standar kampus." }]);
+      setActiveLogs(l => [...l, { 
+        time: timestamp(), 
+        agent: "Quality Examiner", 
+        text: `Audit format: A4 margin ${campusGuideline?.margins ? `${campusGuideline.margins.leftCm}-${campusGuideline.margins.topCm}-${campusGuideline.margins.rightCm}-${campusGuideline.margins.bottomCm}` : '4-4-3-3'} cm standar ${campusGuideline?.campusName || 'kampus'}.` 
+      }]);
       setActiveLogs(l => [...l, { time: timestamp(), agent: "Quality Examiner", text: "Audit tabel: Format terbuka 3-garis horizontal tanpa vertikal." }]);
       setOverallProgress(88);
     }, 4600);
@@ -150,9 +164,12 @@ export const AgentExecutionMonitor: React.FC<AgentExecutionMonitorProps> = ({
       clearTimeout(timer4);
       clearTimeout(timer5);
     };
-  }, [title, category, answers, targetEntity, candidateName, candidateId, institution, facultyMajor]);
+  }, [title, category, answers, targetEntity, candidateName, candidateId, institution, facultyMajor, campusGuideline]);
 
   const handleFinish = () => {
+    if (generatedDocRef.current && campusGuideline && !generatedDocRef.current.campusGuideline) {
+      generatedDocRef.current.campusGuideline = campusGuideline;
+    }
     onComplete(generatedDocRef.current || undefined);
   };
 

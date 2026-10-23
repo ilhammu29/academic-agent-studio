@@ -99,10 +99,43 @@ export interface BibliographyItem {
   doiUrl?: string;
 }
 
+export interface CampusGuideline {
+  campusName: string;
+  facultyMajor?: string;
+  guideDocTitle?: string;
+  paperSize: 'A4' | 'Letter';
+  margins: {
+    topCm: number;
+    bottomCm: number;
+    leftCm: number;
+    rightCm: number;
+  };
+  typography: {
+    fontFamily: string;
+    bodySizePt: number;
+    heading1SizePt: number;
+    lineSpacing: number;
+  };
+  headingStyle: 'decimal' | 'alphanumeric' | 'roman';
+  citationStyle: 'apa' | 'ieee' | 'harvard' | 'vancouver';
+  approvalConfig: {
+    supervisorCount: number;
+    requiresHeadOfProgram: boolean;
+    requiresDeanOrFieldMentor: boolean;
+  };
+  customChapters?: {
+    chapterKey: string;
+    chapterTitle: string;
+    mandatorySections: string[];
+  }[];
+  extractedNotes?: string[];
+}
+
 export interface ProposalDocument {
   id: string;
   title: string;
   category: ProposalCategory;
+  campusGuideline?: CampusGuideline;
   institution: string;
   facultyMajor: string;
   targetEntity: string;
