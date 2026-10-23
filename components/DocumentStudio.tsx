@@ -1,12 +1,15 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { ProposalDocument, TreeNode } from "@/types/studio";
 import { VisualTreeGraph } from "./VisualTreeGraph";
 import DefenseSimulator from "./DefenseSimulator";
 import LiteratureSearchModal from "./LiteratureSearchModal";
+import { RevisionMatrixManager } from "./RevisionMatrixManager";
+import { TurnitinPreCheckModal } from "./TurnitinPreCheckModal";
 import { generateAcademicProposalDocx, downloadDocxBlob } from "@/lib/docxExporter";
 import { generateAcademicProposalPptx } from "@/lib/pptxExporter";
+import { generateBibTeX, generateRIS, downloadCitationFile } from "@/lib/bibtexExporter";
 import { 
   FileText, 
   Network, 
@@ -21,7 +24,12 @@ import {
   FileDown,
   ShieldAlert,
   Sparkles,
-  X
+  X,
+  FileCheck2,
+  RotateCcw,
+  RotateCw,
+  BookMarked,
+  CheckCircle2
 } from "lucide-react";
 
 interface DocumentStudioProps {
@@ -36,13 +44,19 @@ export const DocumentStudio: React.FC<DocumentStudioProps> = ({
   onReset
 }) => {
   const [currentDoc, setCurrentDoc] = useState<ProposalDocument>(doc);
-  const [activeTab, setActiveTab] = useState<"naskah" | "tree" | "jadwal" | "slides" | "audit" | "defense">("naskah");
+  const [activeTab, setActiveTab] = useState<"naskah" | "tree" | "jadwal" | "slides" | "audit" | "defense" | "revisionMatrix">("naskah");
   const [copied, setCopied] = useState(false);
   const [activeSlideIndex, setActiveSlideIndex] = useState(0);
   const [isExportingDocx, setIsExportingDocx] = useState(false);
   const [isExportingPptx, setIsExportingPptx] = useState(false);
   const [isLitModalOpen, setIsLitModalOpen] = useState(false);
+  const [isTurnitinModalOpen, setIsTurnitinModalOpen] = useState(false);
   
+  // History & Auto-save states
+  const [history, setHistory] = useState<ProposalDocument[]>([doc]);
+  const [historyIndex, setHistoryIndex] = useState(0);
+  const [lastSaved, setLastSaved] = useState<string | null>(null);
+
   // AI Refinement states
   const [refineKey, setRefineKey] = useState<string | null>(null);
   const [refineSectionTitle, setRefineSectionTitle] = useState<string | null>(null);
@@ -55,7 +69,64 @@ export const DocumentStudio: React.FC<DocumentStudioProps> = ({
 
   useEffect(() => {
     setCurrentDoc(doc);
+    setHistory([doc]);
+    setHistoryIndex(0);
   }, [doc]);
+
+  // Auto-Save effect to localStorage
+  useEffect(() => {
+    if (typeof window !== "undefined" && currentDoc) {
+      try {
+        localStorage.setItem(`academic_studio_autosave_${currentDoc.id || "draft"}`, JSON.stringify(currentDoc));
+        const now = new Date();
+        setLastSaved(now.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", second: "2-digit" }));
+      } catch {
+        // storage quota exceeded or disabled
+      }
+    }
+  }, [currentDoc]);
+
+  // Undo / Redo handlers
+  const handleUndo = () => {
+    if (historyIndex > 0) {
+      const prevDoc = history[historyIndex - 1];
+      setHistoryIndex(historyIndex - 1);
+      setCurrentDoc(prevDoc);
+      setToastMessage("Berhasil kembali ke versi naskah sebelumnya (Undo).");
+      setTimeout(() => setToastMessage(null), 2500);
+    }
+  };
+
+  const handleRedo = () => {
+    if (historyIndex < history.length - 1) {
+      const nextDoc = history[historyIndex + 1];
+      setHistoryIndex(historyIndex + 1);
+      setCurrentDoc(nextDoc);
+      setToastMessage("Berhasil memulihkan versi revisi (Redo).");
+      setTimeout(() => setToastMessage(null), 2500);
+    }
+  };
+
+  const pushToHistory = (newDoc: ProposalDocument) => {
+    const truncatedHistory = history.slice(0, historyIndex + 1);
+    truncatedHistory.push(newDoc);
+    setHistory(truncatedHistory);
+    setHistoryIndex(truncatedHistory.length - 1);
+  };
+
+  const handleExportBibTeX = () => {
+    const bib = generateBibTeX(currentDoc);
+    downloadCitationFile(bib, `Sitasi_${currentDoc.id || "Proposal"}.bib`, "application/x-bibtex");
+    setToastMessage("Berkas BibTeX (.bib) untuk Mendeley & Zotero berhasil diunduh.");
+    setTimeout(() => setToastMessage(null), 3000);
+  };
+
+  const handleExportRIS = () => {
+    const ris = generateRIS(currentDoc);
+    downloadCitationFile(ris, `Sitasi_${currentDoc.id || "Proposal"}.ris`, "application/x-research-info-systems");
+    setToastMessage("Berkas RIS untuk Reference Manager berhasil diunduh.");
+    setTimeout(() => setToastMessage(null), 3000);
+  };
 
   const handleRefineWithAI = (key: string, title: string, textToRefine: string) => {
     setRefineKey(key);
@@ -133,6 +204,7 @@ export const DocumentStudio: React.FC<DocumentStudioProps> = ({
       } else if (refineKey === "bab4.disseminationPlan") {
         updated.bab4 = { ...updated.bab4, disseminationPlan: finalText };
       }
+      pushToHistory(updated);
       return updated;
     });
 
@@ -315,16 +387,47 @@ NIP / NIK.
       {/* 1. Sleek Action Bar & Document Metadata */}
       <div className="pb-6 mb-6 border-b border-zinc-900 flex flex-col md:flex-row md:items-center justify-between gap-4 no-print">
         <div>
-          <h1 className="text-lg sm:text-xl font-semibold text-zinc-100 tracking-tight leading-snug">
-            {currentDoc.title}
-          </h1>
-          <p className="text-xs text-zinc-400 mt-1">
+          <div className="flex items-center gap-2 mb-1">
+            <h1 className="text-lg sm:text-xl font-semibold text-zinc-100 tracking-tight leading-snug">
+              {currentDoc.title}
+            </h1>
+            {lastSaved && (
+              <span className="hidden sm:inline-flex items-center gap-1 text-[10px] font-mono text-zinc-400 bg-zinc-900 px-2 py-0.5 rounded border border-zinc-800">
+                <CheckCircle2 className="w-3 h-3 text-emerald-400" />
+                <span>Auto-saved {lastSaved}</span>
+              </span>
+            )}
+          </div>
+          <p className="text-xs text-zinc-400">
             Pengusul: <span className="text-zinc-200 font-medium">{currentDoc.candidateName}</span> &bull; {currentDoc.targetEntity} &bull; {currentDoc.durationMonths} Bulan
           </p>
         </div>
 
-        {/* Action Buttons: DOCX, PPTX, Literature, MD, Print */}
+        {/* Action Buttons: Undo/Redo, DOCX, PPTX, BibTeX, Turnitin, Literature, MD, Print */}
         <div className="flex items-center flex-wrap gap-2">
+          {/* Undo & Redo History */}
+          <div className="flex items-center border border-zinc-800 rounded-lg overflow-hidden bg-zinc-900">
+            <button
+              type="button"
+              onClick={handleUndo}
+              disabled={historyIndex <= 0}
+              className="p-1.5 hover:bg-zinc-800 disabled:opacity-30 text-zinc-300 transition-colors cursor-pointer"
+              title="Undo perubahan naskah"
+            >
+              <RotateCcw className="w-3.5 h-3.5" />
+            </button>
+            <div className="w-[1px] h-4 bg-zinc-800"></div>
+            <button
+              type="button"
+              onClick={handleRedo}
+              disabled={historyIndex >= history.length - 1}
+              className="p-1.5 hover:bg-zinc-800 disabled:opacity-30 text-zinc-300 transition-colors cursor-pointer"
+              title="Redo perubahan naskah"
+            >
+              <RotateCw className="w-3.5 h-3.5" />
+            </button>
+          </div>
+
           {/* Word DOCX Button */}
           <button
             type="button"
@@ -365,6 +468,28 @@ NIP / NIK.
                 <span>Unduh Slide (.pptx)</span>
               </>
             )}
+          </button>
+
+          {/* Audit Turnitin Pre-Check */}
+          <button
+            type="button"
+            onClick={() => setIsTurnitinModalOpen(true)}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-zinc-900 hover:bg-zinc-800 text-zinc-200 border border-zinc-800 text-xs font-medium transition-all cursor-pointer"
+            title="Audit Turnitin, frasa klise AI, dan orisinalitas naskah"
+          >
+            <ShieldCheck className="w-3.5 h-3.5 text-zinc-300" />
+            <span>Audit Turnitin</span>
+          </button>
+
+          {/* Export BibTeX Button */}
+          <button
+            type="button"
+            onClick={handleExportBibTeX}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-zinc-900 hover:bg-zinc-800 text-zinc-300 border border-zinc-800 text-xs font-medium transition-all cursor-pointer"
+            title="Unduh berkas BibTeX (.bib) untuk Mendeley & Zotero"
+          >
+            <BookMarked className="w-3.5 h-3.5 text-zinc-400" />
+            <span>BibTeX</span>
           </button>
 
           {/* Literature Search Trigger */}
@@ -465,6 +590,19 @@ NIP / NIK.
         >
           <Presentation className="w-3.5 h-3.5" />
           <span>Slide Sidang (16:9)</span>
+        </button>
+
+        <button
+          type="button"
+          onClick={() => setActiveTab("revisionMatrix")}
+          className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors whitespace-nowrap cursor-pointer ${
+            activeTab === "revisionMatrix"
+              ? "bg-zinc-100 text-black font-semibold"
+              : "text-zinc-400 hover:text-zinc-200 hover:bg-zinc-900"
+          }`}
+        >
+          <FileCheck2 className="w-3.5 h-3.5" />
+          <span>Matriks Revisi Dosen</span>
         </button>
 
         <button
@@ -1217,6 +1355,18 @@ NIP / NIK.
       {activeTab === "defense" && (
         <DefenseSimulator doc={currentDoc} />
       )}
+
+      {/* TAB 7: MATRIKS REVISI DOSEN */}
+      {activeTab === "revisionMatrix" && (
+        <RevisionMatrixManager doc={currentDoc} />
+      )}
+
+      {/* MODAL: AUDIT TURNITIN & ANTI-SLOP */}
+      <TurnitinPreCheckModal
+        isOpen={isTurnitinModalOpen}
+        onClose={() => setIsTurnitinModalOpen(false)}
+        doc={currentDoc}
+      />
 
       {/* MODAL: PENCARIAN LITERATUR SEMANTIC SCHOLAR */}
       <LiteratureSearchModal

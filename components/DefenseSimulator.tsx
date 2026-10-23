@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { ProposalDocument } from '@/types/studio';
 import { 
   ShieldAlert, 
@@ -9,12 +9,12 @@ import {
   Award, 
   CheckCircle2, 
   AlertTriangle, 
-  UserCheck, 
   RefreshCw, 
   HelpCircle,
-  Brain,
-  MessageSquare,
-  ChevronRight
+  Mic,
+  MicOff,
+  Volume2,
+  VolumeX
 } from 'lucide-react';
 
 interface DefenseSimulatorProps {
@@ -62,7 +62,7 @@ export default function DefenseSimulator({ doc }: DefenseSimulatorProps) {
       examinerName: 'Ir. Budi Wicaksono, M.Kom.',
       examinerRole: 'Penguji Praktisi / Mentor Lapangan',
       examinerAvatar: '👨‍💼',
-      question: `Dalam matriks jadwal Bab IV, Anda menjanjikan luaran selesai dalam kurun ${doc.durationMonths} bulan. Bagaimana rencana kontingensi Anda jika terjadi kendala akses data riil, perizinan, atau hambatan hardware?`,
+      question: `Dalam matriks jadwal Bab IV, Anda menjanjikan luaran selesai dalam kurun ${doc.durationMonths} bulan. Bagaimana rencana kontingensi Anda jika terjadi kendala akses data riil, perizinan, atau hambatan teknis?`,
       contextGap: 'Menguji manajemen risiko (Pre-Mortem Thinking) dan kelayakan praktis pelaksanaan di lapangan.',
     },
   ]);
@@ -70,15 +70,105 @@ export default function DefenseSimulator({ doc }: DefenseSimulatorProps) {
   const [activeQuestionId, setActiveQuestionId] = useState<string>('q1');
   const [currentInput, setCurrentInput] = useState<string>('');
   const [isEvaluating, setIsEvaluating] = useState<boolean>(false);
+  const [isListening, setIsListening] = useState<boolean>(false);
+  const [isPlayingAudio, setIsPlayingAudio] = useState<boolean>(false);
+
+  const recognitionRef = useRef<any>(null);
 
   const activeExchange = exchanges.find((e) => e.id === activeQuestionId) || exchanges[0];
+
+  // Speech Recognition Setup
+  useEffect(() => {
+    return () => {
+      if (recognitionRef.current) {
+        recognitionRef.current.stop();
+      }
+      if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
+        window.speechSynthesis.cancel();
+      }
+    };
+  }, []);
+
+  const toggleSpeechRecognition = () => {
+    if (typeof window === 'undefined') return;
+
+    const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+    if (!SpeechRecognition) {
+      alert('Peramban Anda belum mendukung Web Speech Recognition. Gunakan Google Chrome atau Edge.');
+      return;
+    }
+
+    if (isListening) {
+      if (recognitionRef.current) {
+        recognitionRef.current.stop();
+      }
+      setIsListening(false);
+      return;
+    }
+
+    try {
+      const recognition = new SpeechRecognition();
+      recognition.lang = 'id-ID';
+      recognition.continuous = true;
+      recognition.interimResults = true;
+
+      recognition.onstart = () => {
+        setIsListening(true);
+      };
+
+      recognition.onresult = (event: any) => {
+        let transcript = '';
+        for (let i = 0; i < event.results.length; i++) {
+          transcript += event.results[i][0].transcript + ' ';
+        }
+        setCurrentInput(transcript.trim());
+      };
+
+      recognition.onerror = () => {
+        setIsListening(false);
+      };
+
+      recognition.onend = () => {
+        setIsListening(false);
+      };
+
+      recognitionRef.current = recognition;
+      recognition.start();
+    } catch {
+      setIsListening(false);
+    }
+  };
+
+  // Text to Speech for Examiner Question
+  const toggleSpeakQuestion = (text: string) => {
+    if (typeof window === 'undefined' || !('speechSynthesis' in window)) return;
+
+    if (isPlayingAudio) {
+      window.speechSynthesis.cancel();
+      setIsPlayingAudio(false);
+      return;
+    }
+
+    window.speechSynthesis.cancel();
+    const utterance = new SpeechSynthesisUtterance(text);
+    utterance.lang = 'id-ID';
+    utterance.rate = 1.0;
+    utterance.onend = () => setIsPlayingAudio(false);
+    utterance.onerror = () => setIsPlayingAudio(false);
+    setIsPlayingAudio(true);
+    window.speechSynthesis.speak(utterance);
+  };
 
   const handleEvaluateAnswer = async () => {
     if (!currentInput.trim()) return;
 
+    if (isListening && recognitionRef.current) {
+      recognitionRef.current.stop();
+      setIsListening(false);
+    }
+
     setIsEvaluating(true);
 
-    // Call Gemini API route or intelligent evaluation logic
     try {
       const prompt = `Analisis jawaban sidang seminar proposal berikut:
 Judul Proposal: "${doc.title}"
@@ -121,14 +211,14 @@ Format dalam JSON:
       const fallbackCritique = {
         strengths: [
           'Menjawab langsung inti permasalahan tanpa berbelit-belit.',
-          `Menunjukkan pemahaman dasar terhadap konteks operasional di ${doc.targetEntity}.`,
+          `Menunjukkan pemahaman terhadap konteks studi di ${doc.targetEntity}.`,
         ],
         weaknesses: [
           'Kurang menyertakan metrik kuantitatif spesifik (misal: persentase latensi atau estimasi error rate).',
-          'Belum menyitir rujukan literatur pendukung untuk memperkuat argumen di depan dewan penguji.',
+          'Belum menyitir rujukan literatur primer pendukung untuk memperkuat justifikasi metode.',
         ],
-        idealRebuttal: `Izin menjawab Dewan Penguji. Pemilihan metode ini didasarkan pada prinsip Occam's Razor dan First-Principles. Kami mengidentifikasi bahwa keterbatasan utama sistem konvensional terletak pada skalabilitas pemrosesan data, di mana pendekatan kami menawarkan trade-off latensi 40% lebih rendah dengan kompleksitas komputasi linear. Hal ini sejalan dengan temuan terdahulu bahwa optimasi berbasis pipeline modular mampu mengeliminasi bottleneck integrasi secara signifikan.`,
-        thinkingModeAdvice: 'Terapkan First-Principles Thinking & Critical Falsification: Selalu sebutkan metrik pembanding dan sitasi penguat saat diserang.',
+        idealRebuttal: `Izin menjawab Dewan Penguji. Pemilihan pendekatan ini didasarkan pada analisis perbandingan efisiensi dan prinsip First-Principles. Keterbatasan sistem sebelumnya terletak pada bottleneck integrasi data, di mana metode usulan ini mampu mereduksi redundansi komputasi secara signifikan. Hal ini selaras dengan publikasi primer terdahulu bahwa optimasi modularitas meningkatkan reliabilitas operasional di ${doc.targetEntity}.`,
+        thinkingModeAdvice: 'Terapkan First-Principles Thinking & Critical Falsification: Selalu sebutkan metrik pembanding dan sitasi saat diserang.',
       };
 
       updateExchange(activeExchange.id, currentInput, calculatedScore, fallbackCritique);
@@ -143,29 +233,29 @@ Format dalam JSON:
   };
 
   return (
-    <div className="w-full bg-[#0D121C] border border-[#1E2738] rounded-2xl p-4 sm:p-6 shadow-xl animate-in fade-in duration-300">
+    <div className="w-full bg-zinc-950 border border-zinc-800 rounded-2xl p-4 sm:p-6 shadow-xl animate-in fade-in duration-300 text-zinc-100">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-4 border-b border-[#1A2333] gap-3">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-4 border-b border-zinc-800 gap-3">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-red-950/40 border border-red-800/40 flex items-center justify-center text-red-400">
-            <ShieldAlert className="w-5 h-5" />
+          <div className="w-10 h-10 rounded-xl bg-zinc-900 border border-zinc-800 flex items-center justify-center text-zinc-200">
+            <ShieldAlert className="w-5 h-5 text-zinc-200" />
           </div>
           <div>
-            <h3 className="text-base font-bold text-milk-white flex items-center gap-2">
+            <h3 className="text-base font-bold text-zinc-100 flex items-center gap-2">
               <span>Simulasi Sidang Sempro & Uji Pertahanan Akademik</span>
-              <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-red-950/60 text-red-400 border border-red-800/40">
+              <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-zinc-800 text-zinc-300 border border-zinc-700">
                 AI EXAMINER DEFENSE
               </span>
             </h3>
-            <p className="text-xs text-milk-muted">
-              Uji ketahanan proposal Anda menghadapi interogasi kritis dewan penguji sebelum maju ke sidang sesungguhnya
+            <p className="text-xs text-zinc-400">
+              Uji ketahanan proposal Anda menghadapi interogasi kritis dewan penguji dengan dukungan audio & suara
             </p>
           </div>
         </div>
 
         <div className="flex items-center gap-2">
-          <span className="text-xs font-mono text-milk-dim">Taraf Kesiapan:</span>
-          <span className="text-xs font-mono font-bold text-sky-400 bg-sky-950/50 px-2.5 py-1 rounded-lg border border-sky-800/40">
+          <span className="text-xs font-mono text-zinc-400">Kesiapan:</span>
+          <span className="text-xs font-mono font-bold text-zinc-100 bg-zinc-900 px-2.5 py-1 rounded-lg border border-zinc-800">
             {exchanges.filter((e) => e.score).length} / {exchanges.length} Pertanyaan Teruji
           </span>
         </div>
@@ -175,10 +265,10 @@ Format dalam JSON:
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 mt-5">
         {/* Left Column: Examiner Question Tabs */}
         <div className="lg:col-span-4 space-y-2.5">
-          <div className="text-[11px] font-mono text-milk-dim uppercase tracking-wider mb-1">
+          <div className="text-[11px] font-mono text-zinc-400 uppercase tracking-wider mb-1">
             Daftar Penguji & Pertanyaan:
           </div>
-          {exchanges.map((item, idx) => {
+          {exchanges.map((item) => {
             const isSelected = item.id === activeQuestionId;
             const isAnswered = !!item.score;
 
@@ -188,27 +278,31 @@ Format dalam JSON:
                 onClick={() => {
                   setActiveQuestionId(item.id);
                   setCurrentInput(item.candidateAnswer || '');
+                  if (isPlayingAudio) {
+                    window.speechSynthesis?.cancel();
+                    setIsPlayingAudio(false);
+                  }
                 }}
                 className={`w-full p-3 rounded-xl border text-left transition-all cursor-pointer flex flex-col gap-1.5 ${
                   isSelected
-                    ? 'bg-[#151D2C] border-sky-500 shadow-md'
-                    : 'bg-[#101622] border-[#1D2739] hover:border-sky-500/40'
+                    ? 'bg-zinc-900 border-zinc-600 shadow-md'
+                    : 'bg-zinc-900/40 border-zinc-800/80 hover:border-zinc-700'
                 }`}
               >
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <span className="text-base">{item.examinerAvatar}</span>
-                    <span className="text-xs font-semibold text-milk-white">{item.examinerName}</span>
+                    <span className="text-xs font-semibold text-zinc-200">{item.examinerName}</span>
                   </div>
                   {isAnswered ? (
-                    <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-emerald-950/60 text-emerald-300 border border-emerald-800/40 font-bold">
+                    <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-emerald-950/60 text-emerald-400 border border-emerald-800/40 font-bold">
                       Skor {item.score}
                     </span>
                   ) : (
-                    <span className="text-[10px] font-mono text-milk-dim">Belum Dijawab</span>
+                    <span className="text-[10px] font-mono text-zinc-500">Belum Dijawab</span>
                   )}
                 </div>
-                <p className="text-[11px] text-milk-muted line-clamp-2 leading-relaxed">
+                <p className="text-[11px] text-zinc-400 line-clamp-2 leading-relaxed">
                   {item.question}
                 </p>
               </button>
@@ -217,23 +311,37 @@ Format dalam JSON:
         </div>
 
         {/* Right Column: Interrogation Arena */}
-        <div className="lg:col-span-8 flex flex-col justify-between bg-[#0A0E17] border border-[#192232] rounded-xl p-4 sm:p-5">
+        <div className="lg:col-span-8 flex flex-col justify-between bg-zinc-900/40 border border-zinc-800/80 rounded-xl p-4 sm:p-5">
           <div>
             {/* Active Examiner Info */}
-            <div className="flex items-start gap-3 p-3 rounded-xl bg-[#121824] border border-[#1E283A] mb-4">
+            <div className="flex items-start gap-3 p-3.5 rounded-xl bg-zinc-900 border border-zinc-800 mb-4">
               <span className="text-2xl">{activeExchange.examinerAvatar}</span>
               <div className="flex-1">
                 <div className="flex items-center justify-between">
-                  <h4 className="text-xs font-bold text-milk-white">{activeExchange.examinerName}</h4>
-                  <span className="text-[10px] font-mono text-sky-400 bg-sky-950/40 px-2 py-0.5 rounded border border-sky-800/30">
-                    {activeExchange.examinerRole}
-                  </span>
+                  <h4 className="text-xs font-bold text-zinc-200">{activeExchange.examinerName}</h4>
+                  <div className="flex items-center gap-2">
+                    <span className="text-[10px] font-mono text-zinc-300 bg-zinc-800 px-2 py-0.5 rounded border border-zinc-700">
+                      {activeExchange.examinerRole}
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => toggleSpeakQuestion(activeExchange.question)}
+                      className={`p-1 rounded-md text-xs transition-colors cursor-pointer ${
+                        isPlayingAudio 
+                          ? 'bg-zinc-100 text-zinc-950' 
+                          : 'bg-zinc-800 text-zinc-300 hover:text-white'
+                      }`}
+                      title={isPlayingAudio ? 'Hentikan audio' : 'Dengarkan suara penguji'}
+                    >
+                      {isPlayingAudio ? <VolumeX className="w-3.5 h-3.5" /> : <Volume2 className="w-3.5 h-3.5" />}
+                    </button>
+                  </div>
                 </div>
-                <p className="text-xs font-medium text-milk-white mt-1.5 leading-relaxed">
+                <p className="text-xs font-medium text-zinc-200 mt-2 leading-relaxed">
                   "{activeExchange.question}"
                 </p>
-                <div className="mt-2 text-[10px] font-mono text-milk-dim flex items-center gap-1.5">
-                  <HelpCircle className="w-3 h-3 text-champagne" />
+                <div className="mt-2 text-[10px] font-mono text-zinc-400 flex items-center gap-1.5">
+                  <HelpCircle className="w-3 h-3 text-zinc-400" />
                   <span>Target Uji Penguji: {activeExchange.contextGap}</span>
                 </div>
               </div>
@@ -241,15 +349,41 @@ Format dalam JSON:
 
             {/* Candidate Answer Input */}
             <div>
-              <label className="block text-xs font-medium text-milk-soft mb-1.5">
-                Jawaban Pertahanan Kandidat (Argumen Sidang Anda):
-              </label>
+              <div className="flex items-center justify-between mb-1.5">
+                <label className="block text-xs font-medium text-zinc-300">
+                  Jawaban Pertahanan Kandidat (Argumen Sidang Anda):
+                </label>
+                {/* Voice Input Toggle Button */}
+                <button
+                  type="button"
+                  onClick={toggleSpeechRecognition}
+                  className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[11px] font-medium transition-all cursor-pointer ${
+                    isListening
+                      ? 'bg-red-500 text-white animate-pulse'
+                      : 'bg-zinc-800 hover:bg-zinc-700 text-zinc-200 border border-zinc-700'
+                  }`}
+                  title="Jawab menggunakan mikrofon suara"
+                >
+                  {isListening ? (
+                    <>
+                      <MicOff className="w-3.5 h-3.5" />
+                      <span>Mendengarkan Suara...</span>
+                    </>
+                  ) : (
+                    <>
+                      <Mic className="w-3.5 h-3.5" />
+                      <span>Bicara dengan Suara</span>
+                    </>
+                  )}
+                </button>
+              </div>
+
               <textarea
                 rows={4}
                 value={currentInput}
                 onChange={(e) => setCurrentInput(e.target.value)}
                 placeholder="Izin menjawab Dewan Penguji. Berdasarkan kajian pustaka dan analisis awal di lapangan, pemilihan metode ini didasarkan pada..."
-                className="w-full bg-[#121824] border border-[#202C3F] rounded-xl p-3 text-xs text-white placeholder-milk-dim focus:outline-none focus:border-sky-500 font-sans leading-relaxed resize-none"
+                className="w-full bg-zinc-900 border border-zinc-800 rounded-xl p-3 text-xs text-zinc-100 placeholder-zinc-500 focus:outline-none focus:border-zinc-500 font-sans leading-relaxed resize-none"
               />
             </div>
 
@@ -258,7 +392,7 @@ Format dalam JSON:
               <button
                 onClick={handleEvaluateAnswer}
                 disabled={isEvaluating || !currentInput.trim()}
-                className="py-2 px-4 rounded-xl bg-sky-500 hover:bg-sky-400 disabled:opacity-40 disabled:pointer-events-none text-white font-semibold text-xs transition-all shadow-md flex items-center gap-2 cursor-pointer"
+                className="py-2 px-4 rounded-xl bg-zinc-100 hover:bg-white disabled:opacity-40 text-zinc-950 font-semibold text-xs transition-all shadow-md flex items-center gap-2 cursor-pointer"
               >
                 {isEvaluating ? (
                   <>
@@ -275,34 +409,34 @@ Format dalam JSON:
 
           {/* Feedback & Critique Display */}
           {activeExchange.critique && (
-            <div className="mt-5 pt-4 border-t border-[#1C2536] space-y-3.5 animate-in fade-in duration-300">
+            <div className="mt-5 pt-4 border-t border-zinc-800 space-y-3.5 animate-in fade-in duration-300">
               <div className="flex items-center justify-between">
-                <span className="text-xs font-bold text-milk-white flex items-center gap-2">
-                  <Award className="w-4 h-4 text-champagne" /> Hasil Evaluasi Sidang
+                <span className="text-xs font-bold text-zinc-200 flex items-center gap-2">
+                  <Award className="w-4 h-4 text-zinc-300" /> Hasil Evaluasi Sidang
                 </span>
-                <span className="text-xs font-mono font-bold text-emerald-400 bg-emerald-950/50 px-2.5 py-1 rounded-md border border-emerald-800/40">
+                <span className="text-xs font-mono font-bold text-emerald-400 bg-emerald-950/60 px-2.5 py-1 rounded-md border border-emerald-800/40">
                   Skor Kesiapan: {activeExchange.score} / 100
                 </span>
               </div>
 
               {/* Strengths and Weaknesses */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 text-xs">
-                <div className="p-3 rounded-lg bg-emerald-950/30 border border-emerald-800/40 text-milk-soft">
+                <div className="p-3 rounded-lg bg-zinc-900 border border-zinc-800 text-zinc-300">
                   <div className="font-semibold text-emerald-400 flex items-center gap-1.5 mb-1 text-[11px]">
                     <CheckCircle2 className="w-3.5 h-3.5" /> Kelebihan Argumen:
                   </div>
-                  <ul className="space-y-1 text-[11px] list-disc list-inside text-milk-muted">
+                  <ul className="space-y-1 text-[11px] list-disc list-inside text-zinc-400">
                     {activeExchange.critique.strengths.map((s, i) => (
                       <li key={i}>{s}</li>
                     ))}
                   </ul>
                 </div>
 
-                <div className="p-3 rounded-lg bg-red-950/30 border border-red-800/40 text-milk-soft">
-                  <div className="font-semibold text-red-400 flex items-center gap-1.5 mb-1 text-[11px]">
+                <div className="p-3 rounded-lg bg-zinc-900 border border-zinc-800 text-zinc-300">
+                  <div className="font-semibold text-amber-400 flex items-center gap-1.5 mb-1 text-[11px]">
                     <AlertTriangle className="w-3.5 h-3.5" /> Celah yang Masih Terbuka:
                   </div>
-                  <ul className="space-y-1 text-[11px] list-disc list-inside text-milk-muted">
+                  <ul className="space-y-1 text-[11px] list-disc list-inside text-zinc-400">
                     {activeExchange.critique.weaknesses.map((w, i) => (
                       <li key={i}>{w}</li>
                     ))}
@@ -311,14 +445,14 @@ Format dalam JSON:
               </div>
 
               {/* Ideal Rebuttal */}
-              <div className="p-3 rounded-lg bg-[#111724] border border-[#1F2B3E] text-xs">
-                <div className="text-[11px] font-mono text-sky-400 font-semibold mb-1 flex items-center gap-1.5">
-                  <Sparkles className="w-3.5 h-3.5" /> Rekomendasi Jawaban Ideal (Gold Standard Rebuttal):
+              <div className="p-3.5 rounded-lg bg-zinc-900 border border-zinc-800 text-xs">
+                <div className="text-[11px] font-mono text-zinc-200 font-semibold mb-1 flex items-center gap-1.5">
+                  <Sparkles className="w-3.5 h-3.5 text-zinc-300" /> Rekomendasi Jawaban Ideal (Gold Standard Rebuttal):
                 </div>
-                <p className="text-[11px] text-milk-soft leading-relaxed italic">
+                <p className="text-[11px] text-zinc-300 leading-relaxed italic">
                   "{activeExchange.critique.idealRebuttal}"
                 </p>
-                <div className="mt-2 text-[10px] font-mono text-champagne">
+                <div className="mt-2 text-[10px] font-mono text-zinc-400">
                   💡 Tips Berpikir: {activeExchange.critique.thinkingModeAdvice}
                 </div>
               </div>
