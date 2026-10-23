@@ -46,7 +46,8 @@ import {
   Compass,
   Bot,
   Landmark,
-  GraduationCap
+  GraduationCap,
+  Brain
 } from "lucide-react";
 
 interface DocumentStudioProps {
@@ -61,7 +62,9 @@ export const DocumentStudio: React.FC<DocumentStudioProps> = ({
   onReset
 }) => {
   const [currentDoc, setCurrentDoc] = useState<ProposalDocument>(doc);
-  const [activeTab, setActiveTab] = useState<"naskah" | "tree" | "jadwal" | "slides" | "audit" | "defense" | "revisionMatrix">("naskah");
+  const [activeTab, setActiveTab] = useState<"naskah" | "flowchart" | "tree" | "jadwal" | "slides" | "audit" | "defense" | "revisionMatrix">("naskah");
+  const [workspaceCategory, setWorkspaceCategory] = useState<"naskah" | "metodologi" | "sidang" | "kualitas">("naskah");
+  const [jadwalViewMode, setJadwalViewMode] = useState<"gantt" | "detail">("gantt");
   const [copied, setCopied] = useState(false);
   const [activeSlideIndex, setActiveSlideIndex] = useState(0);
   const [isExportingDocx, setIsExportingDocx] = useState(false);
@@ -803,98 +806,243 @@ NIP / NIK.
         </div>
       </div>
 
-      {/* 2. Sleek Tab Navigation */}
-      <div className="flex items-center gap-1 border-b border-zinc-200 dark:border-zinc-850 pb-2 mb-4 overflow-x-auto no-print">
-        <button
-          type="button"
-          onClick={() => setActiveTab("naskah")}
-          className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors whitespace-nowrap cursor-pointer ${
-            activeTab === "naskah"
-              ? "bg-zinc-900 text-white dark:bg-zinc-100 dark:text-black font-semibold shadow-xs"
-              : "text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 hover:bg-zinc-100 dark:hover:bg-zinc-900"
-          }`}
-        >
-          <FileText className="w-3.5 h-3.5" />
-          <span>Naskah Proposal</span>
-        </button>
+      {/* 2. Structured Category Navigation Bar (Clean Grouping) */}
+      <div className="border-b border-zinc-200 dark:border-zinc-850 pb-3 mb-4 no-print space-y-2.5">
+        
+        {/* Tier 1: Main Category Segment Tabs */}
+        <div className="flex items-center gap-1.5 overflow-x-auto pb-1 scrollbar-none">
+          <button
+            type="button"
+            onClick={() => {
+              setWorkspaceCategory("naskah");
+              setActiveTab("naskah");
+            }}
+            className={`flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-xs font-medium transition-all cursor-pointer whitespace-nowrap ${
+              workspaceCategory === "naskah"
+                ? "bg-zinc-950 text-white dark:bg-zinc-100 dark:text-black font-semibold shadow-xs"
+                : "text-zinc-600 dark:text-zinc-400 hover:text-zinc-950 dark:hover:text-zinc-100 hover:bg-zinc-100 dark:hover:bg-zinc-900 border border-transparent"
+            }`}
+          >
+            <FileText className="w-3.5 h-3.5" />
+            <span>1. Naskah &amp; Publikasi</span>
+          </button>
 
-        <button
-          type="button"
-          onClick={() => setActiveTab("defense")}
-          className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors whitespace-nowrap cursor-pointer ${
-            activeTab === "defense"
-              ? "bg-zinc-900 text-white dark:bg-zinc-100 dark:text-black font-semibold shadow-xs"
-              : "text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 hover:bg-zinc-100 dark:hover:bg-zinc-900"
-          }`}
-        >
-          <ShieldAlert className="w-3.5 h-3.5" />
-          <span>Tanya Jawab Sidang</span>
-        </button>
+          <button
+            type="button"
+            onClick={() => {
+              setWorkspaceCategory("metodologi");
+              setActiveTab("jadwal");
+            }}
+            className={`flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-xs font-medium transition-all cursor-pointer whitespace-nowrap ${
+              workspaceCategory === "metodologi"
+                ? "bg-zinc-950 text-white dark:bg-zinc-100 dark:text-black font-semibold shadow-xs"
+                : "text-zinc-600 dark:text-zinc-400 hover:text-zinc-950 dark:hover:text-zinc-100 hover:bg-zinc-100 dark:hover:bg-zinc-900 border border-transparent"
+            }`}
+          >
+            <Network className="w-3.5 h-3.5" />
+            <span>2. Metodologi &amp; Alur Kerja</span>
+          </button>
 
-        <button
-          type="button"
-          onClick={() => setActiveTab("tree")}
-          className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors whitespace-nowrap cursor-pointer ${
-            activeTab === "tree"
-              ? "bg-zinc-900 text-white dark:bg-zinc-100 dark:text-black font-semibold shadow-xs"
-              : "text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 hover:bg-zinc-100 dark:hover:bg-zinc-900"
-          }`}
-        >
-          <Network className="w-3.5 h-3.5" />
-          <span>Struktur Pohon Graf</span>
-        </button>
+          <button
+            type="button"
+            onClick={() => {
+              setWorkspaceCategory("sidang");
+              setActiveTab("defense");
+            }}
+            className={`flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-xs font-medium transition-all cursor-pointer whitespace-nowrap ${
+              workspaceCategory === "sidang"
+                ? "bg-zinc-950 text-white dark:bg-zinc-100 dark:text-black font-semibold shadow-xs"
+                : "text-zinc-600 dark:text-zinc-400 hover:text-zinc-950 dark:hover:text-zinc-100 hover:bg-zinc-100 dark:hover:bg-zinc-900 border border-transparent"
+            }`}
+          >
+            <GraduationCap className="w-3.5 h-3.5" />
+            <span>3. Kesiapan Sidang &amp; Bimbingan</span>
+          </button>
 
-        <button
-          type="button"
-          onClick={() => setActiveTab("jadwal")}
-          className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors whitespace-nowrap cursor-pointer ${
-            activeTab === "jadwal"
-              ? "bg-zinc-900 text-white dark:bg-zinc-100 dark:text-black font-semibold shadow-xs"
-              : "text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 hover:bg-zinc-100 dark:hover:bg-zinc-900"
-          }`}
-        >
-          <CalendarDays className="w-3.5 h-3.5" />
-          <span>Matriks Jadwal</span>
-        </button>
+          <button
+            type="button"
+            onClick={() => {
+              setWorkspaceCategory("kualitas");
+              setActiveTab("audit");
+            }}
+            className={`flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-xs font-medium transition-all cursor-pointer whitespace-nowrap ${
+              workspaceCategory === "kualitas"
+                ? "bg-zinc-950 text-white dark:bg-zinc-100 dark:text-black font-semibold shadow-xs"
+                : "text-zinc-600 dark:text-zinc-400 hover:text-zinc-950 dark:hover:text-zinc-100 hover:bg-zinc-100 dark:hover:bg-zinc-900 border border-transparent"
+            }`}
+          >
+            <ShieldCheck className="w-3.5 h-3.5" />
+            <span>4. Kualitas &amp; Orisinalitas</span>
+          </button>
+        </div>
 
-        <button
-          type="button"
-          onClick={() => setActiveTab("slides")}
-          className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors whitespace-nowrap cursor-pointer ${
-            activeTab === "slides"
-              ? "bg-zinc-900 text-white dark:bg-zinc-100 dark:text-black font-semibold shadow-xs"
-              : "text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 hover:bg-zinc-100 dark:hover:bg-zinc-900"
-          }`}
-        >
-          <Presentation className="w-3.5 h-3.5" />
-          <span>Slide Sidang (16:9)</span>
-        </button>
+        {/* Tier 2: Contextual Sub-Pills for the Active Category */}
+        <div className="flex items-center gap-1.5 overflow-x-auto pb-1 text-xs">
+          {workspaceCategory === "naskah" && (
+            <>
+              <button
+                type="button"
+                onClick={() => setActiveTab("naskah")}
+                className={`px-3 py-1 rounded-md transition-all cursor-pointer flex items-center gap-1.5 ${
+                  activeTab === "naskah"
+                    ? "bg-zinc-200 dark:bg-zinc-800 text-zinc-950 dark:text-zinc-100 font-semibold"
+                    : "text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 hover:bg-zinc-100 dark:hover:bg-zinc-900"
+                }`}
+              >
+                <FileText className="w-3 h-3" />
+                <span>Naskah Proposal (A4)</span>
+              </button>
 
-        <button
-          type="button"
-          onClick={() => setActiveTab("revisionMatrix")}
-          className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors whitespace-nowrap cursor-pointer ${
-            activeTab === "revisionMatrix"
-              ? "bg-zinc-900 text-white dark:bg-zinc-100 dark:text-black font-semibold shadow-xs"
-              : "text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 hover:bg-zinc-100 dark:hover:bg-zinc-900"
-          }`}
-        >
-          <FileCheck2 className="w-3.5 h-3.5" />
-          <span>Matriks Revisi Dosen</span>
-        </button>
+              <button
+                type="button"
+                onClick={() => setIsApprovalModalOpen(true)}
+                className="px-3 py-1 rounded-md text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 hover:bg-zinc-100 dark:hover:bg-zinc-900 transition-all cursor-pointer flex items-center gap-1.5"
+              >
+                <FileSignature className="w-3 h-3 text-amber-500" />
+                <span>Lembar Pengesahan Dosen</span>
+              </button>
 
-        <button
-          type="button"
-          onClick={() => setActiveTab("audit")}
-          className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors whitespace-nowrap cursor-pointer ${
-            activeTab === "audit"
-              ? "bg-zinc-900 text-white dark:bg-zinc-100 dark:text-black font-semibold shadow-xs"
-              : "text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 hover:bg-zinc-100 dark:hover:bg-zinc-900"
-          }`}
-        >
-          <ShieldCheck className="w-3.5 h-3.5" />
-          <span>Audit Kualitas</span>
-        </button>
+              <button
+                type="button"
+                onClick={() => setIsInstrumentModalOpen(true)}
+                className="px-3 py-1 rounded-md text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 hover:bg-zinc-100 dark:hover:bg-zinc-900 transition-all cursor-pointer flex items-center gap-1.5"
+              >
+                <ClipboardList className="w-3 h-3 text-blue-500" />
+                <span>Instrumen Riset &amp; Angket</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setIsGuidelineModalOpen(true)}
+                className="px-3 py-1 rounded-md text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 hover:bg-zinc-100 dark:hover:bg-zinc-900 transition-all cursor-pointer flex items-center gap-1.5"
+              >
+                <Landmark className="w-3 h-3 text-indigo-500" />
+                <span>Panduan Kampus ({currentDoc.campusGuideline?.campusName.split("(")[0].trim() || "Standar Dikti"})</span>
+              </button>
+            </>
+          )}
+
+          {workspaceCategory === "metodologi" && (
+            <>
+              <button
+                type="button"
+                onClick={() => setActiveTab("jadwal")}
+                className={`px-3 py-1 rounded-md transition-all cursor-pointer flex items-center gap-1.5 ${
+                  activeTab === "jadwal"
+                    ? "bg-zinc-200 dark:bg-zinc-800 text-zinc-950 dark:text-zinc-100 font-semibold"
+                    : "text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 hover:bg-zinc-100 dark:hover:bg-zinc-900"
+                }`}
+              >
+                <CalendarDays className="w-3 h-3" />
+                <span>Matriks Jadwal &amp; Timeline</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setActiveTab("flowchart")}
+                className={`px-3 py-1 rounded-md transition-all cursor-pointer flex items-center gap-1.5 ${
+                  activeTab === "flowchart"
+                    ? "bg-zinc-200 dark:bg-zinc-800 text-zinc-950 dark:text-zinc-100 font-semibold"
+                    : "text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 hover:bg-zinc-100 dark:hover:bg-zinc-900"
+                }`}
+              >
+                <Network className="w-3 h-3" />
+                <span>Bagan Alir Penelitian (Bagan Resmi)</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setActiveTab("tree")}
+                className={`px-3 py-1 rounded-md transition-all cursor-pointer flex items-center gap-1.5 ${
+                  activeTab === "tree"
+                    ? "bg-zinc-200 dark:bg-zinc-800 text-zinc-950 dark:text-zinc-100 font-semibold"
+                    : "text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 hover:bg-zinc-100 dark:hover:bg-zinc-900"
+                }`}
+              >
+                <Compass className="w-3 h-3" />
+                <span>Pohon Alur Riset &amp; Roadmap Belajar</span>
+              </button>
+            </>
+          )}
+
+          {workspaceCategory === "sidang" && (
+            <>
+              <button
+                type="button"
+                onClick={() => setActiveTab("defense")}
+                className={`px-3 py-1 rounded-md transition-all cursor-pointer flex items-center gap-1.5 ${
+                  activeTab === "defense"
+                    ? "bg-zinc-200 dark:bg-zinc-800 text-zinc-950 dark:text-zinc-100 font-semibold"
+                    : "text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 hover:bg-zinc-100 dark:hover:bg-zinc-900"
+                }`}
+              >
+                <ShieldAlert className="w-3 h-3" />
+                <span>Tanya Jawab Sidang Penguji</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setActiveTab("slides")}
+                className={`px-3 py-1 rounded-md transition-all cursor-pointer flex items-center gap-1.5 ${
+                  activeTab === "slides"
+                    ? "bg-zinc-200 dark:bg-zinc-800 text-zinc-950 dark:text-zinc-100 font-semibold"
+                    : "text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 hover:bg-zinc-100 dark:hover:bg-zinc-900"
+                }`}
+              >
+                <Presentation className="w-3 h-3" />
+                <span>Slide Sidang (16:9 Eksekutif)</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setActiveTab("revisionMatrix")}
+                className={`px-3 py-1 rounded-md transition-all cursor-pointer flex items-center gap-1.5 ${
+                  activeTab === "revisionMatrix"
+                    ? "bg-zinc-200 dark:bg-zinc-800 text-zinc-950 dark:text-zinc-100 font-semibold"
+                    : "text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 hover:bg-zinc-100 dark:hover:bg-zinc-900"
+                }`}
+              >
+                <FileCheck2 className="w-3 h-3" />
+                <span>Matriks Revisi Dosen</span>
+              </button>
+            </>
+          )}
+
+          {workspaceCategory === "kualitas" && (
+            <>
+              <button
+                type="button"
+                onClick={() => setActiveTab("audit")}
+                className={`px-3 py-1 rounded-md transition-all cursor-pointer flex items-center gap-1.5 ${
+                  activeTab === "audit"
+                    ? "bg-zinc-200 dark:bg-zinc-800 text-zinc-950 dark:text-zinc-100 font-semibold"
+                    : "text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 hover:bg-zinc-100 dark:hover:bg-zinc-900"
+                }`}
+              >
+                <ShieldCheck className="w-3 h-3" />
+                <span>Audit Kualitas Ilmiah</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setIsTurnitinModalOpen(true)}
+                className="px-3 py-1 rounded-md text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 hover:bg-zinc-100 dark:hover:bg-zinc-900 transition-all cursor-pointer flex items-center gap-1.5"
+              >
+                <ShieldCheck className="w-3 h-3 text-emerald-500" />
+                <span>Cek Turnitin &amp; Orisinalitas</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setIsLitModalOpen(true)}
+                className="px-3 py-1 rounded-md text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 hover:bg-zinc-100 dark:hover:bg-zinc-900 transition-all cursor-pointer flex items-center gap-1.5"
+              >
+                <BookOpen className="w-3 h-3 text-purple-500" />
+                <span>Literatur Jurnal Primer (PRISMA)</span>
+              </button>
+            </>
+          )}
+        </div>
       </div>
 
       {/* QUICK JUMP OUTLINE RAIL (Only for Naskah Tab) */}
@@ -1298,24 +1446,14 @@ NIP / NIK.
               </h2>
             </div>
 
-            {/* Academic Visual Methodology Flowchart Diagram (Standar Bagan Alir Resmi) */}
-            <AcademicFlowchartDiagram doc={currentDoc} type="methodology" />
-
-            <div className="flex items-center justify-between p-3 rounded-xl bg-zinc-50 dark:bg-zinc-900/60 border border-zinc-200 dark:border-zinc-800 no-print mb-4">
-              <div className="flex items-center gap-2">
-                <ClipboardList className="w-4 h-4 text-zinc-500 dark:text-zinc-300" />
-                <div>
-                  <span className="font-semibold text-zinc-800 dark:text-zinc-200 text-xs">Instrumen Riset & Angket Pengumpulan Data</span>
-                  <p className="text-[11px] text-zinc-500 dark:text-zinc-400">Tersedia kuesioner Skala Likert 1-5, pedoman wawancara, dan checklist observasi</p>
-                </div>
+            {/* Formal Academic Figure 3.1: Bagan Alir Tahapan Pelaksanaan */}
+            <div className="my-6 p-4 rounded-xl border border-zinc-200 dark:border-zinc-800 bg-zinc-50/50 dark:bg-zinc-900/30 text-center">
+              <div className="max-w-2xl mx-auto py-2">
+                <AcademicFlowchartDiagram doc={currentDoc} type="methodology" />
               </div>
-              <button
-                type="button"
-                onClick={() => setIsInstrumentModalOpen(true)}
-                className="px-3 py-1.5 rounded-lg bg-zinc-900 dark:bg-zinc-100 hover:bg-black dark:hover:bg-white text-white dark:text-black font-semibold text-xs transition-colors cursor-pointer shadow-xs"
-              >
-                Lihat Instrumen
-              </button>
+              <p className="text-xs font-serif font-bold text-zinc-900 dark:text-zinc-100 mt-2 text-center">
+                Gambar 3.1 Bagan Alir Tahapan Pelaksanaan {currentDoc.category === "magang" ? "Kegiatan Magang & Analisis" : "Penelitian"}
+              </p>
             </div>
 
             <div className="space-y-4 text-xs sm:text-sm text-zinc-800 dark:text-zinc-300 leading-relaxed text-justify print:text-black font-sans">
@@ -1805,49 +1943,182 @@ NIP / NIK.
         </div>
       )}
 
-      {/* TAB 3: MATRIKS JADWAL */}
+      {/* TAB: BAGAN ALIR PENELITIAN INTERAKTIF (Dedicated Web View) */}
+      {activeTab === "flowchart" && (
+        <div className="bg-white dark:bg-zinc-950 p-6 rounded-2xl border border-zinc-200 dark:border-zinc-850 shadow-sm space-y-6">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-zinc-200 dark:border-zinc-850 pb-4">
+            <div>
+              <h2 className="text-base sm:text-lg font-semibold text-zinc-900 dark:text-zinc-100 flex items-center gap-2">
+                <Network className="w-5 h-5 text-indigo-500" />
+                <span>Bagan Alir Metodologi &amp; Desain Penelitian</span>
+              </h2>
+              <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-1">
+                Visualisasi terstruktur tahapan pelaksanaan (Input, Proses, Validasi, Luaran) yang terhubung dengan Bab III
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={() => setActiveTab("naskah")}
+              className="px-3 py-1.5 rounded-lg border border-zinc-200 dark:border-zinc-800 text-xs font-medium text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-900 transition-colors self-start sm:self-auto cursor-pointer"
+            >
+              ← Kembali ke Teks Naskah
+            </button>
+          </div>
+
+          <div className="space-y-6">
+            <div>
+              <h3 className="text-xs font-semibold text-zinc-800 dark:text-zinc-200 mb-3 flex items-center gap-2">
+                <Sparkles className="w-3.5 h-3.5 text-amber-500" />
+                <span>Bagan Alir Tahapan Eksekusi Metodologi:</span>
+              </h3>
+              <AcademicFlowchartDiagram doc={currentDoc} type="methodology" />
+            </div>
+
+            <div className="pt-6 border-t border-zinc-200 dark:border-zinc-850">
+              <h3 className="text-xs font-semibold text-zinc-800 dark:text-zinc-200 mb-3 flex items-center gap-2">
+                <Brain className="w-3.5 h-3.5 text-indigo-500" />
+                <span>Kerangka Konseptual &amp; Kausalitas Antar-Variabel:</span>
+              </h3>
+              <AcademicFlowchartDiagram doc={currentDoc} type="conceptual" />
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* TAB: MATRIKS JADWAL & GANTT CHART */}
       {activeTab === "jadwal" && (
-        <div className="bg-white dark:bg-zinc-950 p-6 rounded-2xl border border-zinc-200 dark:border-zinc-850 shadow-sm">
-          <div className="flex items-center justify-between gap-4 mb-6">
-            <h2 className="text-base sm:text-lg font-semibold text-zinc-900 dark:text-zinc-100">
-              Rencana Jadwal Mingguan Terintegrasi
-            </h2>
-            <span className="text-xs font-mono text-zinc-500 dark:text-zinc-400">
-              Durasi: {currentDoc.durationMonths} Bulan
-            </span>
-          </div>
+        <div className="bg-white dark:bg-zinc-950 p-6 rounded-2xl border border-zinc-200 dark:border-zinc-850 shadow-sm space-y-6">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-zinc-200 dark:border-zinc-850 pb-4">
+            <div>
+              <h2 className="text-base sm:text-lg font-semibold text-zinc-900 dark:text-zinc-100 flex items-center gap-2">
+                <CalendarDays className="w-5 h-5 text-indigo-500" />
+                <span>Matriks Jadwal Pelaksanaan &amp; Timeline Riset</span>
+              </h2>
+              <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-1">
+                Alokasi waktu {currentDoc.durationMonths} Bulan ({currentDoc.durationMonths * 4} Minggu Kerja) dengan target luaran terukur
+              </p>
+            </div>
 
-          <div className="space-y-3">
-            {currentDoc.bab4.jadwalMatriks.map((item, idx) => (
-              <div
-                key={idx}
-                className="p-3.5 rounded-xl border border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900/30 flex flex-col md:flex-row md:items-center justify-between gap-3"
+            {/* Toggle Gantt vs Detail Cards */}
+            <div className="flex items-center gap-1 bg-zinc-100 dark:bg-zinc-900 p-1 rounded-lg border border-zinc-200 dark:border-zinc-800 text-xs font-medium self-start sm:self-auto shadow-2xs">
+              <button
+                type="button"
+                onClick={() => setJadwalViewMode("gantt")}
+                className={`px-3 py-1 rounded-md transition-all cursor-pointer ${
+                  jadwalViewMode === "gantt"
+                    ? "bg-white dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 shadow-xs font-semibold"
+                    : "text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100"
+                }`}
               >
-                <div className="flex items-start gap-3">
-                  <div className="w-10 h-10 rounded-lg bg-zinc-200 dark:bg-zinc-900 text-zinc-800 dark:text-zinc-200 flex flex-col items-center justify-center font-mono font-bold flex-shrink-0">
-                    <span className="text-[9px] uppercase text-zinc-500">MG</span>
-                    <span className="text-xs">{item.week}</span>
-                  </div>
-                  <div>
-                    <h3 className="text-xs sm:text-sm font-semibold text-zinc-900 dark:text-zinc-100">
-                      {item.phase}
-                    </h3>
-                    <p className="text-xs text-zinc-600 dark:text-zinc-400 mt-0.5">
-                      {item.activities.join(" • ")}
-                    </p>
-                    <p className="text-[11px] text-zinc-500 mt-0.5">
-                      Target Kompetensi: {item.competencyTarget}
-                    </p>
-                  </div>
-                </div>
-
-                <div className="md:text-right flex-shrink-0 text-xs">
-                  <span className="text-zinc-500 block text-[11px]">Output:</span>
-                  <span className="font-mono text-zinc-800 dark:text-zinc-200 font-medium">{item.output}</span>
-                </div>
-              </div>
-            ))}
+                Diagram Gantt
+              </button>
+              <button
+                type="button"
+                onClick={() => setJadwalViewMode("detail")}
+                className={`px-3 py-1 rounded-md transition-all cursor-pointer ${
+                  jadwalViewMode === "detail"
+                    ? "bg-white dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 shadow-xs font-semibold"
+                    : "text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100"
+                }`}
+              >
+                Kartu Rincian
+              </button>
+            </div>
           </div>
+
+          {/* VIEW 1: INTERACTIVE GANTT TIMELINE MATRIX */}
+          {jadwalViewMode === "gantt" && (
+            <div className="overflow-x-auto">
+              <table className="w-full text-left text-xs border border-zinc-200 dark:border-zinc-800 rounded-xl overflow-hidden">
+                <thead className="bg-zinc-50 dark:bg-zinc-900 text-zinc-700 dark:text-zinc-300 font-semibold border-b border-zinc-200 dark:border-zinc-800">
+                  <tr>
+                    <th className="p-3 w-1/4">Tahapan / Kegiatan</th>
+                    <th className="p-3 w-1/4">Aktivitas Utama</th>
+                    {Array.from({ length: Math.min(6, currentDoc.durationMonths || 6) }).map((_, mIdx) => (
+                      <th key={mIdx} className="p-3 text-center border-l border-zinc-200 dark:border-zinc-800 font-mono text-[11px]">
+                        Bulan {mIdx + 1}
+                      </th>
+                    ))}
+                    <th className="p-3 text-right">Luaran (Deliverable)</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-zinc-200 dark:divide-zinc-800">
+                  {currentDoc.bab4.jadwalMatriks.map((item, idx) => {
+                    const totalMonths = Math.min(6, currentDoc.durationMonths || 6);
+                    const activeMonthIdx = idx % totalMonths;
+
+                    return (
+                      <tr key={idx} className="hover:bg-zinc-50/50 dark:hover:bg-zinc-900/30 transition-colors">
+                        <td className="p-3 font-semibold text-zinc-900 dark:text-zinc-100 align-top">
+                          <div className="flex items-center gap-2">
+                            <span className="w-5 h-5 rounded-md bg-zinc-200 dark:bg-zinc-800 text-[10px] font-mono flex items-center justify-center font-bold">
+                              {idx + 1}
+                            </span>
+                            <span>{item.phase}</span>
+                          </div>
+                        </td>
+                        <td className="p-3 text-zinc-600 dark:text-zinc-400 text-[11px] align-top">
+                          {item.activities.join(" • ")}
+                        </td>
+                        {Array.from({ length: totalMonths }).map((_, mIdx) => {
+                          const isCurrent = mIdx === activeMonthIdx;
+                          return (
+                            <td key={mIdx} className="p-3 text-center border-l border-zinc-200 dark:border-zinc-800 align-middle">
+                              {isCurrent ? (
+                                <div className="h-6 rounded-md bg-indigo-600 text-white font-mono text-[10px] font-semibold flex items-center justify-center shadow-xs">
+                                  Mg {item.week}
+                                </div>
+                              ) : (
+                                <div className="h-2 rounded-full bg-zinc-100 dark:bg-zinc-850 mx-auto w-8" />
+                              )}
+                            </td>
+                          );
+                        })}
+                        <td className="p-3 text-right font-mono text-zinc-800 dark:text-zinc-200 text-[11px] font-medium align-top">
+                          {item.output}
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          )}
+
+          {/* VIEW 2: DETAIL CARDS */}
+          {jadwalViewMode === "detail" && (
+            <div className="space-y-3">
+              {currentDoc.bab4.jadwalMatriks.map((item, idx) => (
+                <div
+                  key={idx}
+                  className="p-3.5 rounded-xl border border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900/30 flex flex-col md:flex-row md:items-center justify-between gap-3"
+                >
+                  <div className="flex items-start gap-3">
+                    <div className="w-10 h-10 rounded-lg bg-zinc-200 dark:bg-zinc-900 text-zinc-800 dark:text-zinc-200 flex flex-col items-center justify-center font-mono font-bold flex-shrink-0">
+                      <span className="text-[9px] uppercase text-zinc-500">MG</span>
+                      <span className="text-xs">{item.week}</span>
+                    </div>
+                    <div>
+                      <h3 className="text-xs sm:text-sm font-semibold text-zinc-900 dark:text-zinc-100">
+                        {item.phase}
+                      </h3>
+                      <p className="text-xs text-zinc-600 dark:text-zinc-400 mt-0.5">
+                        {item.activities.join(" • ")}
+                      </p>
+                      <p className="text-[11px] text-zinc-500 mt-0.5">
+                        Target Kompetensi: {item.competencyTarget}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="md:text-right flex-shrink-0 text-xs">
+                    <span className="text-zinc-500 block text-[11px]">Output:</span>
+                    <span className="font-mono text-zinc-800 dark:text-zinc-200 font-medium">{item.output}</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       )}
 

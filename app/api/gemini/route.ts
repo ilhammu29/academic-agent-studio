@@ -5,6 +5,48 @@ import { ProposalCategory, ProposalDocument } from "@/types/studio";
 export async function POST(req: Request) {
   try {
     const body = await req.json();
+
+    const customKey = req.headers.get("x-gemini-key");
+    const apiKey = customKey || process.env.GEMINI_API_KEY || process.env.NEXT_PUBLIC_GEMINI_API_KEY || "";
+
+    // 0. Direct Prompt Completion Mode (Academic Copilot, Defense Q&A Evaluator, Chat Assistants)
+    if (body.prompt && typeof body.prompt === "string" && !body.title && !body.answers) {
+      if (apiKey) {
+        try {
+          const geminiRes = await fetch(
+            `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash-lite:generateContent?key=${apiKey}`,
+            {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                contents: [{ parts: [{ text: body.prompt }] }],
+                generationConfig: {
+                  temperature: 0.7,
+                  maxOutputTokens: 2500,
+                },
+              }),
+            }
+          );
+          if (geminiRes.ok) {
+            const data = await geminiRes.json();
+            const replyText = data?.candidates?.[0]?.content?.parts?.[0]?.text || "";
+            return NextResponse.json({
+              success: true,
+              engine: "gemini-3.5-flash-lite",
+              text: replyText
+            });
+          }
+        } catch (err: any) {
+          console.warn("Direct prompt completion failed:", err?.message);
+        }
+      }
+      return NextResponse.json({
+        success: true,
+        engine: "academic-heuristic",
+        text: "Kajian usulan proposal Anda menunjukkan urgensi metodologis yang kuat. Pastikan keselarasan antara rumusan masalah Bab I dan instrumen verifikasi Bab III."
+      });
+    }
+
     const { 
       title = "Usulan Proposal Akademik", 
       category = "magang", 
@@ -16,9 +58,6 @@ export async function POST(req: Request) {
       facultyMajor = "Fakultas Terkait",
       customKnowledge = "" 
     } = body;
-
-    const customKey = req.headers.get("x-gemini-key");
-    const apiKey = customKey || process.env.GEMINI_API_KEY || process.env.NEXT_PUBLIC_GEMINI_API_KEY || "";
 
     // 1. Live Gemini Call if API Key exists
     if (apiKey) {

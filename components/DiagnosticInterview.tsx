@@ -171,16 +171,16 @@ export const DiagnosticInterview: React.FC<DiagnosticInterviewProps> = ({
       {/* 1. Header & Stage Pill */}
       <div className="mb-8">
         
-        {/* Step Pill */}
-        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-zinc-100 dark:bg-zinc-900 border border-zinc-200/70 dark:border-zinc-800 text-xs font-medium text-zinc-700 dark:text-zinc-300 mb-3 shadow-2xs">
+        {/* Step Badge */}
+        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-md bg-zinc-100 dark:bg-zinc-900 border border-zinc-200/70 dark:border-zinc-800 text-xs font-medium text-zinc-700 dark:text-zinc-300 mb-3 shadow-2xs">
           <Layers className="w-3.5 h-3.5 text-zinc-800 dark:text-zinc-200" />
-          <span>Langkah 2 dari 4: Wawancara Diagnostik</span>
+          <span>Langkah 2 dari 4: Wawancara Diagnostik Lapangan</span>
         </div>
 
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
             <h2 className="text-2xl sm:text-3xl font-bold text-zinc-950 dark:text-white tracking-tight">
-              Wawancara Penajaman Metodologi
+              Wawancara Eksplorasi & Penajaman Konteks
             </h2>
             <p className="text-xs sm:text-sm text-zinc-500 dark:text-zinc-400 mt-1 max-w-xl line-clamp-2">
               Topik: <span className="font-semibold text-zinc-800 dark:text-zinc-200">"{title}"</span>
@@ -192,7 +192,7 @@ export const DiagnosticInterview: React.FC<DiagnosticInterviewProps> = ({
             type="button"
             onClick={handleAutoGenerateAIAnswers}
             disabled={isGeneratingAll}
-            className="self-start sm:self-auto py-2 px-4 rounded-full border border-zinc-200/90 dark:border-zinc-800 bg-white dark:bg-zinc-900 hover:bg-zinc-50 dark:hover:bg-zinc-800 text-zinc-900 dark:text-zinc-100 text-xs font-medium transition-all flex items-center gap-2 cursor-pointer flex-shrink-0 disabled:opacity-50 shadow-xs hover:border-zinc-300"
+            className="self-start sm:self-auto py-2 px-4 rounded-lg border border-zinc-200/90 dark:border-zinc-800 bg-white dark:bg-zinc-900 hover:bg-zinc-50 dark:hover:bg-zinc-800 text-zinc-900 dark:text-zinc-100 text-xs font-medium transition-all flex items-center gap-2 cursor-pointer flex-shrink-0 disabled:opacity-50 shadow-xs hover:border-zinc-300"
           >
             {isGeneratingAll ? (
               <Loader2 className="w-3.5 h-3.5 animate-spin text-zinc-500" />
@@ -203,11 +203,24 @@ export const DiagnosticInterview: React.FC<DiagnosticInterviewProps> = ({
           </button>
         </div>
 
+        {/* Purpose Explainer Banner */}
+        <div className="mt-4 p-3.5 rounded-xl border border-zinc-200 dark:border-zinc-850 bg-zinc-50/70 dark:bg-zinc-900/40 text-xs text-zinc-600 dark:text-zinc-400 leading-relaxed flex items-start gap-3">
+          <Sparkles className="w-4 h-4 text-zinc-700 dark:text-zinc-300 shrink-0 mt-0.5" />
+          <div>
+            <p className="font-medium text-zinc-800 dark:text-zinc-200 mb-0.5">
+              Fungsi Wawancara Diagnostik:
+            </p>
+            <p>
+              Proposal naskah berbobot puluhan halaman tidak bisa disusun dari sekadar judul umum. Wawancara ini menggali 6 parameter fondasi: lokus spesifik, celah masalah empiris, batasan lingkup, instrumen ukur, metrik validasi, dan luaran nyata. Informasi ini menjadi basis fakta bagi Agen AI dalam menyusun Bab I sampai Bab IV secara akurat tanpa asumsi fiktif.
+            </p>
+          </div>
+        </div>
+
         {/* Minimal Progress Bar */}
         <div className="flex items-center gap-3 pt-5">
-          <div className="flex-1 bg-zinc-200/80 dark:bg-zinc-800 h-1.5 rounded-full overflow-hidden">
+          <div className="flex-1 bg-zinc-200/80 dark:bg-zinc-800 h-1.5 rounded-md overflow-hidden">
             <div
-              className="h-full bg-zinc-900 dark:bg-zinc-100 transition-all duration-300 rounded-full"
+              className="h-full bg-zinc-900 dark:bg-zinc-100 transition-all duration-300 rounded-md"
               style={{ width: `${progressPercent}%` }}
             />
           </div>

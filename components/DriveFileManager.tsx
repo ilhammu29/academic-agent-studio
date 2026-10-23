@@ -103,8 +103,8 @@ export default function DriveFileManager({
               onClick={() => setActiveFolder('all')}
               className={`px-3 py-2 rounded-lg flex items-center gap-2 text-xs transition-colors cursor-pointer whitespace-nowrap text-left ${
                 activeFolder === 'all'
-                  ? 'bg-zinc-900 text-zinc-100 font-medium'
-                  : 'text-zinc-400 hover:text-zinc-200 hover:bg-zinc-900/50'
+                  ? 'bg-zinc-950 text-white dark:bg-zinc-100 dark:text-black font-semibold shadow-xs'
+                  : 'text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 hover:bg-zinc-200/60 dark:hover:bg-zinc-900'
               }`}
             >
               <HardDrive className="w-4 h-4 text-zinc-400" />
@@ -116,8 +116,8 @@ export default function DriveFileManager({
               onClick={() => setActiveFolder('word')}
               className={`px-3 py-2 rounded-lg flex items-center gap-2 text-xs transition-colors cursor-pointer whitespace-nowrap text-left ${
                 activeFolder === 'word'
-                  ? 'bg-zinc-900 text-zinc-100 font-medium'
-                  : 'text-zinc-400 hover:text-zinc-200 hover:bg-zinc-900/50'
+                  ? 'bg-zinc-950 text-white dark:bg-zinc-100 dark:text-black font-semibold shadow-xs'
+                  : 'text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 hover:bg-zinc-200/60 dark:hover:bg-zinc-900'
               }`}
             >
               <FileText className="w-4 h-4 text-zinc-400" />
@@ -129,8 +129,8 @@ export default function DriveFileManager({
               onClick={() => setActiveFolder('pptx')}
               className={`px-3 py-2 rounded-lg flex items-center gap-2 text-xs transition-colors cursor-pointer whitespace-nowrap text-left ${
                 activeFolder === 'pptx'
-                  ? 'bg-zinc-900 text-zinc-100 font-medium'
-                  : 'text-zinc-400 hover:text-zinc-200 hover:bg-zinc-900/50'
+                  ? 'bg-zinc-950 text-white dark:bg-zinc-100 dark:text-black font-semibold shadow-xs'
+                  : 'text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 hover:bg-zinc-200/60 dark:hover:bg-zinc-900'
               }`}
             >
               <Presentation className="w-4 h-4 text-zinc-400" />
@@ -142,8 +142,8 @@ export default function DriveFileManager({
               onClick={() => setActiveFolder('md')}
               className={`px-3 py-2 rounded-lg flex items-center gap-2 text-xs transition-colors cursor-pointer whitespace-nowrap text-left ${
                 activeFolder === 'md'
-                  ? 'bg-zinc-900 text-zinc-100 font-medium'
-                  : 'text-zinc-400 hover:text-zinc-200 hover:bg-zinc-900/50'
+                  ? 'bg-zinc-950 text-white dark:bg-zinc-100 dark:text-black font-semibold shadow-xs'
+                  : 'text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 hover:bg-zinc-200/60 dark:hover:bg-zinc-900'
               }`}
             >
               <FileCode className="w-4 h-4 text-zinc-400" />
@@ -153,13 +153,13 @@ export default function DriveFileManager({
         </div>
 
         {/* Minimal Storage Indicator */}
-        <div className="hidden md:block pt-4 border-t border-zinc-900 text-[11px] text-zinc-500">
+        <div className="hidden md:block pt-4 border-t border-zinc-200 dark:border-zinc-800 text-[11px] text-zinc-500">
           <div className="flex justify-between mb-1.5">
-            <span>Penyimpanan</span>
-            <span className="text-zinc-400 font-mono">12.8 MB / 5 GB</span>
+            <span>Penyimpanan Workspace</span>
+            <span className="text-zinc-700 dark:text-zinc-300 font-mono font-medium">Lokal &amp; Cloud</span>
           </div>
-          <div className="w-full h-1 bg-zinc-900 rounded-full overflow-hidden">
-            <div className="w-[10%] h-full bg-zinc-300 rounded-full" />
+          <div className="w-full h-1 bg-zinc-200 dark:bg-zinc-850 rounded-md overflow-hidden">
+            <div className="w-[100%] h-full bg-emerald-500 rounded-md" />
           </div>
         </div>
       </aside>
@@ -170,13 +170,13 @@ export default function DriveFileManager({
         {/* Top Search & Filter Bar */}
         <div className="p-3 sm:p-4 border-b border-zinc-200 dark:border-zinc-900 bg-zinc-50/60 dark:bg-zinc-950/60 flex items-center justify-between gap-3">
           <div className="relative flex-1 max-w-sm">
-            <Search className="absolute left-3 top-2.5 w-4 h-4 text-zinc-500" />
+            <Search className="absolute left-3 top-2.5 w-4 h-4 text-zinc-400" />
             <input
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Cari usulan atau instansi..."
-              className="w-full bg-zinc-900 border border-zinc-800 rounded-lg pl-9 pr-3 py-1.5 text-xs text-zinc-100 placeholder:text-zinc-600 focus:outline-none focus:border-zinc-500 transition-colors"
+              className="w-full bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-lg pl-9 pr-3 py-1.5 text-xs text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-400 focus:outline-none focus:border-zinc-400 dark:focus:border-zinc-600 transition-colors"
             />
           </div>
 
@@ -184,7 +184,7 @@ export default function DriveFileManager({
             <button
               type="button"
               onClick={() => setViewMode(viewMode === 'list' ? 'grid' : 'list')}
-              className="p-1.5 rounded-lg border border-zinc-800 text-zinc-400 hover:text-zinc-200 hover:bg-zinc-900 transition-colors cursor-pointer"
+              className="p-1.5 rounded-lg border border-zinc-200 dark:border-zinc-800 text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 hover:bg-zinc-100 dark:hover:bg-zinc-900 transition-colors cursor-pointer"
               title="Ganti Mode Tampilan"
             >
               {viewMode === 'list' ? <Grid className="w-4 h-4" /> : <List className="w-4 h-4" />}

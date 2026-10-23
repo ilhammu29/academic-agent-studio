@@ -17,7 +17,8 @@ import {
   X,
   RotateCcw,
   Sparkles,
-  GraduationCap
+  GraduationCap,
+  Plus
 } from 'lucide-react';
 import { StudioStage, ProposalCategory } from '@/types/studio';
 import { UserProfile } from '@/lib/supabase';
@@ -75,6 +76,17 @@ export default function AppShell({
       icon: Home,
       isActive: currentStage === 'input' || currentStage === 'interview' || currentStage === 'orchestration',
       onClick: () => onNavigateStage('input')
+    },
+    {
+      id: 'new-proposal',
+      label: 'Mulai Usulan Baru (+)',
+      icon: Plus,
+      isActive: false,
+      onClick: () => {
+        if (confirm("Mulai sesi usulan baru? Draf naskah Anda tetap tersimpan otomatis di Arsip Proyek.")) {
+          onResetSession();
+        }
+      }
     },
     {
       id: 'chat',
@@ -267,13 +279,28 @@ export default function AppShell({
           )}
         </div>
 
-        {/* Right: Theme Switcher, 12 Thinking Modes Bell, User Profile Badge */}
+        {/* Right: New Proposal Button, Theme Switcher, 12 Thinking Modes Bell, User Profile Badge */}
         <div className="flex items-center gap-2 sm:gap-3">
           
-          {/* Theme Selector Pill "☼ Light ⌄" */}
+          {/* New Proposal / Sesi Baru CTA Button (Like ChatGPT / Claude) */}
+          <button
+            type="button"
+            onClick={() => {
+              if (confirm("Mulai sesi usulan baru? Draf naskah Anda tetap tersimpan otomatis di Arsip Proyek.")) {
+                onResetSession();
+              }
+            }}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-zinc-950 text-white dark:bg-zinc-100 dark:text-black hover:opacity-90 text-xs font-semibold shadow-xs transition-all cursor-pointer"
+            title="Mulai usulan proposal baru tanpa me-refresh browser"
+          >
+            <Plus className="w-3.5 h-3.5" />
+            <span className="hidden sm:inline">Usulan Baru</span>
+          </button>
+
+          {/* Theme Selector Button */}
           <button
             onClick={toggleTheme}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-full hover:bg-zinc-200/70 dark:hover:bg-zinc-800 text-xs font-medium text-zinc-800 dark:text-zinc-200 transition-colors cursor-pointer"
+            className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg hover:bg-zinc-200/70 dark:hover:bg-zinc-800 text-xs font-medium text-zinc-800 dark:text-zinc-200 transition-colors cursor-pointer"
             title={theme === 'dark' ? 'Ganti ke Mode Terang' : 'Ganti ke Mode Gelap'}
           >
             {theme === 'dark' ? (
@@ -291,7 +318,7 @@ export default function AppShell({
               if (onOpenTwelveModes) onOpenTwelveModes();
             }}
             title="12 Metode Berpikir Ilmiah"
-            className="p-2 rounded-full text-zinc-700 dark:text-zinc-400 hover:text-zinc-950 dark:hover:text-white hover:bg-zinc-200/70 dark:hover:bg-zinc-800 transition-colors cursor-pointer"
+            className="p-2 rounded-lg text-zinc-700 dark:text-zinc-400 hover:text-zinc-950 dark:hover:text-white hover:bg-zinc-200/70 dark:hover:bg-zinc-800 transition-colors cursor-pointer"
           >
             <Bell className="w-4 h-4 stroke-[1.85]" />
           </button>
@@ -300,7 +327,7 @@ export default function AppShell({
           <button
             onClick={onOpenAuth}
             title={`${currentUser.name || 'Ilham Maulana'} (${currentUser.role || 'Mahasiswa'})`}
-            className="w-8 h-8 rounded-full bg-[#18181B] dark:bg-zinc-100 text-white dark:text-zinc-950 font-bold text-xs flex items-center justify-center cursor-pointer shadow-xs hover:scale-105 active:scale-95 transition-transform"
+            className="w-8 h-8 rounded-lg bg-[#18181B] dark:bg-zinc-100 text-white dark:text-zinc-950 font-bold text-xs flex items-center justify-center cursor-pointer shadow-xs hover:scale-105 active:scale-95 transition-transform"
           >
             {userInitials}
           </button>

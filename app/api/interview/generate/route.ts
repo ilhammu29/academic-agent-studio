@@ -25,8 +25,16 @@ Judul: "${title}"
 Kategori: "${category}" (magang industri atau skripsi/penelitian)
 Instansi/Subjek Sasaran: "${targetEntity || "Instansi / Laboratorium Terkait"}"
 
-Tugas Anda adalah merumuskan tepat 4 pertanyaan wawancara diagnostik mendalam untuk menggali detail proposal tersebut sebelum disusun oleh tim agen AI.
-Pertanyaan dan saran jawaban (aiSuggestion) HARUS DISESUAIKAN SECARA TEPAT DENGAN RUMPUN ILMU JUDUL (contoh: jika kesehatan/gizi/kedokteran seperti Obesitas, gunakan istilah klinis/antropometri/pola gizi, JANGAN gunakan istilah IT seperti algoritma atau docker).
+Tugas Anda adalah merumuskan 5 hingga 6 pertanyaan wawancara diagnostik mendalam untuk menggali secara tuntas potensi, realitas lapangan, dan metodologi dari judul tersebut sebelum disusun oleh tim agen AI.
+Pertanyaan dan saran jawaban (aiSuggestion) HARUS MENGIKUTI PERSEPSI & RUMPUN ILMU DARI JUDUL (contoh: jika kesehatan/gizi/kedokteran seperti Obesitas, gunakan istilah klinis/antropometri/pola gizi/faktor determinan; jika teknik/IT, gunakan istilah rekayasa sistem; jika ekonomi/manajemen, gunakan efisiensi operasional/supply chain/finansial).
+
+Pertanyaan yang harus dicakup:
+1. Unit Sasaran / Divisi / Populasi Spesifik (targetDepartment)
+2. Gejala Nyata & Akar Masalah Lapangan (problemStatement)
+3. Batasan Ruang Lingkup & Asumsi (scopeLimitations)
+4. Metodologi Kerja, Alat Ukur & Instrumen Pengumpulan Data (toolsSkillset)
+5. Metrik Validasi & Pengujian Keberhasilan (evaluationMetrics)
+6. Luaran Nyata / Tangible Deliverables (deliverables)
 
 Format JSON valid tanpa markdown (\`\`\`json):
 {
@@ -34,7 +42,7 @@ Format JSON valid tanpa markdown (\`\`\`json):
     {
       "id": "targetDepartment",
       "field": "targetDepartment",
-      "question": "Pertanyaan spesifik divisi/unit atau subjek/populasi sasaran...",
+      "question": "Pertanyaan spesifik divisi/unit atau subjek sasaran di lapangan...",
       "contextHint": "Petunjuk konteks akademis singkat...",
       "placeholder": "Contoh pengisian ringkas...",
       "aiSuggestion": "Saran jawaban lengkap, formal, dan spesifik yang siap diterapkan...",
@@ -43,28 +51,46 @@ Format JSON valid tanpa markdown (\`\`\`json):
     {
       "id": "problemStatement",
       "field": "problemStatement",
-      "question": "Pertanyaan mengenai kesenjangan masalah (gap) atau inefisiensi nyata di lapangan...",
+      "question": "Pertanyaan mengenai gap masalah empiris atau inefisiensi nyata yang dihadapi...",
       "contextHint": "Petunjuk konteks...",
       "placeholder": "...",
-      "aiSuggestion": "Saran jawaban komprehensif berbasis data empiris...",
+      "aiSuggestion": "Saran jawaban komprehensif berbasis fakta lapangan...",
       "thinkingModeApplied": "Critical / Falsification Thinking"
+    },
+    {
+      "id": "scopeLimitations",
+      "field": "scopeLimitations",
+      "question": "Pertanyaan batasan ruang lingkup agar riset/tugas realistis selesai tepat waktu...",
+      "contextHint": "Mencegah bias dan topik melebar...",
+      "placeholder": "...",
+      "aiSuggestion": "Saran batasan lingkup...",
+      "thinkingModeApplied": "Boundary Thinking"
     },
     {
       "id": "toolsSkillset",
       "field": "toolsSkillset",
-      "question": "Pertanyaan mengenai metodologi kerja, alat ukur/instrumen, atau perangkat pendukung...",
-      "contextHint": "Petunjuk konteks...",
+      "question": "Pertanyaan mengenai instrumen ukur, metodologi analisis, atau perangkat kerja yang digunakan...",
+      "contextHint": "Petunjuk metodologi...",
       "placeholder": "...",
-      "aiSuggestion": "Saran daftar alat, metode, atau instrumen yang relevan dengan bidangnya...",
+      "aiSuggestion": "Saran daftar instrumen/metode...",
       "thinkingModeApplied": "Occam's Razor"
+    },
+    {
+      "id": "evaluationMetrics",
+      "field": "evaluationMetrics",
+      "question": "Pertanyaan mengenai bagaimana keberhasilan intervensi atau hasil riset ini diukur secara objektif...",
+      "contextHint": "Metrik ketercapaian...",
+      "placeholder": "...",
+      "aiSuggestion": "Saran metrik evaluasi...",
+      "thinkingModeApplied": "Empirical Verification"
     },
     {
       "id": "deliverables",
       "field": "deliverables",
-      "question": "Pertanyaan mengenai produk kerja nyata (tangible deliverable) atau luaran yang dihasilkan...",
-      "contextHint": "Petunjuk konteks...",
+      "question": "Pertanyaan mengenai produk luaran nyata (dokumen, prototipe, SOP, sistem) yang diserahkan...",
+      "contextHint": "Luaran terukur...",
       "placeholder": "...",
-      "aiSuggestion": "Saran luaran konkret dan terukur (laporan, prototipe, SOP, dsb)...",
+      "aiSuggestion": "Saran produk luaran...",
       "thinkingModeApplied": "Systems / Holistic Thinking"
     }
   ]

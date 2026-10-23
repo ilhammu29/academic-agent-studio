@@ -3,23 +3,19 @@ import { NextResponse } from "next/server";
 export async function POST(req: Request) {
   try {
     const body = await req.json();
-    const { 
-      mode = "interactive_chat",
-      messages = [],
-      fieldDetails = {},
-      userQuery = ""
-    } = body;
+    const userQuery = (body.userQuery || body.message || body.prompt || "").trim();
+    const messages = body.messages || body.history || [];
+    const fieldDetails = body.fieldDetails || body.context || {};
+    const mode = body.mode || "conversational";
 
     const customKey = req.headers.get("x-gemini-key");
     const apiKey = customKey || process.env.GEMINI_API_KEY || process.env.NEXT_PUBLIC_GEMINI_API_KEY || "";
 
-    const {
-      targetEntity = "",
-      major = "",
-      currentDuties = "",
-      rawIdea = "",
-      category = "magang"
-    } = fieldDetails;
+    const targetEntity = fieldDetails.targetEntity || fieldDetails.entity || "";
+    const major = fieldDetails.major || fieldDetails.programStudi || "";
+    const currentDuties = fieldDetails.currentDuties || "";
+    const rawIdea = fieldDetails.rawIdea || fieldDetails.currentTitle || "";
+    const category = fieldDetails.category || "magang";
 
     // 1. Live Gemini 3.5 Flash Lite Call
     if (apiKey) {
@@ -111,19 +107,27 @@ Sertakan di bagian akhir format JSON terpisah bertanda:
           const conversationHistory = messages.map((m: any) => `${m.role === 'user' ? 'Mahasiswa' : 'Dr. Bimbingan'}: ${m.content}`).join("\n");
           promptContent = `
 Berikut adalah riwayat konsultasi sebelumnya:
-${conversationHistory}
+${conversationHistory || "(Percakapan baru)"}
 
-Pertanyaan/keluhan terbaru dari Mahasiswa:
+Pertanyaan/keluhan/ide terbaru dari Mahasiswa:
 "${userQuery}"
 
-Tanggapi secara empatik, solutif, dan beri arahan konkret. Jika pembicaraan sudah mengerucut ke solusi atau judul yang disepakati, sertakan kartu ringkasan JSON bertanda:
+Tugas Anda:
+1. Berikan tanggapan yang hangat, suportif, berbobot akademis, dan langsung menjawab inti kebingungan mahasiswa.
+2. Analisis potensi masalah, kebaruan (novelty), serta saran metodologi dan alur kerja yang realistis.
+3. Selalu formulasikan 1 usulan judul terbaik yang telah disempurnakan berdasarkan topik pembicaraan ini di dalam blok kartu JSON persis seperti format berikut:
 \`\`\`consultation_card
 {
-  "recommendedTitle": "Judul proposal yang disepakati...",
+  "recommendedTitle": "Judul proposal formal, tajam, dan tidak klise...",
   "targetEntity": "${targetEntity || 'Instansi Terkait'}",
-  "coreProblem": "Masalah utama yang diangkat...",
-  "proposedSolution": "Solusi/metode yang dipakai...",
-  "flowSteps": ["Tahap 1...", "Tahap 2...", "Tahap 3...", "Tahap 4..."],
+  "coreProblem": "Rumusan masalah 1 kalimat tajam...",
+  "proposedSolution": "Solusi atau metodologi yang disarankan...",
+  "flowSteps": [
+    "Fase 1: Studi pendahuluan & identifikasi gap...",
+    "Fase 2: Perancangan instrumen ukur / arsitektur solusi...",
+    "Fase 3: Implementasi & uji coba pada subjek...",
+    "Fase 4: Evaluasi metrik keberhasilan & pelaporan..."
+  ],
   "category": "${category}"
 }
 \`\`\`

@@ -115,11 +115,11 @@ export default function DatabaseDrawer({
         </div>
 
         {/* 2. Top Action Bar: Save Current Draft & Refresh */}
-        <div className="p-4 border-b border-zinc-200 dark:border-zinc-800 flex flex-col sm:flex-row gap-2.5 items-stretch sm:items-center justify-between bg-white dark:bg-zinc-950">
+        <div className="p-4 border-b border-zinc-200 dark:border-zinc-850 flex flex-col sm:flex-row gap-2.5 items-stretch sm:items-center justify-between bg-white dark:bg-zinc-950">
           <button
             onClick={handleSaveCurrent}
             disabled={isSaving}
-            className="py-2 px-4 rounded-full bg-zinc-950 hover:bg-black text-white dark:bg-zinc-100 dark:hover:bg-white dark:text-zinc-950 font-semibold text-xs transition-all shadow-xs flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
+            className="py-2 px-4 rounded-lg bg-zinc-950 hover:bg-black text-white dark:bg-zinc-100 dark:hover:bg-white dark:text-zinc-950 font-semibold text-xs transition-all shadow-xs flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
           >
             {isSaving ? (
               <RefreshCw className="w-3.5 h-3.5 animate-spin" />
@@ -133,14 +133,34 @@ export default function DatabaseDrawer({
             </span>
           </button>
 
-          <button
-            onClick={fetchProjects}
-            className="py-2 px-3 rounded-full border border-zinc-200 dark:border-zinc-800 hover:bg-zinc-100 dark:hover:bg-zinc-900 text-zinc-700 dark:text-zinc-300 text-xs font-medium transition-colors flex items-center justify-center gap-1.5 cursor-pointer"
-            title="Muat ulang dari database"
-          >
-            <RefreshCw className={`w-3.5 h-3.5 ${isLoading ? 'animate-spin' : ''}`} />
-            <span>Segarkan</span>
-          </button>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => {
+                const jsonStr = JSON.stringify(projects, null, 2);
+                const blob = new Blob([jsonStr], { type: "application/json" });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement("a");
+                a.href = url;
+                a.download = `OXID_Academic_Projects_Backup_${Date.now()}.json`;
+                a.click();
+                URL.revokeObjectURL(url);
+              }}
+              className="py-2 px-3 rounded-lg border border-zinc-200 dark:border-zinc-800 hover:bg-zinc-100 dark:hover:bg-zinc-900 text-zinc-700 dark:text-zinc-300 text-xs font-medium transition-colors flex items-center justify-center gap-1.5 cursor-pointer"
+              title="Unduh seluruh database arsip dalam berkas JSON"
+            >
+              <FileText className="w-3.5 h-3.5 text-zinc-400" />
+              <span>Cadangan (.json)</span>
+            </button>
+
+            <button
+              onClick={fetchProjects}
+              className="py-2 px-3 rounded-lg border border-zinc-200 dark:border-zinc-800 hover:bg-zinc-100 dark:hover:bg-zinc-900 text-zinc-700 dark:text-zinc-300 text-xs font-medium transition-colors flex items-center justify-center gap-1.5 cursor-pointer"
+              title="Muat ulang dari database"
+            >
+              <RefreshCw className={`w-3.5 h-3.5 ${isLoading ? 'animate-spin' : ''}`} />
+              <span>Segarkan</span>
+            </button>
+          </div>
         </div>
 
         {/* 3. Search & Filter Category Pills */}
@@ -166,7 +186,7 @@ export default function DatabaseDrawer({
               <button
                 key={tab.id}
                 onClick={() => setFilterCategory(tab.id as any)}
-                className={`py-1 px-3 rounded-full text-xs font-medium whitespace-nowrap transition-colors cursor-pointer ${
+                className={`py-1 px-3 rounded-lg text-xs font-medium whitespace-nowrap transition-colors cursor-pointer ${
                   filterCategory === tab.id
                     ? 'bg-zinc-950 text-white dark:bg-zinc-100 dark:text-black font-semibold'
                     : 'bg-white dark:bg-zinc-900 text-zinc-600 dark:text-zinc-400 border border-zinc-200 dark:border-zinc-800 hover:border-zinc-300'

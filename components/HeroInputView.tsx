@@ -22,7 +22,9 @@ import {
   Bot,
   Sparkles,
   Check,
-  RefreshCw
+  RefreshCw,
+  RotateCcw,
+  X
 } from "lucide-react";
 import { TitleRecommendation, getAiTitleRecommendations } from "@/lib/titleGenerator";
 
@@ -227,247 +229,263 @@ export const HeroInputView: React.FC<HeroInputViewProps> = ({
   };
 
   return (
-    <div className="flex-1 flex flex-col justify-between max-w-7xl mx-auto w-full px-6 sm:px-12 lg:px-16 py-8 sm:py-14 animate-in fade-in duration-300">
+    <div className="flex-1 flex flex-col justify-between max-w-5xl mx-auto w-full px-4 sm:px-8 py-6 sm:py-10 animate-in fade-in duration-300">
       
       {/* ============================================================ */}
-      {/* 1. HERO MAIN STAGE: Text & Input (Left) + Morphing Slime (Right) */}
+      {/* 1. HERO MAIN STAGE: Center-Aligned with Compact Slime Bubble */}
       {/* ============================================================ */}
-      <div className="flex-1 flex flex-col lg:flex-row items-center justify-between gap-10 lg:gap-14 w-full my-auto">
+      <div className="flex-1 flex flex-col items-center text-center justify-center w-full my-auto z-10">
         
-        {/* Left Column: Headline, Actions, and Input Capsule */}
-        <div className="w-full lg:max-w-2xl flex flex-col items-start text-left z-10">
+        {/* COMPACT FLUID MORPHING SLIME / BUBBLE (Centered & Scaled Down) */}
+        <div className="w-[180px] h-[150px] relative flex items-center justify-center pointer-events-none select-none mb-3">
+          {/* Ambient Glow */}
+          <div className="absolute w-44 h-44 rounded-full bg-zinc-300/35 dark:bg-zinc-700/20 blur-2xl animate-slime-pulse" />
           
-          {/* Subtle Top Badge (Academic Emblem, No generic star) */}
-          <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-zinc-200/80 dark:bg-zinc-900 border border-zinc-300/80 dark:border-zinc-800 text-xs font-semibold text-zinc-900 dark:text-zinc-200 mb-6 shadow-2xs">
-            <GraduationCap className="w-4 h-4 text-zinc-800 dark:text-zinc-300 flex-shrink-0" />
-            <span>Asisten Perumusan Usulan Akademik</span>
-          </div>
-
-          {/* Headline (Matching typography & hierarchy of reference) */}
-          <div className="space-y-1">
-            <h1 className="text-3xl sm:text-5xl lg:text-[54px] font-bold tracking-tight text-zinc-950 dark:text-white leading-[1.12]">
-              Perumusan Usulan
-            </h1>
-            <h2 className="text-3xl sm:text-5xl lg:text-[54px] font-semibold tracking-tight text-zinc-600 dark:text-zinc-400 leading-[1.12]">
-              Proposal Akademik
-            </h2>
-          </div>
-
-          {/* Subtitle Description */}
-          <p className="text-sm sm:text-base text-zinc-600 dark:text-zinc-400 mt-4 max-w-xl leading-relaxed font-normal">
-            Ketikkan judul usulan Anda atau pilih inspirasi topik di bawah. Sistem akan memandu wawancara diagnostik sebelum dokumen lengkap disusun.
-          </p>
-
-          {/* PROMINENT QUICK ACTIONS TOOLBAR (AI Generate, Konsultasi, Format Kampus, Parameter) */}
-          <div className="w-full mt-6 flex flex-wrap items-center gap-2 text-xs">
-            {/* 1. Tombol Rekomendasi Judul (AI & Internet) */}
-            <button
-              type="button"
-              onClick={() => handleOpenAiRecommender()}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 hover:border-zinc-400 dark:hover:border-zinc-700 text-zinc-800 dark:text-zinc-200 font-medium transition-all shadow-2xs cursor-pointer group hover:bg-zinc-50 dark:hover:bg-zinc-850"
-              title="Cari ide judul akademik berbasis AI dan jurnal ilmiah riil dari internet"
-            >
-              <Lightbulb className="w-3.5 h-3.5 text-amber-500 group-hover:scale-110 transition-transform" />
-              <span>Generator Judul (AI & Internet)</span>
-            </button>
-
-            {/* 2. Tombol Konsultasi Masalah Magang (AI Mentor) */}
-            {onOpenConsultation && (
-              <button
-                type="button"
-                onClick={onOpenConsultation}
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800/80 hover:border-emerald-400 text-emerald-800 dark:text-emerald-300 font-medium transition-all shadow-2xs cursor-pointer"
-                title="Bimbingan interaktif menemukan masalah lapangan dan membedah alur riset"
-              >
-                <MessageSquare className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
-                <span>AI Mentor & Konsultasi Ide</span>
-              </button>
-            )}
-
-            {/* 3. Tombol Format Kampus (Scan AI) */}
-            {onOpenGuidelineModal && (
-              <button
-                type="button"
-                onClick={onOpenGuidelineModal}
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 hover:border-zinc-400 dark:hover:border-zinc-700 text-zinc-800 dark:text-zinc-200 font-medium transition-all shadow-2xs cursor-pointer"
-                title="Pindai PDF panduan kampus atau pilih template format kampus Anda"
-              >
-                <Landmark className="w-3.5 h-3.5 text-indigo-500" />
-                <span>{activeCampusName ? activeCampusName.split("(")[0].trim() : "Format Kampus"}</span>
-              </button>
-            )}
-
-            {/* 4. Tombol Parameter Instansi & Durasi */}
-            <button
-              type="button"
-              onClick={() => setShowParameters(!showParameters)}
-              className="inline-flex items-center gap-1 px-3 py-1.5 rounded-full bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 hover:border-zinc-400 dark:hover:border-zinc-700 text-zinc-700 dark:text-zinc-300 font-medium transition-all shadow-2xs cursor-pointer"
-            >
-              <SlidersHorizontal className="w-3 h-3 text-zinc-500" />
-              <span>{showParameters ? "Tutup Parameter" : "Instansi & Durasi"}</span>
-              <ChevronDown className={`w-3 h-3 text-zinc-400 transition-transform ${showParameters ? "rotate-180" : ""}`} />
-            </button>
-          </div>
-
-          {/* Expandable Parameters Box */}
-          {showParameters && (
-            <div className="w-full mt-3 p-4 rounded-2xl bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs animate-in fade-in zoom-in-95 duration-150 shadow-sm">
-              <div>
-                <label className="text-[11px] font-semibold text-zinc-700 dark:text-zinc-300 block mb-1">
-                  Instansi / Tempat Magang
-                </label>
-                <input
-                  type="text"
-                  value={targetEntity}
-                  onChange={(e) => setTargetEntity(e.target.value)}
-                  placeholder="Contoh: PT Telkom / RS Sardjito"
-                  className="w-full bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-lg px-3 py-1.5 text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-400 text-xs focus:outline-none focus:border-zinc-400 transition-colors"
-                />
-              </div>
-
-              <div>
-                <label className="text-[11px] font-semibold text-zinc-700 dark:text-zinc-300 block mb-1">
-                  Durasi Kegiatan
-                </label>
-                <select
-                  value={durationMonths}
-                  onChange={(e) => setDurationMonths(Number(e.target.value))}
-                  className="w-full bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-lg px-3 py-1.5 text-zinc-900 dark:text-zinc-100 text-xs focus:outline-none focus:border-zinc-400 transition-colors"
-                >
-                  <option value={1}>1 Bulan (4 Minggu)</option>
-                  <option value={3}>3 Bulan (12 Minggu - PKL)</option>
-                  <option value={4}>4 Bulan (16 Minggu - 1 Semester)</option>
-                  <option value={6}>6 Bulan (MBKM 20 SKS / Skripsi)</option>
-                </select>
-              </div>
-
-              <div>
-                <label className="text-[11px] font-semibold text-zinc-700 dark:text-zinc-300 block mb-1">
-                  Nama Pengusul
-                </label>
-                <input
-                  type="text"
-                  value={candidateName}
-                  onChange={(e) => setCandidateName(e.target.value)}
-                  placeholder="Nama Lengkap Anda"
-                  className="w-full bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-lg px-3 py-1.5 text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-400 text-xs focus:outline-none focus:border-zinc-400 transition-colors"
-                />
-              </div>
-            </div>
-          )}
-
-          {/* Hero Input Capsule (Giant rounded-full pill) */}
-          <div className="w-full mt-4 bg-white dark:bg-zinc-900 border border-zinc-300 dark:border-zinc-800 rounded-full p-2 pl-4 pr-2.5 flex items-center gap-2.5 shadow-md shadow-zinc-200/50 dark:shadow-none hover:border-zinc-400 dark:hover:border-zinc-700 transition-all focus-within:border-zinc-500 dark:focus-within:border-zinc-500 focus-within:ring-2 focus-within:ring-zinc-200/60 dark:focus-within:ring-zinc-800">
-            {/* Input Field */}
-            <input
-              type="text"
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              onKeyDown={handleKeyDown}
-              placeholder="Tuliskan judul usulan atau ketik topik (contoh: obesitas, AI, supply chain)..."
-              className="w-full bg-transparent border-none outline-none text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-400 text-sm sm:text-base font-normal py-2"
-            />
-
-            {/* Quick Action: Search & Generate Title */}
-            <button
-              type="button"
-              onClick={() => handleOpenAiRecommender(title.trim())}
-              title="Generate usulan judul berdasarkan kata kunci ini (AI & Internet)"
-              className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-zinc-100 hover:bg-zinc-200 dark:bg-zinc-800 dark:hover:bg-zinc-750 text-zinc-800 dark:text-zinc-200 font-semibold text-xs transition-colors flex-shrink-0 cursor-pointer shadow-2xs"
-            >
-              <Lightbulb className="w-3.5 h-3.5 text-amber-500" />
-              <span>Cari Ide Judul</span>
-            </button>
-
-            {/* Circular Dark Submit Button with Arrow Right */}
-            <button
-              type="button"
-              onClick={handleSubmit}
-              title="Mulai Wawancara Diagnostik"
-              className="w-10 h-10 rounded-full bg-[#18181B] dark:bg-zinc-100 text-white dark:text-zinc-950 flex items-center justify-center hover:scale-105 active:scale-95 transition-all flex-shrink-0 cursor-pointer shadow-sm group"
-            >
-              <ArrowRight className="w-4 h-4 stroke-[2.5] group-hover:translate-x-0.5 transition-transform" />
-            </button>
-          </div>
-
-          {/* Topic Inspiration Chips (Horizontal Pills under the Input) */}
-          <div className="w-full mt-4 flex items-center gap-2.5 overflow-x-auto pb-2 scrollbar-none">
-            {TOPIC_CHIPS.map((chip) => {
-              const Icon = chip.icon;
-              const isSelected = title === chip.title;
-              return (
-                <button
-                  key={chip.id}
-                  type="button"
-                  onClick={() => handleSelectChip(chip)}
-                  className={`inline-flex items-center gap-2 px-3.5 py-2 rounded-full text-xs font-medium whitespace-nowrap transition-all cursor-pointer group shadow-2xs ${
-                    isSelected
-                      ? 'bg-zinc-900 text-white dark:bg-zinc-100 dark:text-black border border-transparent'
-                      : 'bg-white dark:bg-zinc-900 text-zinc-800 dark:text-zinc-300 border border-zinc-200 dark:border-zinc-800 hover:bg-zinc-50 dark:hover:bg-zinc-800 hover:border-zinc-300 dark:hover:border-zinc-700'
-                  }`}
-                >
-                  <Icon className="w-3.5 h-3.5 flex-shrink-0 opacity-70 group-hover:opacity-100" />
-                  <span>{chip.label}</span>
-                  <ChevronRight className="w-3 h-3 text-zinc-400 group-hover:translate-x-0.5 transition-transform" />
-                </button>
-              );
-            })}
-          </div>
-
-        </div>
-
-        {/* Right Column: FLUID MORPHING SLIME / BUBBLE ANIMATION (Wave Motion) */}
-        <div className="hidden lg:flex w-full lg:w-[460px] h-[400px] relative items-center justify-center pointer-events-none select-none">
-          
-          {/* 1. Ambient Fluid Ripple Background */}
-          <div className="absolute w-72 h-72 rounded-full bg-zinc-300/40 dark:bg-zinc-700/20 blur-3xl animate-slime-pulse" />
-
-          {/* 2. Secondary Floating Fluid Droplet (Wave Motion Behind) */}
+          {/* Secondary Droplet */}
           <div 
             style={{
-              width: "280px",
-              height: "280px",
-              background: "radial-gradient(circle at 40% 40%, rgba(255,255,255,0.9) 0%, rgba(220,220,220,0.6) 45%, rgba(180,180,180,0.4) 100%)",
+              width: "150px",
+              height: "150px",
+              background: "radial-gradient(circle at 40% 40%, rgba(255,255,255,0.85) 0%, rgba(220,220,220,0.5) 50%, rgba(180,180,180,0.3) 100%)",
             }}
-            className="absolute rounded-full filter blur-sm opacity-60 animate-slime-morph" 
+            className="absolute rounded-full filter blur-xs opacity-50 animate-slime-morph" 
           />
 
-          {/* 3. Primary Organic Morphing Slime / Fluid Bubble */}
+          {/* Primary Slime Bubble */}
           <div 
             style={{
-              width: "320px",
-              height: "300px",
-              background: "radial-gradient(circle at 35% 30%, #FFFFFF 0%, #F1F1EF 35%, #D4D4D0 75%, #A3A39E 100%)",
-              boxShadow: "0 25px 50px -12px rgba(0,0,0,0.18), inset -10px -10px 25px rgba(0,0,0,0.22), inset 12px 12px 25px rgba(255,255,255,0.9)"
+              width: "160px",
+              height: "140px",
+              background: "radial-gradient(circle at 35% 30%, #FFFFFF 0%, #F4F4F2 35%, #D4D4D0 75%, #A3A39E 100%)",
+              boxShadow: "0 15px 35px -8px rgba(0,0,0,0.15), inset -6px -6px 16px rgba(0,0,0,0.18), inset 8px 8px 16px rgba(255,255,255,0.9)"
             }}
             className="relative animate-slime-morph border border-white/60 flex items-center justify-center transition-all"
           >
-            {/* Inner Floating Liquid Core Bubble */}
+            {/* Inner Core */}
             <div 
               style={{
-                width: "120px",
-                height: "110px",
+                width: "60px",
+                height: "55px",
                 background: "radial-gradient(circle at 35% 35%, rgba(255,255,255,0.95) 0%, rgba(240,240,238,0.7) 50%, rgba(200,200,195,0.3) 100%)",
-                boxShadow: "inset -4px -4px 10px rgba(0,0,0,0.15), inset 6px 6px 12px rgba(255,255,255,0.9)"
+                boxShadow: "inset -2px -2px 6px rgba(0,0,0,0.12), inset 4px 4px 8px rgba(255,255,255,0.9)"
               }}
               className="rounded-full animate-slime-morph opacity-90 filter blur-[0.5px]"
             />
-
-            {/* Specular Glaze Highlight */}
-            <div className="absolute top-10 left-12 w-14 h-8 bg-white/70 rounded-full rotate-[-25deg] filter blur-[2px]" />
+            {/* Specular Glaze */}
+            <div className="absolute top-4 left-6 w-8 h-4 bg-white/70 rounded-full rotate-[-25deg] filter blur-[1px]" />
           </div>
 
-          {/* 4. Small Satellite Bubble Droplet */}
+          {/* Small Satellite Droplet */}
           <div 
             style={{
-              width: "55px",
-              height: "55px",
+              width: "30px",
+              height: "30px",
               background: "radial-gradient(circle at 35% 35%, #FFFFFF 0%, #E8E8E4 60%, #B8B8B2 100%)",
-              boxShadow: "0 10px 20px rgba(0,0,0,0.1), inset -3px -3px 8px rgba(0,0,0,0.2), inset 3px 3px 8px rgba(255,255,255,0.9)"
+              boxShadow: "0 6px 12px rgba(0,0,0,0.1), inset -2px -2px 5px rgba(0,0,0,0.15), inset 2px 2px 5px rgba(255,255,255,0.9)"
             }}
-            className="absolute top-14 right-10 rounded-full animate-slime-morph"
+            className="absolute top-3 right-4 rounded-full animate-slime-morph"
+          />
+        </div>
+
+        {/* Subtle Top Badge */}
+        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-md bg-zinc-100 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-xs font-medium text-zinc-800 dark:text-zinc-200 mb-4 shadow-2xs">
+          <GraduationCap className="w-3.5 h-3.5 text-zinc-700 dark:text-zinc-300 flex-shrink-0" />
+          <span>OXID Academic Studio • Standar Pedoman Dikti</span>
+        </div>
+
+        {/* Centered Headline */}
+        <div className="space-y-1 max-w-2xl">
+          <h1 className="text-3xl sm:text-5xl font-bold tracking-tight text-zinc-950 dark:text-white leading-tight">
+            Perumusan Usulan Proposal
+          </h1>
+          <p className="text-sm sm:text-base text-zinc-600 dark:text-zinc-400 mt-2 max-w-xl mx-auto leading-relaxed font-normal">
+            Ketikkan judul usulan Anda atau cari inspirasi topik. Agen AI memandu wawancara diagnostik sebelum naskah proposal terverifikasi disusun.
+          </p>
+        </div>
+
+        {/* ACTION TOOLBAR: Spacious, neatly grouped with rounded-lg */}
+        <div className="mt-5 flex flex-wrap items-center justify-center gap-2 text-xs">
+          {/* 1. Generator Judul (AI & Internet) */}
+          <button
+            type="button"
+            onClick={() => handleOpenAiRecommender()}
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 hover:border-zinc-400 dark:hover:border-zinc-700 text-zinc-800 dark:text-zinc-200 font-medium transition-all shadow-2xs cursor-pointer group hover:bg-zinc-50 dark:hover:bg-zinc-850"
+            title="Cari ide judul akademik berbasis penalaran AI dan literatur primer jurnal internasional"
+          >
+            <Lightbulb className="w-3.5 h-3.5 text-amber-500 group-hover:scale-110 transition-transform" />
+            <span>Generator Judul (AI & Internet)</span>
+          </button>
+
+          {/* 2. AI Mentor & Konsultasi Ide */}
+          {onOpenConsultation && (
+            <button
+              type="button"
+              onClick={onOpenConsultation}
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800/80 hover:border-emerald-400 text-emerald-800 dark:text-emerald-300 font-medium transition-all shadow-2xs cursor-pointer"
+              title="Bimbingan interaktif membedah masalah lapangan, novelty, dan alur riset"
+            >
+              <MessageSquare className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
+              <span>AI Mentor & Konsultasi Ide</span>
+            </button>
+          )}
+
+          {/* 3. Format Kampus */}
+          {onOpenGuidelineModal && (
+            <button
+              type="button"
+              onClick={onOpenGuidelineModal}
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 hover:border-zinc-400 dark:hover:border-zinc-700 text-zinc-800 dark:text-zinc-200 font-medium transition-all shadow-2xs cursor-pointer"
+              title="Pindai PDF panduan kampus atau pilih template format kampus Anda"
+            >
+              <Landmark className="w-3.5 h-3.5 text-indigo-500" />
+              <span>{activeCampusName ? activeCampusName.split("(")[0].trim() : "Format Kampus"}</span>
+            </button>
+          )}
+
+          {/* 4. Parameter Instansi & Durasi */}
+          <button
+            type="button"
+            onClick={() => setShowParameters(!showParameters)}
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 hover:border-zinc-400 dark:hover:border-zinc-700 text-zinc-700 dark:text-zinc-300 font-medium transition-all shadow-2xs cursor-pointer"
+          >
+            <SlidersHorizontal className="w-3.5 h-3.5 text-zinc-500" />
+            <span>{showParameters ? "Tutup Parameter" : "Instansi & Durasi"}</span>
+            <ChevronDown className={`w-3.5 h-3.5 text-zinc-400 transition-transform ${showParameters ? "rotate-180" : ""}`} />
+          </button>
+
+          {/* 5. NEW SESSION / RESET BUTTON (Allows user to reset without page refresh) */}
+          {(title || targetEntity) && (
+            <button
+              type="button"
+              onClick={() => {
+                if (confirm("Mulai sesi baru? Input judul dan parameter saat ini akan dikosongkan.")) {
+                  setTitle("");
+                  setTargetEntity("");
+                }
+              }}
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-zinc-100 dark:bg-zinc-850 border border-zinc-200 dark:border-zinc-750 hover:bg-zinc-200 dark:hover:bg-zinc-800 text-zinc-700 dark:text-zinc-300 font-medium transition-all shadow-2xs cursor-pointer"
+              title="Mulai usulan baru / bersihkan formulir input tanpa refresh browser"
+            >
+              <RotateCcw className="w-3.5 h-3.5 text-zinc-500" />
+              <span>Sesi Baru</span>
+            </button>
+          )}
+        </div>
+
+        {/* Expandable Parameters Box (Centered) */}
+        {showParameters && (
+          <div className="w-full max-w-2xl mt-4 p-4 rounded-xl bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs text-left animate-in fade-in zoom-in-95 duration-150 shadow-sm">
+            <div>
+              <label className="text-[11px] font-semibold text-zinc-700 dark:text-zinc-300 block mb-1">
+                Instansi / Tempat Mitra
+              </label>
+              <input
+                type="text"
+                value={targetEntity}
+                onChange={(e) => setTargetEntity(e.target.value)}
+                placeholder="Contoh: PT Telkom / RS Sardjito"
+                className="w-full bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-lg px-3 py-1.5 text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-400 text-xs focus:outline-none focus:border-zinc-400 transition-colors"
+              />
+            </div>
+
+            <div>
+              <label className="text-[11px] font-semibold text-zinc-700 dark:text-zinc-300 block mb-1">
+                Durasi Kegiatan
+              </label>
+              <select
+                value={durationMonths}
+                onChange={(e) => setDurationMonths(Number(e.target.value))}
+                className="w-full bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-lg px-3 py-1.5 text-zinc-900 dark:text-zinc-100 text-xs focus:outline-none focus:border-zinc-400 transition-colors"
+              >
+                <option value={1}>1 Bulan (4 Minggu)</option>
+                <option value={3}>3 Bulan (12 Minggu - PKL)</option>
+                <option value={4}>4 Bulan (16 Minggu - 1 Semester)</option>
+                <option value={6}>6 Bulan (MBKM 20 SKS / Skripsi)</option>
+              </select>
+            </div>
+
+            <div>
+              <label className="text-[11px] font-semibold text-zinc-700 dark:text-zinc-300 block mb-1">
+                Nama Pengusul
+              </label>
+              <input
+                type="text"
+                value={candidateName}
+                onChange={(e) => setCandidateName(e.target.value)}
+                placeholder="Nama Lengkap Anda"
+                className="w-full bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-lg px-3 py-1.5 text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-400 text-xs focus:outline-none focus:border-zinc-400 transition-colors"
+              />
+            </div>
+          </div>
+        )}
+
+        {/* Hero Input Capsule (Centered, Spacious) */}
+        <div className="w-full max-w-3xl mt-5 bg-white dark:bg-zinc-900 border border-zinc-300 dark:border-zinc-800 rounded-2xl p-2 pl-4 pr-2.5 flex items-center gap-2.5 shadow-md shadow-zinc-200/50 dark:shadow-none hover:border-zinc-400 dark:hover:border-zinc-700 transition-all focus-within:border-zinc-500 dark:focus-within:border-zinc-500 focus-within:ring-2 focus-within:ring-zinc-200/60 dark:focus-within:ring-zinc-800">
+          <input
+            type="text"
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+            onKeyDown={handleKeyDown}
+            placeholder="Tuliskan judul usulan atau ketik topik (contoh: obesitas, AI, supply chain, fintech)..."
+            className="w-full bg-transparent border-none outline-none text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-400 text-sm sm:text-base font-normal py-2 text-left"
           />
 
+          {/* Clear button if text entered */}
+          {title && (
+            <button
+              type="button"
+              onClick={() => setTitle("")}
+              className="p-1 rounded-md text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200 transition-colors cursor-pointer"
+              title="Hapus teks"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          )}
+
+          {/* Quick Action: Search & Generate Title */}
+          <button
+            type="button"
+            onClick={() => handleOpenAiRecommender(title.trim())}
+            title="Generate usulan judul berdasarkan kata kunci ini (AI & Internet)"
+            className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-zinc-100 hover:bg-zinc-200 dark:bg-zinc-800 dark:hover:bg-zinc-750 text-zinc-800 dark:text-zinc-200 font-medium text-xs transition-colors flex-shrink-0 cursor-pointer shadow-2xs"
+          >
+            <Lightbulb className="w-3.5 h-3.5 text-amber-500" />
+            <span>Cari Ide Judul</span>
+          </button>
+
+          {/* Circular Dark Submit Button with Arrow Right */}
+          <button
+            type="button"
+            onClick={handleSubmit}
+            title="Mulai Wawancara Diagnostik"
+            className="w-10 h-10 rounded-xl bg-zinc-950 dark:bg-zinc-100 text-white dark:text-zinc-950 flex items-center justify-center hover:scale-105 active:scale-95 transition-all flex-shrink-0 cursor-pointer shadow-sm group"
+          >
+            <ArrowRight className="w-4 h-4 stroke-[2.5] group-hover:translate-x-0.5 transition-transform" />
+          </button>
+        </div>
+
+        {/* Topic Inspiration Chips (Centered, rounded-lg) */}
+        <div className="w-full max-w-3xl mt-4 flex items-center justify-center gap-2 overflow-x-auto pb-2 scrollbar-none flex-wrap">
+          {TOPIC_CHIPS.map((chip) => {
+            const Icon = chip.icon;
+            const isSelected = title === chip.title;
+            return (
+              <button
+                key={chip.id}
+                type="button"
+                onClick={() => handleSelectChip(chip)}
+                className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium whitespace-nowrap transition-all cursor-pointer group shadow-2xs ${
+                  isSelected
+                    ? 'bg-zinc-900 text-white dark:bg-zinc-100 dark:text-black border border-transparent'
+                    : 'bg-white dark:bg-zinc-900 text-zinc-800 dark:text-zinc-300 border border-zinc-200 dark:border-zinc-800 hover:bg-zinc-50 dark:hover:bg-zinc-800 hover:border-zinc-300 dark:hover:border-zinc-700'
+                }`}
+              >
+                <Icon className="w-3.5 h-3.5 flex-shrink-0 opacity-70 group-hover:opacity-100" />
+                <span>{chip.label}</span>
+                <ChevronRight className="w-3 h-3 text-zinc-400 group-hover:translate-x-0.5 transition-transform" />
+              </button>
+            );
+          })}
         </div>
 
       </div>
