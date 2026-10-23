@@ -16,6 +16,7 @@ import { AcademicCopilotDrawer } from "./AcademicCopilotDrawer";
 import { generateAcademicProposalDocx, downloadDocxBlob } from "@/lib/docxExporter";
 import { generateAcademicProposalPptx } from "@/lib/pptxExporter";
 import { generateBibTeX, generateRIS, downloadCitationFile } from "@/lib/bibtexExporter";
+import { saveProjectRecord, SavedProjectRecord, getStoredUser } from "@/lib/supabase";
 import { 
   FileText, 
   Network, 
@@ -30,6 +31,8 @@ import {
   FileDown,
   ShieldAlert,
   Sparkles,
+  Lightbulb,
+  Bookmark,
   X,
   FileCheck2,
   RotateCcw,
@@ -114,6 +117,35 @@ export const DocumentStudio: React.FC<DocumentStudioProps> = ({
   const [isRefining, setIsRefining] = useState(false);
   const [refineError, setRefineError] = useState<string | null>(null);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
+  const [isSavingArchive, setIsSavingArchive] = useState(false);
+
+  const handleSaveToArchive = async () => {
+    setIsSavingArchive(true);
+    try {
+      const user = getStoredUser();
+      const record: SavedProjectRecord = {
+        id: currentDoc.id || `proj-${Date.now()}`,
+        userId: user.id || "usr-default",
+        title: currentDoc.title,
+        category: currentDoc.category,
+        targetEntity: currentDoc.targetEntity,
+        durationMonths: currentDoc.durationMonths,
+        stage: "result",
+        answers: {},
+        documentData: currentDoc,
+        treeGraph: treeData,
+        updatedAt: new Date().toISOString(),
+        createdAt: new Date().toISOString()
+      };
+      await saveProjectRecord(record);
+      setToastMessage("✓ Naskah berhasil disimpan ke Arsip Proyek!");
+      setTimeout(() => setToastMessage(null), 3000);
+    } catch (err) {
+      console.error("Gagal menyimpan ke arsip:", err);
+    } finally {
+      setIsSavingArchive(false);
+    }
+  };
 
   useEffect(() => {
     setCurrentDoc(doc);
@@ -746,14 +778,26 @@ NIP / NIK.
             )}
           </div>
 
+          {/* Dedicated Simpan ke Arsip Proyek Button */}
+          <button
+            type="button"
+            onClick={handleSaveToArchive}
+            disabled={isSavingArchive}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-900 hover:bg-zinc-50 dark:hover:bg-zinc-800 text-zinc-900 dark:text-zinc-100 text-xs font-semibold shadow-xs transition-all cursor-pointer disabled:opacity-50"
+            title="Simpan naskah dan perubahan ini ke database arsip"
+          >
+            <Bookmark className="w-3.5 h-3.5 text-amber-500" />
+            <span>{isSavingArchive ? "Menyimpan..." : "Simpan ke Arsip"}</span>
+          </button>
+
           {/* Co-Pilot AI Slide-over Drawer Trigger */}
           <button
             type="button"
             onClick={() => setIsCopilotOpen(true)}
-            className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg bg-zinc-900 hover:bg-black text-white dark:bg-zinc-100 dark:hover:bg-white dark:text-black text-xs font-semibold shadow-sm transition-all cursor-pointer"
+            className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg bg-zinc-950 hover:bg-black text-white dark:bg-zinc-100 dark:hover:bg-white dark:text-black text-xs font-semibold shadow-xs transition-all cursor-pointer"
             title="Buka asisten Co-Pilot AI untuk konsultasi metodologi & simulasi penguji"
           >
-            <Sparkles className="w-3.5 h-3.5" />
+            <Bot className="w-3.5 h-3.5" />
             <span>Co-Pilot AI</span>
           </button>
         </div>
@@ -1124,18 +1168,18 @@ NIP / NIK.
               </h2>
             </div>
 
-            <div className="space-y-4 text-xs sm:text-sm text-zinc-300 leading-relaxed text-justify print:text-black font-sans">
+            <div className="space-y-4 text-xs sm:text-sm text-zinc-800 dark:text-zinc-300 leading-relaxed text-justify print:text-black font-sans">
               {currentDoc.category === "magang" ? (
                 /* Format Khusus Magang: Profil Perusahaan, Visi Misi, Struktur Organisasi */
                 <>
                   <div className="flex items-center justify-between">
-                    <h3 className="text-sm font-semibold text-zinc-100 print:text-black font-serif">2.1 Profil Instansi Mitra</h3>
+                    <h3 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100 print:text-black font-serif">2.1 Profil Instansi Mitra</h3>
                     <button
                       type="button"
                       onClick={() => handleRefineWithAI("bab2.profilInstansi", "2.1 Profil Instansi Mitra", currentDoc.bab2.profilInstansi)}
-                      className="no-print text-[11px] font-mono text-zinc-400 hover:text-zinc-100 bg-zinc-900 px-2 py-0.5 rounded border border-zinc-800 flex items-center gap-1 cursor-pointer transition-colors"
+                      className="no-print text-[11px] font-mono text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-100 bg-zinc-100 dark:bg-zinc-900 px-2 py-0.5 rounded border border-zinc-200 dark:border-zinc-800 flex items-center gap-1 cursor-pointer transition-colors shadow-xs"
                     >
-                      <Sparkles className="w-3 h-3 text-zinc-400" />
+                      <Sparkles className="w-3 h-3 text-zinc-500 dark:text-zinc-400" />
                       <span>Revisi AI</span>
                     </button>
                   </div>
@@ -1310,13 +1354,13 @@ NIP / NIK.
                 /* Format Khusus Skripsi: Desain Riset, Populasi & Sampel, DOV Table, KEPK */
                 <>
                   <div className="flex items-center justify-between">
-                    <h3 className="text-sm font-semibold text-zinc-100 print:text-black font-serif">3.1 Jenis dan Desain Penelitian</h3>
+                    <h3 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100 print:text-black font-serif">3.1 Jenis dan Desain Penelitian</h3>
                     <button
                       type="button"
                       onClick={() => handleRefineWithAI("bab3.metodePelaksanaan", "3.1 Jenis dan Desain Penelitian", currentDoc.bab3.metodePelaksanaan)}
-                      className="no-print text-[11px] font-mono text-zinc-400 hover:text-zinc-100 bg-zinc-900 px-2 py-0.5 rounded border border-zinc-800 flex items-center gap-1 cursor-pointer transition-colors"
+                      className="no-print text-[11px] font-mono text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-100 bg-zinc-100 dark:bg-zinc-900 px-2 py-0.5 rounded border border-zinc-200 dark:border-zinc-800 flex items-center gap-1 cursor-pointer transition-colors shadow-xs"
                     >
-                      <Sparkles className="w-3 h-3 text-zinc-400" />
+                      <Sparkles className="w-3 h-3 text-zinc-500 dark:text-zinc-400" />
                       <span>Revisi AI</span>
                     </button>
                   </div>
@@ -1325,7 +1369,7 @@ NIP / NIK.
                   {/* Populasi & Sampel */}
                   {currentDoc.bab3.populationSample && (
                     <div>
-                      <h3 className="text-sm font-semibold text-zinc-100 print:text-black font-serif pt-2">3.2 Populasi, Sampel, & Kriteria Subjek</h3>
+                      <h3 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100 print:text-black font-serif pt-2">3.2 Populasi, Sampel, & Kriteria Subjek</h3>
                       <p className="indent-6">{currentDoc.bab3.populationSample}</p>
                     </div>
                   )}
@@ -1333,23 +1377,23 @@ NIP / NIK.
                   {/* Tabel Definisi Operasional Variabel (Tabel 3 Garis Terbuka) */}
                   {currentDoc.bab3.operationalDefinitions && currentDoc.bab3.operationalDefinitions.length > 0 && (
                     <div className="pt-2">
-                      <h3 className="text-sm font-semibold text-zinc-100 print:text-black font-serif mb-2">
+                      <h3 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100 print:text-black font-serif mb-2">
                         3.3 Tabel Definisi Operasional Variabel (DOV)
                       </h3>
                       <div className="overflow-x-auto my-3">
-                        <table className="w-full text-left text-xs font-sans border-t-2 border-b-2 border-zinc-200 print:border-black">
+                        <table className="w-full text-left text-xs font-sans border-t-2 border-b-2 border-zinc-300 dark:border-zinc-700 print:border-black">
                           <thead>
-                            <tr className="border-b border-zinc-800 print:border-black font-semibold text-zinc-100 print:text-black">
+                            <tr className="border-b border-zinc-200 dark:border-zinc-800 print:border-black font-semibold text-zinc-900 dark:text-zinc-100 print:text-black">
                               <th className="py-2 px-3">Variabel Penelitian</th>
                               <th className="py-2 px-3">Definisi Operasional</th>
                               <th className="py-2 px-3">Parameter & Alat Ukur</th>
                               <th className="py-2 px-3">Skala Pengukuran</th>
                             </tr>
                           </thead>
-                          <tbody className="divide-y divide-zinc-900 print:divide-gray-300 text-zinc-300 print:text-black text-[11px]">
+                          <tbody className="divide-y divide-zinc-200 dark:divide-zinc-800 print:divide-gray-300 text-zinc-700 dark:text-zinc-300 print:text-black text-[11px]">
                             {currentDoc.bab3.operationalDefinitions.map((dov, idx) => (
                               <tr key={idx} className="align-top">
-                                <td className="py-2 px-3 font-medium text-zinc-200 print:text-black whitespace-nowrap">{dov.variable}</td>
+                                <td className="py-2 px-3 font-medium text-zinc-900 dark:text-zinc-200 print:text-black whitespace-nowrap">{dov.variable}</td>
                                 <td className="py-2 px-3">{dov.definition}</td>
                                 <td className="py-2 px-3">{dov.parameterTool}</td>
                                 <td className="py-2 px-3 font-mono">{dov.indicatorScale}</td>
@@ -1362,7 +1406,7 @@ NIP / NIK.
                   )}
 
                   {/* Instrumen & Kalibrasi */}
-                  <h3 className="text-sm font-semibold text-zinc-100 print:text-black font-serif pt-2">3.4 Instrumen & Kalibrasi Alat Ukur</h3>
+                  <h3 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100 print:text-black font-serif pt-2">3.4 Instrumen & Kalibrasi Alat Ukur</h3>
                   <ul className="list-disc pl-6 space-y-1">
                     {currentDoc.bab3.perangkatTools.map((p, i) => <li key={i}>{p}</li>)}
                   </ul>
@@ -1370,12 +1414,12 @@ NIP / NIK.
                   {/* Kelaikan Etik (Ethical Clearance) */}
                   {currentDoc.bab3.ethicalConsiderations && (
                     <div>
-                      <h3 className="text-sm font-semibold text-zinc-100 print:text-black font-serif pt-2">3.5 Protokol Etika Penelitian (Ethical Clearance)</h3>
+                      <h3 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100 print:text-black font-serif pt-2">3.5 Protokol Etika Penelitian (Ethical Clearance)</h3>
                       <p className="indent-6">{currentDoc.bab3.ethicalConsiderations}</p>
                     </div>
                   )}
 
-                  <h3 className="text-sm font-semibold text-zinc-100 print:text-black font-serif pt-2">3.6 Rencana Analisis Data & Uji Hipotesis</h3>
+                  <h3 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100 print:text-black font-serif pt-2">3.6 Rencana Analisis Data & Uji Hipotesis</h3>
                   <ul className="list-disc pl-6 space-y-1">
                     {currentDoc.bab3.rencanaKompetensi.map((k, i) => <li key={i}>{k}</li>)}
                   </ul>
@@ -1407,13 +1451,13 @@ NIP / NIK.
                     <th className="py-2 px-3">Target Luaran (Output)</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-zinc-900 print:divide-gray-300 text-zinc-300 print:text-black">
+                <tbody className="divide-y divide-zinc-200 dark:divide-zinc-800 print:divide-gray-300 text-zinc-700 dark:text-zinc-300 print:text-black">
                   {currentDoc.bab4.jadwalMatriks.map((row, idx) => (
                     <tr key={idx}>
-                      <td className="py-2.5 px-3 font-mono font-medium text-zinc-200 print:text-black whitespace-nowrap">
+                      <td className="py-2.5 px-3 font-mono font-medium text-zinc-900 dark:text-zinc-200 print:text-black whitespace-nowrap">
                         Mg {row.week}
                       </td>
-                      <td className="py-2.5 px-3 font-medium text-zinc-100 print:text-black">
+                      <td className="py-2.5 px-3 font-medium text-zinc-900 dark:text-zinc-100 print:text-black">
                         {row.phase}
                       </td>
                       <td className="py-2.5 px-3">
@@ -1421,7 +1465,7 @@ NIP / NIK.
                           {row.activities.map((act, aIdx) => <li key={aIdx}>{act}</li>)}
                         </ul>
                       </td>
-                      <td className="py-2.5 px-3 font-mono text-[11px] text-zinc-300 print:text-black">
+                      <td className="py-2.5 px-3 font-mono text-[11px] text-zinc-600 dark:text-zinc-300 print:text-black">
                         {row.output}
                       </td>
                     </tr>
@@ -1436,29 +1480,29 @@ NIP / NIK.
             {/* Tabel Rencana Anggaran Biaya (RAB) untuk Skripsi/Penelitian */}
             {currentDoc.bab4.budgetPlan && currentDoc.bab4.budgetPlan.length > 0 && (
               <div className="pt-3 mb-6">
-                <h3 className="text-sm font-semibold text-zinc-100 print:text-black font-serif mb-2">
+                <h3 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100 print:text-black font-serif mb-2">
                   Tabel 4.2 Rencana Anggaran Biaya (RAB Penelitian)
                 </h3>
                 <div className="overflow-x-auto my-2">
-                  <table className="w-full text-left text-xs font-sans border-t-2 border-b-2 border-zinc-200 print:border-black">
+                  <table className="w-full text-left text-xs font-sans border-t-2 border-b-2 border-zinc-300 dark:border-zinc-700 print:border-black">
                     <thead>
-                      <tr className="border-b border-zinc-800 print:border-black font-semibold text-zinc-100 print:text-black">
+                      <tr className="border-b border-zinc-200 dark:border-zinc-800 print:border-black font-semibold text-zinc-900 dark:text-zinc-100 print:text-black">
                         <th className="py-2 px-3">Komponen Biaya</th>
                         <th className="py-2 px-3">Kategori</th>
                         <th className="py-2 px-3 text-right">Alokasi Anggaran (Rp)</th>
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-zinc-900 print:divide-gray-300 text-zinc-300 print:text-black text-[11px]">
+                    <tbody className="divide-y divide-zinc-200 dark:divide-zinc-800 print:divide-gray-300 text-zinc-700 dark:text-zinc-300 print:text-black text-[11px]">
                       {currentDoc.bab4.budgetPlan.map((b, idx) => (
                         <tr key={idx}>
                           <td className="py-2 px-3">{b.item}</td>
-                          <td className="py-2 px-3 font-medium text-zinc-400">{b.category}</td>
-                          <td className="py-2 px-3 text-right font-mono font-medium text-zinc-200 print:text-black">
+                          <td className="py-2 px-3 font-medium text-zinc-600 dark:text-zinc-400">{b.category}</td>
+                          <td className="py-2 px-3 text-right font-mono font-medium text-zinc-900 dark:text-zinc-200 print:text-black">
                             Rp {b.cost.toLocaleString("id-ID")}
                           </td>
                         </tr>
                       ))}
-                      <tr className="border-t-2 border-zinc-700 font-bold text-zinc-100 print:text-black">
+                      <tr className="border-t-2 border-zinc-300 dark:border-zinc-700 font-bold text-zinc-900 dark:text-zinc-100 print:text-black">
                         <td colSpan={2} className="py-2.5 px-3">Total Anggaran Riset</td>
                         <td className="py-2.5 px-3 text-right font-mono">
                           Rp {currentDoc.bab4.budgetPlan.reduce((acc, curr) => acc + curr.cost, 0).toLocaleString("id-ID")}
@@ -1473,10 +1517,10 @@ NIP / NIK.
             {/* Target Publikasi / Diseminasi untuk Skripsi */}
             {currentDoc.bab4.disseminationPlan && (
               <div className="mb-4">
-                <h3 className="text-sm font-semibold text-zinc-100 print:text-black font-serif mb-1">
+                <h3 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100 print:text-black font-serif mb-1">
                   4.3 Rencana Diseminasi & Publikasi Jurnal
                 </h3>
-                <p className="text-xs sm:text-sm text-zinc-300 indent-6 font-sans print:text-black">
+                <p className="text-xs sm:text-sm text-zinc-800 dark:text-zinc-300 indent-6 font-sans print:text-black">
                   {currentDoc.bab4.disseminationPlan}
                 </p>
               </div>
@@ -1631,10 +1675,10 @@ NIP / NIK.
               {currentDoc.approvalSheet?.primarySigners ? (
                 currentDoc.approvalSheet.primarySigners.map((signer, sIdx) => (
                   <div key={sIdx}>
-                    <p className="text-zinc-400 print:text-black mb-16 leading-tight">
-                      Menyetujui,<br /><strong>{signer.role}</strong>
+                    <p className="text-zinc-600 dark:text-zinc-400 print:text-black mb-16 leading-tight">
+                      Menyetujui,<br /><strong className="text-zinc-800 dark:text-zinc-200">{signer.role}</strong>
                     </p>
-                    <p className="font-semibold text-zinc-200 print:text-black underline underline-offset-4">
+                    <p className="font-semibold text-zinc-900 dark:text-zinc-200 print:text-black underline underline-offset-4">
                       {signer.name}
                     </p>
                     <p className="text-zinc-500 font-mono print:text-gray-600 mt-0.5">
@@ -1645,14 +1689,14 @@ NIP / NIK.
               ) : (
                 <>
                   <div>
-                    <p className="text-zinc-400 print:text-black mb-16">Menyetujui,<br /><strong>Dosen Pembimbing Akademik</strong></p>
-                    <p className="font-semibold text-zinc-200 print:text-black">(__________________________________)</p>
+                    <p className="text-zinc-600 dark:text-zinc-400 print:text-black mb-16">Menyetujui,<br /><strong className="text-zinc-800 dark:text-zinc-200">Dosen Pembimbing Akademik</strong></p>
+                    <p className="font-semibold text-zinc-900 dark:text-zinc-200 print:text-black">(__________________________________)</p>
                     <p className="text-zinc-500 font-mono print:text-gray-600">NIP.</p>
                   </div>
 
                   <div>
-                    <p className="text-zinc-400 print:text-black mb-16">Menyetujui,<br /><strong>Pimpinan / Mentor Lapangan {currentDoc.targetEntity}</strong></p>
-                    <p className="font-semibold text-zinc-200 print:text-black">(__________________________________)</p>
+                    <p className="text-zinc-600 dark:text-zinc-400 print:text-black mb-16">Menyetujui,<br /><strong className="text-zinc-800 dark:text-zinc-200">Pimpinan / Mentor Lapangan {currentDoc.targetEntity}</strong></p>
+                    <p className="font-semibold text-zinc-900 dark:text-zinc-200 print:text-black">(__________________________________)</p>
                     <p className="text-zinc-500 font-mono print:text-gray-600">NIP / NIK.</p>
                   </div>
                 </>

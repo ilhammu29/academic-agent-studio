@@ -16,7 +16,6 @@ export default function AuthModal({ isOpen, onClose, currentUser, onUpdateUser }
 
   // Login / Register state
   const [email, setEmail] = useState(currentUser.email);
-  const [password, setPassword] = useState('••••••••');
   const [name, setName] = useState(currentUser.name);
   const [institution, setInstitution] = useState(currentUser.institution);
   const [role, setRole] = useState<UserProfile['role']>(currentUser.role);
@@ -96,33 +95,37 @@ export default function AuthModal({ isOpen, onClose, currentUser, onUpdateUser }
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-in fade-in duration-150">
-      <div className="w-full max-w-lg bg-zinc-950 border border-zinc-800 rounded-xl shadow-2xl overflow-hidden flex flex-col max-h-[85vh]">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-xs animate-in fade-in duration-150">
+      <div className="w-full max-w-lg bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[85vh] animate-in zoom-in-95 duration-150">
         
         {/* Modal Header */}
-        <div className="px-5 py-4 border-b border-zinc-900 flex items-center justify-between">
+        <div className="px-5 py-4 border-b border-zinc-200 dark:border-zinc-850 flex items-center justify-between bg-zinc-50/50 dark:bg-zinc-900/50">
           <div>
-            <h3 className="text-sm font-semibold text-zinc-100">Profil & Database Supabase</h3>
-            <p className="text-xs text-zinc-500 mt-0.5">Kelola identitas pengusul & sinkronisasi database cloud</p>
+            <h3 className="text-sm sm:text-base font-bold text-zinc-900 dark:text-zinc-100">
+              Profil Pengusul & Cloud Supabase
+            </h3>
+            <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-0.5">
+              Kelola identitas peneliti dan sinkronisasi database cloud
+            </p>
           </div>
           <button
             type="button"
             onClick={onClose}
-            className="w-7 h-7 rounded hover:bg-zinc-900 text-zinc-400 hover:text-white flex items-center justify-center transition-colors text-sm"
+            className="w-8 h-8 rounded-lg hover:bg-zinc-200 dark:hover:bg-zinc-800 text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-100 flex items-center justify-center transition-colors text-sm cursor-pointer"
           >
-            ✕
+            <X className="w-4 h-4" />
           </button>
         </div>
 
         {/* Tab Navigation */}
-        <div className="flex border-b border-zinc-900 bg-zinc-950 px-5 pt-1 gap-2">
+        <div className="flex border-b border-zinc-200 dark:border-zinc-850 bg-zinc-50 dark:bg-zinc-900 px-5 pt-2 gap-4 text-xs font-medium">
           <button
             type="button"
             onClick={() => setActiveTab('login')}
-            className={`pb-2.5 px-2 text-xs font-medium border-b-2 transition-colors cursor-pointer flex items-center gap-1.5 ${
+            className={`pb-2.5 px-1 border-b-2 transition-colors cursor-pointer flex items-center gap-1.5 ${
               activeTab === 'login'
-                ? 'border-zinc-100 text-zinc-100 font-semibold'
-                : 'border-transparent text-zinc-400 hover:text-zinc-200'
+                ? 'border-zinc-950 text-zinc-950 dark:border-zinc-100 dark:text-white font-semibold'
+                : 'border-transparent text-zinc-500 hover:text-zinc-800 dark:text-zinc-400 dark:hover:text-zinc-200'
             }`}
           >
             <KeyRound className="w-3.5 h-3.5" />
@@ -132,10 +135,10 @@ export default function AuthModal({ isOpen, onClose, currentUser, onUpdateUser }
           <button
             type="button"
             onClick={() => setActiveTab('register')}
-            className={`pb-2.5 px-2 text-xs font-medium border-b-2 transition-colors cursor-pointer flex items-center gap-1.5 ${
+            className={`pb-2.5 px-1 border-b-2 transition-colors cursor-pointer flex items-center gap-1.5 ${
               activeTab === 'register'
-                ? 'border-zinc-100 text-zinc-100 font-semibold'
-                : 'border-transparent text-zinc-400 hover:text-zinc-200'
+                ? 'border-zinc-950 text-zinc-950 dark:border-zinc-100 dark:text-white font-semibold'
+                : 'border-transparent text-zinc-500 hover:text-zinc-800 dark:text-zinc-400 dark:hover:text-zinc-200'
             }`}
           >
             <User className="w-3.5 h-3.5" />
@@ -145,10 +148,10 @@ export default function AuthModal({ isOpen, onClose, currentUser, onUpdateUser }
           <button
             type="button"
             onClick={() => setActiveTab('supabase')}
-            className={`pb-2.5 px-2 text-xs font-medium border-b-2 transition-colors cursor-pointer flex items-center gap-1.5 ${
+            className={`pb-2.5 px-1 border-b-2 transition-colors cursor-pointer flex items-center gap-1.5 ${
               activeTab === 'supabase'
-                ? 'border-zinc-100 text-zinc-100 font-semibold'
-                : 'border-transparent text-zinc-400 hover:text-zinc-200'
+                ? 'border-zinc-950 text-zinc-950 dark:border-zinc-100 dark:text-white font-semibold'
+                : 'border-transparent text-zinc-500 hover:text-zinc-800 dark:text-zinc-400 dark:hover:text-zinc-200'
             }`}
           >
             <Database className="w-3.5 h-3.5" />
@@ -161,26 +164,30 @@ export default function AuthModal({ isOpen, onClose, currentUser, onUpdateUser }
           {activeTab === 'login' && (
             <form onSubmit={handleLoginSubmit} className="space-y-3.5">
               <div>
-                <label className="block text-xs text-zinc-400 mb-1">Email Akademik</label>
+                <label className="block text-xs font-semibold text-zinc-700 dark:text-zinc-300 mb-1">
+                  Email Akademik
+                </label>
                 <div className="relative">
-                  <Mail className="absolute left-3 top-2.5 w-4 h-4 text-zinc-500" />
+                  <Mail className="absolute left-3 top-2.5 w-4 h-4 text-zinc-400" />
                   <input
                     type="email"
                     required
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     placeholder="nama.peneliti@universitas.ac.id"
-                    className="w-full bg-zinc-900 border border-zinc-800 rounded-lg pl-9 pr-3 py-1.5 text-xs text-zinc-100 placeholder:text-zinc-600 focus:outline-none focus:border-zinc-500 transition-colors"
+                    className="w-full bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl pl-9 pr-3 py-2 text-xs text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-400 focus:outline-none focus:border-zinc-400 transition-colors"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block text-xs text-zinc-400 mb-1">Peran Akademik</label>
+                <label className="block text-xs font-semibold text-zinc-700 dark:text-zinc-300 mb-1">
+                  Peran Akademik
+                </label>
                 <select
                   value={role}
                   onChange={(e) => setRole(e.target.value as UserProfile['role'])}
-                  className="w-full bg-zinc-900 border border-zinc-800 rounded-lg px-3 py-1.5 text-xs text-zinc-100 focus:outline-none focus:border-zinc-500"
+                  className="w-full bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl px-3 py-2 text-xs text-zinc-900 dark:text-zinc-100 focus:outline-none focus:border-zinc-400"
                 >
                   <option value="Mahasiswa">Mahasiswa (Penyusun Proposal Magang / Skripsi)</option>
                   <option value="Dosen Pembimbing">Dosen Pembimbing Akademik / Promotor</option>
@@ -191,23 +198,25 @@ export default function AuthModal({ isOpen, onClose, currentUser, onUpdateUser }
 
               {/* Quick Preset Selector */}
               <div className="pt-2">
-                <span className="text-[11px] text-zinc-500 block mb-1.5">Preset Cepat:</span>
+                <span className="text-[11px] text-zinc-500 dark:text-zinc-400 block mb-1.5 font-medium">
+                  Preset Contoh:
+                </span>
                 <div className="grid grid-cols-2 gap-2">
                   <button
                     type="button"
-                    onClick={() => setPresetProfile('Mahasiswa', 'Muhammad Ilham', 'Universitas Sebelas Maret (UNS)', 'ilham.akademik@student.uns.ac.id')}
-                    className="text-left p-2.5 rounded-lg bg-zinc-900/60 border border-zinc-800 hover:border-zinc-600 text-xs transition-colors cursor-pointer"
+                    onClick={() => setPresetProfile('Mahasiswa', 'Ilham Maulana', 'Universitas Sebelas Maret (UNS)', 'ilham.maulana@student.uns.ac.id')}
+                    className="text-left p-2.5 rounded-xl bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 hover:border-zinc-400 text-xs transition-colors cursor-pointer"
                   >
-                    <div className="font-medium text-zinc-200">Muhammad Ilham</div>
+                    <div className="font-semibold text-zinc-900 dark:text-zinc-100">Ilham Maulana</div>
                     <div className="text-zinc-500 text-[11px]">Mahasiswa Informatika</div>
                   </button>
 
                   <button
                     type="button"
                     onClick={() => setPresetProfile('Dosen Pembimbing', 'Dr. Eng. Ir. Hendra S., M.T.', 'Institut Teknologi Bandung (ITB)', 'hendra.dosen@itb.ac.id')}
-                    className="text-left p-2.5 rounded-lg bg-zinc-900/60 border border-zinc-800 hover:border-zinc-600 text-xs transition-colors cursor-pointer"
+                    className="text-left p-2.5 rounded-xl bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 hover:border-zinc-400 text-xs transition-colors cursor-pointer"
                   >
-                    <div className="font-medium text-zinc-200">Dr. Eng. Hendra</div>
+                    <div className="font-semibold text-zinc-900 dark:text-zinc-100">Dr. Eng. Hendra</div>
                     <div className="text-zinc-500 text-[11px]">Dosen & Reviewer</div>
                   </button>
                 </div>
@@ -215,11 +224,11 @@ export default function AuthModal({ isOpen, onClose, currentUser, onUpdateUser }
 
               <button
                 type="submit"
-                className="w-full mt-4 py-2.5 rounded-lg bg-zinc-100 hover:bg-white text-black font-semibold text-xs transition-all flex items-center justify-center gap-2 cursor-pointer shadow-sm"
+                className="w-full mt-4 py-2.5 rounded-full bg-zinc-950 hover:bg-black text-white dark:bg-zinc-100 dark:hover:bg-white dark:text-black font-semibold text-xs transition-all flex items-center justify-center gap-2 cursor-pointer shadow-sm"
               >
                 {authSuccess ? (
                   <>
-                    <Check className="w-4 h-4" /> Berhasil Tersimpan
+                    <Check className="w-4 h-4 text-emerald-400" /> Berhasil Tersimpan
                   </>
                 ) : (
                   <>
@@ -233,53 +242,61 @@ export default function AuthModal({ isOpen, onClose, currentUser, onUpdateUser }
           {activeTab === 'register' && (
             <form onSubmit={handleLoginSubmit} className="space-y-3.5">
               <div>
-                <label className="block text-xs text-zinc-400 mb-1">Nama Lengkap & Gelar</label>
+                <label className="block text-xs font-semibold text-zinc-700 dark:text-zinc-300 mb-1">
+                  Nama Lengkap & Gelar
+                </label>
                 <div className="relative">
-                  <User className="absolute left-3 top-2.5 w-4 h-4 text-zinc-500" />
+                  <User className="absolute left-3 top-2.5 w-4 h-4 text-zinc-400" />
                   <input
                     type="text"
                     required
                     value={name}
                     onChange={(e) => setName(e.target.value)}
-                    placeholder="Contoh: Muhammad Ilham, S.Kom."
-                    className="w-full bg-zinc-900 border border-zinc-800 rounded-lg pl-9 pr-3 py-1.5 text-xs text-zinc-100 placeholder:text-zinc-600 focus:outline-none focus:border-zinc-500"
+                    placeholder="Contoh: Ilham Maulana, S.Kom."
+                    className="w-full bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl pl-9 pr-3 py-2 text-xs text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-400 focus:outline-none focus:border-zinc-400"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block text-xs text-zinc-400 mb-1">Institusi / Perguruan Tinggi</label>
+                <label className="block text-xs font-semibold text-zinc-700 dark:text-zinc-300 mb-1">
+                  Institusi / Perguruan Tinggi
+                </label>
                 <div className="relative">
-                  <Building className="absolute left-3 top-2.5 w-4 h-4 text-zinc-500" />
+                  <Building className="absolute left-3 top-2.5 w-4 h-4 text-zinc-400" />
                   <input
                     type="text"
                     required
                     value={institution}
                     onChange={(e) => setInstitution(e.target.value)}
-                    placeholder="Contoh: Universitas Gadjah Mada / PT Telkom"
-                    className="w-full bg-zinc-900 border border-zinc-800 rounded-lg pl-9 pr-3 py-1.5 text-xs text-zinc-100 placeholder:text-zinc-600 focus:outline-none focus:border-zinc-500"
+                    placeholder="Contoh: Universitas Sebelas Maret (UNS) / PT Telkom"
+                    className="w-full bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl pl-9 pr-3 py-2 text-xs text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-400 focus:outline-none focus:border-zinc-400"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block text-xs text-zinc-400 mb-1">Email</label>
+                <label className="block text-xs font-semibold text-zinc-700 dark:text-zinc-300 mb-1">
+                  Email
+                </label>
                 <input
                   type="email"
                   required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="email@institusi.ac.id"
-                  className="w-full bg-zinc-900 border border-zinc-800 rounded-lg px-3 py-1.5 text-xs text-zinc-100 placeholder:text-zinc-600 focus:outline-none focus:border-zinc-500"
+                  className="w-full bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl px-3 py-2 text-xs text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-400 focus:outline-none focus:border-zinc-400"
                 />
               </div>
 
               <div>
-                <label className="block text-xs text-zinc-400 mb-1">Peran</label>
+                <label className="block text-xs font-semibold text-zinc-700 dark:text-zinc-300 mb-1">
+                  Peran
+                </label>
                 <select
                   value={role}
                   onChange={(e) => setRole(e.target.value as UserProfile['role'])}
-                  className="w-full bg-zinc-900 border border-zinc-800 rounded-lg px-3 py-1.5 text-xs text-zinc-100 focus:outline-none focus:border-zinc-500"
+                  className="w-full bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl px-3 py-2 text-xs text-zinc-900 dark:text-zinc-100 focus:outline-none focus:border-zinc-400"
                 >
                   <option value="Mahasiswa">Mahasiswa</option>
                   <option value="Dosen Pembimbing">Dosen Pembimbing</option>
@@ -290,7 +307,7 @@ export default function AuthModal({ isOpen, onClose, currentUser, onUpdateUser }
 
               <button
                 type="submit"
-                className="w-full mt-4 py-2.5 rounded-lg bg-zinc-100 hover:bg-white text-black font-semibold text-xs transition-all flex items-center justify-center gap-2 cursor-pointer shadow-sm"
+                className="w-full mt-4 py-2.5 rounded-full bg-zinc-950 hover:bg-black text-white dark:bg-zinc-100 dark:hover:bg-white dark:text-black font-semibold text-xs transition-all flex items-center justify-center gap-2 cursor-pointer shadow-sm"
               >
                 Daftar & Masuk Studio <ArrowRight className="w-4 h-4" />
               </button>
@@ -299,29 +316,33 @@ export default function AuthModal({ isOpen, onClose, currentUser, onUpdateUser }
 
           {activeTab === 'supabase' && (
             <div className="space-y-3.5">
-              <p className="text-xs text-zinc-400 leading-relaxed">
-                Aplikasi ini mendukung penyimpanan lokal browser dan sinkronisasi otomatis ke proyek remote Supabase PostgreSQL Anda.
+              <p className="text-xs text-zinc-600 dark:text-zinc-400 leading-relaxed">
+                Platform OXID mendukung penyimpanan lokal peramban (browser) dan sinkronisasi otomatis ke database PostgreSQL Supabase Anda.
               </p>
 
               <div>
-                <label className="block text-xs text-zinc-400 mb-1">Supabase Project URL</label>
+                <label className="block text-xs font-semibold text-zinc-700 dark:text-zinc-300 mb-1">
+                  Supabase Project URL
+                </label>
                 <input
                   type="text"
                   value={supabaseUrl}
                   onChange={(e) => setSupabaseUrl(e.target.value)}
                   placeholder="https://xyzcompany.supabase.co"
-                  className="w-full bg-zinc-900 border border-zinc-800 rounded-lg px-3 py-1.5 text-xs text-zinc-100 font-mono placeholder:text-zinc-600 focus:outline-none focus:border-zinc-500"
+                  className="w-full bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl px-3 py-2 text-xs text-zinc-900 dark:text-zinc-100 font-mono placeholder:text-zinc-400 focus:outline-none focus:border-zinc-400"
                 />
               </div>
 
               <div>
-                <label className="block text-xs text-zinc-400 mb-1">Supabase Anon Key</label>
+                <label className="block text-xs font-semibold text-zinc-700 dark:text-zinc-300 mb-1">
+                  Supabase Anon Key
+                </label>
                 <input
                   type="password"
                   value={supabaseAnonKey}
                   onChange={(e) => setSupabaseAnonKey(e.target.value)}
                   placeholder="eyJhbGciOiJIUzI1NiIsInR5cCI6..."
-                  className="w-full bg-zinc-900 border border-zinc-800 rounded-lg px-3 py-1.5 text-xs text-zinc-100 font-mono placeholder:text-zinc-600 focus:outline-none focus:border-zinc-500"
+                  className="w-full bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl px-3 py-2 text-xs text-zinc-900 dark:text-zinc-100 font-mono placeholder:text-zinc-400 focus:outline-none focus:border-zinc-400"
                 />
               </div>
 
@@ -330,7 +351,7 @@ export default function AuthModal({ isOpen, onClose, currentUser, onUpdateUser }
                   type="button"
                   onClick={handleSaveSupabaseConfig}
                   disabled={isTesting}
-                  className="flex-1 py-2 rounded-lg bg-zinc-100 hover:bg-white text-black font-semibold text-xs transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
+                  className="flex-1 py-2.5 rounded-full bg-zinc-950 hover:bg-black text-white dark:bg-zinc-100 dark:hover:bg-white dark:text-black font-semibold text-xs transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50 shadow-xs"
                 >
                   {isTesting ? (
                     <>
@@ -346,37 +367,37 @@ export default function AuthModal({ isOpen, onClose, currentUser, onUpdateUser }
                 <button
                   type="button"
                   onClick={copySqlToClipboard}
-                  className="py-2 px-3 rounded-lg bg-zinc-900 hover:bg-zinc-800 text-zinc-300 border border-zinc-800 text-xs transition-colors flex items-center gap-1.5 cursor-pointer"
+                  className="py-2.5 px-4 rounded-full border border-zinc-200 dark:border-zinc-800 hover:bg-zinc-100 dark:hover:bg-zinc-900 text-zinc-700 dark:text-zinc-300 text-xs transition-colors flex items-center gap-1.5 cursor-pointer"
                   title="Salin skrip pembuatan tabel SQL"
                 >
-                  {copiedSql ? <Check className="w-3.5 h-3.5 text-zinc-100" /> : <Copy className="w-3.5 h-3.5" />}
+                  {copiedSql ? <Check className="w-3.5 h-3.5 text-emerald-500" /> : <Copy className="w-3.5 h-3.5" />}
                   <span>{copiedSql ? 'Disalin' : 'Salin SQL'}</span>
                 </button>
               </div>
 
               {testResult && (
                 <div
-                  className={`p-3 rounded-lg border text-xs flex items-start gap-2 ${
+                  className={`p-3 rounded-xl border text-xs flex items-start gap-2 ${
                     testResult.success
-                      ? 'bg-zinc-900 border-zinc-700 text-zinc-200'
-                      : 'bg-red-950/40 border-red-900 text-red-300'
+                      ? 'bg-emerald-50 dark:bg-emerald-950/40 border-emerald-200 dark:border-emerald-800 text-emerald-800 dark:text-emerald-300'
+                      : 'bg-red-50 dark:bg-red-950/40 border-red-200 dark:border-red-900 text-red-700 dark:text-red-300'
                   }`}
                 >
                   {testResult.success ? (
-                    <Check className="w-4 h-4 text-zinc-100 flex-shrink-0 mt-0.5" />
+                    <Check className="w-4 h-4 text-emerald-600 flex-shrink-0 mt-0.5" />
                   ) : (
-                    <AlertCircle className="w-4 h-4 text-red-400 flex-shrink-0 mt-0.5" />
+                    <AlertCircle className="w-4 h-4 text-red-500 flex-shrink-0 mt-0.5" />
                   )}
                   <span>{testResult.message}</span>
                 </div>
               )}
 
               {/* SQL Snippet */}
-              <div className="border border-zinc-900 rounded-lg p-3 bg-zinc-950">
-                <div className="text-[11px] text-zinc-500 mb-1 flex items-center justify-between">
+              <div className="border border-zinc-200 dark:border-zinc-800 rounded-xl p-3 bg-zinc-50 dark:bg-zinc-950">
+                <div className="text-[11px] text-zinc-500 mb-1 flex items-center justify-between font-medium">
                   <span>Skema Tabel SQL (PostgreSQL):</span>
                 </div>
-                <pre className="text-[10px] font-mono text-zinc-400 max-h-20 overflow-y-auto bg-black p-2 rounded border border-zinc-900">
+                <pre className="text-[10px] font-mono text-zinc-600 dark:text-zinc-400 max-h-24 overflow-y-auto bg-white dark:bg-black p-2.5 rounded-lg border border-zinc-200 dark:border-zinc-900">
                   {SUPABASE_SQL_MIGRATION}
                 </pre>
               </div>

@@ -225,17 +225,17 @@ export default function DriveFileManager({
             </div>
           ) : viewMode === 'list' ? (
             /* LIST VIEW */
-            <div className="divide-y divide-zinc-900 border border-zinc-900 rounded-lg overflow-hidden">
+            <div className="divide-y divide-zinc-200 dark:divide-zinc-900 border border-zinc-200 dark:border-zinc-900 rounded-lg overflow-hidden bg-white dark:bg-zinc-950">
               {filtered.map((item) => (
                 <div
                   key={item.id}
                   onClick={() => onLoadProject(item)}
-                  className="p-3 sm:p-4 hover:bg-zinc-950/80 transition-colors cursor-pointer flex flex-col sm:flex-row sm:items-center justify-between gap-3 group"
+                  className="p-3 sm:p-4 hover:bg-zinc-100 dark:hover:bg-zinc-900/80 transition-colors cursor-pointer flex flex-col sm:flex-row sm:items-center justify-between gap-3 group"
                 >
                   <div className="flex items-start gap-3 flex-1 min-w-0">
                     <FileText className="w-4 h-4 text-zinc-400 flex-shrink-0 mt-0.5" />
                     <div className="min-w-0">
-                      <h4 className="text-xs sm:text-sm font-medium text-zinc-100 truncate group-hover:text-white transition-colors">
+                      <h4 className="text-xs sm:text-sm font-medium text-zinc-900 dark:text-zinc-100 truncate group-hover:text-black dark:group-hover:text-white transition-colors">
                         {item.title}
                       </h4>
                       <p className="text-[11px] text-zinc-500 mt-0.5">
@@ -248,7 +248,7 @@ export default function DriveFileManager({
                     <button
                       type="button"
                       onClick={(e) => handleDownloadWord(item, e)}
-                      className="px-2.5 py-1 rounded border border-zinc-800 hover:border-zinc-600 text-[11px] text-zinc-300 hover:text-white transition-colors flex items-center gap-1"
+                      className="px-2.5 py-1 rounded border border-zinc-200 dark:border-zinc-800 hover:border-zinc-400 dark:hover:border-zinc-600 text-[11px] text-zinc-700 dark:text-zinc-300 hover:text-zinc-950 dark:hover:text-white transition-colors flex items-center gap-1 shadow-xs"
                       title="Unduh DOCX"
                     >
                       <Download className="w-3 h-3" /> Word
@@ -257,7 +257,7 @@ export default function DriveFileManager({
                     <button
                       type="button"
                       onClick={(e) => handleDownloadSlide(item, e)}
-                      className="px-2.5 py-1 rounded border border-zinc-800 hover:border-zinc-600 text-[11px] text-zinc-300 hover:text-white transition-colors flex items-center gap-1"
+                      className="px-2.5 py-1 rounded border border-zinc-200 dark:border-zinc-800 hover:border-zinc-400 dark:hover:border-zinc-600 text-[11px] text-zinc-700 dark:text-zinc-300 hover:text-zinc-950 dark:hover:text-white transition-colors flex items-center gap-1 shadow-xs"
                       title="Unduh PPTX"
                     >
                       <Download className="w-3 h-3" /> Slide
@@ -266,7 +266,7 @@ export default function DriveFileManager({
                     <button
                       type="button"
                       onClick={(e) => handleDelete(item.id, e)}
-                      className="p-1 rounded text-zinc-600 hover:text-red-400 transition-colors"
+                      className="p-1 rounded text-zinc-400 hover:text-red-500 transition-colors cursor-pointer"
                       title="Hapus Usulan"
                     >
                       <Trash2 className="w-3.5 h-3.5" />
@@ -282,11 +282,11 @@ export default function DriveFileManager({
                 <div
                   key={item.id}
                   onClick={() => onLoadProject(item)}
-                  className="p-4 rounded-lg border border-zinc-900 bg-zinc-950/60 hover:border-zinc-700 transition-all cursor-pointer flex flex-col justify-between group"
+                  className="p-4 rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950/60 hover:border-zinc-400 dark:hover:border-zinc-700 transition-all cursor-pointer flex flex-col justify-between group shadow-xs"
                 >
                   <div>
                     <FileText className="w-5 h-5 text-zinc-400 mb-2" />
-                    <h4 className="text-xs sm:text-sm font-medium text-zinc-100 line-clamp-2 group-hover:text-white">
+                    <h4 className="text-xs sm:text-sm font-medium text-zinc-900 dark:text-zinc-100 line-clamp-2 group-hover:text-black dark:group-hover:text-white">
                       {item.title}
                     </h4>
                     <p className="text-[11px] text-zinc-500 mt-1">

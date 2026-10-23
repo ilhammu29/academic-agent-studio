@@ -2,7 +2,7 @@
 
 import React, { useState, useRef, useEffect } from "react";
 import { DiagnosticQuestion, ProposalCategory } from "@/types/studio";
-import { ArrowLeft, ArrowRight, Sparkles, Check, Loader2, Mic, MicOff } from "lucide-react";
+import { ArrowLeft, ArrowRight, Sparkles, Check, Loader2, Mic, MicOff, Layers } from "lucide-react";
 
 interface DiagnosticInterviewProps {
   category: ProposalCategory;
@@ -173,13 +173,7 @@ export const DiagnosticInterview: React.FC<DiagnosticInterviewProps> = ({
         
         {/* Step Pill */}
         <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-zinc-100 dark:bg-zinc-900 border border-zinc-200/70 dark:border-zinc-800 text-xs font-medium text-zinc-700 dark:text-zinc-300 mb-3 shadow-2xs">
-          <svg 
-            className="w-3.5 h-3.5 text-zinc-800 dark:text-zinc-200" 
-            viewBox="0 0 24 24" 
-            fill="currentColor"
-          >
-            <path d="M12 0L14.5 9.5L24 12L14.5 14.5L12 24L9.5 14.5L0 12L9.5 9.5L12 0Z" />
-          </svg>
+          <Layers className="w-3.5 h-3.5 text-zinc-800 dark:text-zinc-200" />
           <span>Langkah 2 dari 4: Wawancara Diagnostik</span>
         </div>
 

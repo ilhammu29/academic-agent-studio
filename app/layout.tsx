@@ -3,7 +3,7 @@ import "./globals.css";
 import { ThemeProvider } from "@/components/ThemeProvider";
 
 export const metadata: Metadata = {
-  title: "Academic & Proposal Agent Studio — Full AI Tools Suite",
+  title: "OXID — Academic Agent Studio",
   description: "Platform AI Agentik Khusus Perancangan Proposal Magang Industri, Skripsi, dan Penelitian Akademik Berbasis Standar Presisi Tinggi & 12 Metode Berpikir.",
 };
 

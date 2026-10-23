@@ -197,23 +197,23 @@ Hasilkan format JSON murni:
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-sm animate-in fade-in duration-200">
-      <div className="w-full max-w-3xl bg-zinc-950 border border-zinc-800 rounded-2xl shadow-2xl flex flex-col max-h-[90vh] overflow-hidden text-zinc-100">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 dark:bg-black/75 backdrop-blur-sm animate-in fade-in duration-200">
+      <div className="w-full max-w-3xl bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-2xl shadow-2xl flex flex-col max-h-[90vh] overflow-hidden text-zinc-900 dark:text-zinc-100">
         
         {/* Header */}
-        <div className="p-4 sm:p-5 border-b border-zinc-800 flex items-center justify-between bg-zinc-900/60">
+        <div className="p-4 sm:p-5 border-b border-zinc-200 dark:border-zinc-800 flex items-center justify-between bg-zinc-50/80 dark:bg-zinc-900/60">
           <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-xl bg-zinc-800 border border-zinc-700 flex items-center justify-center text-zinc-100">
-              <ClipboardList className="w-5 h-5 text-zinc-200" />
+            <div className="w-9 h-9 rounded-xl bg-zinc-100 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 flex items-center justify-center text-zinc-800 dark:text-zinc-100">
+              <ClipboardList className="w-5 h-5 text-zinc-700 dark:text-zinc-200" />
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <h3 className="text-sm font-semibold text-zinc-100">Generator Instrumen Riset & Angket</h3>
-                <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-zinc-800 text-zinc-300 border border-zinc-700">
+                <h3 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">Generator Instrumen Riset & Angket</h3>
+                <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 border border-zinc-200 dark:border-zinc-700">
                   LAMPIRAN BAB III
                 </span>
               </div>
-              <p className="text-xs text-zinc-400">
+              <p className="text-xs text-zinc-500 dark:text-zinc-400">
                 Kuesioner Skala Likert 1–5, Pedoman Wawancara, dan Lembar Observasi Lapangan
               </p>
             </div>
@@ -224,7 +224,7 @@ Hasilkan format JSON murni:
               type="button"
               onClick={handleGenerateAiInstruments}
               disabled={isGeneratingAi}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-zinc-100 hover:bg-white text-zinc-950 text-xs font-semibold transition-colors cursor-pointer disabled:opacity-40"
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-zinc-900 hover:bg-black dark:bg-zinc-100 dark:hover:bg-white text-white dark:text-zinc-950 text-xs font-semibold transition-colors cursor-pointer disabled:opacity-40 shadow-xs"
               title="Generate instrumen otomatis selaras dengan judul dan variabel proposal"
             >
               {isGeneratingAi ? (
@@ -242,7 +242,7 @@ Hasilkan format JSON murni:
 
             <button
               onClick={onClose}
-              className="p-1.5 rounded-lg text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800 transition-colors cursor-pointer"
+              className="p-1.5 rounded-lg text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-100 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors cursor-pointer"
             >
               <X className="w-4 h-4" />
             </button>
@@ -250,18 +250,18 @@ Hasilkan format JSON murni:
         </div>
 
         {/* Tab Navigation */}
-        <div className="flex items-center gap-2 px-5 pt-3 border-b border-zinc-800 bg-zinc-900/30 text-xs">
+        <div className="flex items-center gap-2 px-5 pt-3 border-b border-zinc-200 dark:border-zinc-800 bg-zinc-50/50 dark:bg-zinc-900/30 text-xs">
           <button
             onClick={() => setActiveTab("kuesioner")}
             className={`pb-2.5 px-2 border-b-2 font-medium transition-colors cursor-pointer flex items-center gap-1.5 ${
               activeTab === "kuesioner"
-                ? "border-zinc-100 text-zinc-100 font-semibold"
-                : "border-transparent text-zinc-400 hover:text-zinc-200"
+                ? "border-zinc-900 dark:border-zinc-100 text-zinc-900 dark:text-zinc-100 font-semibold"
+                : "border-transparent text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-200"
             }`}
           >
             <FileSpreadsheet className="w-3.5 h-3.5" />
             <span>Kuesioner Likert (1–5)</span>
-            <span className="text-[10px] px-1.5 py-0.2 rounded-full bg-zinc-800 text-zinc-300">
+            <span className="text-[10px] px-1.5 py-0.2 rounded-full bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300">
               {questionnaire.length}
             </span>
           </button>
@@ -270,13 +270,13 @@ Hasilkan format JSON murni:
             onClick={() => setActiveTab("wawancara")}
             className={`pb-2.5 px-2 border-b-2 font-medium transition-colors cursor-pointer flex items-center gap-1.5 ${
               activeTab === "wawancara"
-                ? "border-zinc-100 text-zinc-100 font-semibold"
-                : "border-transparent text-zinc-400 hover:text-zinc-200"
+                ? "border-zinc-900 dark:border-zinc-100 text-zinc-900 dark:text-zinc-100 font-semibold"
+                : "border-transparent text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-200"
             }`}
           >
             <MessageSquare className="w-3.5 h-3.5" />
             <span>Pedoman Wawancara</span>
-            <span className="text-[10px] px-1.5 py-0.2 rounded-full bg-zinc-800 text-zinc-300">
+            <span className="text-[10px] px-1.5 py-0.2 rounded-full bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300">
               {interviewGuides.length}
             </span>
           </button>
@@ -285,13 +285,13 @@ Hasilkan format JSON murni:
             onClick={() => setActiveTab("observasi")}
             className={`pb-2.5 px-2 border-b-2 font-medium transition-colors cursor-pointer flex items-center gap-1.5 ${
               activeTab === "observasi"
-                ? "border-zinc-100 text-zinc-100 font-semibold"
-                : "border-transparent text-zinc-400 hover:text-zinc-200"
+                ? "border-zinc-900 dark:border-zinc-100 text-zinc-900 dark:text-zinc-100 font-semibold"
+                : "border-transparent text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-200"
             }`}
           >
             <Eye className="w-3.5 h-3.5" />
             <span>Checklist Observasi</span>
-            <span className="text-[10px] px-1.5 py-0.2 rounded-full bg-zinc-800 text-zinc-300">
+            <span className="text-[10px] px-1.5 py-0.2 rounded-full bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300">
               {observationChecklist.length}
             </span>
           </button>
@@ -301,25 +301,25 @@ Hasilkan format JSON murni:
         <div className="p-5 overflow-y-auto space-y-4 text-xs">
           {activeTab === "kuesioner" && (
             <div className="space-y-3">
-              <div className="p-3 rounded-xl bg-zinc-900 border border-zinc-800 text-zinc-400 text-[11px] flex items-center justify-between">
+              <div className="p-3 rounded-xl bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-zinc-600 dark:text-zinc-400 text-[11px] flex items-center justify-between">
                 <span>Skala Penilaian: 1 = Sangat Tidak Setuju (STS) &bull; 2 = TS &bull; 3 = Netral/KS &bull; 4 = S &bull; 5 = Sangat Setuju (SS)</span>
-                <span className="text-zinc-300 font-mono font-semibold">{questionnaire.length} Butir Angket</span>
+                <span className="text-zinc-900 dark:text-zinc-300 font-mono font-semibold">{questionnaire.length} Butir Angket</span>
               </div>
 
               <div className="space-y-2.5">
                 {questionnaire.map((q) => (
-                  <div key={q.id} className="p-3.5 rounded-xl bg-zinc-900/60 border border-zinc-800 space-y-2">
+                  <div key={q.id} className="p-3.5 rounded-xl bg-zinc-50 dark:bg-zinc-900/60 border border-zinc-200 dark:border-zinc-800 space-y-2">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-2">
-                        <span className="w-5 h-5 rounded-full bg-zinc-800 text-zinc-200 font-mono text-[10px] flex items-center justify-center font-bold">
+                        <span className="w-5 h-5 rounded-full bg-zinc-200 dark:bg-zinc-800 text-zinc-800 dark:text-zinc-200 font-mono text-[10px] flex items-center justify-center font-bold">
                           {q.id}
                         </span>
-                        <span className="font-semibold text-zinc-200">{q.variable}</span>
-                        <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-zinc-900 text-zinc-400 border border-zinc-800">
+                        <span className="font-semibold text-zinc-900 dark:text-zinc-200">{q.variable}</span>
+                        <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-zinc-100 dark:bg-zinc-900 text-zinc-600 dark:text-zinc-400 border border-zinc-200 dark:border-zinc-800">
                           {q.indicator}
                         </span>
                       </div>
-                      <div className="flex items-center gap-1 text-[10px] font-mono text-zinc-500">
+                      <div className="flex items-center gap-1 text-[10px] font-mono text-zinc-400 dark:text-zinc-500">
                         <span>STS</span>
                         <span>[1]</span>
                         <span>[2]</span>
@@ -329,7 +329,7 @@ Hasilkan format JSON murni:
                         <span>SS</span>
                       </div>
                     </div>
-                    <p className="text-zinc-300 text-[11px] leading-relaxed pl-7">
+                    <p className="text-zinc-700 dark:text-zinc-300 text-[11px] leading-relaxed pl-7">
                       "{q.questionText}"
                     </p>
                   </div>
@@ -340,17 +340,17 @@ Hasilkan format JSON murni:
 
           {activeTab === "wawancara" && (
             <div className="space-y-3">
-              <p className="text-zinc-400 text-[11px] leading-relaxed">
+              <p className="text-zinc-600 dark:text-zinc-400 text-[11px] leading-relaxed">
                 Pertanyaan panduan wawancara mendalam untuk menggali aspek kualitatif, hambatan implementasi, dan justifikasi operasional:
               </p>
 
               <div className="space-y-2">
                 {interviewGuides.map((item, idx) => (
-                  <div key={idx} className="p-3 rounded-xl bg-zinc-900/60 border border-zinc-800 flex items-start gap-3">
-                    <span className="w-5 h-5 rounded-full bg-zinc-800 text-zinc-200 font-mono text-[10px] flex items-center justify-center font-bold flex-shrink-0 mt-0.5">
+                  <div key={idx} className="p-3 rounded-xl bg-zinc-50 dark:bg-zinc-900/60 border border-zinc-200 dark:border-zinc-800 flex items-start gap-3">
+                    <span className="w-5 h-5 rounded-full bg-zinc-200 dark:bg-zinc-800 text-zinc-800 dark:text-zinc-200 font-mono text-[10px] flex items-center justify-center font-bold flex-shrink-0 mt-0.5">
                       {idx + 1}
                     </span>
-                    <p className="text-zinc-300 text-[11px] leading-relaxed">
+                    <p className="text-zinc-700 dark:text-zinc-300 text-[11px] leading-relaxed">
                       {item}
                     </p>
                   </div>
@@ -361,19 +361,19 @@ Hasilkan format JSON murni:
 
           {activeTab === "observasi" && (
             <div className="space-y-3">
-              <p className="text-zinc-400 text-[11px] leading-relaxed">
+              <p className="text-zinc-600 dark:text-zinc-400 text-[11px] leading-relaxed">
                 Checklist pengamatan langsung di lokus {doc.targetEntity} untuk memvalidasi kondisi lapangan sebelum dan sesudah intervensi:
               </p>
 
               <div className="space-y-2">
                 {observationChecklist.map((item, idx) => (
-                  <div key={idx} className="p-3 rounded-xl bg-zinc-900/60 border border-zinc-800 flex items-center gap-3">
+                  <div key={idx} className="p-3 rounded-xl bg-zinc-50 dark:bg-zinc-900/60 border border-zinc-200 dark:border-zinc-800 flex items-center gap-3">
                     <input
                       type="checkbox"
                       readOnly
-                      className="w-4 h-4 rounded bg-zinc-800 border-zinc-700 text-zinc-100"
+                      className="w-4 h-4 rounded bg-zinc-100 dark:bg-zinc-800 border-zinc-300 dark:border-zinc-700 text-zinc-900 dark:text-zinc-100"
                     />
-                    <span className="text-zinc-300 text-[11px]">
+                    <span className="text-zinc-700 dark:text-zinc-300 text-[11px]">
                       {item}
                     </span>
                   </div>
@@ -384,23 +384,23 @@ Hasilkan format JSON murni:
         </div>
 
         {/* Footer */}
-        <div className="p-4 border-t border-zinc-800 bg-zinc-900/60 flex items-center justify-between">
+        <div className="p-4 border-t border-zinc-200 dark:border-zinc-800 bg-zinc-50/80 dark:bg-zinc-900/60 flex items-center justify-between">
           <div className="flex items-center gap-2">
             <button
               type="button"
               onClick={handleCopyMarkdown}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-zinc-900 hover:bg-zinc-800 text-zinc-200 border border-zinc-800 text-xs font-medium transition-colors cursor-pointer"
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-zinc-100 hover:bg-zinc-200 dark:bg-zinc-900 dark:hover:bg-zinc-800 text-zinc-800 dark:text-zinc-200 border border-zinc-200 dark:border-zinc-800 text-xs font-medium transition-colors cursor-pointer"
             >
-              {copied ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5 text-zinc-400" />}
+              {copied ? <Check className="w-3.5 h-3.5 text-emerald-500" /> : <Copy className="w-3.5 h-3.5 text-zinc-500" />}
               <span>{copied ? "Tersalin!" : "Salin Format MD"}</span>
             </button>
 
             <button
               type="button"
               onClick={handleDownloadCsv}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-zinc-900 hover:bg-zinc-800 text-zinc-200 border border-zinc-800 text-xs font-medium transition-colors cursor-pointer"
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-zinc-100 hover:bg-zinc-200 dark:bg-zinc-900 dark:hover:bg-zinc-800 text-zinc-800 dark:text-zinc-200 border border-zinc-200 dark:border-zinc-800 text-xs font-medium transition-colors cursor-pointer"
             >
-              <Download className="w-3.5 h-3.5 text-zinc-400" />
+              <Download className="w-3.5 h-3.5 text-zinc-500" />
               <span>Unduh CSV</span>
             </button>
           </div>
@@ -408,7 +408,7 @@ Hasilkan format JSON murni:
           <button
             type="button"
             onClick={onClose}
-            className="px-4 py-2 rounded-xl bg-zinc-100 hover:bg-white text-zinc-900 font-semibold text-xs transition-colors cursor-pointer"
+            className="px-4 py-2 rounded-xl bg-zinc-900 hover:bg-black dark:bg-zinc-100 dark:hover:bg-white text-white dark:text-zinc-900 font-semibold text-xs transition-colors cursor-pointer shadow-xs"
           >
             Tutup
           </button>

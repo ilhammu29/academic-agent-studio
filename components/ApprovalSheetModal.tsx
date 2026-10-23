@@ -82,25 +82,25 @@ export const ApprovalSheetModal: React.FC<ApprovalSheetModalProps> = ({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-sm animate-in fade-in duration-200">
-      <div className="w-full max-w-xl bg-zinc-950 border border-zinc-800 rounded-2xl shadow-2xl flex flex-col max-h-[90vh] overflow-hidden text-zinc-100">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 dark:bg-black/75 backdrop-blur-sm animate-in fade-in duration-200">
+      <div className="w-full max-w-xl bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-2xl shadow-2xl flex flex-col max-h-[90vh] overflow-hidden text-zinc-900 dark:text-zinc-100">
         
         {/* Header */}
-        <div className="p-4 sm:p-5 border-b border-zinc-800 flex items-center justify-between bg-zinc-900/60">
+        <div className="p-4 sm:p-5 border-b border-zinc-200 dark:border-zinc-800 flex items-center justify-between bg-zinc-50/80 dark:bg-zinc-900/60">
           <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-xl bg-zinc-800 border border-zinc-700 flex items-center justify-center text-zinc-100">
-              <FileSignature className="w-5 h-5 text-zinc-200" />
+            <div className="w-9 h-9 rounded-xl bg-zinc-100 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 flex items-center justify-center text-zinc-800 dark:text-zinc-100">
+              <FileSignature className="w-5 h-5 text-zinc-700 dark:text-zinc-200" />
             </div>
             <div>
-              <h3 className="text-sm font-semibold text-zinc-100">Kustomisasi Lembar Pengesahan Kampus</h3>
-              <p className="text-xs text-zinc-400">
+              <h3 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">Kustomisasi Lembar Pengesahan Kampus</h3>
+              <p className="text-xs text-zinc-500 dark:text-zinc-400">
                 Nama dosen pembimbing, penguji, NIP/NIDN, dan tanda tangan resmi
               </p>
             </div>
           </div>
           <button
             onClick={onClose}
-            className="p-1.5 rounded-lg text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800 transition-colors cursor-pointer"
+            className="p-1.5 rounded-lg text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-100 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors cursor-pointer"
           >
             <X className="w-4 h-4" />
           </button>
@@ -111,106 +111,106 @@ export const ApprovalSheetModal: React.FC<ApprovalSheetModalProps> = ({
           {/* Kota & Tanggal */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
-              <label className="block text-[11px] text-zinc-400 mb-1">Kota Kampus / Pelaksanaan:</label>
+              <label className="block text-[11px] font-medium text-zinc-600 dark:text-zinc-400 mb-1">Kota Kampus / Pelaksanaan:</label>
               <input
                 type="text"
                 value={city}
                 onChange={(e) => setCity(e.target.value)}
-                className="w-full bg-zinc-900 border border-zinc-800 rounded-xl px-3 py-2 text-zinc-200 focus:outline-none focus:border-zinc-500"
+                className="w-full bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl px-3 py-2 text-zinc-900 dark:text-zinc-200 focus:outline-none focus:border-zinc-500"
                 placeholder="Contoh: Jakarta"
               />
             </div>
             <div>
-              <label className="block text-[11px] text-zinc-400 mb-1">Tanggal Persetujuan:</label>
+              <label className="block text-[11px] font-medium text-zinc-600 dark:text-zinc-400 mb-1">Tanggal Persetujuan:</label>
               <input
                 type="text"
                 value={approvalDate}
                 onChange={(e) => setApprovalDate(e.target.value)}
-                className="w-full bg-zinc-900 border border-zinc-800 rounded-xl px-3 py-2 text-zinc-200 focus:outline-none focus:border-zinc-500"
+                className="w-full bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl px-3 py-2 text-zinc-900 dark:text-zinc-200 focus:outline-none focus:border-zinc-500"
                 placeholder="Contoh: 24 Oktober 2026"
               />
             </div>
           </div>
 
           {/* Dosen Pembimbing 1 */}
-          <div className="p-3.5 rounded-xl bg-zinc-900/60 border border-zinc-800 space-y-2.5">
-            <div className="font-semibold text-zinc-200 flex items-center justify-between text-xs">
+          <div className="p-3.5 rounded-xl bg-zinc-50 dark:bg-zinc-900/60 border border-zinc-200 dark:border-zinc-800 space-y-2.5">
+            <div className="font-semibold text-zinc-900 dark:text-zinc-200 flex items-center justify-between text-xs">
               <span>{signer1Role}</span>
               <span className="text-[10px] font-mono text-zinc-500">PENANDATANGAN 1</span>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
               <div>
-                <label className="block text-[11px] text-zinc-400 mb-1">Nama Lengkap & Gelar:</label>
+                <label className="block text-[11px] text-zinc-600 dark:text-zinc-400 mb-1">Nama Lengkap & Gelar:</label>
                 <input
                   type="text"
                   value={signer1Name}
                   onChange={(e) => setSigner1Name(e.target.value)}
-                  className="w-full bg-zinc-900 border border-zinc-800 rounded-lg px-2.5 py-1.5 text-zinc-200 focus:outline-none focus:border-zinc-500"
+                  className="w-full bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-lg px-2.5 py-1.5 text-zinc-900 dark:text-zinc-200 focus:outline-none focus:border-zinc-500"
                 />
               </div>
               <div>
-                <label className="block text-[11px] text-zinc-400 mb-1">NIP / NIDN:</label>
+                <label className="block text-[11px] text-zinc-600 dark:text-zinc-400 mb-1">NIP / NIDN:</label>
                 <input
                   type="text"
                   value={signer1Id}
                   onChange={(e) => setSigner1Id(e.target.value)}
-                  className="w-full bg-zinc-900 border border-zinc-800 rounded-lg px-2.5 py-1.5 text-zinc-200 font-mono focus:outline-none focus:border-zinc-500"
+                  className="w-full bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-lg px-2.5 py-1.5 text-zinc-900 dark:text-zinc-200 font-mono focus:outline-none focus:border-zinc-500"
                 />
               </div>
             </div>
           </div>
 
           {/* Dosen Pembimbing 2 / Mentor */}
-          <div className="p-3.5 rounded-xl bg-zinc-900/60 border border-zinc-800 space-y-2.5">
-            <div className="font-semibold text-zinc-200 flex items-center justify-between text-xs">
+          <div className="p-3.5 rounded-xl bg-zinc-50 dark:bg-zinc-900/60 border border-zinc-200 dark:border-zinc-800 space-y-2.5">
+            <div className="font-semibold text-zinc-900 dark:text-zinc-200 flex items-center justify-between text-xs">
               <span>{signer2Role}</span>
               <span className="text-[10px] font-mono text-zinc-500">PENANDATANGAN 2</span>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
               <div>
-                <label className="block text-[11px] text-zinc-400 mb-1">Nama Lengkap & Gelar:</label>
+                <label className="block text-[11px] text-zinc-600 dark:text-zinc-400 mb-1">Nama Lengkap & Gelar:</label>
                 <input
                   type="text"
                   value={signer2Name}
                   onChange={(e) => setSigner2Name(e.target.value)}
-                  className="w-full bg-zinc-900 border border-zinc-800 rounded-lg px-2.5 py-1.5 text-zinc-200 focus:outline-none focus:border-zinc-500"
+                  className="w-full bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-lg px-2.5 py-1.5 text-zinc-900 dark:text-zinc-200 focus:outline-none focus:border-zinc-500"
                 />
               </div>
               <div>
-                <label className="block text-[11px] text-zinc-400 mb-1">NIP / NIDN / NIK:</label>
+                <label className="block text-[11px] text-zinc-600 dark:text-zinc-400 mb-1">NIP / NIDN / NIK:</label>
                 <input
                   type="text"
                   value={signer2Id}
                   onChange={(e) => setSigner2Id(e.target.value)}
-                  className="w-full bg-zinc-900 border border-zinc-800 rounded-lg px-2.5 py-1.5 text-zinc-200 font-mono focus:outline-none focus:border-zinc-500"
+                  className="w-full bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-lg px-2.5 py-1.5 text-zinc-900 dark:text-zinc-200 font-mono focus:outline-none focus:border-zinc-500"
                 />
               </div>
             </div>
           </div>
 
           {/* Ketua Program Studi */}
-          <div className="p-3.5 rounded-xl bg-zinc-900/60 border border-zinc-800 space-y-2.5">
-            <div className="font-semibold text-zinc-200 flex items-center justify-between text-xs">
+          <div className="p-3.5 rounded-xl bg-zinc-50 dark:bg-zinc-900/60 border border-zinc-200 dark:border-zinc-800 space-y-2.5">
+            <div className="font-semibold text-zinc-900 dark:text-zinc-200 flex items-center justify-between text-xs">
               <span>Mengetahui: {headRole}</span>
               <span className="text-[10px] font-mono text-zinc-500">PENGESAH KAMPUS</span>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
               <div>
-                <label className="block text-[11px] text-zinc-400 mb-1">Nama Lengkap & Gelar:</label>
+                <label className="block text-[11px] text-zinc-600 dark:text-zinc-400 mb-1">Nama Lengkap & Gelar:</label>
                 <input
                   type="text"
                   value={headName}
                   onChange={(e) => setHeadName(e.target.value)}
-                  className="w-full bg-zinc-900 border border-zinc-800 rounded-lg px-2.5 py-1.5 text-zinc-200 focus:outline-none focus:border-zinc-500"
+                  className="w-full bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-lg px-2.5 py-1.5 text-zinc-900 dark:text-zinc-200 focus:outline-none focus:border-zinc-500"
                 />
               </div>
               <div>
-                <label className="block text-[11px] text-zinc-400 mb-1">NIP / NIDN:</label>
+                <label className="block text-[11px] text-zinc-600 dark:text-zinc-400 mb-1">NIP / NIDN:</label>
                 <input
                   type="text"
                   value={headId}
                   onChange={(e) => setHeadId(e.target.value)}
-                  className="w-full bg-zinc-900 border border-zinc-800 rounded-lg px-2.5 py-1.5 text-zinc-200 font-mono focus:outline-none focus:border-zinc-500"
+                  className="w-full bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-lg px-2.5 py-1.5 text-zinc-900 dark:text-zinc-200 font-mono focus:outline-none focus:border-zinc-500"
                 />
               </div>
             </div>
@@ -220,13 +220,13 @@ export const ApprovalSheetModal: React.FC<ApprovalSheetModalProps> = ({
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-2 rounded-xl text-zinc-400 hover:text-zinc-200 transition-colors cursor-pointer"
+              className="px-4 py-2 rounded-xl text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-200 transition-colors cursor-pointer"
             >
               Batal
             </button>
             <button
               type="submit"
-              className="px-4 py-2 rounded-xl bg-zinc-100 hover:bg-white text-zinc-950 font-semibold text-xs transition-colors cursor-pointer flex items-center gap-1.5"
+              className="px-4 py-2 rounded-xl bg-zinc-900 hover:bg-black dark:bg-zinc-100 dark:hover:bg-white text-white dark:text-zinc-950 font-semibold text-xs transition-colors cursor-pointer flex items-center gap-1.5 shadow-sm"
             >
               <Save className="w-3.5 h-3.5" />
               <span>Terapkan ke Naskah</span>

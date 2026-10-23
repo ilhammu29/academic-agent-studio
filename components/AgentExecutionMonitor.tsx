@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { AgentInfo, ProposalCategory, ProposalDocument, CampusGuideline } from "@/types/studio";
 import { INITIAL_AGENTS, buildGeneratedDocument } from "@/lib/agentEngine";
-import { ArrowRight, Check, Loader2 } from "lucide-react";
+import { ArrowRight, Check, Loader2, Cpu } from "lucide-react";
 
 interface AgentExecutionMonitorProps {
   title: string;
@@ -182,13 +182,7 @@ export const AgentExecutionMonitor: React.FC<AgentExecutionMonitorProps> = ({
         
         {/* Step Pill */}
         <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-zinc-100 dark:bg-zinc-900 border border-zinc-200/70 dark:border-zinc-800 text-xs font-medium text-zinc-700 dark:text-zinc-300 mb-3 shadow-2xs">
-          <svg 
-            className="w-3.5 h-3.5 text-zinc-800 dark:text-zinc-200" 
-            viewBox="0 0 24 24" 
-            fill="currentColor"
-          >
-            <path d="M12 0L14.5 9.5L24 12L14.5 14.5L12 24L9.5 14.5L0 12L9.5 9.5L12 0Z" />
-          </svg>
+          <Cpu className="w-3.5 h-3.5 text-zinc-800 dark:text-zinc-200" />
           <span>Langkah 3 dari 4: Multi-Agent Orkestrasi</span>
         </div>
 
