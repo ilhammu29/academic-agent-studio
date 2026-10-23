@@ -37,6 +37,7 @@ interface HeroInputViewProps {
   onOpenDatabase?: () => void;
   onOpenDrive?: () => void;
   onOpenGuidelineModal?: () => void;
+  onOpenConsultation?: () => void;
   activeCampusName?: string;
 }
 
@@ -105,6 +106,7 @@ export const HeroInputView: React.FC<HeroInputViewProps> = ({
   onOpenDatabase,
   onOpenDrive,
   onOpenGuidelineModal,
+  onOpenConsultation,
   activeCampusName
 }) => {
   const [showConfig, setShowConfig] = useState(false);
@@ -202,6 +204,18 @@ export const HeroInputView: React.FC<HeroInputViewProps> = ({
                 Rekomendasi Judul (AI)
               </span>
             </button>
+
+            {onOpenConsultation && (
+              <button
+                type="button"
+                onClick={onOpenConsultation}
+                className="flex items-center gap-1.5 text-emerald-600 dark:text-emerald-400 hover:text-emerald-800 dark:hover:text-emerald-200 transition-colors cursor-pointer text-xs font-semibold px-2.5 py-0.5 rounded-full bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-200 dark:border-emerald-800/80 shadow-2xs"
+                title="Bimbingan & Konsultasi Menemukan Masalah Lapangan dan Merumuskan Alur"
+              >
+                <GraduationCap className="w-3.5 h-3.5 text-emerald-500" />
+                <span>Konsultasi Ide & Masalah</span>
+              </button>
+            )}
 
             {onOpenGuidelineModal && (
               <button
@@ -370,38 +384,80 @@ export const HeroInputView: React.FC<HeroInputViewProps> = ({
         </div>
       </div>
 
+      {/* 2.5 BANNER KLINIK KONSULTASI MASALAH & ALUR */}
+      {onOpenConsultation && (
+        <div className="w-full p-4 rounded-2xl bg-gradient-to-r from-emerald-50/80 via-white to-indigo-50/80 dark:from-emerald-950/25 dark:via-zinc-900/60 dark:to-indigo-950/25 border border-emerald-200/80 dark:border-emerald-900/50 shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
+          <div className="flex items-start sm:items-center gap-3">
+            <div className="w-9 h-9 rounded-xl bg-emerald-600 text-white flex items-center justify-center shrink-0 shadow-xs">
+              <GraduationCap className="w-5 h-5" />
+            </div>
+            <div>
+              <h4 className="font-semibold text-zinc-900 dark:text-zinc-100 text-xs sm:text-sm">
+                Bingung Menemukan Masalah di Tempat Magang atau Alur Metodologinya?
+              </h4>
+              <p className="text-[11px] sm:text-xs text-zinc-600 dark:text-zinc-400 mt-0.5">
+                Konsultasikan langsung dengan AI Mentor. Temukan 3 celah masalah operasional riil, rumusan judul berbobot, dan peta alur kerja siap pakai.
+              </p>
+            </div>
+          </div>
+          <button
+            type="button"
+            onClick={onOpenConsultation}
+            className="self-start sm:self-auto px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-xs transition-colors shrink-0 flex items-center gap-1.5 cursor-pointer shadow-xs active:scale-95"
+          >
+            <span>Mulai Konsultasi Gratis</span>
+            <ArrowUp className="w-3.5 h-3.5 rotate-45" />
+          </button>
+        </div>
+      )}
+
       {/* 3. Sleek Quick Links */}
       <div className="w-full flex items-center justify-between text-xs text-zinc-500 px-1 flex-wrap gap-2">
-        <button
-          type="button"
-          onClick={handleOpenAiRecommender}
-          className="text-zinc-500 hover:text-zinc-800 dark:hover:text-zinc-200 transition-colors flex items-center gap-1.5 cursor-pointer text-xs"
-        >
-          <Sparkles className="w-3.5 h-3.5 text-zinc-400" />
-          <span>Eksplorasi Ide Judul Riset Terindeks</span>
-        </button>
+        <div className="flex items-center gap-3 flex-wrap">
+          {onOpenConsultation && (
+            <button
+              type="button"
+              onClick={onOpenConsultation}
+              className="text-emerald-600 dark:text-emerald-400 hover:underline transition-colors flex items-center gap-1.5 cursor-pointer text-xs font-semibold"
+            >
+              <GraduationCap className="w-3.5 h-3.5 text-emerald-500" />
+              <span>Klinik Bimbingan Masalah (AI Mentor)</span>
+            </button>
+          )}
 
-        {onOpenGuidelineModal && (
           <button
             type="button"
-            onClick={onOpenGuidelineModal}
-            className="text-indigo-600 dark:text-indigo-400 hover:underline transition-colors flex items-center gap-1.5 cursor-pointer text-xs font-medium"
-          >
-            <Landmark className="w-3.5 h-3.5 text-indigo-500" />
-            <span>Pindai PDF Pedoman Kampus (AI)</span>
-          </button>
-        )}
-
-        {onOpenDrive && (
-          <button
-            type="button"
-            onClick={onOpenDrive}
+            onClick={handleOpenAiRecommender}
             className="text-zinc-500 hover:text-zinc-800 dark:hover:text-zinc-200 transition-colors flex items-center gap-1.5 cursor-pointer text-xs"
           >
-            <FolderKanban className="w-3.5 h-3.5 text-zinc-400" />
-            <span>Buka Drive Penyimpanan</span>
+            <Sparkles className="w-3.5 h-3.5 text-zinc-400" />
+            <span>Eksplorasi Ide Judul Riset Terindeks</span>
           </button>
-        )}
+        </div>
+
+        <div className="flex items-center gap-3">
+          {onOpenGuidelineModal && (
+            <button
+              type="button"
+              onClick={onOpenGuidelineModal}
+              className="text-indigo-600 dark:text-indigo-400 hover:underline transition-colors flex items-center gap-1.5 cursor-pointer text-xs font-medium"
+            >
+              <Landmark className="w-3.5 h-3.5 text-indigo-500" />
+              <span>Pindai PDF Pedoman Kampus (AI)</span>
+            </button>
+          )}
+
+          {onOpenDrive && (
+            <button
+              type="button"
+              onClick={onOpenDrive}
+              className="text-zinc-500 hover:text-zinc-800 dark:hover:text-zinc-200 transition-colors flex items-center gap-1.5 cursor-pointer text-xs"
+            >
+              <FolderKanban className="w-3.5 h-3.5 text-zinc-400" />
+              <span>Buka Drive Penyimpanan</span>
+            </button>
+          )}
+        </div>
       </div>
 
       {/* 4. MODAL: REKOMENDASI JUDUL ILMIAH */}

@@ -10,6 +10,7 @@ import { TurnitinPreCheckModal } from "./TurnitinPreCheckModal";
 import { ResearchInstrumentModal } from "./ResearchInstrumentModal";
 import { ApprovalSheetModal } from "./ApprovalSheetModal";
 import { CampusGuidelineModal } from "./CampusGuidelineModal";
+import { AcademicConsultationModal } from "./AcademicConsultationModal";
 import { AcademicFlowchartDiagram } from "./AcademicFlowchartDiagram";
 import { AcademicCopilotDrawer } from "./AcademicCopilotDrawer";
 import { generateAcademicProposalDocx, downloadDocxBlob } from "@/lib/docxExporter";
@@ -41,7 +42,8 @@ import {
   ChevronDown,
   Compass,
   Bot,
-  Landmark
+  Landmark,
+  GraduationCap
 } from "lucide-react";
 
 interface DocumentStudioProps {
@@ -68,6 +70,7 @@ export const DocumentStudio: React.FC<DocumentStudioProps> = ({
   const [isGuidelineModalOpen, setIsGuidelineModalOpen] = useState(false);
   const [citationStyle, setCitationStyle] = useState<"apa" | "ieee">("apa");
   const [showMarginRuler, setShowMarginRuler] = useState(false);
+  const [isConsultationModalOpen, setIsConsultationModalOpen] = useState(false);
   
   // Co-Pilot & Dropdown states
   const [isCopilotOpen, setIsCopilotOpen] = useState(false);
@@ -524,6 +527,21 @@ NIP / NIK.
 
             {isToolsDropdownOpen && (
               <div className="absolute right-0 mt-2 w-64 rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-1.5 shadow-xl z-30 animate-in fade-in zoom-in-95 duration-100">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsToolsDropdownOpen(false);
+                    setIsConsultationModalOpen(true);
+                  }}
+                  className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-medium text-emerald-700 dark:text-emerald-300 hover:bg-emerald-50 dark:hover:bg-emerald-950/40 transition-colors text-left cursor-pointer border-b border-zinc-100 dark:border-zinc-800/80 mb-1"
+                >
+                  <GraduationCap className="w-4 h-4 text-emerald-600 flex-shrink-0" />
+                  <div>
+                    <p className="font-semibold text-zinc-900 dark:text-zinc-100">Klinik Bimbingan Ide & Alur (AI)</p>
+                    <p className="text-[10px] text-zinc-500">Konsultasi masalah lapangan & alur riset</p>
+                  </div>
+                </button>
+
                 <button
                   type="button"
                   onClick={() => {
@@ -2148,7 +2166,7 @@ NIP / NIK.
             </div>
 
             {/* Modal Footer */}
-            <div className="p-3.5 px-5 border-t border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900/40 flex items-center justify-between text-xs text-zinc-500">
+            <div className="p-3.5 px-5 border-t border-zinc-200 dark:border-zinc-850 bg-zinc-50 dark:bg-zinc-900/40 flex items-center justify-between text-xs text-zinc-500">
               <span>Klik luar atau tombol X untuk membatalkan</span>
               <button
                 type="button"
@@ -2162,6 +2180,28 @@ NIP / NIK.
           </div>
         </div>
       )}
+
+      {/* MODAL: KLINIK KONSULTASI BIMBINGAN (AI MENTOR) */}
+      <AcademicConsultationModal
+        isOpen={isConsultationModalOpen}
+        onClose={() => setIsConsultationModalOpen(false)}
+        initialCategory={currentDoc.category}
+        initialTargetEntity={currentDoc.targetEntity}
+        onApplyProposal={(appliedTitle, appliedEntity, appliedCategory) => {
+          setCurrentDoc(prev => {
+            const updated = {
+              ...prev,
+              title: appliedTitle,
+              targetEntity: appliedEntity || prev.targetEntity,
+              category: appliedCategory || prev.category
+            };
+            pushToHistory(updated);
+            return updated;
+          });
+          setToastMessage(`Judul berhasil diperbarui ke: "${appliedTitle}"`);
+          setTimeout(() => setToastMessage(null), 3000);
+        }}
+      />
 
     </div>
   );

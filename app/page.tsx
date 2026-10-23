@@ -9,6 +9,7 @@ import { AgentExecutionMonitor } from "@/components/AgentExecutionMonitor";
 import { DocumentStudio } from "@/components/DocumentStudio";
 import { TwelveModesModal } from "@/components/TwelveModesModal";
 import { CampusGuidelineModal } from "@/components/CampusGuidelineModal";
+import { AcademicConsultationModal } from "@/components/AcademicConsultationModal";
 import { CAMPUS_PRESETS } from "@/lib/campusPresets";
 import ScreenLoader from "@/components/ScreenLoader";
 import AuthModal from "@/components/AuthModal";
@@ -59,6 +60,7 @@ export default function Home() {
   // Campus Guideline & Formatting State
   const [campusGuideline, setCampusGuideline] = useState<CampusGuideline>(CAMPUS_PRESETS[0]);
   const [isGuidelineModalOpen, setIsGuidelineModalOpen] = useState(false);
+  const [isConsultationModalOpen, setIsConsultationModalOpen] = useState(false);
 
   // Check Supabase status on mount
   useEffect(() => {
@@ -324,6 +326,7 @@ export default function Home() {
             onOpenDatabase={() => setIsDatabaseDrawerOpen(true)}
             onOpenDrive={() => setStage("drive")}
             onOpenGuidelineModal={() => setIsGuidelineModalOpen(true)}
+            onOpenConsultation={() => setIsConsultationModalOpen(true)}
             activeCampusName={campusGuideline?.campusName}
           />
         )}
@@ -414,6 +417,19 @@ export default function Home() {
               campusGuideline: guideline
             });
           }
+        }}
+      />
+
+      {/* 7. Academic Consultation & Problem Discovery Modal */}
+      <AcademicConsultationModal
+        isOpen={isConsultationModalOpen}
+        onClose={() => setIsConsultationModalOpen(false)}
+        initialCategory={category}
+        initialTargetEntity={targetEntity}
+        onApplyProposal={(appliedTitle, appliedEntity, appliedCategory) => {
+          setTitle(appliedTitle);
+          if (appliedEntity) setTargetEntity(appliedEntity);
+          if (appliedCategory) setCategory(appliedCategory);
         }}
       />
     </>
