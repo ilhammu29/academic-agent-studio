@@ -57,7 +57,7 @@ export default function AppShell({
   const [showSearchDropdown, setShowSearchDropdown] = useState(false);
   const { theme, toggleTheme } = useTheme();
 
-  // Get user initials (e.g. "IM" for "Ilham Maulana")
+  // User initials (e.g. "IM" for "Ilham Maulana")
   const userInitials = (currentUser.name || 'Ilham Maulana')
     .split(' ')
     .filter(Boolean)
@@ -76,7 +76,7 @@ export default function AppShell({
     },
     {
       id: 'chat',
-      label: 'Chat',
+      label: 'Chat & Konsultasi Ide',
       icon: MessageSquare,
       isActive: false,
       onClick: () => {
@@ -85,28 +85,28 @@ export default function AppShell({
     },
     {
       id: 'dokumen',
-      label: 'Dokumen',
+      label: 'Dokumen Studio',
       icon: FileText,
       isActive: currentStage === 'result',
       onClick: () => onNavigateStage('result')
     },
     {
       id: 'proyek',
-      label: 'Proyek',
+      label: 'Arsip Proyek',
       icon: Folder,
       isActive: false,
       onClick: onOpenDatabase
     },
     {
       id: 'drive',
-      label: 'Drive',
+      label: 'Penyimpanan Drive',
       icon: Cloud,
       isActive: currentStage === 'drive',
       onClick: () => onNavigateStage('drive')
     },
     {
       id: 'pengaturan',
-      label: 'Pengaturan',
+      label: 'Format Kampus & Pengaturan',
       icon: Settings,
       isActive: false,
       onClick: () => {
@@ -120,83 +120,97 @@ export default function AppShell({
     <div className="min-h-screen w-full bg-[#F9F9F8] dark:bg-[#000000] text-zinc-900 dark:text-zinc-100 font-sans antialiased flex flex-col transition-colors duration-200">
       
       {/* ============================================================ */}
-      {/* 1. MINIMALIST DESKTOP LEFT SIDEBAR (Matching ui-referensi.png) */}
+      {/* 1. SLIM ICON-ONLY SIDEBAR RAIL (w-16 / 72px)                 */}
       {/* ============================================================ */}
-      <aside className="hidden md:flex w-60 lg:w-64 h-screen fixed left-0 top-0 bottom-0 bg-[#F9F9F8] dark:bg-[#000000] border-r border-zinc-200/70 dark:border-zinc-800/80 flex-col justify-between p-5 z-40 transition-colors duration-200 select-none">
+      <aside className="hidden md:flex w-16 lg:w-[72px] h-screen fixed left-0 top-0 bottom-0 bg-[#F9F9F8] dark:bg-[#000000] border-r border-zinc-200/80 dark:border-zinc-850 flex-col items-center justify-between py-5 z-40 transition-colors duration-200 select-none">
         
-        {/* Top: Logo Brand "✦ LIX" */}
-        <div>
-          <div className="flex items-center gap-2.5 px-3 py-2 mb-6 cursor-pointer" onClick={() => onNavigateStage('input')}>
-            {/* Minimal 4-Point Star Sparkle Icon */}
+        {/* Top: Sparkle Logo Mark "✦ LIX" */}
+        <div className="flex flex-col items-center">
+          <button
+            onClick={() => onNavigateStage('input')}
+            title="Beranda LIX Academic Studio"
+            className="w-10 h-10 rounded-xl bg-zinc-950 dark:bg-zinc-100 text-white dark:text-zinc-950 flex flex-col items-center justify-center font-bold text-xs tracking-wider hover:opacity-90 active:scale-95 transition-all cursor-pointer shadow-xs group"
+          >
+            {/* Sparkle 4-point Star SVG */}
             <svg 
-              className="w-5 h-5 text-zinc-950 dark:text-white flex-shrink-0" 
+              className="w-4 h-4 text-white dark:text-zinc-950 group-hover:scale-110 transition-transform" 
               viewBox="0 0 24 24" 
               fill="currentColor"
             >
               <path d="M12 0L14.5 9.5L24 12L14.5 14.5L12 24L9.5 14.5L0 12L9.5 9.5L12 0Z" />
             </svg>
-            <span className="text-xl font-bold tracking-tight text-zinc-950 dark:text-white">
-              LIX
-            </span>
-          </div>
-
-          {/* Navigation Links List */}
-          <nav className="flex flex-col gap-1.5 w-full">
-            {navMenuItems.map((item) => {
-              const Icon = item.icon;
-              const isActive = item.isActive;
-              return (
-                <button
-                  key={item.id}
-                  onClick={item.onClick}
-                  className={`w-full px-4 py-2.5 rounded-xl flex items-center gap-3.5 text-sm transition-all text-left cursor-pointer ${
-                    isActive
-                      ? 'bg-[#ECECEC] dark:bg-zinc-800 text-zinc-950 dark:text-white font-medium shadow-2xs'
-                      : 'text-zinc-600 dark:text-zinc-400 hover:text-zinc-950 dark:hover:text-white hover:bg-zinc-200/50 dark:hover:bg-zinc-900/60 font-normal'
-                  }`}
-                >
-                  <Icon className="w-4 h-4 stroke-[2] flex-shrink-0" />
-                  <span>{item.label}</span>
-                </button>
-              );
-            })}
-          </nav>
+          </button>
         </div>
 
-        {/* Bottom: Profile & Online Status Card */}
-        <div className="pt-4 border-t border-zinc-200/60 dark:border-zinc-800/60">
+        {/* Center: Stage & Feature Navigation Icons with Floating Tooltips */}
+        <nav className="flex flex-col items-center gap-2.5 w-full px-2">
+          {navMenuItems.map((item) => {
+            const Icon = item.icon;
+            const isActive = item.isActive;
+            return (
+              <button
+                key={item.id}
+                onClick={item.onClick}
+                className={`relative w-11 h-11 rounded-xl flex items-center justify-center transition-all cursor-pointer group ${
+                  isActive
+                    ? 'text-white dark:text-black bg-zinc-950 dark:bg-zinc-100 shadow-xs'
+                    : 'text-zinc-500 dark:text-zinc-400 hover:text-zinc-950 dark:hover:text-zinc-100 hover:bg-zinc-200/60 dark:hover:bg-zinc-900'
+                }`}
+              >
+                {/* Active Indicator Bar on Left */}
+                {isActive && (
+                  <span className="absolute -left-2 top-3 bottom-3 w-1 bg-zinc-950 dark:bg-zinc-100 rounded-r-full" />
+                )}
+                
+                <Icon className="w-4 h-4 stroke-[2]" />
+
+                {/* Floating Tooltip to the right */}
+                <div className="absolute left-16 px-2.5 py-1.5 rounded-lg bg-zinc-900 dark:bg-zinc-800 text-white text-[11px] font-medium whitespace-nowrap opacity-0 pointer-events-none group-hover:opacity-100 transition-opacity shadow-xl z-50 flex items-center gap-1.5">
+                  <span>{item.label}</span>
+                </div>
+              </button>
+            );
+          })}
+        </nav>
+
+        {/* Bottom: Utilities (Theme Switcher, 12 Modes, User Profile Avatar) */}
+        <div className="flex flex-col items-center gap-2 w-full px-2">
+          
+          {/* Theme Switcher Toggle */}
+          <button
+            onClick={toggleTheme}
+            title={theme === 'dark' ? 'Mode Terang' : 'Mode Gelap'}
+            className="relative w-10 h-10 rounded-xl text-zinc-500 dark:text-zinc-400 hover:text-zinc-950 dark:hover:text-zinc-100 hover:bg-zinc-200/60 dark:hover:bg-zinc-900 flex items-center justify-center transition-all cursor-pointer group"
+          >
+            {theme === 'dark' ? (
+              <Sun className="w-4 h-4 text-zinc-300 group-hover:text-white transition-colors" />
+            ) : (
+              <Moon className="w-4 h-4 text-zinc-600 group-hover:text-zinc-950 transition-colors" />
+            )}
+            <div className="absolute left-16 px-2.5 py-1 rounded-lg bg-zinc-900 dark:bg-zinc-800 text-white text-[11px] font-medium whitespace-nowrap opacity-0 pointer-events-none group-hover:opacity-100 transition-opacity shadow-xl z-50">
+              {theme === 'dark' ? 'Mode Terang' : 'Mode Gelap'}
+            </div>
+          </button>
+
+          {/* User Profile Avatar with Initials "IM" */}
           <button
             onClick={onOpenAuth}
-            className="w-full px-2.5 py-2 rounded-xl flex items-center gap-3 hover:bg-zinc-200/60 dark:hover:bg-zinc-900 transition-colors text-left cursor-pointer group"
+            title={`${currentUser.name || 'Ilham Maulana'} (${currentUser.role || 'Mahasiswa'})`}
+            className="relative w-9 h-9 rounded-full bg-[#18181B] dark:bg-zinc-100 text-white dark:text-zinc-950 font-bold text-xs flex items-center justify-center cursor-pointer shadow-xs hover:scale-105 active:scale-95 transition-transform group"
           >
-            {/* User Initials Avatar Circle */}
-            <div className="w-9 h-9 rounded-full bg-[#18181B] dark:bg-zinc-100 text-white dark:text-zinc-950 font-bold text-xs flex items-center justify-center flex-shrink-0 shadow-xs">
-              {userInitials}
+            <span>{userInitials}</span>
+            <div className="absolute left-16 px-2.5 py-1.5 rounded-lg bg-zinc-900 dark:bg-zinc-800 text-white text-[11px] font-medium whitespace-nowrap opacity-0 pointer-events-none group-hover:opacity-100 transition-opacity shadow-xl z-50 flex items-center gap-1.5">
+              <span>{currentUser.name || 'Ilham Maulana'}</span>
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
             </div>
-
-            {/* User Name & Status */}
-            <div className="flex-1 min-w-0">
-              <p className="text-xs font-semibold text-zinc-900 dark:text-zinc-100 truncate group-hover:text-black dark:group-hover:text-white">
-                {currentUser.name || 'Ilham Maulana'}
-              </p>
-              <div className="flex items-center gap-1.5 mt-0.5">
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 flex-shrink-0 animate-pulse" />
-                <span className="text-[11px] text-zinc-400 dark:text-zinc-500 font-normal">
-                  Online
-                </span>
-              </div>
-            </div>
-
-            {/* Chevron Icon */}
-            <ChevronDown className="w-3.5 h-3.5 text-zinc-400 group-hover:text-zinc-700 dark:group-hover:text-zinc-300 transition-colors flex-shrink-0" />
           </button>
         </div>
       </aside>
 
       {/* ============================================================ */}
-      {/* 2. MINIMALIST TOP HEADER (Matching ui-referensi.png) */}
+      {/* 2. MINIMALIST TOP HEADER (Matching ui-referensi.png)         */}
       {/* ============================================================ */}
-      <header className="fixed top-0 right-0 left-0 md:left-60 lg:left-64 h-16 bg-[#F9F9F8]/90 dark:bg-[#000000]/90 backdrop-blur-md px-4 sm:px-8 flex items-center justify-between z-30 transition-colors duration-200">
+      <header className="fixed top-0 right-0 left-0 md:left-16 lg:left-[72px] h-16 bg-[#F9F9F8]/90 dark:bg-[#000000]/90 backdrop-blur-md px-4 sm:px-8 flex items-center justify-between z-30 transition-colors duration-200">
         
         {/* Left: Quick Search Capsule "🔍 Cari sesuatu..." */}
         <div className="relative flex-1 max-w-xs sm:max-w-sm">
@@ -224,7 +238,7 @@ export default function AppShell({
               </div>
               <button
                 onMouseDown={() => onNavigateStage('input')}
-                className="w-full text-left px-2.5 py-1.5 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 flex items-center gap-2 text-zinc-700 dark:text-zinc-300"
+                className="w-full text-left px-2.5 py-1.5 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 flex items-center gap-2 text-zinc-700 dark:text-zinc-300 cursor-pointer"
               >
                 <Home className="w-3.5 h-3.5" />
                 <span>Buat Usulan Baru</span>
@@ -233,14 +247,14 @@ export default function AppShell({
                 onMouseDown={() => {
                   if (onOpenConsultation) onOpenConsultation();
                 }}
-                className="w-full text-left px-2.5 py-1.5 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 flex items-center gap-2 text-zinc-700 dark:text-zinc-300"
+                className="w-full text-left px-2.5 py-1.5 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 flex items-center gap-2 text-zinc-700 dark:text-zinc-300 cursor-pointer"
               >
                 <MessageSquare className="w-3.5 h-3.5" />
                 <span>Konsultasi Ide & Masalah Magang</span>
               </button>
               <button
                 onMouseDown={onOpenDatabase}
-                className="w-full text-left px-2.5 py-1.5 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 flex items-center gap-2 text-zinc-700 dark:text-zinc-300"
+                className="w-full text-left px-2.5 py-1.5 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 flex items-center gap-2 text-zinc-700 dark:text-zinc-300 cursor-pointer"
               >
                 <Folder className="w-3.5 h-3.5" />
                 <span>Buka Riwayat Proyek Proposal</span>
@@ -249,7 +263,7 @@ export default function AppShell({
                 onMouseDown={() => {
                   if (onOpenGuidelines) onOpenGuidelines();
                 }}
-                className="w-full text-left px-2.5 py-1.5 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 flex items-center gap-2 text-zinc-700 dark:text-zinc-300"
+                className="w-full text-left px-2.5 py-1.5 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 flex items-center gap-2 text-zinc-700 dark:text-zinc-300 cursor-pointer"
               >
                 <Settings className="w-3.5 h-3.5" />
                 <span>Pindai Format Kampus (Scan AI)</span>
@@ -282,7 +296,7 @@ export default function AppShell({
               if (onOpenTwelveModes) onOpenTwelveModes();
             }}
             title="12 Model Berpikir Ilmiah"
-            className="p-2 rounded-full text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-200/50 dark:hover:bg-zinc-800 transition-colors cursor-pointer"
+            className="p-2 rounded-full text-zinc-600 dark:text-zinc-400 hover:text-zinc-950 dark:hover:text-white hover:bg-zinc-200/50 dark:hover:bg-zinc-800 transition-colors cursor-pointer"
           >
             <Bell className="w-4 h-4 stroke-[1.85]" />
           </button>
@@ -290,7 +304,7 @@ export default function AppShell({
           {/* User Avatar Circle Badge */}
           <button
             onClick={onOpenAuth}
-            title={`${currentUser.name} (${currentUser.role})`}
+            title={`${currentUser.name || 'Ilham Maulana'} (${currentUser.role || 'Mahasiswa'})`}
             className="w-8 h-8 rounded-full bg-[#18181B] dark:bg-zinc-100 text-white dark:text-zinc-950 font-bold text-xs flex items-center justify-center cursor-pointer shadow-xs hover:scale-105 active:scale-95 transition-transform"
           >
             {userInitials}
@@ -307,7 +321,7 @@ export default function AppShell({
       </header>
 
       {/* ============================================================ */}
-      {/* 3. MOBILE SLIDE-OUT MENU DRAWER */}
+      {/* 3. MOBILE SLIDE-OUT MENU DRAWER                              */}
       {/* ============================================================ */}
       {mobileMenuOpen && (
         <div className="md:hidden fixed inset-x-0 top-16 bg-white dark:bg-[#09090b] border-b border-zinc-200 dark:border-zinc-800 p-4 z-40 space-y-2 animate-in fade-in slide-in-from-top-2 duration-150 shadow-2xl">
@@ -325,7 +339,7 @@ export default function AppShell({
                 }}
                 className={`w-full px-3.5 py-2.5 rounded-xl flex items-center gap-3 text-xs transition-colors text-left ${
                   item.isActive 
-                    ? 'bg-[#ECECEC] text-zinc-950 dark:bg-zinc-800 dark:text-white font-semibold' 
+                    ? 'bg-zinc-950 text-white dark:bg-zinc-100 dark:text-black font-semibold' 
                     : 'text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-900'
                 }`}
               >
@@ -351,9 +365,9 @@ export default function AppShell({
       )}
 
       {/* ============================================================ */}
-      {/* 4. WORKSPACE MAIN VIEWPORT */}
+      {/* 4. WORKSPACE MAIN VIEWPORT                                   */}
       {/* ============================================================ */}
-      <main className="flex-1 md:ml-60 lg:ml-64 pt-16 min-h-screen flex flex-col overflow-x-hidden">
+      <main className="flex-1 md:ml-16 lg:ml-[72px] pt-16 min-h-screen flex flex-col overflow-x-hidden">
         {children}
       </main>
 
