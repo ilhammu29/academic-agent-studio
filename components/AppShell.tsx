@@ -3,19 +3,19 @@
 import React, { useState } from 'react';
 import { 
   Home, 
-  MessageSquareCode, 
-  Cpu, 
+  MessageSquare, 
   FileText, 
-  Brain, 
-  RotateCcw, 
+  Folder, 
   Cloud, 
-  Menu,
+  Settings, 
+  Search, 
+  Sun, 
+  Moon, 
+  Bell, 
+  ChevronDown, 
+  Menu, 
   X,
-  HardDrive,
-  Sun,
-  Moon,
-  ChevronRight,
-  Database
+  RotateCcw
 } from 'lucide-react';
 import { StudioStage, ProposalCategory } from '@/types/studio';
 import { UserProfile } from '@/lib/supabase';
@@ -27,6 +27,8 @@ interface AppShellProps {
   onOpenTwelveModes: () => void;
   onOpenDatabase: () => void;
   onOpenAuth: () => void;
+  onOpenConsultation?: () => void;
+  onOpenGuidelines?: () => void;
   onResetSession: () => void;
   activeCategory?: ProposalCategory;
   activeTitle?: string;
@@ -41,344 +43,319 @@ export default function AppShell({
   onOpenTwelveModes,
   onOpenDatabase,
   onOpenAuth,
+  onOpenConsultation,
+  onOpenGuidelines,
   onResetSession,
   activeCategory = 'magang',
-  activeTitle = 'Perancangan Usulan Akademik',
+  activeTitle = '',
   currentUser,
   isSupabaseConfigured = false,
   children,
 }: AppShellProps) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [showSearchDropdown, setShowSearchDropdown] = useState(false);
   const { theme, toggleTheme } = useTheme();
 
-  const stageList: { id: StudioStage; label: string; shortLabel: string; icon: any; stepNumber: number }[] = [
-    { id: 'input', label: 'Topik & Scope Usulan', shortLabel: 'Topik', icon: Home, stepNumber: 1 },
-    { id: 'interview', label: 'Wawancara Diagnostik', shortLabel: 'Wawancara', icon: MessageSquareCode, stepNumber: 2 },
-    { id: 'orchestration', label: 'Multi-Agent Orkestrasi', shortLabel: 'Agen AI', icon: Cpu, stepNumber: 3 },
-    { id: 'result', label: 'Studio Naskah Proposal', shortLabel: 'Studio', icon: FileText, stepNumber: 4 },
-    { id: 'drive', label: 'Penyimpanan File Drive', shortLabel: 'Drive', icon: HardDrive, stepNumber: 5 },
+  // Get user initials (e.g. "IM" for "Ilham Maulana")
+  const userInitials = (currentUser.name || 'Ilham Maulana')
+    .split(' ')
+    .filter(Boolean)
+    .map((part) => part[0])
+    .join('')
+    .slice(0, 2)
+    .toUpperCase() || 'IM';
+
+  const navMenuItems = [
+    {
+      id: 'beranda',
+      label: 'Beranda',
+      icon: Home,
+      isActive: currentStage === 'input' || currentStage === 'interview' || currentStage === 'orchestration',
+      onClick: () => onNavigateStage('input')
+    },
+    {
+      id: 'chat',
+      label: 'Chat',
+      icon: MessageSquare,
+      isActive: false,
+      onClick: () => {
+        if (onOpenConsultation) onOpenConsultation();
+      }
+    },
+    {
+      id: 'dokumen',
+      label: 'Dokumen',
+      icon: FileText,
+      isActive: currentStage === 'result',
+      onClick: () => onNavigateStage('result')
+    },
+    {
+      id: 'proyek',
+      label: 'Proyek',
+      icon: Folder,
+      isActive: false,
+      onClick: onOpenDatabase
+    },
+    {
+      id: 'drive',
+      label: 'Drive',
+      icon: Cloud,
+      isActive: currentStage === 'drive',
+      onClick: () => onNavigateStage('drive')
+    },
+    {
+      id: 'pengaturan',
+      label: 'Pengaturan',
+      icon: Settings,
+      isActive: false,
+      onClick: () => {
+        if (onOpenGuidelines) onOpenGuidelines();
+        else onOpenAuth();
+      }
+    }
   ];
 
-  const categoryLabels: Record<ProposalCategory, string> = {
-    magang: 'Magang Industri',
-    skripsi: 'Skripsi / TA',
-    penelitian: 'Tesis & Riset'
-  };
-
   return (
-    <div className="min-h-screen w-full bg-zinc-50 dark:bg-[#000000] text-zinc-900 dark:text-zinc-100 font-sans selection:bg-zinc-800 selection:text-white dark:selection:bg-white dark:selection:text-black antialiased flex flex-col md:flex-row transition-colors duration-200">
+    <div className="min-h-screen w-full bg-[#F9F9F8] dark:bg-[#000000] text-zinc-900 dark:text-zinc-100 font-sans antialiased flex flex-col transition-colors duration-200">
       
       {/* ============================================================ */}
-      {/* 1. REDESIGNED DESKTOP MINIMALIST LEFT NAVIGATION RAIL */}
+      {/* 1. MINIMALIST DESKTOP LEFT SIDEBAR (Matching ui-referensi.png) */}
       {/* ============================================================ */}
-      <aside className="hidden md:flex w-16 lg:w-[72px] h-screen fixed left-0 top-0 bottom-0 bg-white dark:bg-[#000000] border-r border-zinc-200 dark:border-zinc-900 flex-col items-center justify-between py-5 z-40 shadow-sm transition-colors duration-200">
+      <aside className="hidden md:flex w-60 lg:w-64 h-screen fixed left-0 top-0 bottom-0 bg-[#F9F9F8] dark:bg-[#000000] border-r border-zinc-200/70 dark:border-zinc-800/80 flex-col justify-between p-5 z-40 transition-colors duration-200 select-none">
         
-        {/* Top: Sleek Minimal Branding Mark */}
-        <div className="flex flex-col items-center">
-          <button
-            onClick={() => onNavigateStage('input')}
-            title="Beranda Academic Studio"
-            className="w-10 h-10 rounded-xl bg-zinc-900 dark:bg-zinc-100 text-white dark:text-black flex flex-col items-center justify-center font-bold text-xs tracking-wider hover:opacity-90 active:scale-95 transition-all cursor-pointer shadow-sm"
-          >
-            <span>LIX</span>
-          </button>
+        {/* Top: Logo Brand "✦ LIX" */}
+        <div>
+          <div className="flex items-center gap-2.5 px-3 py-2 mb-6 cursor-pointer" onClick={() => onNavigateStage('input')}>
+            {/* Minimal 4-Point Star Sparkle Icon */}
+            <svg 
+              className="w-5 h-5 text-zinc-950 dark:text-white flex-shrink-0" 
+              viewBox="0 0 24 24" 
+              fill="currentColor"
+            >
+              <path d="M12 0L14.5 9.5L24 12L14.5 14.5L12 24L9.5 14.5L0 12L9.5 9.5L12 0Z" />
+            </svg>
+            <span className="text-xl font-bold tracking-tight text-zinc-950 dark:text-white">
+              LIX
+            </span>
+          </div>
+
+          {/* Navigation Links List */}
+          <nav className="flex flex-col gap-1.5 w-full">
+            {navMenuItems.map((item) => {
+              const Icon = item.icon;
+              const isActive = item.isActive;
+              return (
+                <button
+                  key={item.id}
+                  onClick={item.onClick}
+                  className={`w-full px-4 py-2.5 rounded-xl flex items-center gap-3.5 text-sm transition-all text-left cursor-pointer ${
+                    isActive
+                      ? 'bg-[#ECECEC] dark:bg-zinc-800 text-zinc-950 dark:text-white font-medium shadow-2xs'
+                      : 'text-zinc-600 dark:text-zinc-400 hover:text-zinc-950 dark:hover:text-white hover:bg-zinc-200/50 dark:hover:bg-zinc-900/60 font-normal'
+                  }`}
+                >
+                  <Icon className="w-4 h-4 stroke-[2] flex-shrink-0" />
+                  <span>{item.label}</span>
+                </button>
+              );
+            })}
+          </nav>
         </div>
 
-        {/* Center: Stage Nav Icons with Enhanced Tooltips */}
-        <nav className="flex flex-col items-center gap-2.5 w-full px-2">
-          {stageList.map((item) => {
-            const Icon = item.icon;
-            const isActive = currentStage === item.id;
-            return (
-              <button
-                key={item.id}
-                onClick={() => onNavigateStage(item.id)}
-                title={item.label}
-                className={`relative w-11 h-11 rounded-xl flex items-center justify-center transition-all cursor-pointer group ${
-                  isActive
-                    ? 'text-white dark:text-black bg-zinc-900 dark:bg-zinc-100 shadow-sm'
-                    : 'text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 hover:bg-zinc-100 dark:hover:bg-zinc-900'
-                }`}
-              >
-                {/* Active Indicator Bar */}
-                {isActive && (
-                  <span className="absolute -left-2 top-3 bottom-3 w-1 bg-zinc-900 dark:bg-zinc-100 rounded-r-full" />
-                )}
-                <Icon className="w-4 h-4 stroke-[1.85]" />
-
-                {/* Floating Tooltip */}
-                <div className="absolute left-16 px-2.5 py-1.5 rounded-lg bg-zinc-900 dark:bg-zinc-800 text-white text-[11px] font-medium whitespace-nowrap opacity-0 pointer-events-none group-hover:opacity-100 transition-opacity shadow-xl z-50 flex items-center gap-1.5">
-                  <span className="font-mono text-zinc-400">{item.stepNumber}.</span>
-                  <span>{item.label}</span>
-                </div>
-              </button>
-            );
-          })}
-        </nav>
-
-        {/* Bottom: Utilities (Theme Switcher, 12 Modes, Drive/DB, Profile) */}
-        <div className="flex flex-col items-center gap-2 w-full px-2">
-          
-          {/* Theme Switcher Toggle */}
-          <button
-            onClick={toggleTheme}
-            title={theme === 'dark' ? 'Beralih ke Mode Terang (Light Mode)' : 'Beralih ke Mode Gelap (Dark Mode)'}
-            className="relative w-10 h-10 rounded-xl text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 hover:bg-zinc-100 dark:hover:bg-zinc-900 flex items-center justify-center transition-all cursor-pointer group"
-          >
-            {theme === 'dark' ? (
-              <Sun className="w-4 h-4 stroke-[1.85] text-zinc-400 group-hover:text-zinc-100 transition-colors" />
-            ) : (
-              <Moon className="w-4 h-4 stroke-[1.85] text-zinc-600 group-hover:text-zinc-900 transition-colors" />
-            )}
-            <div className="absolute left-16 px-2.5 py-1 rounded-lg bg-zinc-900 dark:bg-zinc-800 text-white text-[11px] font-medium whitespace-nowrap opacity-0 pointer-events-none group-hover:opacity-100 transition-opacity shadow-xl z-50">
-              {theme === 'dark' ? 'Mode Terang' : 'Mode Gelap'}
-            </div>
-          </button>
-
-          {/* 12 Thinking Modes Trigger */}
-          <button
-            onClick={onOpenTwelveModes}
-            title="12 Metode Berpikir Ilmiah"
-            className="relative w-10 h-10 rounded-xl text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 hover:bg-zinc-100 dark:hover:bg-zinc-900 flex items-center justify-center transition-all cursor-pointer group"
-          >
-            <Brain className="w-4 h-4 stroke-[1.85]" />
-            <div className="absolute left-16 px-2.5 py-1 rounded-lg bg-zinc-900 dark:bg-zinc-800 text-white text-[11px] font-medium whitespace-nowrap opacity-0 pointer-events-none group-hover:opacity-100 transition-opacity shadow-xl z-50">
-              12 Metode Berpikir
-            </div>
-          </button>
-
-          {/* Database Drawer Trigger */}
-          <button
-            onClick={onOpenDatabase}
-            title="Riwayat Proposal & Database"
-            className="relative w-10 h-10 rounded-xl text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 hover:bg-zinc-100 dark:hover:bg-zinc-900 flex items-center justify-center transition-all cursor-pointer group"
-          >
-            <Database className="w-4 h-4 stroke-[1.85]" />
-            <div className="absolute left-16 px-2.5 py-1 rounded-lg bg-zinc-900 dark:bg-zinc-800 text-white text-[11px] font-medium whitespace-nowrap opacity-0 pointer-events-none group-hover:opacity-100 transition-opacity shadow-xl z-50">
-              Arsip & Database
-            </div>
-          </button>
-
-          {/* User Profile Avatar */}
+        {/* Bottom: Profile & Online Status Card */}
+        <div className="pt-4 border-t border-zinc-200/60 dark:border-zinc-800/60">
           <button
             onClick={onOpenAuth}
-            title={`${currentUser.name} (${currentUser.role})`}
-            className="w-8 h-8 mt-1 rounded-full bg-zinc-200 dark:bg-zinc-800 hover:bg-zinc-300 dark:hover:bg-zinc-700 text-xs font-semibold text-zinc-800 dark:text-zinc-200 flex items-center justify-center cursor-pointer transition-colors shadow-sm"
+            className="w-full px-2.5 py-2 rounded-xl flex items-center gap-3 hover:bg-zinc-200/60 dark:hover:bg-zinc-900 transition-colors text-left cursor-pointer group"
           >
-            {currentUser.name.charAt(0).toUpperCase()}
+            {/* User Initials Avatar Circle */}
+            <div className="w-9 h-9 rounded-full bg-[#18181B] dark:bg-zinc-100 text-white dark:text-zinc-950 font-bold text-xs flex items-center justify-center flex-shrink-0 shadow-xs">
+              {userInitials}
+            </div>
+
+            {/* User Name & Status */}
+            <div className="flex-1 min-w-0">
+              <p className="text-xs font-semibold text-zinc-900 dark:text-zinc-100 truncate group-hover:text-black dark:group-hover:text-white">
+                {currentUser.name || 'Ilham Maulana'}
+              </p>
+              <div className="flex items-center gap-1.5 mt-0.5">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 flex-shrink-0 animate-pulse" />
+                <span className="text-[11px] text-zinc-400 dark:text-zinc-500 font-normal">
+                  Online
+                </span>
+              </div>
+            </div>
+
+            {/* Chevron Icon */}
+            <ChevronDown className="w-3.5 h-3.5 text-zinc-400 group-hover:text-zinc-700 dark:group-hover:text-zinc-300 transition-colors flex-shrink-0" />
           </button>
         </div>
       </aside>
 
       {/* ============================================================ */}
-      {/* 2. REDESIGNED MOBILE TOP BAR */}
+      {/* 2. MINIMALIST TOP HEADER (Matching ui-referensi.png) */}
       {/* ============================================================ */}
-      <header className="md:hidden sticky top-0 z-40 w-full h-14 bg-white/95 dark:bg-[#000000]/95 border-b border-zinc-200 dark:border-zinc-900 px-4 flex items-center justify-between backdrop-blur-md transition-colors">
-        <div className="flex items-center gap-2.5">
-          <span className="w-7 h-7 rounded-lg bg-zinc-900 dark:bg-zinc-100 text-white dark:text-black font-bold text-xs flex items-center justify-center shadow-sm">
-            LIX
-          </span>
-          <span className="text-xs font-semibold tracking-tight text-zinc-900 dark:text-zinc-100">
-            Academic Studio
-          </span>
-          <span className="text-[10px] px-2 py-0.5 rounded-full bg-zinc-100 dark:bg-zinc-900 text-zinc-600 dark:text-zinc-400 border border-zinc-200 dark:border-zinc-800">
-            {categoryLabels[activeCategory] || 'Akademik'}
-          </span>
+      <header className="fixed top-0 right-0 left-0 md:left-60 lg:left-64 h-16 bg-[#F9F9F8]/90 dark:bg-[#000000]/90 backdrop-blur-md px-4 sm:px-8 flex items-center justify-between z-30 transition-colors duration-200">
+        
+        {/* Left: Quick Search Capsule "🔍 Cari sesuatu..." */}
+        <div className="relative flex-1 max-w-xs sm:max-w-sm">
+          <div className="relative flex items-center">
+            <Search className="w-3.5 h-3.5 text-zinc-400 absolute left-3.5 pointer-events-none" />
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={(e) => {
+                setSearchQuery(e.target.value);
+                setShowSearchDropdown(true);
+              }}
+              onFocus={() => setShowSearchDropdown(true)}
+              onBlur={() => setTimeout(() => setShowSearchDropdown(false), 200)}
+              placeholder="Cari sesuatu..."
+              className="w-full h-9 rounded-full bg-[#F1F1EF] dark:bg-zinc-900/90 text-xs text-zinc-800 dark:text-zinc-200 placeholder:text-zinc-400 pl-9 pr-4 border border-transparent focus:border-zinc-300 dark:focus:border-zinc-700 focus:bg-white dark:focus:bg-zinc-900 outline-none transition-all shadow-2xs"
+            />
+          </div>
+
+          {/* Quick Command & Search Dropdown */}
+          {showSearchDropdown && (
+            <div className="absolute top-11 left-0 w-80 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl shadow-xl p-2 z-50 text-xs animate-in fade-in duration-100">
+              <div className="text-[10px] uppercase font-semibold text-zinc-400 px-2 py-1">
+                Aksi Cepat & Navigasi
+              </div>
+              <button
+                onMouseDown={() => onNavigateStage('input')}
+                className="w-full text-left px-2.5 py-1.5 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 flex items-center gap-2 text-zinc-700 dark:text-zinc-300"
+              >
+                <Home className="w-3.5 h-3.5" />
+                <span>Buat Usulan Baru</span>
+              </button>
+              <button
+                onMouseDown={() => {
+                  if (onOpenConsultation) onOpenConsultation();
+                }}
+                className="w-full text-left px-2.5 py-1.5 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 flex items-center gap-2 text-zinc-700 dark:text-zinc-300"
+              >
+                <MessageSquare className="w-3.5 h-3.5" />
+                <span>Konsultasi Ide & Masalah Magang</span>
+              </button>
+              <button
+                onMouseDown={onOpenDatabase}
+                className="w-full text-left px-2.5 py-1.5 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 flex items-center gap-2 text-zinc-700 dark:text-zinc-300"
+              >
+                <Folder className="w-3.5 h-3.5" />
+                <span>Buka Riwayat Proyek Proposal</span>
+              </button>
+              <button
+                onMouseDown={() => {
+                  if (onOpenGuidelines) onOpenGuidelines();
+                }}
+                className="w-full text-left px-2.5 py-1.5 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 flex items-center gap-2 text-zinc-700 dark:text-zinc-300"
+              >
+                <Settings className="w-3.5 h-3.5" />
+                <span>Pindai Format Kampus (Scan AI)</span>
+              </button>
+            </div>
+          )}
         </div>
 
-        <div className="flex items-center gap-1.5">
-          {/* Mobile Theme Switcher */}
+        {/* Right: Theme Switcher, Bell Icon, User Profile Badge */}
+        <div className="flex items-center gap-2 sm:gap-3">
+          
+          {/* Theme Selector Pill "☼ Light ⌄" */}
           <button
             onClick={toggleTheme}
-            className="p-2 rounded-lg text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-100 dark:hover:bg-zinc-900 transition-colors"
-            title={theme === 'dark' ? 'Mode Terang' : 'Mode Gelap'}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-full hover:bg-zinc-200/50 dark:hover:bg-zinc-800 text-xs font-medium text-zinc-700 dark:text-zinc-300 transition-colors cursor-pointer"
+            title={theme === 'dark' ? 'Ganti ke Mode Terang' : 'Ganti ke Mode Gelap'}
           >
-            {theme === 'dark' ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
+            {theme === 'dark' ? (
+              <Moon className="w-3.5 h-3.5 text-zinc-300" />
+            ) : (
+              <Sun className="w-3.5 h-3.5 text-zinc-600" />
+            )}
+            <span className="capitalize">{theme === 'dark' ? 'Dark' : 'Light'}</span>
+            <ChevronDown className="w-3 h-3 text-zinc-400" />
           </button>
 
+          {/* Notification Bell */}
           <button
-            onClick={onOpenTwelveModes}
-            className="p-2 rounded-lg text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-100 dark:hover:bg-zinc-900 transition-colors"
-            title="12 Metode Berpikir"
+            onClick={() => {
+              if (onOpenTwelveModes) onOpenTwelveModes();
+            }}
+            title="12 Model Berpikir Ilmiah"
+            className="p-2 rounded-full text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-200/50 dark:hover:bg-zinc-800 transition-colors cursor-pointer"
           >
-            <Brain className="w-4 h-4" />
+            <Bell className="w-4 h-4 stroke-[1.85]" />
           </button>
 
+          {/* User Avatar Circle Badge */}
           <button
             onClick={onOpenAuth}
-            className="w-7 h-7 rounded-full bg-zinc-200 dark:bg-zinc-800 text-[11px] font-semibold text-zinc-800 dark:text-zinc-200 flex items-center justify-center"
+            title={`${currentUser.name} (${currentUser.role})`}
+            className="w-8 h-8 rounded-full bg-[#18181B] dark:bg-zinc-100 text-white dark:text-zinc-950 font-bold text-xs flex items-center justify-center cursor-pointer shadow-xs hover:scale-105 active:scale-95 transition-transform"
           >
-            {currentUser.name.charAt(0)}
+            {userInitials}
           </button>
 
+          {/* Mobile Menu Toggle Button */}
           <button
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            className="p-2 rounded-lg text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-100 dark:hover:bg-zinc-900 transition-colors"
-            aria-label="Toggle navigation menu"
+            className="md:hidden p-2 rounded-lg text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-200/50 dark:hover:bg-zinc-800 transition-colors"
           >
-            {mobileMenuOpen ? <X className="w-4 h-4" /> : <Menu className="w-4 h-4" />}
+            {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
           </button>
         </div>
       </header>
 
-      {/* Mobile Drawer Menu */}
+      {/* ============================================================ */}
+      {/* 3. MOBILE SLIDE-OUT MENU DRAWER */}
+      {/* ============================================================ */}
       {mobileMenuOpen && (
-        <div className="md:hidden fixed inset-x-0 top-14 bg-white dark:bg-[#09090b] border-b border-zinc-200 dark:border-zinc-800 p-4 z-40 space-y-1 animate-in fade-in slide-in-from-top-2 duration-150 shadow-2xl">
-          <div className="text-[10px] uppercase tracking-wider text-zinc-500 font-medium px-2 py-1">
-            Navigasi Tahapan Usulan
+        <div className="md:hidden fixed inset-x-0 top-16 bg-white dark:bg-[#09090b] border-b border-zinc-200 dark:border-zinc-800 p-4 z-40 space-y-2 animate-in fade-in slide-in-from-top-2 duration-150 shadow-2xl">
+          <div className="text-[10px] uppercase font-semibold text-zinc-400 px-3">
+            Menu Navigasi
           </div>
-          {stageList.map((item) => {
+          {navMenuItems.map((item) => {
             const Icon = item.icon;
-            const isActive = currentStage === item.id;
             return (
               <button
                 key={item.id}
                 onClick={() => {
-                  onNavigateStage(item.id);
+                  item.onClick();
                   setMobileMenuOpen(false);
                 }}
-                className={`w-full px-3 py-2.5 rounded-xl flex items-center gap-3 text-xs transition-colors text-left ${
-                  isActive 
-                    ? 'bg-zinc-900 text-white dark:bg-zinc-100 dark:text-black font-semibold shadow-sm' 
-                    : 'text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-100 dark:hover:bg-zinc-900'
+                className={`w-full px-3.5 py-2.5 rounded-xl flex items-center gap-3 text-xs transition-colors text-left ${
+                  item.isActive 
+                    ? 'bg-[#ECECEC] text-zinc-950 dark:bg-zinc-800 dark:text-white font-semibold' 
+                    : 'text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-900'
                 }`}
               >
                 <Icon className="w-4 h-4" />
-                <span>{item.stepNumber}. {item.label}</span>
+                <span>{item.label}</span>
               </button>
             );
           })}
           
           <div className="pt-3 mt-2 border-t border-zinc-200 dark:border-zinc-900 flex items-center justify-between px-2 text-xs">
             <button
-              onClick={toggleTheme}
-              className="flex items-center gap-1.5 text-zinc-700 dark:text-zinc-300 hover:text-black dark:hover:text-white font-medium"
-            >
-              {theme === 'dark' ? <Sun className="w-3.5 h-3.5" /> : <Moon className="w-3.5 h-3.5" />}
-              <span>{theme === 'dark' ? 'Mode Terang (Light)' : 'Mode Gelap (Dark)'}</span>
-            </button>
-            <button
               onClick={() => {
                 onResetSession();
                 setMobileMenuOpen(false);
               }}
-              className="text-red-500 hover:underline flex items-center gap-1 text-xs"
+              className="text-red-500 hover:underline flex items-center gap-1.5 text-xs cursor-pointer"
             >
               <RotateCcw className="w-3.5 h-3.5" />
-              Reset Sesi
+              <span>Reset Sesi</span>
             </button>
           </div>
         </div>
       )}
 
       {/* ============================================================ */}
-      {/* 3. MAIN WORKSPACE VIEWPORT */}
+      {/* 4. WORKSPACE MAIN VIEWPORT */}
       {/* ============================================================ */}
-      <div className="flex-1 md:pl-16 lg:pl-[72px] min-h-screen flex flex-col overflow-x-hidden">
-        
-        {/* REDESIGNED TOP HEADER NAVBAR */}
-        <div className="w-full h-15 border-b border-zinc-200 dark:border-zinc-900 bg-white/80 dark:bg-[#000000]/80 backdrop-blur-md px-4 sm:px-8 flex items-center justify-between sticky top-0 z-30 transition-colors duration-200">
-          
-          {/* Left: Category Badge & Proposal Title Breadcrumb */}
-          <div className="flex items-center gap-2.5 overflow-hidden pr-4">
-            <span className="text-[11px] font-semibold px-2.5 py-0.5 rounded-full bg-zinc-100 dark:bg-zinc-900 text-zinc-700 dark:text-zinc-300 border border-zinc-200 dark:border-zinc-800 whitespace-nowrap shadow-xs">
-              {categoryLabels[activeCategory] || 'Akademik'}
-            </span>
-            <ChevronRight className="w-3.5 h-3.5 text-zinc-400 dark:text-zinc-600 flex-shrink-0" />
-            <h1 
-              title={activeTitle}
-              className="text-xs sm:text-sm font-medium text-zinc-800 dark:text-zinc-200 truncate max-w-[180px] sm:max-w-xs md:max-w-md lg:max-w-lg cursor-default"
-            >
-              {activeTitle}
-            </h1>
-          </div>
-
-          {/* Center/Right: Stepper Segment & Action Controls */}
-          <div className="flex items-center gap-3 flex-shrink-0">
-            
-            {/* Desktop Stage Segmented Stepper */}
-            <nav className="hidden lg:flex items-center gap-1 bg-zinc-100 dark:bg-zinc-950 p-1 rounded-xl border border-zinc-200 dark:border-zinc-900 text-xs shadow-xs">
-              {stageList.map((stg) => {
-                const isActive = currentStage === stg.id;
-                return (
-                  <button
-                    key={stg.id}
-                    onClick={() => onNavigateStage(stg.id)}
-                    className={`px-3 py-1.5 rounded-lg text-[11px] transition-all cursor-pointer flex items-center gap-1.5 ${
-                      isActive
-                        ? 'bg-white dark:bg-zinc-100 text-zinc-900 dark:text-black font-semibold shadow-xs'
-                        : 'text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 hover:bg-zinc-200/60 dark:hover:bg-zinc-900/60'
-                    }`}
-                  >
-                    <span className="font-mono text-[10px] opacity-60">{stg.stepNumber}.</span>
-                    <span>{stg.shortLabel}</span>
-                  </button>
-                );
-              })}
-            </nav>
-
-            {/* Quick Theme Switcher Pill Button */}
-            <button
-              onClick={toggleTheme}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium text-zinc-700 dark:text-zinc-300 bg-zinc-100 dark:bg-zinc-900 hover:bg-zinc-200 dark:hover:bg-zinc-800 border border-zinc-200 dark:border-zinc-800 transition-colors cursor-pointer shadow-xs"
-              title={theme === 'dark' ? 'Beralih ke Light Mode' : 'Beralih ke Dark Mode'}
-            >
-              {theme === 'dark' ? (
-                <>
-                  <Sun className="w-3.5 h-3.5 text-zinc-300" />
-                  <span className="hidden sm:inline text-[11px]">Light</span>
-                </>
-              ) : (
-                <>
-                  <Moon className="w-3.5 h-3.5 text-zinc-600" />
-                  <span className="hidden sm:inline text-[11px]">Dark</span>
-                </>
-              )}
-            </button>
-
-            {/* Supabase Cloud Sync Pill */}
-            <button
-              onClick={onOpenAuth}
-              className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-200 bg-zinc-100/60 dark:bg-zinc-900/40 hover:bg-zinc-100 dark:hover:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 transition-colors"
-              title="Status Database & Cloud Storage"
-            >
-              <Cloud className="w-3.5 h-3.5 text-zinc-400" />
-              <span className="text-[11px]">
-                {isSupabaseConfigured ? 'Sync Aktif' : 'Penyimpanan'}
-              </span>
-            </button>
-          </div>
-        </div>
-
-        {/* WORKSPACE CONTENT CANVAS */}
-        <main className="flex-1 w-full max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-10 flex flex-col">
-          {children}
-        </main>
-      </div>
-
-      {/* ============================================================ */}
-      {/* 4. REDESIGNED MOBILE BOTTOM NAVIGATION */}
-      {/* ============================================================ */}
-      <nav className="md:hidden fixed bottom-0 left-0 right-0 h-14 bg-white/95 dark:bg-[#000000]/95 border-t border-zinc-200 dark:border-zinc-900 flex items-center justify-around px-2 z-40 backdrop-blur-md transition-colors">
-        {stageList.map((item) => {
-          const Icon = item.icon;
-          const isActive = currentStage === item.id;
-          return (
-            <button
-              key={item.id}
-              onClick={() => onNavigateStage(item.id)}
-              className={`flex flex-col items-center justify-center gap-0.5 py-1 px-2.5 text-[10px] font-medium transition-colors ${
-                isActive 
-                  ? 'text-zinc-900 dark:text-zinc-100 font-semibold' 
-                  : 'text-zinc-400 dark:text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-300'
-              }`}
-            >
-              <Icon className="w-4 h-4 stroke-[1.85]" />
-              <span>{item.shortLabel}</span>
-            </button>
-          );
-        })}
-      </nav>
+      <main className="flex-1 md:ml-60 lg:ml-64 pt-16 min-h-screen flex flex-col overflow-x-hidden">
+        {children}
+      </main>
 
     </div>
   );

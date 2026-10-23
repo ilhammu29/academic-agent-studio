@@ -151,8 +151,8 @@ export function getStoredUser(): UserProfile {
   if (typeof window === 'undefined') {
     return {
       id: 'usr-default',
-      email: 'ilham.akademik@universitas.ac.id',
-      name: 'Muhammad Ilham',
+      email: 'ilham.maulana@universitas.ac.id',
+      name: 'Ilham Maulana',
       role: 'Mahasiswa',
       institution: 'Universitas Sebelas Maret (UNS)',
       createdAt: new Date().toISOString()
@@ -168,8 +168,8 @@ export function getStoredUser(): UserProfile {
   }
   const defaultUser: UserProfile = {
     id: 'usr-default',
-    email: 'ilham.akademik@universitas.ac.id',
-    name: 'Muhammad Ilham',
+    email: 'ilham.maulana@universitas.ac.id',
+    name: 'Ilham Maulana',
     role: 'Mahasiswa',
     institution: 'Universitas Sebelas Maret (UNS)',
     createdAt: new Date().toISOString()

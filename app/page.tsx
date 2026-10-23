@@ -35,12 +35,12 @@ export default function Home() {
   const [stage, setStage] = useState<StudioStage>("input");
   const [category, setCategory] = useState<ProposalCategory>("magang");
 
-  // Input Stage State (Cleaned of any arbitrary dummy strings)
-  const [title, setTitle] = useState("Implementasi Pipeline MLOps & RAG untuk Knowledge Retrieval Internal");
-  const [targetEntity, setTargetEntity] = useState("PT Telkom Indonesia (Persero) Tbk");
+  // Input Stage State
+  const [title, setTitle] = useState("");
+  const [targetEntity, setTargetEntity] = useState("");
   const [institution, setInstitution] = useState(currentUser.institution || "Universitas Sebelas Maret (UNS)");
   const [facultyMajor, setFacultyMajor] = useState("Informatika & Sains Data");
-  const [candidateName, setCandidateName] = useState(currentUser.name || "Muhammad Ilham");
+  const [candidateName, setCandidateName] = useState(currentUser.name || "Ilham Maulana");
   const [candidateId, setCandidateId] = useState("NIM-2026-AKAD");
   const [durationMonths, setDurationMonths] = useState<number>(6);
 
@@ -294,13 +294,15 @@ export default function Home() {
         <ScreenLoader onComplete={() => setShowSplash(false)} />
       )}
 
-      {/* 2. Full-Bleed Desktop & Mobile Responsive App Shell (Monochrome) */}
+      {/* 2. Full-Bleed Desktop & Mobile Responsive App Shell (Matching ui-referensi.png) */}
       <AppShell
         currentStage={stage}
         onNavigateStage={handleNavigateStage}
         onOpenTwelveModes={() => setIsThinkingModalOpen(true)}
         onOpenDatabase={() => setIsDatabaseDrawerOpen(true)}
         onOpenAuth={() => setIsAuthModalOpen(true)}
+        onOpenConsultation={() => setIsConsultationModalOpen(true)}
+        onOpenGuidelines={() => setIsGuidelineModalOpen(true)}
         onResetSession={handleResetSession}
         activeCategory={category}
         activeTitle={title}
