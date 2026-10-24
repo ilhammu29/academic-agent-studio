@@ -48,6 +48,7 @@ export default function Home() {
   const [candidateName, setCandidateName] = useState(currentUser.name || "Ilham Maulana");
   const [candidateId, setCandidateId] = useState("NIM-2026-AKAD");
   const [durationMonths, setDurationMonths] = useState<number>(6);
+  const [targetDepthPages, setTargetDepthPages] = useState<number>(45);
 
   // Interview Stage State
   const [questions, setQuestions] = useState<DiagnosticQuestion[]>([]);
@@ -272,6 +273,9 @@ export default function Home() {
       if (project.documentData.campusGuideline) {
         setCampusGuideline(project.documentData.campusGuideline);
       }
+      if (project.documentData.targetDepthPages) {
+        setTargetDepthPages(project.documentData.targetDepthPages);
+      }
     } else {
       const doc = buildGeneratedDocument(
         project.title,
@@ -329,7 +333,11 @@ export default function Home() {
         {stage === "input" && (
           <HeroInputView
             category={category}
-            setCategory={setCategory}
+            setCategory={(newCat) => {
+              setCategory(newCat);
+              if (newCat === "magang" && targetDepthPages > 30) setTargetDepthPages(25);
+              else if (newCat === "skripsi" && targetDepthPages < 40) setTargetDepthPages(45);
+            }}
             reportType={reportType}
             setReportType={setReportType}
             title={title}
@@ -342,6 +350,8 @@ export default function Home() {
             setCandidateName={setCandidateName}
             candidateId={candidateId}
             setCandidateId={setCandidateId}
+            targetDepthPages={targetDepthPages}
+            setTargetDepthPages={setTargetDepthPages}
             onSubmit={handleStartInterview}
             onOpenDatabase={() => setIsDatabaseDrawerOpen(true)}
             onOpenDrive={() => setStage("drive")}
@@ -403,6 +413,7 @@ export default function Home() {
             institution={institution}
             facultyMajor={facultyMajor}
             campusGuideline={campusGuideline}
+            targetDepthPages={targetDepthPages}
             onComplete={handleAgentsFinished}
           />
         )}

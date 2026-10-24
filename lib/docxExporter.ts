@@ -56,7 +56,7 @@ function parseImageData(dataUrl?: string): Uint8Array | null {
   return null;
 }
 
-export async function generateAcademicProposalDocx(rawDoc: ProposalDocument): Promise<Blob> {
+export async function generateAcademicProposalDocx(rawDoc: ProposalDocument, disabledSections: string[] = []): Promise<Blob> {
   const doc = sanitizeAcademicText(rawDoc);
   const guideline = doc.campusGuideline;
   const hs = guideline?.headingStyle || "decimal";
@@ -66,7 +66,7 @@ export async function generateAcademicProposalDocx(rawDoc: ProposalDocument): Pr
   const leftCm = guideline?.margins?.leftCm ?? 4;
   const rightCm = guideline?.margins?.rightCm ?? 3;
   const bottomCm = guideline?.margins?.bottomCm ?? 3;
-  const lineSpacingTwip = guideline?.typography?.lineSpacing === 2.0 ? 480 : 360;
+  const lineSpacingTwip = Math.round((guideline?.typography?.lineSpacing || 1.5) * 240);
   const isMagang = doc.category === "magang";
 
   // Reusable Paragraph styling
@@ -74,7 +74,7 @@ export async function generateAcademicProposalDocx(rawDoc: ProposalDocument): Pr
     new Paragraph({
       alignment: AlignmentType.CENTER,
       heading: HeadingLevel.HEADING_1,
-      spacing: { before: 240, after: 280, line: 360 },
+      spacing: { before: 240, after: 280, line: lineSpacingTwip },
       children: [
         new TextRun({
           text: stripDoubleAsterisks(text),
@@ -90,7 +90,7 @@ export async function generateAcademicProposalDocx(rawDoc: ProposalDocument): Pr
     new Paragraph({
       alignment: AlignmentType.LEFT,
       heading: HeadingLevel.HEADING_2,
-      spacing: { before: 200, after: 140, line: 360 },
+      spacing: { before: 200, after: 140, line: lineSpacingTwip },
       children: [
         new TextRun({
           text: stripDoubleAsterisks(text),
@@ -106,7 +106,7 @@ export async function generateAcademicProposalDocx(rawDoc: ProposalDocument): Pr
     new Paragraph({
       alignment: AlignmentType.LEFT,
       heading: HeadingLevel.HEADING_3,
-      spacing: { before: 160, after: 100, line: 360 },
+      spacing: { before: 160, after: 100, line: lineSpacingTwip },
       children: [
         new TextRun({
           text: stripDoubleAsterisks(text),
@@ -121,7 +121,7 @@ export async function generateAcademicProposalDocx(rawDoc: ProposalDocument): Pr
   const createBodyParagraph = (text: string) =>
     new Paragraph({
       alignment: AlignmentType.JUSTIFIED,
-      spacing: { after: 160, line: 360 }, // 1.5 line spacing
+      spacing: { after: 160, line: lineSpacingTwip },
       indent: { firstLine: cmToDxa(1.0) }, // Indentasi 1 cm paragraf baru
       children: [
         new TextRun({
@@ -136,7 +136,7 @@ export async function generateAcademicProposalDocx(rawDoc: ProposalDocument): Pr
   const createBulletItem = (text: string) =>
     new Paragraph({
       alignment: AlignmentType.JUSTIFIED,
-      spacing: { after: 100, line: 360 },
+      spacing: { after: 100, line: lineSpacingTwip },
       indent: { left: cmToDxa(0.8), hanging: cmToDxa(0.4) },
       children: [
         new TextRun({
@@ -326,22 +326,12 @@ export async function generateAcademicProposalDocx(rawDoc: ProposalDocument): Pr
     };
   });
 
-  const docxDocument = new Document({
-    styles: {
-      default: {
-        document: {
-          run: { font: FONT_FAMILY, size: 24, color: PRIMARY_COLOR },
-          paragraph: { spacing: { line: 360 } },
-        },
-      },
-    },
-    sections: [
-      // ==========================================
-      // SECTION 1: HALAMAN JUDUL / COVER
-      // ==========================================
-      {
-        properties: standardPageProperties,
-        children: [
+  // ==========================================
+  // SECTION 1: HALAMAN JUDUL / COVER
+  // ==========================================
+  const coverSection = {
+    properties: standardPageProperties,
+    children: [
           new Paragraph({
             alignment: AlignmentType.CENTER,
             spacing: { before: 200, after: 120 },
@@ -464,14 +454,14 @@ export async function generateAcademicProposalDocx(rawDoc: ProposalDocument): Pr
             ],
           }),
         ],
-      },
+  };
 
-      // ==========================================
-      // SECTION 2: LEMBAR PENGESAHAN
-      // ==========================================
-      {
-        properties: standardPageProperties,
-        children: [
+  // ==========================================
+  // SECTION 2: LEMBAR PENGESAHAN
+  // ==========================================
+  const pengesahanSection = {
+    properties: standardPageProperties,
+    children: [
           createHeading1(doc.approvalSheet?.title || "LEMBAR PENGESAHAN PROPOSAL"),
           new Paragraph({ spacing: { after: 200 } }),
           ...(pengesahanImgBytes ? [
@@ -568,14 +558,14 @@ export async function generateAcademicProposalDocx(rawDoc: ProposalDocument): Pr
             }),
           ]),
         ],
-      },
+  };
 
-      // ==========================================
-      // SECTION 2B: LEMBAR PERNYATAAN BEBAS PLAGIARISME
-      // ==========================================
-      {
-        properties: standardPageProperties,
-        children: [
+  // ==========================================
+  // SECTION 2B: LEMBAR PERNYATAAN BEBAS PLAGIARISME
+  // ==========================================
+  const orisinalitasSection = {
+    properties: standardPageProperties,
+    children: [
           createHeading1("SURAT PERNYATAAN BEBAS PLAGIARISME & KEASLIAN KARYA"),
           new Paragraph({ spacing: { after: 240 } }),
           ...(orisinalitasImgBytes ? [
@@ -593,7 +583,7 @@ export async function generateAcademicProposalDocx(rawDoc: ProposalDocument): Pr
           ] : [
             createBodyParagraph("Yang bertanda tangan di bawah ini:"),
             new Paragraph({
-              spacing: { after: 80, line: 360 },
+              spacing: { after: 80, line: lineSpacingTwip },
               indent: { left: cmToDxa(0.8) },
               children: [
                 new TextRun({ text: "Nama\t\t: ", font: FONT_FAMILY, size: 24 }),
@@ -601,7 +591,7 @@ export async function generateAcademicProposalDocx(rawDoc: ProposalDocument): Pr
               ],
             }),
             new Paragraph({
-              spacing: { after: 80, line: 360 },
+              spacing: { after: 80, line: lineSpacingTwip },
               indent: { left: cmToDxa(0.8) },
               children: [
                 new TextRun({ text: "NIM\t\t: ", font: FONT_FAMILY, size: 24 }),
@@ -609,7 +599,7 @@ export async function generateAcademicProposalDocx(rawDoc: ProposalDocument): Pr
               ],
             }),
             new Paragraph({
-              spacing: { after: 80, line: 360 },
+              spacing: { after: 80, line: lineSpacingTwip },
               indent: { left: cmToDxa(0.8) },
               children: [
                 new TextRun({ text: "Program Studi\t: ", font: FONT_FAMILY, size: 24 }),
@@ -617,7 +607,7 @@ export async function generateAcademicProposalDocx(rawDoc: ProposalDocument): Pr
               ],
             }),
             new Paragraph({
-              spacing: { after: 200, line: 360 },
+              spacing: { after: 200, line: lineSpacingTwip },
               indent: { left: cmToDxa(0.8) },
               children: [
                 new TextRun({ text: "Perguruan Tinggi\t: ", font: FONT_FAMILY, size: 24 }),
@@ -631,18 +621,13 @@ export async function generateAcademicProposalDocx(rawDoc: ProposalDocument): Pr
             new Paragraph({ alignment: AlignmentType.RIGHT, children: [new TextRun({ text: `NIM. ${doc.candidateId}`, font: FONT_FAMILY, size: 22 })] }),
           ]),
         ],
-      },
+  };
 
-      // ==========================================
-      // SECTION 2B-EXTRA: LEMBAR KHUSUS & SCAN FORM KAMPUS
-      // ==========================================
-      ...extraDocxSections,
-
-      // ==========================================
-      // SECTION 2C: KATA PENGANTAR
-      // ==========================================
-      {
-        properties: standardPageProperties,
+  // ==========================================
+  // SECTION 2C: KATA PENGANTAR
+  // ==========================================
+  const pengantarSection = {
+    properties: standardPageProperties,
         children: [
           createHeading1("KATA PENGANTAR"),
           new Paragraph({ spacing: { after: 200 } }),
@@ -654,14 +639,14 @@ export async function generateAcademicProposalDocx(rawDoc: ProposalDocument): Pr
           new Paragraph({ alignment: AlignmentType.RIGHT, children: [new TextRun({ text: doc.candidateName, bold: true, underline: {}, font: FONT_FAMILY, size: 24 })] }),
           new Paragraph({ alignment: AlignmentType.RIGHT, children: [new TextRun({ text: `NIM. ${doc.candidateId}`, font: FONT_FAMILY, size: 22 })] }),
         ],
-      },
+  };
 
-      // ==========================================
-      // SECTION 2D: ABSTRAK (BAHASA INDONESIA)
-      // ==========================================
-      {
-        properties: standardPageProperties,
-        children: [
+  // ==========================================
+  // SECTION 2D: ABSTRAK (BAHASA INDONESIA)
+  // ==========================================
+  const abstrakIdSection = {
+    properties: standardPageProperties,
+    children: [
           createHeading1("ABSTRAK"),
           new Paragraph({
             alignment: AlignmentType.CENTER,
@@ -688,14 +673,14 @@ export async function generateAcademicProposalDocx(rawDoc: ProposalDocument): Pr
             ],
           }),
         ],
-      },
+  };
 
-      // ==========================================
-      // SECTION 2E: ABSTRACT (ENGLISH)
-      // ==========================================
-      {
-        properties: standardPageProperties,
-        children: [
+  // ==========================================
+  // SECTION 2E: ABSTRACT (ENGLISH)
+  // ==========================================
+  const abstractEnSection = {
+    properties: standardPageProperties,
+    children: [
           createHeading1("ABSTRACT"),
           new Paragraph({
             alignment: AlignmentType.CENTER,
@@ -714,7 +699,7 @@ export async function generateAcademicProposalDocx(rawDoc: ProposalDocument): Pr
           }),
           new Paragraph({
             alignment: AlignmentType.JUSTIFIED,
-            spacing: { after: 160, line: 360 },
+            spacing: { after: 160, line: lineSpacingTwip },
             indent: { firstLine: cmToDxa(1.0) },
             children: [
               new TextRun({
@@ -727,7 +712,7 @@ export async function generateAcademicProposalDocx(rawDoc: ProposalDocument): Pr
           }),
           new Paragraph({
             alignment: AlignmentType.JUSTIFIED,
-            spacing: { after: 160, line: 360 },
+            spacing: { after: 160, line: lineSpacingTwip },
             indent: { firstLine: cmToDxa(1.0) },
             children: [
               new TextRun({
@@ -746,14 +731,14 @@ export async function generateAcademicProposalDocx(rawDoc: ProposalDocument): Pr
             ],
           }),
         ],
-      },
+  };
 
-      // ==========================================
-      // SECTION 2F: DAFTAR ISI FORMAL
-      // ==========================================
-      {
-        properties: standardPageProperties,
-        children: [
+  // ==========================================
+  // SECTION 2F: DAFTAR ISI FORMAL
+  // ==========================================
+  const daftarIsiSection = {
+    properties: standardPageProperties,
+    children: [
           createHeading1("DAFTAR ISI"),
           new Paragraph({ spacing: { after: 200 } }),
           ...[
@@ -778,7 +763,7 @@ export async function generateAcademicProposalDocx(rawDoc: ProposalDocument): Pr
             { title: "LAMPIRAN-LAMPIRAN", page: `${pLampiran}` },
           ].map((entry) =>
             new Paragraph({
-              spacing: { after: 100, line: 360 },
+              spacing: { after: 100, line: lineSpacingTwip },
               children: [
                 new TextRun({ text: entry.title, bold: true, font: FONT_FAMILY, size: 22 }),
                 new TextRun({ text: ` ${".".repeat(45)} `, font: FONT_FAMILY, size: 20 }),
@@ -787,28 +772,28 @@ export async function generateAcademicProposalDocx(rawDoc: ProposalDocument): Pr
             })
           ),
         ],
-      },
+  };
 
-      // ==========================================
-      // SECTION 3: RINGKASAN EKSEKUTIF
-      // ==========================================
-      {
-        properties: standardPageProperties,
-        ...chapterHeadersFooters,
-        children: [
-          createHeading1("RINGKASAN EKSEKUTIF"),
-          new Paragraph({ spacing: { after: 200 } }),
-          createBodyParagraph(doc.executiveSummary),
-        ],
-      },
+  // ==========================================
+  // SECTION 3: RINGKASAN EKSEKUTIF
+  // ==========================================
+  const ringkasanSection = {
+    properties: standardPageProperties,
+    ...chapterHeadersFooters,
+    children: [
+      createHeading1("RINGKASAN EKSEKUTIF"),
+      new Paragraph({ spacing: { after: 200 } }),
+      createBodyParagraph(doc.executiveSummary),
+    ],
+  };
 
-      // ==========================================
-      // SECTION 4: BAB I PENDAHULUAN
-      // ==========================================
-      {
-        properties: standardPageProperties,
-        ...chapterHeadersFooters,
-        children: [
+  // ==========================================
+  // SECTION 4: BAB I PENDAHULUAN
+  // ==========================================
+  const bab1Section = {
+    properties: standardPageProperties,
+    ...chapterHeadersFooters,
+    children: [
           createHeading1(doc.bab1.title),
           new Paragraph({ spacing: { after: 140 } }),
 
@@ -819,7 +804,7 @@ export async function generateAcademicProposalDocx(rawDoc: ProposalDocument): Pr
           ...doc.bab1.rumusanMasalah.map((r, i) =>
             new Paragraph({
               alignment: AlignmentType.JUSTIFIED,
-              spacing: { after: 120, line: 360 },
+              spacing: { after: 120, line: lineSpacingTwip },
               indent: { left: cmToDxa(0.8), hanging: cmToDxa(0.4) },
               children: [new TextRun({ text: `${i + 1}. ${r}`, font: FONT_FAMILY, size: 24 })],
             })
@@ -831,45 +816,45 @@ export async function generateAcademicProposalDocx(rawDoc: ProposalDocument): Pr
           createHeading2(getSectionHeading(1, 3, "Tujuan Kegiatan / Penelitian", hs)),
           new Paragraph({
             alignment: AlignmentType.JUSTIFIED,
-            spacing: { after: 100, line: 360 },
+            spacing: { after: 100, line: lineSpacingTwip },
             children: [new TextRun({ text: "Tujuan Umum:", bold: true, font: FONT_FAMILY, size: 24 })],
           }),
           createBodyParagraph(doc.bab1.tujuanUmum),
           new Paragraph({
             alignment: AlignmentType.JUSTIFIED,
-            spacing: { before: 100, after: 100, line: 360 },
+            spacing: { before: 100, after: 100, line: lineSpacingTwip },
             children: [new TextRun({ text: "Tujuan Khusus:", bold: true, font: FONT_FAMILY, size: 24 })],
           }),
           ...doc.bab1.tujuanKhusus.map((t) => createBulletItem(t)),
 
           createHeading2(getSectionHeading(1, 4, "Manfaat Kegiatan", hs)),
           new Paragraph({
-            spacing: { after: 80, line: 360 },
+            spacing: { after: 80, line: lineSpacingTwip },
             children: [new TextRun({ text: "A. Bagi Mahasiswa Pengusul:", bold: true, font: FONT_FAMILY, size: 24 })],
           }),
           ...doc.bab1.manfaatMahasiswa.map((m) => createBulletItem(m)),
 
           new Paragraph({
-            spacing: { before: 120, after: 80, line: 360 },
+            spacing: { before: 120, after: 80, line: lineSpacingTwip },
             children: [new TextRun({ text: `B. Bagi Instansi Mitra (${doc.targetEntity}):`, bold: true, font: FONT_FAMILY, size: 24 })],
           }),
           ...doc.bab1.manfaatInstansi.map((m) => createBulletItem(m)),
 
           new Paragraph({
-            spacing: { before: 120, after: 80, line: 360 },
+            spacing: { before: 120, after: 80, line: lineSpacingTwip },
             children: [new TextRun({ text: `C. Bagi Perguruan Tinggi (${doc.institution}):`, bold: true, font: FONT_FAMILY, size: 24 })],
           }),
           ...doc.bab1.manfaatAkademik.map((m) => createBulletItem(m)),
         ],
-      },
+  };
 
-      // ==========================================
-      // SECTION 5: BAB II TINJAUAN PUSTAKA / PROFIL INSTANSI
-      // ==========================================
-      {
-        properties: standardPageProperties,
-        ...chapterHeadersFooters,
-        children: [
+  // ==========================================
+  // SECTION 5: BAB II TINJAUAN PUSTAKA / PROFIL INSTANSI
+  // ==========================================
+  const bab2Section = {
+    properties: standardPageProperties,
+    ...chapterHeadersFooters,
+    children: [
           createHeading1(doc.bab2.title),
           new Paragraph({ spacing: { after: 140 } }),
 
@@ -888,7 +873,7 @@ export async function generateAcademicProposalDocx(rawDoc: ProposalDocument): Pr
             createBodyParagraph(t.elaboration),
             new Paragraph({
               alignment: AlignmentType.JUSTIFIED,
-              spacing: { after: 180, line: 360 },
+              spacing: { after: 180, line: lineSpacingTwip },
               indent: { firstLine: cmToDxa(1.0) },
               children: [
                 new TextRun({
@@ -934,15 +919,15 @@ export async function generateAcademicProposalDocx(rawDoc: ProposalDocument): Pr
             return items;
           }),
         ],
-      },
+  };
 
-      // ==========================================
-      // SECTION 6: BAB III METODOLOGI & RENCANA KERJA
-      // ==========================================
-      {
-        properties: standardPageProperties,
-        ...chapterHeadersFooters,
-        children: [
+  // ==========================================
+  // SECTION 6: BAB III METODOLOGI & RENCANA KERJA
+  // ==========================================
+  const bab3Section = {
+    properties: standardPageProperties,
+    ...chapterHeadersFooters,
+    children: [
           createHeading1(doc.bab3.title),
           new Paragraph({ spacing: { after: 140 } }),
 
@@ -953,7 +938,7 @@ export async function generateAcademicProposalDocx(rawDoc: ProposalDocument): Pr
           ...doc.bab3.lingkupPekerjaan.map((l, i) =>
             new Paragraph({
               alignment: AlignmentType.JUSTIFIED,
-              spacing: { after: 100, line: 360 },
+              spacing: { after: 100, line: lineSpacingTwip },
               indent: { left: cmToDxa(0.8), hanging: cmToDxa(0.4) },
               children: [new TextRun({ text: `${i + 1}. ${l}`, font: FONT_FAMILY, size: 24 })],
             })
@@ -998,22 +983,22 @@ export async function generateAcademicProposalDocx(rawDoc: ProposalDocument): Pr
             return items;
           }),
         ],
-      },
+  };
 
-      // ==========================================
-      // SECTION 7: BAB IV JADWAL MATRIKS & ANGGARAN
-      // ==========================================
-      {
-        properties: standardPageProperties,
-        ...chapterHeadersFooters,
-        children: [
+  // ==========================================
+  // SECTION 7: BAB IV JADWAL MATRIKS & ANGGARAN
+  // ==========================================
+  const bab4Section = {
+    properties: standardPageProperties,
+    ...chapterHeadersFooters,
+    children: [
           createHeading1(doc.bab4.title),
           new Paragraph({ spacing: { after: 140 } }),
 
           createHeading2(getSectionHeading(4, 0, "Matriks Rencana Kerja Mingguan (Tabel 3-Garis)", hs)),
           new Paragraph({
             alignment: AlignmentType.JUSTIFIED,
-            spacing: { after: 140, line: 360 },
+            spacing: { after: 140, line: lineSpacingTwip },
             children: [
               new TextRun({
                 text: "Tabel 4.1. Distribusi Kegiatan Mingguan dan Target Capaian",
@@ -1084,15 +1069,15 @@ export async function generateAcademicProposalDocx(rawDoc: ProposalDocument): Pr
           createHeading2(getSectionHeading(4, 1, "Penutup", hs)),
           createBodyParagraph(doc.bab4.penutup),
         ],
-      },
+  };
 
-      // ==========================================
-      // SECTION 8: BAB V KESIMPULAN & MITIGASI RISIKO
-      // ==========================================
-      {
-        properties: standardPageProperties,
-        ...chapterHeadersFooters,
-        children: [
+  // ==========================================
+  // SECTION 8: BAB V KESIMPULAN & MITIGASI RISIKO
+  // ==========================================
+  const bab5Section = {
+    properties: standardPageProperties,
+    ...chapterHeadersFooters,
+    children: [
           createHeading1(doc.bab5?.title || (isMagang ? "BAB V: PENUTUP & REKOMENDASI" : "BAB V: KESIMPULAN & REKOMENDASI KONTRIBUSI")),
           
           createHeading2(getSectionHeading(5, 0, "Kesimpulan Rencana Usulan", hs)),
@@ -1159,15 +1144,15 @@ export async function generateAcademicProposalDocx(rawDoc: ProposalDocument): Pr
           createHeading2(getSectionHeading(5, 3, "Rencana Keberlanjutan Proyek (Sustainability Plan)", hs)),
           createBodyParagraph(doc.bab5?.sustainabilityPlan || `Seluruh artefak hasil pekerjaan dan dokumentasi diserahkan secara resmi kepada pihak ${doc.targetEntity} disertai sesi transfer knowledge untuk pemanfaatan berkelanjutan.`),
         ],
-      },
+  };
 
-      // ==========================================
-      // SECTION 9: DAFTAR PUSTAKA
-      // ==========================================
-      {
-        properties: standardPageProperties,
-        ...chapterHeadersFooters,
-        children: [
+  // ==========================================
+  // SECTION 9: DAFTAR PUSTAKA
+  // ==========================================
+  const pustakaSection = {
+    properties: standardPageProperties,
+    ...chapterHeadersFooters,
+    children: [
           createHeading1("DAFTAR PUSTAKA"),
           new Paragraph({ spacing: { after: 200 } }),
           ...(doc.bibliography || []).map((b, bIdx) =>
@@ -1205,15 +1190,15 @@ export async function generateAcademicProposalDocx(rawDoc: ProposalDocument): Pr
             })
           ),
         ],
-      },
+  };
 
-      // ==========================================
-      // SECTION 10: LAMPIRAN-LAMPIRAN
-      // ==========================================
-      {
-        properties: standardPageProperties,
-        ...chapterHeadersFooters,
-        children: [
+  // ==========================================
+  // SECTION 10: LAMPIRAN-LAMPIRAN
+  // ==========================================
+  const lampiranSection = {
+    properties: standardPageProperties,
+    ...chapterHeadersFooters,
+    children: [
           createHeading1("LAMPIRAN-LAMPIRAN"),
           new Paragraph({ spacing: { after: 200 } }),
 
@@ -1366,8 +1351,36 @@ export async function generateAcademicProposalDocx(rawDoc: ProposalDocument): Pr
             ),
           ] : []),
         ],
+  };
+
+  const docSections: any[] = [];
+  if (!disabledSections.includes("section-cover")) docSections.push(coverSection);
+  if (!disabledSections.includes("section-pengesahan")) docSections.push(pengesahanSection);
+  if (!disabledSections.includes("section-orisinalitas")) docSections.push(orisinalitasSection);
+  extraDocxSections.forEach((s) => docSections.push(s));
+  if (!disabledSections.includes("section-pengantar")) docSections.push(pengantarSection);
+  if (!disabledSections.includes("section-abstrak")) docSections.push(abstrakIdSection);
+  if (!disabledSections.includes("section-abstract-en")) docSections.push(abstractEnSection);
+  if (!disabledSections.includes("section-daftar-isi")) docSections.push(daftarIsiSection);
+  if (!disabledSections.includes("section-ringkasan")) docSections.push(ringkasanSection);
+  if (!disabledSections.includes("section-bab1")) docSections.push(bab1Section);
+  if (!disabledSections.includes("section-bab2")) docSections.push(bab2Section);
+  if (!disabledSections.includes("section-bab3")) docSections.push(bab3Section);
+  if (!disabledSections.includes("section-bab4")) docSections.push(bab4Section);
+  if (!disabledSections.includes("section-bab5")) docSections.push(bab5Section);
+  if (!disabledSections.includes("section-pustaka")) docSections.push(pustakaSection);
+  if (!disabledSections.includes("section-lampiran")) docSections.push(lampiranSection);
+
+  const docxDocument = new Document({
+    styles: {
+      default: {
+        document: {
+          run: { font: FONT_FAMILY, size: 24, color: PRIMARY_COLOR },
+          paragraph: { spacing: { line: lineSpacingTwip } },
+        },
       },
-    ],
+    },
+    sections: docSections.length > 0 ? docSections : [coverSection],
   });
 
   return await Packer.toBlob(docxDocument);

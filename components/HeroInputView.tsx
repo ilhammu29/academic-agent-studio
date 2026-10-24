@@ -52,6 +52,8 @@ interface HeroInputViewProps {
   setCandidateName: (n: string) => void;
   candidateId: string;
   setCandidateId: (id: string) => void;
+  targetDepthPages?: number;
+  setTargetDepthPages?: (p: number) => void;
   onSubmit: () => void;
   onOpenDatabase?: () => void;
   onOpenDrive?: () => void;
@@ -131,6 +133,8 @@ export const HeroInputView: React.FC<HeroInputViewProps> = ({
   setCandidateName,
   candidateId,
   setCandidateId,
+  targetDepthPages = 45,
+  setTargetDepthPages,
   onSubmit,
   onOpenDatabase,
   onOpenDrive,
@@ -252,6 +256,9 @@ export const HeroInputView: React.FC<HeroInputViewProps> = ({
     if (setReportType) {
       setReportType(tpl.reportType);
     }
+    if (setTargetDepthPages && tpl.targetDepthPagesDefault) {
+      setTargetDepthPages(tpl.targetDepthPagesDefault);
+    }
   };
 
   const handleSelectChip = (chip: typeof TOPIC_CHIPS[0]) => {
@@ -261,6 +268,9 @@ export const HeroInputView: React.FC<HeroInputViewProps> = ({
     setDurationMonths(chip.duration);
     if (setReportType && chip.reportType) {
       setReportType(chip.reportType);
+    }
+    if (setTargetDepthPages) {
+      setTargetDepthPages(chip.category === "magang" ? 25 : 45);
     }
   };
 
@@ -463,7 +473,7 @@ export const HeroInputView: React.FC<HeroInputViewProps> = ({
             }`}
           >
             <SlidersHorizontal className="w-3.5 h-3.5 text-[#7C9CFF]" />
-            <span>{showParameters ? "Tutup Parameter" : "Parameter & Template"}</span>
+            <span>{showParameters ? "Tutup Parameter" : `Target ~${targetDepthPages} Hal • Template`}</span>
             <ChevronDown className={`w-3.5 h-3.5 text-[#64748B] transition-transform ${showParameters ? "rotate-180" : ""}`} />
           </button>
 
@@ -595,6 +605,66 @@ export const HeroInputView: React.FC<HeroInputViewProps> = ({
                   placeholder="Nomor Induk Mahasiswa"
                   className="w-full bg-[#F8FAFC] dark:bg-[#0B101A] border border-[#E2E8F0] dark:border-[#253149] rounded-lg px-3 py-1.5 text-xs text-[#0F172A] dark:text-[#F3F6FC] placeholder:text-[#64748B] focus:outline-none focus:border-[#7C9CFF] transition-colors"
                 />
+              </div>
+            </div>
+
+            {/* Section 3: Target Tebal Dokumen (Custom Halaman) */}
+            <div className="pt-3 border-t border-[#E2E8F0] dark:border-[#253149]">
+              <div className="flex items-center justify-between mb-2">
+                <label className="text-[11px] font-bold uppercase tracking-wider text-[#475569] dark:text-[#A4B1C7] flex items-center gap-1.5">
+                  <SlidersHorizontal className="w-3.5 h-3.5 text-[#7C9CFF]" />
+                  <span>Target Ketebalan Naskah Dokumen (Custom Halaman)</span>
+                </label>
+                <span className="text-[10px] text-[#64748B] dark:text-[#A4B1C7] hidden sm:inline">
+                  Mengatur kedalaman analitis, jumlah teori (8-16) &amp; rincian bab
+                </span>
+              </div>
+
+              <div className="flex flex-wrap items-center gap-2">
+                {[
+                  { pages: 25, label: "25 Hal", desc: "Ringkas / Magang" },
+                  { pages: 45, label: "45 Hal", desc: "Standar Skripsi Dikti" },
+                  { pages: 65, label: "65 Hal", desc: "Skripsi Komprehensif" },
+                  { pages: 85, label: "85 Hal", desc: "Tesis / Laporan Penuh" },
+                ].map((preset) => {
+                  const isSelected = (targetDepthPages ?? 45) === preset.pages;
+                  return (
+                    <button
+                      key={preset.pages}
+                      type="button"
+                      onClick={() => setTargetDepthPages && setTargetDepthPages(preset.pages)}
+                      className={`px-3 py-1.5 rounded-xl border text-xs font-medium transition-all cursor-pointer flex items-center gap-1.5 ${
+                        isSelected
+                          ? "bg-[#7C9CFF] text-[#080B12] font-bold border-[#7C9CFF] shadow-xs"
+                          : "bg-[#F8FAFC] dark:bg-[#0B101A] border-[#E2E8F0] dark:border-[#253149] text-[#475569] dark:text-[#A4B1C7] hover:border-[#7C9CFF]/50"
+                      }`}
+                    >
+                      <span>{preset.label}</span>
+                      <span className="text-[10px] opacity-75">({preset.desc})</span>
+                    </button>
+                  );
+                })}
+
+                {/* Custom Page Number Input */}
+                <div className="flex items-center gap-1.5 sm:ml-auto bg-[#F8FAFC] dark:bg-[#0B101A] border border-[#E2E8F0] dark:border-[#253149] rounded-xl px-2.5 py-1">
+                  <span className="text-[10px] font-bold uppercase text-[#64748B] dark:text-[#A4B1C7]">
+                    Custom:
+                  </span>
+                  <input
+                    type="number"
+                    min={15}
+                    max={150}
+                    value={targetDepthPages ?? 45}
+                    onChange={(e) => {
+                      const val = parseInt(e.target.value, 10);
+                      if (!isNaN(val) && setTargetDepthPages) {
+                        setTargetDepthPages(Math.max(10, Math.min(150, val)));
+                      }
+                    }}
+                    className="w-12 bg-transparent text-xs font-bold text-[#0F172A] dark:text-[#F3F6FC] text-center focus:outline-none"
+                  />
+                  <span className="text-[10px] text-[#64748B] dark:text-[#A4B1C7]">Hal</span>
+                </div>
               </div>
             </div>
 

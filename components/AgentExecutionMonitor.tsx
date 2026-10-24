@@ -38,6 +38,7 @@ interface AgentExecutionMonitorProps {
   institution?: string;
   facultyMajor?: string;
   campusGuideline?: CampusGuideline;
+  targetDepthPages?: number;
   onComplete: (doc?: ProposalDocument) => void;
 }
 
@@ -64,6 +65,7 @@ export const AgentExecutionMonitor: React.FC<AgentExecutionMonitorProps> = ({
   institution = "Universitas",
   facultyMajor = "Program Studi Terkait",
   campusGuideline,
+  targetDepthPages,
   onComplete
 }) => {
   const [agents, setAgents] = useState<AgentInfo[]>(INITIAL_AGENTS);
@@ -107,7 +109,8 @@ export const AgentExecutionMonitor: React.FC<AgentExecutionMonitorProps> = ({
       facultyMajor,
       targetEntity,
       campusGuideline,
-      reportType
+      reportType,
+      targetDepthPages
     );
     generatedDocRef.current = initialDoc;
 
@@ -127,7 +130,8 @@ export const AgentExecutionMonitor: React.FC<AgentExecutionMonitorProps> = ({
             candidateId,
             institution,
             facultyMajor,
-            campusGuideline
+            campusGuideline,
+            targetDepthPages
           })
         });
 

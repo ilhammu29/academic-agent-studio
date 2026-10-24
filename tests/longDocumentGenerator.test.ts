@@ -79,3 +79,50 @@ test('Dense academic document exports to large, structurally sound DOCX binary',
   // A dense 40-page academic document with multiple tables (gap matrix, DOV table, WBS, budget) will produce > 20,000 bytes
   assert.ok(docxBlob.size > 20000, `Generated dense DOCX size should exceed 20KB (actual size: ${docxBlob.size} bytes)`);
 });
+
+test('buildDenseAcademicDocument scales depth when custom targetDepthPages is specified', () => {
+  const skripsiDense = buildDenseAcademicDocument(
+    'Pengembangan Model Deep Learning untuk Diagnosis Retinopati Diabetik',
+    'skripsi',
+    { masalah: 'Deteksi dini retinopati diabetik terkendala kelangkaan dokter spesialis mata.' },
+    'Budi Santoso',
+    'NIM-12345',
+    'Universitas Gadjah Mada',
+    'Teknologi Biomedis',
+    'RSUP Dr. Sardjito',
+    undefined,
+    'skripsi',
+    65
+  );
+
+  assert.strictEqual(skripsiDense.targetDepthPages, 65, 'Document targetDepthPages must reflect user custom target');
+  assert.ok(skripsiDense.bab1.latarBelakang.length >= 10, 'Dense skripsi must scale to >= 10 paragraphs in Bab 1');
+  assert.ok(skripsiDense.bab2.landasanTeori.length >= 12, 'Dense skripsi must scale to >= 12 theories in Bab 2');
+  assert.ok(skripsiDense.bab2.researchGapMatrix && skripsiDense.bab2.researchGapMatrix.length >= 5, 'Must scale to >= 5 research gap studies');
+});
+
+test('generateAcademicProposalDocx respects disabledSections filtering', async () => {
+  const doc = buildDenseAcademicDocument(
+    'Audit Sistem Informasi Rumah Sakit',
+    'magang',
+    {},
+    'Siti Rahma',
+    'NIM-9988',
+    'Universitas Diponegoro',
+    'Sistem Informasi',
+    'RSUD Tugurejo',
+    undefined,
+    'magang',
+    25
+  );
+
+  const blobFull = await generateAcademicProposalDocx(doc, []);
+  const blobFiltered = await generateAcademicProposalDocx(doc, [
+    'section-cover',
+    'section-orisinalitas',
+    'section-pengantar',
+    'section-lampiran'
+  ]);
+
+  assert.ok(blobFiltered.size < blobFull.size, 'Filtered DOCX must be smaller than full DOCX because disabled sections were excluded');
+});

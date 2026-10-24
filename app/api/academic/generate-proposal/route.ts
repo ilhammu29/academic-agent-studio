@@ -36,7 +36,8 @@ export async function POST(req: Request) {
       facultyMajor,
       targetEntity,
       campusGuideline,
-      reportType
+      reportType,
+      targetDepthPages
     );
 
     if (campusLogoUrl) {

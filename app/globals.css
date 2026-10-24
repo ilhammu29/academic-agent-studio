@@ -189,21 +189,68 @@ html.light ::-webkit-scrollbar-thumb:hover {
   animation: slimeWavePulse 6s ease-in-out infinite;
 }
 
+/* Document Studio Dynamic Typography & Spacing Cascade */
+.academic-doc-canvas {
+  font-family: var(--doc-font, 'Times New Roman', serif);
+}
+
+.academic-doc-canvas,
+.academic-doc-canvas *:not(svg, svg *, .no-font-override, .no-font-override *) {
+  font-family: var(--doc-font, 'Times New Roman', serif) !important;
+}
+
+.academic-doc-canvas p,
+.academic-doc-canvas li,
+.academic-doc-canvas td,
+.academic-doc-canvas .doc-content-text {
+  line-height: var(--doc-line-height, 1.5) !important;
+}
+
 /* Print Styles */
+@page {
+  size: A4;
+  margin: 40mm 30mm 30mm 40mm;
+}
+
 @media print {
-  body {
-    background-color: white !important;
-    color: black !important;
+  @page {
+    size: A4;
+    margin: 40mm 30mm 30mm 40mm;
   }
-  .no-print {
+
+  /* Completely hide surrounding studio chrome, sidebars and navigation */
+  header, nav, aside, [role="toolbar"], .no-print, .word-status-bar, button {
     display: none !important;
   }
+
+  body, html {
+    background-color: white !important;
+    color: black !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  main, article, .academic-doc-canvas {
+    margin: 0 !important;
+    padding: 0 !important;
+    border: none !important;
+    box-shadow: none !important;
+    background: white !important;
+    color: black !important;
+    max-width: 100% !important;
+  }
+
+  .print-break-page {
+    page-break-after: always !important;
+    break-after: page !important;
+  }
+
   .print-only {
     display: block !important;
   }
   .proposal-page {
     page-break-after: always;
-    padding: 30mm 25mm 25mm 30mm !important;
+    padding: 0 !important;
     background: white !important;
     color: black !important;
   }
