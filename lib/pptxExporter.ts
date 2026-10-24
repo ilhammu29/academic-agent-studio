@@ -342,19 +342,6 @@ export async function generateAcademicProposalPptx(
         }
       );
 
-      // Connector Arrow 1 -> 2
-      slide.addText("➔", {
-        x: 4.45,
-        y: 3.8,
-        w: 0.38,
-        h: 0.4,
-        fontSize: 14,
-        bold: true,
-        color: ACCENT_CYAN,
-        fontFace: FONT_PRIMARY,
-        align: "center",
-      });
-
       // Card 2: Permasalahan Riil
       slide.addShape(pptx.ShapeType.roundRect, {
         x: 4.8,
@@ -389,19 +376,6 @@ export async function generateAcademicProposalPptx(
           align: "justify",
         }
       );
-
-      // Connector Arrow 2 -> 3
-      slide.addText("➔", {
-        x: 8.45,
-        y: 3.8,
-        w: 0.38,
-        h: 0.4,
-        fontSize: 14,
-        bold: true,
-        color: ACCENT_CYAN,
-        fontFace: FONT_PRIMARY,
-        align: "center",
-      });
 
       // Card 3: Solusi yang Diusulkan
       slide.addShape(pptx.ShapeType.roundRect, {
@@ -885,21 +859,6 @@ export async function generateAcademicProposalPptx(
         color: TEXT_MUTED,
         fontFace: FONT_PRIMARY,
       });
-
-      // Connector Arrow between step cards
-      if (sIdx < flowSteps.length - 1) {
-        slide.addText("➔", {
-          x: cardX + 2.58,
-          y: 2.3,
-          w: 0.45,
-          h: 0.4,
-          fontSize: 16,
-          bold: true,
-          color: ACCENT_CYAN,
-          fontFace: FONT_PRIMARY,
-          align: "center",
-        });
-      }
     });
 
     // Subcard: Lingkup Kerja

@@ -113,22 +113,22 @@ export const CampusGuidelineModal: React.FC<CampusGuidelineModalProps> = ({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-5 bg-black/60 dark:bg-black/80 backdrop-blur-md animate-in fade-in duration-150">
-      <div className="w-full max-w-3xl bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-850 rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[92vh] animate-in zoom-in-95 duration-150">
+      <div className="w-full max-w-3xl bg-white dark:bg-[#0B101A] border border-[#E2E8F0] dark:border-[#253149] rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[92vh] animate-in zoom-in-95 duration-150">
         
         {/* Header */}
-        <div className="px-5 py-4 border-b border-zinc-200 dark:border-zinc-850 flex items-center justify-between bg-zinc-50 dark:bg-zinc-900/60">
+        <div className="px-5 py-4 border-b border-[#E2E8F0] dark:border-[#253149] flex items-center justify-between bg-[#F8FAFC] dark:bg-[#111827]">
           <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-xl bg-zinc-900 dark:bg-zinc-100 text-white dark:text-black flex items-center justify-center shadow-xs">
+            <div className="w-9 h-9 rounded-xl bg-[#7C9CFF]/15 text-[#7C9CFF] border border-[#7C9CFF]/30 flex items-center justify-center shadow-xs">
               <Landmark className="w-4 h-4" />
             </div>
             <div>
-              <h3 className="text-sm sm:text-base font-bold text-zinc-900 dark:text-zinc-100 flex items-center gap-2">
-                <span>Format Kampus & AI Guideline Scanner</span>
-                <span className="text-[10px] font-mono font-semibold px-2 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-400 border border-emerald-300 dark:border-emerald-800">
+              <h3 className="text-sm sm:text-base font-bold text-[#0F172A] dark:text-[#F3F6FC] flex items-center gap-2">
+                <span>Format Kampus &amp; AI Guideline Scanner</span>
+                <span className="text-[10px] font-mono font-semibold px-2 py-0.5 rounded-full bg-[#34D399]/15 text-[#34D399] border border-[#34D399]/30">
                   Auto-Word Sync
                 </span>
               </h3>
-              <p className="text-[11px] text-zinc-500 dark:text-zinc-400">
+              <p className="text-[11px] text-[#64748B] dark:text-[#A4B1C7]">
                 Sesuaikan margin (4-4-3-3), tipografi, dan lembar pengesahan persis sesuai buku pedoman fakultas Anda.
               </p>
             </div>
@@ -137,21 +137,21 @@ export const CampusGuidelineModal: React.FC<CampusGuidelineModalProps> = ({
           <button
             type="button"
             onClick={onClose}
-            className="p-1.5 rounded-lg hover:bg-zinc-200 dark:hover:bg-zinc-800 text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 transition-colors cursor-pointer"
+            className="p-1.5 rounded-lg hover:bg-[#F1F5F9] dark:hover:bg-[#172033] text-[#64748B] dark:text-[#A4B1C7] hover:text-[#0F172A] dark:hover:text-[#F3F6FC] transition-colors cursor-pointer"
           >
             <X className="w-4 h-4" />
           </button>
         </div>
 
         {/* Tab Switcher */}
-        <div className="grid grid-cols-3 border-b border-zinc-200 dark:border-zinc-850 text-xs font-medium bg-zinc-100/70 dark:bg-zinc-900/40 p-1.5 gap-1.5">
+        <div className="grid grid-cols-3 border-b border-[#E2E8F0] dark:border-[#253149] text-xs font-medium bg-[#F8FAFC] dark:bg-[#080B12] p-1.5 gap-1.5">
           <button
             type="button"
             onClick={() => setActiveTab("presets")}
             className={`py-2 px-3 rounded-lg flex items-center justify-center gap-1.5 transition-all cursor-pointer ${
               activeTab === "presets"
-                ? "bg-white dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 font-semibold shadow-xs"
-                : "text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-200"
+                ? "bg-white dark:bg-[#111827] text-[#7C9CFF] font-semibold border border-[#7C9CFF]/30 shadow-2xs"
+                : "text-[#64748B] dark:text-[#A4B1C7] hover:text-[#0F172A] dark:hover:text-[#F3F6FC]"
             }`}
           >
             <Landmark className="w-3.5 h-3.5" />
@@ -163,8 +163,8 @@ export const CampusGuidelineModal: React.FC<CampusGuidelineModalProps> = ({
             onClick={() => setActiveTab("upload")}
             className={`py-2 px-3 rounded-lg flex items-center justify-center gap-1.5 transition-all cursor-pointer ${
               activeTab === "upload"
-                ? "bg-white dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 font-semibold shadow-xs"
-                : "text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-200"
+                ? "bg-white dark:bg-[#111827] text-[#7C9CFF] font-semibold border border-[#7C9CFF]/30 shadow-2xs"
+                : "text-[#64748B] dark:text-[#A4B1C7] hover:text-[#0F172A] dark:hover:text-[#F3F6FC]"
             }`}
           >
             <UploadCloud className="w-3.5 h-3.5" />
@@ -176,8 +176,8 @@ export const CampusGuidelineModal: React.FC<CampusGuidelineModalProps> = ({
             onClick={() => setActiveTab("custom")}
             className={`py-2 px-3 rounded-lg flex items-center justify-center gap-1.5 transition-all cursor-pointer ${
               activeTab === "custom"
-                ? "bg-white dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 font-semibold shadow-xs"
-                : "text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-200"
+                ? "bg-white dark:bg-[#111827] text-[#7C9CFF] font-semibold border border-[#7C9CFF]/30 shadow-2xs"
+                : "text-[#64748B] dark:text-[#A4B1C7] hover:text-[#0F172A] dark:hover:text-[#F3F6FC]"
             }`}
           >
             <SlidersHorizontal className="w-3.5 h-3.5" />
@@ -206,8 +206,8 @@ export const CampusGuidelineModal: React.FC<CampusGuidelineModalProps> = ({
                       onClick={() => handleSelectPreset(preset)}
                       className={`p-3.5 rounded-xl border text-left cursor-pointer transition-all ${
                         isSelected
-                          ? "bg-zinc-900 text-white dark:bg-zinc-100 dark:text-black border-zinc-900 dark:border-zinc-100 shadow-sm scale-[1.01]"
-                          : "bg-white dark:bg-zinc-900/60 border-zinc-200 dark:border-zinc-800 hover:border-zinc-300 dark:hover:border-zinc-700 text-zinc-800 dark:text-zinc-200"
+                          ? "bg-[#7C9CFF]/15 border-[#7C9CFF]/40 text-[#0F172A] dark:text-[#F3F6FC] shadow-2xs scale-[1.01]"
+                          : "bg-white dark:bg-[#111827] border-[#E2E8F0] dark:border-[#253149] hover:border-[#7C9CFF]/40 text-[#0F172A] dark:text-[#F3F6FC]"
                       }`}
                     >
                       <div className="flex items-start justify-between gap-2">
@@ -217,27 +217,27 @@ export const CampusGuidelineModal: React.FC<CampusGuidelineModalProps> = ({
                           </h4>
                           <span className={`inline-block text-[10px] font-mono mt-1 px-2 py-0.5 rounded-md ${
                             isSelected 
-                              ? "bg-white/20 text-white dark:bg-black/10 dark:text-black" 
-                              : "bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400"
+                              ? "bg-[#7C9CFF]/25 text-[#7C9CFF]" 
+                              : "bg-[#F1F5F9] dark:bg-[#172033] text-[#64748B] dark:text-[#A4B1C7]"
                           }`}>
                             {preset.badge}
                           </span>
                         </div>
                         {isSelected && (
-                          <div className="w-5 h-5 rounded-full bg-emerald-500 text-white flex items-center justify-center flex-shrink-0 mt-0.5">
+                          <div className="w-5 h-5 rounded-full bg-[#34D399] text-[#080B12] flex items-center justify-center flex-shrink-0 mt-0.5 font-bold">
                             <Check className="w-3 h-3 stroke-[3]" />
                           </div>
                         )}
                       </div>
 
                       <p className={`text-[11px] mt-2 line-clamp-2 leading-relaxed ${
-                        isSelected ? "text-zinc-200 dark:text-zinc-700" : "text-zinc-500 dark:text-zinc-400"
+                        isSelected ? "text-[#334155] dark:text-[#CBD5E1]" : "text-[#64748B] dark:text-[#A4B1C7]"
                       }`}>
                         {preset.description}
                       </p>
 
                       <div className={`mt-3 pt-2.5 border-t flex items-center justify-between text-[10px] font-mono ${
-                        isSelected ? "border-white/20 dark:border-black/10 text-zinc-200 dark:text-zinc-800" : "border-zinc-100 dark:border-zinc-800 text-zinc-400"
+                        isSelected ? "border-[#7C9CFF]/30 text-[#7C9CFF]" : "border-[#E2E8F0] dark:border-[#253149] text-[#64748B] dark:text-[#A4B1C7]"
                       }`}>
                         <span>Margin: {preset.margins.leftCm}-{preset.margins.topCm}-{preset.margins.rightCm}-{preset.margins.bottomCm} cm</span>
                         <span>Sitasi: {preset.citationStyle.toUpperCase()}</span>
@@ -541,13 +541,13 @@ export const CampusGuidelineModal: React.FC<CampusGuidelineModalProps> = ({
         </div>
 
         {/* Modal Footer */}
-        <div className="p-3.5 px-5 border-t border-zinc-200 dark:border-zinc-850 bg-zinc-50 dark:bg-zinc-900/60 flex items-center justify-between text-xs">
+        <div className="p-3.5 px-5 border-t border-[#E2E8F0] dark:border-[#253149] bg-[#F8FAFC] dark:bg-[#111827] flex items-center justify-between text-xs">
           <div className="flex items-center gap-2">
-            <span className="text-zinc-500 dark:text-zinc-400 hidden sm:inline">Format Aktif:</span>
-            <span className="font-bold text-zinc-900 dark:text-zinc-100">
+            <span className="text-[#64748B] dark:text-[#A4B1C7] hidden sm:inline">Format Aktif:</span>
+            <span className="font-bold text-[#0F172A] dark:text-[#F3F6FC]">
               {activeGuideline.campusName}
             </span>
-            <span className="text-[10px] font-mono text-zinc-500">
+            <span className="text-[10px] font-mono text-[#7C9CFF]">
               ({activeGuideline.margins.leftCm}-{activeGuideline.margins.topCm}-{activeGuideline.margins.rightCm}-{activeGuideline.margins.bottomCm} cm)
             </span>
           </div>
@@ -556,17 +556,17 @@ export const CampusGuidelineModal: React.FC<CampusGuidelineModalProps> = ({
             <button
               type="button"
               onClick={onClose}
-              className="px-3.5 py-2 rounded-xl text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 transition-colors cursor-pointer"
+              className="px-3.5 py-2 rounded-xl text-[#64748B] dark:text-[#A4B1C7] hover:text-[#0F172A] dark:hover:text-[#F3F6FC] transition-colors cursor-pointer"
             >
               Batal
             </button>
             <button
               type="button"
               onClick={handleSaveAndApply}
-              className="px-5 py-2 rounded-xl bg-zinc-900 hover:bg-black text-white dark:bg-zinc-100 dark:hover:bg-white dark:text-black font-semibold shadow-xs transition-all cursor-pointer flex items-center gap-1.5"
+              className="px-5 py-2 rounded-xl bg-[#7C9CFF] hover:bg-[#688bf5] text-[#080B12] font-semibold shadow-xs transition-all cursor-pointer flex items-center gap-1.5"
             >
-              <Check className="w-3.5 h-3.5" />
-              <span>Terapkan ke Naskah & Word</span>
+              <Check className="w-3.5 h-3.5 stroke-[2.5]" />
+              <span>Terapkan ke Naskah &amp; Word</span>
             </button>
           </div>
         </div>

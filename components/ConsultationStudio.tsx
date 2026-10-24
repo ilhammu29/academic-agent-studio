@@ -390,8 +390,8 @@ Tolong bedah masalah ini dan rumuskan judul proposal akademik yang tajam dan tid
                   }`}
                 >
                   {isAssistant && (
-                    <div className="w-7 h-7 rounded-full bg-zinc-100 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 flex items-center justify-center text-zinc-700 dark:text-zinc-300 flex-shrink-0 mt-1 shadow-2xs">
-                      <Bot className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
+                    <div className="w-7 h-7 rounded-full bg-[#34D399]/15 border border-[#34D399]/30 flex items-center justify-center text-[#34D399] flex-shrink-0 mt-1 shadow-2xs">
+                      <Bot className="w-4 h-4" />
                     </div>
                   )}
 
@@ -399,8 +399,8 @@ Tolong bedah masalah ini dan rumuskan judul proposal akademik yang tajam dan tid
                     <div
                       className={`p-4 rounded-2xl ${
                         isAssistant
-                          ? "bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800/80 text-zinc-850 dark:text-zinc-200"
-                          : "bg-zinc-900 text-white dark:bg-zinc-100 dark:text-zinc-950 font-normal ml-auto"
+                          ? "bg-[#F8FAFC] dark:bg-[#111827] border border-[#E2E8F0] dark:border-[#253149] text-[#0F172A] dark:text-[#F3F6FC]"
+                          : "bg-[#0F172A] text-white dark:bg-[#7C9CFF] dark:text-[#080B12] font-medium ml-auto"
                       }`}
                     >
                       <div className="whitespace-pre-wrap leading-relaxed font-sans">
@@ -409,32 +409,32 @@ Tolong bedah masalah ini dan rumuskan judul proposal akademik yang tajam dan tid
 
                       {/* Attached Candidate Title Card if Generated */}
                       {msg.candidateTitle && (
-                        <div className="mt-3 p-3.5 rounded-xl border border-emerald-300 dark:border-emerald-800 bg-emerald-50/70 dark:bg-emerald-950/30 text-zinc-900 dark:text-zinc-100 space-y-2 animate-in fade-in">
+                        <div className="mt-3 p-3.5 rounded-xl border border-[#7C9CFF]/30 bg-[#7C9CFF]/10 text-[#0F172A] dark:text-[#F3F6FC] space-y-2 animate-in fade-in">
                           <div className="flex items-center justify-between text-[10px] font-mono">
-                            <span className="font-bold text-emerald-700 dark:text-emerald-400 uppercase tracking-wider">
+                            <span className="font-bold text-[#7C9CFF] uppercase tracking-wider">
                               💡 REKOMENDASI FORMULASI JUDUL
                             </span>
-                            <span className="px-2 py-0.5 rounded bg-emerald-200/60 dark:bg-emerald-900 text-emerald-800 dark:text-emerald-200">
+                            <span className="px-2 py-0.5 rounded-md bg-[#7C9CFF]/20 text-[#7C9CFF] font-semibold">
                               {msg.candidateTitle.category.toUpperCase()} • {msg.candidateTitle.durationMonths} BULAN
                             </span>
                           </div>
 
-                          <h4 className="font-serif font-bold text-xs sm:text-sm text-zinc-950 dark:text-white leading-snug">
+                          <h4 className="font-serif font-bold text-xs sm:text-sm text-[#0F172A] dark:text-[#F3F6FC] leading-snug">
                             {msg.candidateTitle.title}
                           </h4>
 
-                          <p className="text-[11px] text-zinc-600 dark:text-zinc-400">
+                          <p className="text-[11px] text-[#64748B] dark:text-[#A4B1C7]">
                             <strong>Lokus/Instansi:</strong> {msg.candidateTitle.entity}
                           </p>
 
-                          <div className="pt-2 flex items-center justify-between border-t border-emerald-200 dark:border-emerald-800/60 text-xs">
-                            <span className="text-[11px] text-zinc-500 dark:text-zinc-400 italic">
+                          <div className="pt-2 flex items-center justify-between border-t border-[#7C9CFF]/20 text-xs">
+                            <span className="text-[11px] text-[#64748B] dark:text-[#A4B1C7] italic">
                               Tersimpan otomatis di Rak Calon Judul (Kanan)
                             </span>
                             <button
                               type="button"
                               onClick={() => handleApplyCandidate(msg.candidateTitle!)}
-                              className="px-3 py-1 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-[11px] transition-colors cursor-pointer flex items-center gap-1 shadow-2xs"
+                              className="px-3 py-1 rounded-lg bg-[#7C9CFF] hover:bg-[#688bf5] text-[#080B12] font-semibold text-[11px] transition-colors cursor-pointer flex items-center gap-1 shadow-2xs"
                             >
                               <span>Terapkan</span>
                               <ArrowRight className="w-3 h-3" />
@@ -444,13 +444,13 @@ Tolong bedah masalah ini dan rumuskan judul proposal akademik yang tajam dan tid
                       )}
                     </div>
 
-                    <div className="text-[10px] text-zinc-400 px-1 font-mono">
+                    <div className="text-[10px] text-[#64748B] dark:text-[#A4B1C7] px-1 font-mono">
                       {msg.timestamp}
                     </div>
                   </div>
 
                   {!isAssistant && (
-                    <div className="w-7 h-7 rounded-full bg-zinc-900 text-white dark:bg-zinc-100 dark:text-zinc-950 flex items-center justify-center flex-shrink-0 mt-1 font-mono font-bold text-[10px]">
+                    <div className="w-7 h-7 rounded-full bg-[#7C9CFF]/15 border border-[#7C9CFF]/30 text-[#7C9CFF] flex items-center justify-center flex-shrink-0 mt-1 font-mono font-bold text-[10px]">
                       U
                     </div>
                   )}
@@ -460,12 +460,12 @@ Tolong bedah masalah ini dan rumuskan judul proposal akademik yang tajam dan tid
 
             {isLoading && (
               <div className="flex items-start gap-3">
-                <div className="w-7 h-7 rounded-full bg-zinc-100 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 flex items-center justify-center text-zinc-700 dark:text-zinc-300 flex-shrink-0 mt-1">
-                  <Bot className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
+                <div className="w-7 h-7 rounded-full bg-[#34D399]/15 border border-[#34D399]/30 flex items-center justify-center text-[#34D399] flex-shrink-0 mt-1">
+                  <Bot className="w-4 h-4" />
                 </div>
-                <div className="p-3.5 rounded-2xl bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 flex items-center gap-2 text-xs text-zinc-500">
-                  <div className="w-4 h-4 border-2 border-zinc-400 border-t-zinc-900 rounded-full animate-spin" />
-                  <span>Dr. Bimbingan sedang membedah masalah & merumuskan judul...</span>
+                <div className="p-3.5 rounded-2xl bg-[#F8FAFC] dark:bg-[#111827] border border-[#E2E8F0] dark:border-[#253149] flex items-center gap-2 text-xs text-[#64748B] dark:text-[#A4B1C7]">
+                  <div className="w-4 h-4 border-2 border-[#7C9CFF] border-t-transparent rounded-full animate-spin" />
+                  <span>Dr. Bimbingan sedang membedah masalah &amp; merumuskan judul...</span>
                 </div>
               </div>
             )}
@@ -474,16 +474,16 @@ Tolong bedah masalah ini dan rumuskan judul proposal akademik yang tajam dan tid
           </div>
 
           {/* Prompt Chips Recommendation */}
-          <div className="px-4 sm:px-6 py-2.5 border-t border-zinc-200 dark:border-zinc-850 bg-zinc-50/50 dark:bg-zinc-900/30 flex items-center gap-2 overflow-x-auto scrollbar-none flex-shrink-0 text-xs">
-            <span className="text-[11px] font-mono text-zinc-400 whitespace-nowrap flex items-center gap-1">
-              <Lightbulb className="w-3 h-3 text-amber-500" /> Topik Bimbingan:
+          <div className="px-4 sm:px-6 py-2.5 border-t border-[#E2E8F0] dark:border-[#253149] bg-[#F8FAFC]/50 dark:bg-[#0B101A]/50 flex items-center gap-2 overflow-x-auto scrollbar-none flex-shrink-0 text-xs">
+            <span className="text-[11px] font-mono text-[#64748B] dark:text-[#A4B1C7] whitespace-nowrap flex items-center gap-1">
+              <Lightbulb className="w-3 h-3 text-[#FBBF24]" /> Topik Bimbingan:
             </span>
             {QUICK_PROMPT_CHIPS.map((chip, i) => (
               <button
                 key={i}
                 type="button"
                 onClick={() => handleSendMessage(chip)}
-                className="px-3 py-1 rounded-full border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 hover:bg-zinc-100 dark:hover:bg-zinc-800 text-zinc-700 dark:text-zinc-300 whitespace-nowrap text-[11px] font-medium transition-colors cursor-pointer shadow-2xs"
+                className="px-3 py-1 rounded-full border border-[#E2E8F0] dark:border-[#253149] bg-white dark:bg-[#111827] hover:border-[#7C9CFF] text-[#0F172A] dark:text-[#F3F6FC] whitespace-nowrap text-[11px] font-medium transition-colors cursor-pointer shadow-2xs"
               >
                 {chip}
               </button>
@@ -491,7 +491,7 @@ Tolong bedah masalah ini dan rumuskan judul proposal akademik yang tajam dan tid
           </div>
 
           {/* Input Box Footer */}
-          <div className="p-4 sm:p-5 border-t border-zinc-200 dark:border-zinc-850 bg-white dark:bg-zinc-950 flex-shrink-0">
+          <div className="p-4 sm:p-5 border-t border-[#E2E8F0] dark:border-[#253149] bg-white dark:bg-[#0B101A] flex-shrink-0">
             <div className="relative flex items-center gap-2">
               <textarea
                 rows={2}
@@ -504,7 +504,7 @@ Tolong bedah masalah ini dan rumuskan judul proposal akademik yang tajam dan tid
                   }
                 }}
                 placeholder="Tuliskan kendala Anda, amatan tugas di kantor, atau ide judul yang ingin dikonsultasikan... (Tekan Enter untuk kirim)"
-                className="w-full p-3 pr-24 rounded-xl border border-zinc-300 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900 text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-400 text-xs focus:outline-none focus:border-zinc-500 font-sans leading-relaxed resize-none shadow-inner"
+                className="w-full p-3 pr-24 rounded-xl border border-[#E2E8F0] dark:border-[#253149] bg-[#F8FAFC] dark:bg-[#111827] text-[#0F172A] dark:text-[#F3F6FC] placeholder:text-[#64748B] dark:placeholder:text-[#A4B1C7] text-xs focus:outline-hidden focus:border-[#7C9CFF] font-sans leading-relaxed resize-none"
               />
 
               <div className="absolute right-2.5 bottom-2.5 flex items-center gap-1.5">
@@ -515,7 +515,7 @@ Tolong bedah masalah ini dan rumuskan judul proposal akademik yang tajam dan tid
                   className={`p-2 rounded-lg text-xs transition-colors cursor-pointer ${
                     isListening
                       ? "bg-red-500 text-white animate-pulse"
-                      : "text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 hover:bg-zinc-200 dark:hover:bg-zinc-800"
+                      : "text-[#64748B] hover:text-[#0F172A] dark:text-[#A4B1C7] dark:hover:text-[#F3F6FC] hover:bg-[#F1F5F9] dark:hover:bg-[#172033]"
                   }`}
                   title="Gunakan suara"
                 >
@@ -527,14 +527,14 @@ Tolong bedah masalah ini dan rumuskan judul proposal akademik yang tajam dan tid
                   type="button"
                   onClick={() => handleSendMessage()}
                   disabled={isLoading || !inputText.trim()}
-                  className="px-3.5 py-2 rounded-lg bg-zinc-950 hover:bg-black dark:bg-zinc-100 dark:hover:bg-white text-white dark:text-zinc-950 text-xs font-semibold disabled:opacity-40 transition-all cursor-pointer shadow-xs flex items-center gap-1.5"
+                  className="px-3.5 py-2 rounded-lg bg-[#7C9CFF] hover:bg-[#688bf5] text-[#080B12] text-xs font-semibold disabled:opacity-40 transition-all cursor-pointer shadow-xs flex items-center gap-1.5"
                 >
                   <Send className="w-3.5 h-3.5" />
                   <span>Kirim</span>
                 </button>
               </div>
             </div>
-            <div className="flex items-center justify-between text-[10px] text-zinc-400 mt-1.5 px-1 font-mono">
+            <div className="flex items-center justify-between text-[10px] text-[#64748B] dark:text-[#A4B1C7] mt-1.5 px-1 font-mono">
               <span>Shift + Enter untuk baris baru</span>
               <span>Didukung Model Penalaran Akademik Gemini 3.5</span>
             </div>

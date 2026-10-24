@@ -283,7 +283,7 @@ export const PresentationStudio: React.FC<PresentationStudioProps> = ({
         return "bg-[#0a1f18] text-emerald-50 border-emerald-900/60";
       case "executive-dark":
       default:
-        return "bg-zinc-950 text-white border-zinc-800";
+        return "bg-[#0B101A] text-[#F3F6FC] border-[#253149]";
     }
   };
 
@@ -297,7 +297,7 @@ export const PresentationStudio: React.FC<PresentationStudioProps> = ({
         return "from-emerald-400 via-teal-300 to-amber-300";
       case "executive-dark":
       default:
-        return "from-sky-500 via-indigo-500 to-amber-400";
+        return "from-[#7C9CFF] via-[#9B8CFF] to-[#34D399]";
     }
   };
 
@@ -353,13 +353,13 @@ export const PresentationStudio: React.FC<PresentationStudioProps> = ({
         <div className="flex flex-wrap items-center gap-2">
           
           {/* Rehearsal Timer */}
-          <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-zinc-100 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 font-mono text-xs">
-            <span className="text-zinc-500 text-[10px]">WAKTU:</span>
-            <span className="font-bold text-zinc-900 dark:text-zinc-100">{formatTimer(timerSeconds)}</span>
+          <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-[#F8FAFC] dark:bg-[#0B101A] border border-[#E2E8F0] dark:border-[#253149] font-mono text-xs">
+            <span className="text-[#64748B] dark:text-[#A4B1C7] text-[10px]">WAKTU:</span>
+            <span className="font-bold text-[#0F172A] dark:text-[#F3F6FC]">{formatTimer(timerSeconds)}</span>
             <button
               type="button"
               onClick={() => setIsTimerRunning(!isTimerRunning)}
-              className="p-1 text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 cursor-pointer"
+              className="p-1 text-[#64748B] hover:text-[#0F172A] dark:text-[#A4B1C7] dark:hover:text-[#F3F6FC] cursor-pointer"
               title={isTimerRunning ? "Jeda Timer" : "Mulai Simulasi Waktu Presentasi"}
             >
               {isTimerRunning ? <Pause className="w-3 h-3" /> : <Play className="w-3 h-3" />}
@@ -370,7 +370,7 @@ export const PresentationStudio: React.FC<PresentationStudioProps> = ({
                 setIsTimerRunning(false);
                 setTimerSeconds(0);
               }}
-              className="p-1 text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-200 cursor-pointer"
+              className="p-1 text-[#94A3B8] hover:text-[#64748B] dark:hover:text-[#CBD5E1] cursor-pointer"
               title="Reset Timer"
             >
               <RotateCcw className="w-3 h-3" />
@@ -382,7 +382,7 @@ export const PresentationStudio: React.FC<PresentationStudioProps> = ({
             <select
               value={slideTheme}
               onChange={(e) => setSlideTheme(e.target.value as SlideTheme)}
-              className="px-2.5 py-1.5 rounded-lg bg-zinc-100 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-xs font-medium text-zinc-800 dark:text-zinc-200 cursor-pointer focus:outline-hidden"
+              className="px-2.5 py-1.5 rounded-lg bg-[#F8FAFC] dark:bg-[#0B101A] border border-[#E2E8F0] dark:border-[#253149] text-xs font-medium text-[#0F172A] dark:text-[#F3F6FC] cursor-pointer focus:outline-hidden"
               title="Tema Warna Slide"
             >
               <option value="executive-dark">Tema: Dark Slate (Default)</option>
@@ -393,18 +393,18 @@ export const PresentationStudio: React.FC<PresentationStudioProps> = ({
           </div>
 
           {/* Visual Mode Toggle (Google Flow vs AI Concept) */}
-          <div className="flex items-center p-0.5 rounded-lg bg-zinc-100 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800">
+          <div className="flex items-center p-0.5 rounded-lg bg-[#F8FAFC] dark:bg-[#0B101A] border border-[#E2E8F0] dark:border-[#253149]">
             <button
               type="button"
               onClick={() => setSlideVisualMode("google-flow")}
               className={`px-2.5 py-1.5 rounded-md text-xs font-medium transition-all cursor-pointer flex items-center gap-1.5 ${
                 slideVisualMode === "google-flow"
-                  ? "bg-white dark:bg-zinc-800 text-sky-600 dark:text-sky-400 shadow-xs font-semibold"
-                  : "text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-200"
+                  ? "bg-white dark:bg-[#172033] text-[#7C9CFF] shadow-2xs font-semibold border border-[#7C9CFF]/30"
+                  : "text-[#64748B] dark:text-[#A4B1C7] hover:text-[#0F172A] dark:hover:text-[#F3F6FC]"
               }`}
             >
-              <Activity className="w-3.5 h-3.5" />
-              <span>Google Flow</span>
+              <Activity className="w-3.5 h-3.5 text-[#7C9CFF]" />
+              <span>Arsitektur Alur</span>
             </button>
             <button
               type="button"
@@ -416,11 +416,11 @@ export const PresentationStudio: React.FC<PresentationStudioProps> = ({
               }}
               className={`px-2.5 py-1.5 rounded-md text-xs font-medium transition-all cursor-pointer flex items-center gap-1.5 ${
                 slideVisualMode === "ai-concept"
-                  ? "bg-white dark:bg-zinc-800 text-sky-600 dark:text-sky-400 shadow-xs font-semibold"
-                  : "text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-200"
+                  ? "bg-white dark:bg-[#172033] text-[#7C9CFF] shadow-2xs font-semibold border border-[#7C9CFF]/30"
+                  : "text-[#64748B] dark:text-[#A4B1C7] hover:text-[#0F172A] dark:hover:text-[#F3F6FC]"
               }`}
             >
-              <Sparkles className="w-3.5 h-3.5" />
+              <Sparkles className="w-3.5 h-3.5 text-[#9B8CFF]" />
               <span>Visual AI</span>
             </button>
           </div>
@@ -430,7 +430,7 @@ export const PresentationStudio: React.FC<PresentationStudioProps> = ({
             type="button"
             onClick={handleBatchGenerateAllSlideVisuals}
             disabled={isBatchGeneratingSlides}
-            className="px-3 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 text-white text-xs font-semibold flex items-center gap-1.5 shadow-xs transition-colors cursor-pointer"
+            className="px-3 py-1.5 rounded-lg bg-white dark:bg-[#111827] border border-[#7C9CFF]/40 text-[#7C9CFF] hover:bg-[#7C9CFF]/10 disabled:opacity-50 text-xs font-semibold flex items-center gap-1.5 shadow-2xs transition-colors cursor-pointer"
             title="Generate ilustrasi visual AI untuk semua slide sekaligus"
           >
             <Sparkles className={`w-3.5 h-3.5 ${isBatchGeneratingSlides ? "animate-spin" : ""}`} />
@@ -441,7 +441,7 @@ export const PresentationStudio: React.FC<PresentationStudioProps> = ({
           <button
             type="button"
             onClick={() => setIsFullscreen(!isFullscreen)}
-            className="p-2 rounded-lg border border-zinc-200 dark:border-zinc-800 hover:bg-zinc-100 dark:hover:bg-zinc-900 text-zinc-700 dark:text-zinc-300 cursor-pointer transition-colors"
+            className="p-2 rounded-lg border border-[#E2E8F0] dark:border-[#253149] hover:bg-[#F1F5F9] dark:hover:bg-[#172033] text-[#64748B] dark:text-[#A4B1C7] hover:text-[#0F172A] dark:hover:text-[#F3F6FC] cursor-pointer transition-colors"
             title={isFullscreen ? "Keluar Fullscreen (Esc)" : "Mode Presentasi Layar Penuh (F / F5)"}
           >
             {isFullscreen ? <Minimize2 className="w-4 h-4" /> : <Maximize2 className="w-4 h-4" />}
@@ -452,7 +452,7 @@ export const PresentationStudio: React.FC<PresentationStudioProps> = ({
             type="button"
             onClick={handleDownloadPptx}
             disabled={isExportingPptx}
-            className="px-3.5 py-1.5 rounded-lg bg-sky-600 hover:bg-sky-500 disabled:opacity-50 text-white text-xs font-semibold flex items-center gap-1.5 shadow-xs transition-colors cursor-pointer"
+            className="px-3.5 py-1.5 rounded-lg bg-[#7C9CFF] hover:bg-[#688bf5] disabled:opacity-50 text-[#080B12] text-xs font-semibold flex items-center gap-1.5 shadow-xs transition-colors cursor-pointer"
           >
             {isExportingPptx ? (
               <RefreshCw className="w-3.5 h-3.5 animate-spin" />
@@ -601,74 +601,60 @@ export const PresentationStudio: React.FC<PresentationStudioProps> = ({
           </div>
 
           {/* Column 2: Contextual Visual Architecture Panel (45%) */}
-          <div className="lg:col-span-6 flex flex-col justify-between bg-zinc-900/60 rounded-xl border border-zinc-800/80 p-5 relative overflow-hidden">
+          <div className="lg:col-span-6 flex flex-col justify-between bg-[#080B12]/60 rounded-xl border border-[#253149] p-5 relative overflow-hidden">
             
-            {/* MODE A: GOOGLE FLOW VECTOR DIAGRAM */}
+            {/* MODE A: GOOGLE FLOW / EXECUTIVE ARCHITECTURE */}
             {slideVisualMode === "google-flow" && (
               <div className="h-full flex flex-col justify-between space-y-4">
-                <div className="flex items-center justify-between pb-2.5 border-b border-zinc-800">
-                  <span className="text-[10px] font-mono uppercase tracking-wider text-zinc-400 flex items-center gap-1.5">
-                    <Activity className="w-3 h-3 text-sky-400" />
-                    Diagram Alur Google Flow &amp; Metrik
+                <div className="flex items-center justify-between pb-2.5 border-b border-[#253149]">
+                  <span className="text-[10px] font-mono uppercase tracking-wider text-[#A4B1C7] flex items-center gap-1.5">
+                    <Activity className="w-3 h-3 text-[#7C9CFF]" />
+                    Kerangka Arsitektur &amp; Capaian
                   </span>
-                  <span className="text-[10px] font-mono text-zinc-400 px-2 py-0.5 rounded-md bg-zinc-800 border border-zinc-700">
-                    Panel Arsitektur
+                  <span className="text-[10px] font-mono text-[#7C9CFF] px-2 py-0.5 rounded-md bg-[#7C9CFF]/10 border border-[#7C9CFF]/30">
+                    Slide {activeSlideIndex + 1}
                   </span>
                 </div>
 
-                {/* Vector Flow Node Visuals */}
-                <div className="space-y-3 my-auto py-2">
-                  <div className="p-3 rounded-lg bg-zinc-950/90 border border-zinc-800 flex items-center justify-between">
-                    <div className="flex items-center gap-2.5">
-                      <div className="w-2.5 h-2.5 rounded-full bg-sky-400 animate-pulse" />
-                      <div>
-                        <div className="text-xs font-semibold text-white">Input Masalah &amp; Kebutuhan</div>
-                        <div className="text-[10px] text-zinc-400">{currentDoc.targetEntity}</div>
-                      </div>
+                {/* Structured Milestone Cards */}
+                <div className="space-y-2.5 my-auto">
+                  <div className="p-3 rounded-xl bg-[#0B101A] border border-[#253149] flex items-start gap-3">
+                    <div className="w-6 h-6 rounded-lg bg-[#7C9CFF]/15 text-[#7C9CFF] font-mono text-xs flex items-center justify-center font-bold flex-shrink-0 mt-0.5">
+                      01
                     </div>
-                    <span className="text-[10px] font-mono text-sky-400 bg-sky-950/80 px-2 py-0.5 rounded border border-sky-800">
-                      Fase 1
-                    </span>
-                  </div>
-
-                  <div className="flex justify-center text-zinc-600">
-                    <div className="w-0.5 h-3 bg-zinc-700" />
-                  </div>
-
-                  <div className="p-3 rounded-lg bg-sky-950/40 border border-sky-800/70 flex items-center justify-between shadow-xs">
-                    <div className="flex items-center gap-2.5">
-                      <div className="w-2.5 h-2.5 rounded-full bg-emerald-400" />
-                      <div>
-                        <div className="text-xs font-semibold text-sky-200">{activeSlide.title}</div>
-                        <div className="text-[10px] text-sky-300/80">Metodologi &amp; Sintesis Teruji</div>
-                      </div>
+                    <div className="min-w-0">
+                      <div className="text-xs font-semibold text-white">Identifikasi &amp; Latar Belakang Masalah</div>
+                      <div className="text-[11px] text-[#A4B1C7] leading-relaxed truncate">{currentDoc.targetEntity}</div>
                     </div>
-                    <span className="text-[10px] font-mono text-emerald-400 bg-emerald-950/80 px-2 py-0.5 rounded border border-emerald-800">
-                      Aktif
-                    </span>
                   </div>
 
-                  <div className="flex justify-center text-zinc-600">
-                    <div className="w-0.5 h-3 bg-zinc-700" />
-                  </div>
-
-                  <div className="p-3 rounded-lg bg-zinc-950/90 border border-zinc-800 flex items-center justify-between">
-                    <div className="flex items-center gap-2.5">
-                      <div className="w-2.5 h-2.5 rounded-full bg-amber-400" />
-                      <div>
-                        <div className="text-xs font-semibold text-white">Evaluasi, Validasi &amp; Output</div>
-                        <div className="text-[10px] text-zinc-400">Target Capaian 100%</div>
-                      </div>
+                  <div className="p-3 rounded-xl bg-[#7C9CFF]/10 border border-[#7C9CFF]/40 flex items-start gap-3">
+                    <div className="w-6 h-6 rounded-lg bg-[#34D399]/20 text-[#34D399] font-mono text-xs flex items-center justify-center font-bold flex-shrink-0 mt-0.5">
+                      02
                     </div>
-                    <span className="text-[10px] font-mono text-amber-400 bg-amber-950/80 px-2 py-0.5 rounded border border-amber-800">
-                      Deliverable
-                    </span>
+                    <div className="min-w-0">
+                      <div className="text-xs font-semibold text-white truncate">{activeSlide.title}</div>
+                      <div className="text-[11px] text-[#A4B1C7] leading-relaxed truncate">{activeSlide.subtitle}</div>
+                    </div>
+                  </div>
+
+                  <div className="p-3 rounded-xl bg-[#0B101A] border border-[#253149] flex items-start gap-3">
+                    <div className="w-6 h-6 rounded-lg bg-[#FBBF24]/20 text-[#FBBF24] font-mono text-xs flex items-center justify-center font-bold flex-shrink-0 mt-0.5">
+                      03
+                    </div>
+                    <div className="min-w-0">
+                      <div className="text-xs font-semibold text-white">Luaran Teruji &amp; Validasi Empiris</div>
+                      <div className="text-[11px] text-[#A4B1C7] leading-relaxed">Penyusunan naskah proposal terverifikasi bebas plagiarisme</div>
+                    </div>
                   </div>
                 </div>
 
-                <div className="pt-2 border-t border-zinc-800/80 flex items-center justify-between text-[10px] font-mono text-zinc-400">
-                  <span>Latency Verifikasi: &lt; 1.2s</span>
-                  <span>Akurasi: 99.4%</span>
+                <div className="pt-2.5 border-t border-[#253149] flex items-center justify-between text-[10px] font-mono text-[#A4B1C7]">
+                  <span className="flex items-center gap-1 text-[#34D399]">
+                    <Check className="w-3 h-3 text-[#34D399]" />
+                    Standar Akademik Dikti
+                  </span>
+                  <span>Durasi: {currentDoc.durationMonths} Bulan</span>
                 </div>
               </div>
             )}
@@ -748,39 +734,39 @@ export const PresentationStudio: React.FC<PresentationStudioProps> = ({
       </div>
 
       {/* SPEAKER NOTES & PRESENTER GUIDE CARD */}
-      <div className="p-4 sm:p-5 rounded-2xl bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 space-y-2.5 shadow-sm">
+      <div className="p-4 sm:p-5 rounded-2xl bg-white dark:bg-[#0B101A] border border-[#E2E8F0] dark:border-[#253149] space-y-2.5 shadow-2xs">
         <div className="flex items-center justify-between">
-          <span className="text-xs font-semibold text-zinc-900 dark:text-zinc-100 flex items-center gap-1.5">
-            <Brain className="w-4 h-4 text-sky-500" />
+          <span className="text-xs font-semibold text-[#0F172A] dark:text-[#F3F6FC] flex items-center gap-1.5">
+            <Brain className="w-4 h-4 text-[#7C9CFF]" />
             Catatan Presenter &amp; Naskah Narasi Sidang (Speaker Notes)
           </span>
           <button
             type="button"
             onClick={handleCopySpeakerNotes}
-            className="px-2.5 py-1 rounded-md bg-zinc-100 dark:bg-zinc-900 hover:bg-zinc-200 dark:hover:bg-zinc-800 text-zinc-700 dark:text-zinc-300 text-xs font-medium flex items-center gap-1 cursor-pointer transition-colors"
+            className="px-2.5 py-1 rounded-md bg-[#F8FAFC] dark:bg-[#111827] hover:bg-[#F1F5F9] dark:hover:bg-[#172033] text-[#334155] dark:text-[#CBD5E1] border border-[#E2E8F0] dark:border-[#253149] text-xs font-medium flex items-center gap-1 cursor-pointer transition-colors shadow-2xs"
           >
-            {copiedNotes ? <Check className="w-3.5 h-3.5 text-emerald-500" /> : <Copy className="w-3.5 h-3.5" />}
+            {copiedNotes ? <Check className="w-3.5 h-3.5 text-[#34D399]" /> : <Copy className="w-3.5 h-3.5" />}
             <span>{copiedNotes ? "Tersalin!" : "Salin Catatan"}</span>
           </button>
         </div>
-        <p className="text-xs sm:text-sm text-zinc-600 dark:text-zinc-300 leading-relaxed italic bg-zinc-50 dark:bg-zinc-900/60 p-3.5 rounded-xl border border-zinc-200 dark:border-zinc-850">
+        <p className="text-xs sm:text-sm text-[#334155] dark:text-[#CBD5E1] leading-relaxed italic bg-[#F8FAFC] dark:bg-[#111827]/70 p-3.5 rounded-xl border border-[#E2E8F0] dark:border-[#253149]">
           "{activeSlide.speakerNotes || "Presenter dapat memaparkan latar belakang, justifikasi metodologis, dan kontribusi empiris pada bagian ini."}"
         </p>
       </div>
 
       {/* EDIT SLIDE MODAL */}
       {isEditModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs animate-in fade-in duration-200">
-          <div className="w-full max-w-xl bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-2xl shadow-2xl p-5 space-y-4 max-h-[90vh] overflow-y-auto">
-            <div className="flex items-center justify-between pb-3 border-b border-zinc-200 dark:border-zinc-800">
-              <h3 className="text-sm font-bold text-zinc-900 dark:text-zinc-100 flex items-center gap-2">
-                <Edit3 className="w-4 h-4 text-sky-500" />
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 dark:bg-black/80 backdrop-blur-xs animate-in fade-in duration-200">
+          <div className="w-full max-w-xl bg-white dark:bg-[#0B101A] border border-[#E2E8F0] dark:border-[#253149] rounded-2xl shadow-2xl p-5 space-y-4 max-h-[90vh] overflow-y-auto">
+            <div className="flex items-center justify-between pb-3 border-b border-[#E2E8F0] dark:border-[#253149]">
+              <h3 className="text-sm font-bold text-[#0F172A] dark:text-[#F3F6FC] flex items-center gap-2">
+                <Edit3 className="w-4 h-4 text-[#7C9CFF]" />
                 <span>Edit Slide {activeSlideIndex + 1}</span>
               </h3>
               <button
                 type="button"
                 onClick={() => setIsEditModalOpen(false)}
-                className="p-1 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-900 text-zinc-400 hover:text-zinc-600 cursor-pointer"
+                className="p-1 rounded-lg hover:bg-[#F1F5F9] dark:hover:bg-[#172033] text-[#64748B] dark:text-[#A4B1C7] cursor-pointer"
               >
                 <X className="w-4 h-4" />
               </button>
@@ -788,40 +774,40 @@ export const PresentationStudio: React.FC<PresentationStudioProps> = ({
 
             <div className="space-y-3 text-xs">
               <div>
-                <label className="font-semibold block mb-1">Kicker / Kategori</label>
+                <label className="font-semibold block mb-1 text-[#0F172A] dark:text-[#F3F6FC]">Kicker / Kategori</label>
                 <input
                   type="text"
                   value={editKicker}
                   onChange={(e) => setEditKicker(e.target.value)}
-                  className="w-full px-3 py-2 rounded-lg bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 focus:outline-hidden"
+                  className="w-full px-3 py-2 rounded-lg bg-white dark:bg-[#111827] border border-[#E2E8F0] dark:border-[#253149] text-[#0F172A] dark:text-[#F3F6FC] focus:outline-hidden"
                 />
               </div>
 
               <div>
-                <label className="font-semibold block mb-1">Judul Slide</label>
+                <label className="font-semibold block mb-1 text-[#0F172A] dark:text-[#F3F6FC]">Judul Slide</label>
                 <input
                   type="text"
                   value={editTitle}
                   onChange={(e) => setEditTitle(e.target.value)}
-                  className="w-full px-3 py-2 rounded-lg bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 focus:outline-hidden"
+                  className="w-full px-3 py-2 rounded-lg bg-white dark:bg-[#111827] border border-[#E2E8F0] dark:border-[#253149] text-[#0F172A] dark:text-[#F3F6FC] focus:outline-hidden"
                 />
               </div>
 
               <div>
-                <label className="font-semibold block mb-1">Subjudul / Penjelas</label>
+                <label className="font-semibold block mb-1 text-[#0F172A] dark:text-[#F3F6FC]">Subjudul / Penjelas</label>
                 <input
                   type="text"
                   value={editSubtitle}
                   onChange={(e) => setEditSubtitle(e.target.value)}
-                  className="w-full px-3 py-2 rounded-lg bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 focus:outline-hidden"
+                  className="w-full px-3 py-2 rounded-lg bg-white dark:bg-[#111827] border border-[#E2E8F0] dark:border-[#253149] text-[#0F172A] dark:text-[#F3F6FC] focus:outline-hidden"
                 />
               </div>
 
               <div>
-                <label className="font-semibold block mb-1">Poin-poin Kunci (Key Points)</label>
+                <label className="font-semibold block mb-1 text-[#0F172A] dark:text-[#F3F6FC]">Poin-poin Kunci (Key Points)</label>
                 {editPoints.map((pt, idx) => (
                   <div key={idx} className="flex items-center gap-2 mb-2">
-                    <span className="font-mono text-zinc-400">{idx + 1}.</span>
+                    <span className="font-mono text-[#64748B] dark:text-[#A4B1C7]">{idx + 1}.</span>
                     <input
                       type="text"
                       value={pt}
@@ -830,7 +816,7 @@ export const PresentationStudio: React.FC<PresentationStudioProps> = ({
                         newPts[idx] = e.target.value;
                         setEditPoints(newPts);
                       }}
-                      className="flex-1 px-3 py-1.5 rounded-lg bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 focus:outline-hidden"
+                      className="flex-1 px-3 py-1.5 rounded-lg bg-white dark:bg-[#111827] border border-[#E2E8F0] dark:border-[#253149] text-[#0F172A] dark:text-[#F3F6FC] focus:outline-hidden"
                     />
                     <button
                       type="button"
@@ -844,35 +830,35 @@ export const PresentationStudio: React.FC<PresentationStudioProps> = ({
                 <button
                   type="button"
                   onClick={() => setEditPoints([...editPoints, "Poin argumen baru"])}
-                  className="mt-1 px-2.5 py-1 rounded-md border border-dashed border-zinc-300 dark:border-zinc-700 text-[11px] font-medium text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 cursor-pointer"
+                  className="mt-1 px-2.5 py-1 rounded-md border border-dashed border-[#E2E8F0] dark:border-[#253149] text-[11px] font-medium text-[#64748B] dark:text-[#A4B1C7] hover:text-[#0F172A] dark:hover:text-[#F3F6FC] cursor-pointer"
                 >
                   + Tambah Poin
                 </button>
               </div>
 
               <div>
-                <label className="font-semibold block mb-1">Catatan Presenter (Speaker Notes)</label>
+                <label className="font-semibold block mb-1 text-[#0F172A] dark:text-[#F3F6FC]">Catatan Presenter (Speaker Notes)</label>
                 <textarea
                   rows={3}
                   value={editNotes}
                   onChange={(e) => setEditNotes(e.target.value)}
-                  className="w-full px-3 py-2 rounded-lg bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 focus:outline-hidden resize-none"
+                  className="w-full px-3 py-2 rounded-lg bg-white dark:bg-[#111827] border border-[#E2E8F0] dark:border-[#253149] text-[#0F172A] dark:text-[#F3F6FC] focus:outline-hidden resize-none"
                 />
               </div>
             </div>
 
-            <div className="flex items-center justify-end gap-2 pt-3 border-t border-zinc-200 dark:border-zinc-800">
+            <div className="flex items-center justify-end gap-2 pt-3 border-t border-[#E2E8F0] dark:border-[#253149]">
               <button
                 type="button"
                 onClick={() => setIsEditModalOpen(false)}
-                className="px-3 py-1.5 rounded-lg border border-zinc-200 dark:border-zinc-800 text-xs font-semibold cursor-pointer"
+                className="px-3 py-1.5 rounded-lg border border-[#E2E8F0] dark:border-[#253149] text-xs font-semibold cursor-pointer text-[#64748B] dark:text-[#A4B1C7]"
               >
                 Batal
               </button>
               <button
                 type="button"
                 onClick={handleSaveEditSlide}
-                className="px-4 py-1.5 rounded-lg bg-zinc-900 hover:bg-black text-white dark:bg-zinc-100 dark:hover:bg-white dark:text-black text-xs font-semibold cursor-pointer"
+                className="px-4 py-1.5 rounded-lg bg-[#7C9CFF] hover:bg-[#688bf5] text-[#080B12] text-xs font-semibold transition-colors cursor-pointer shadow-xs"
               >
                 Simpan Perubahan
               </button>

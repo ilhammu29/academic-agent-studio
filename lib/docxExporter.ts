@@ -655,7 +655,7 @@ export async function generateAcademicProposalDocx(doc: ProposalDocument): Promi
       },
 
       // ==========================================
-      // SECTION 2D: ABSTRAK & ABSTRACT BILINGUAL
+      // SECTION 2D: ABSTRAK (BAHASA INDONESIA)
       // ==========================================
       {
         properties: standardPageProperties,
@@ -663,26 +663,51 @@ export async function generateAcademicProposalDocx(doc: ProposalDocument): Promi
           createHeading1("ABSTRAK"),
           new Paragraph({
             alignment: AlignmentType.CENTER,
-            spacing: { after: 200 },
+            spacing: { after: 120 },
             children: [
               new TextRun({ text: doc.title.toUpperCase(), bold: true, font: FONT_FAMILY, size: 24 }),
             ],
           }),
-          createBodyParagraph(doc.executiveSummary || `Usulan penelitian ini disusun untuk menganalisis dan memecahkan permasalahan operasional pada ${doc.targetEntity} dengan metodologi ilmiah yang terukur dan teruji.`),
           new Paragraph({
-            spacing: { before: 160, after: 300 },
+            alignment: AlignmentType.CENTER,
+            spacing: { after: 240 },
             children: [
-              new TextRun({ text: "Kata Kunci: ", bold: true, font: FONT_FAMILY, size: 22 }),
-              new TextRun({ text: `${doc.category}, ${doc.targetDepartment || "Metodologi"}, ${doc.institution}`, italics: true, font: FONT_FAMILY, size: 22 }),
+              new TextRun({ text: `${doc.candidateName} (NIM: ${doc.candidateId})`, bold: true, font: FONT_FAMILY, size: 20 }),
+              new TextRun({ text: `\n${doc.facultyMajor}, ${doc.institution}`, font: FONT_FAMILY, size: 20 }),
             ],
           }),
-          new Paragraph({ spacing: { after: 200 } }),
+          createBodyParagraph(doc.executiveSummary || `Usulan penelitian ini disusun untuk mengidentifikasi dan memecahkan permasalahan operasional pada ${doc.targetEntity} dengan metodologi ilmiah yang terukur dan teruji secara empiris. Pendekatan yang diusulkan mengintegrasikan landasan teoretis terdepan dengan metodologi terukur demi mencapai efisiensi dan validitas ilmiah yang tinggi.`),
+          createBodyParagraph(`Metodologi pelaksanaan mencakup tahapan identifikasi kebutuhan riil, perancangan arsitektur pemecahan masalah, validasi empiris di lingkungan operasional ${doc.targetEntity}, serta evaluasi berbasis metrik kinerja terstandar. Diharapkan luaran dari kegiatan ini mampu memberikan kontribusi aplikatif berupa prototipe kerja dan pedoman operasional baku, serta memperkaya literatur ilmiah di lingkungan ${doc.institution}.`),
+          new Paragraph({
+            spacing: { before: 200, after: 100 },
+            children: [
+              new TextRun({ text: "Kata Kunci: ", bold: true, font: FONT_FAMILY, size: 22 }),
+              new TextRun({ text: `${doc.category}, ${doc.targetDepartment || "Metodologi"}, ${doc.institution}, Optimasi Sistem, Analisis Kinerja`, italics: true, font: FONT_FAMILY, size: 22 }),
+            ],
+          }),
+        ],
+      },
+
+      // ==========================================
+      // SECTION 2E: ABSTRACT (ENGLISH)
+      // ==========================================
+      {
+        properties: standardPageProperties,
+        children: [
           createHeading1("ABSTRACT"),
           new Paragraph({
             alignment: AlignmentType.CENTER,
-            spacing: { after: 200 },
+            spacing: { after: 120 },
             children: [
               new TextRun({ text: doc.title.toUpperCase(), bold: true, italics: true, font: FONT_FAMILY, size: 24 }),
+            ],
+          }),
+          new Paragraph({
+            alignment: AlignmentType.CENTER,
+            spacing: { after: 240 },
+            children: [
+              new TextRun({ text: `${doc.candidateName} (Student ID: ${doc.candidateId})`, bold: true, font: FONT_FAMILY, size: 20 }),
+              new TextRun({ text: `\nDepartment of ${doc.facultyMajor}, ${doc.institution}`, font: FONT_FAMILY, size: 20 }),
             ],
           }),
           new Paragraph({
@@ -691,7 +716,7 @@ export async function generateAcademicProposalDocx(doc: ProposalDocument): Promi
             indent: { firstLine: cmToDxa(1.0) },
             children: [
               new TextRun({
-                text: `This academic research proposal aims to solve fundamental operational challenges observed at ${doc.targetEntity} through systematic and empirically validated methodologies.`,
+                text: `This academic research proposal systematically investigates and addresses fundamental operational challenges observed at ${doc.targetEntity} through rigorous and empirically validated methodologies. The proposed approach synthesizes cutting-edge theoretical frameworks with precise field measurements to ensure high scientific rigor and practical utility.`,
                 italics: true,
                 font: FONT_FAMILY,
                 size: 24,
@@ -699,17 +724,30 @@ export async function generateAcademicProposalDocx(doc: ProposalDocument): Promi
             ],
           }),
           new Paragraph({
-            spacing: { before: 160, after: 100 },
+            alignment: AlignmentType.JUSTIFIED,
+            spacing: { after: 160, line: 360 },
+            indent: { firstLine: cmToDxa(1.0) },
+            children: [
+              new TextRun({
+                text: `The structured execution pipeline encompasses empirical problem scoping, architectural design, systematic deployment, and thorough benchmark validation. The expected deliverables provide concrete operational standards and verified artifacts for ${doc.targetEntity}, while advancing the academic body of knowledge at ${doc.institution}.`,
+                italics: true,
+                font: FONT_FAMILY,
+                size: 24,
+              }),
+            ],
+          }),
+          new Paragraph({
+            spacing: { before: 200, after: 100 },
             children: [
               new TextRun({ text: "Keywords: ", bold: true, font: FONT_FAMILY, size: 22 }),
-              new TextRun({ text: `Academic Research, Operational Excellence, ${doc.category.toUpperCase()}`, italics: true, font: FONT_FAMILY, size: 22 }),
+              new TextRun({ text: `Academic Research, Applied Methodology, Operational Excellence, ${doc.category.toUpperCase()}, Performance Optimization`, italics: true, font: FONT_FAMILY, size: 22 }),
             ],
           }),
         ],
       },
 
       // ==========================================
-      // SECTION 2E: DAFTAR ISI FORMAL
+      // SECTION 2F: DAFTAR ISI FORMAL
       // ==========================================
       {
         properties: standardPageProperties,
@@ -725,9 +763,10 @@ export async function generateAcademicProposalDocx(doc: ProposalDocument): Promi
               page: ["iv", "v", "vi", "vii", "viii", "ix"][idx] || "iv",
             })),
             { title: "KATA PENGANTAR", page: ["iv", "v", "vi", "vii", "viii", "ix"][extraSheets.length] || "iv" },
-            { title: "ABSTRAK / ABSTRACT", page: ["v", "vi", "vii", "viii", "ix", "x"][extraSheets.length] || "v" },
-            { title: "DAFTAR ISI", page: ["vi", "vii", "viii", "ix", "x", "xi"][extraSheets.length] || "vi" },
-            { title: "DAFTAR GAMBAR & TABEL", page: ["vii", "viii", "ix", "x", "xi", "xii"][extraSheets.length] || "vii" },
+            { title: "ABSTRAK", page: ["v", "vi", "vii", "viii", "ix", "x"][extraSheets.length] || "v" },
+            { title: "ABSTRACT", page: ["vi", "vii", "viii", "ix", "x", "xi"][extraSheets.length] || "vi" },
+            { title: "DAFTAR ISI", page: ["vii", "viii", "ix", "x", "xi", "xii"][extraSheets.length] || "vii" },
+            { title: "DAFTAR GAMBAR & TABEL", page: ["viii", "ix", "x", "xi", "xii", "xiii"][extraSheets.length] || "viii" },
             { title: "BAB I PENDAHULUAN", page: `${pBab1}` },
             { title: "BAB II TINJAUAN PUSTAKA / LANDASAN TEORI", page: `${pBab2}` },
             { title: "BAB III METODOLOGI PENELITIAN / PELAKSANAAN", page: `${pBab3}` },

@@ -120,23 +120,23 @@ export const TheoryCustomizerModal: React.FC<TheoryCustomizerModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-xs p-4 animate-in fade-in duration-200">
-      <div className="bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-850 rounded-2xl w-full max-w-3xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 dark:bg-black/80 backdrop-blur-xs p-4 animate-in fade-in duration-200">
+      <div className="bg-white dark:bg-[#0B101A] border border-[#E2E8F0] dark:border-[#253149] rounded-2xl w-full max-w-3xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
         
         {/* Header */}
-        <div className="flex items-center justify-between p-5 border-b border-zinc-200 dark:border-zinc-800">
+        <div className="flex items-center justify-between p-5 border-b border-[#E2E8F0] dark:border-[#253149] bg-[#F8FAFC] dark:bg-[#111827]">
           <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-lg bg-indigo-50 dark:bg-indigo-950/60 border border-indigo-200 dark:border-indigo-800 flex items-center justify-center text-indigo-600 dark:text-indigo-400">
+            <div className="w-8 h-8 rounded-lg bg-[#7C9CFF]/15 border border-[#7C9CFF]/30 flex items-center justify-center text-[#7C9CFF]">
               <BookOpen className="w-4 h-4" />
             </div>
             <div>
-              <h3 className="text-sm font-bold text-zinc-900 dark:text-zinc-100 flex items-center gap-2">
-                <span>Kustomisasi Bab II: Landasan Teori & Jurnal</span>
-                <span className="px-2 py-0.5 rounded-md bg-indigo-100 dark:bg-indigo-950/80 text-indigo-700 dark:text-indigo-300 font-mono text-[11px] font-semibold">
+              <h3 className="text-sm font-bold text-[#0F172A] dark:text-[#F3F6FC] flex items-center gap-2">
+                <span>Kustomisasi Bab II: Landasan Teori &amp; Jurnal</span>
+                <span className="px-2 py-0.5 rounded-md bg-[#7C9CFF]/15 text-[#7C9CFF] font-mono text-[11px] font-semibold border border-[#7C9CFF]/30">
                   {theories.length} Teori Aktif
                 </span>
               </h3>
-              <p className="text-xs text-zinc-500 dark:text-zinc-400">
+              <p className="text-xs text-[#64748B] dark:text-[#A4B1C7]">
                 Tentukan jumlah teori dan rujukan ilmiah yang otomatis disinkronkan ke Bab II dan Daftar Pustaka
               </p>
             </div>
@@ -144,16 +144,16 @@ export const TheoryCustomizerModal: React.FC<TheoryCustomizerModalProps> = ({
           <button
             type="button"
             onClick={onClose}
-            className="p-1.5 rounded-lg text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200 hover:bg-zinc-100 dark:hover:bg-zinc-900 transition-colors cursor-pointer"
+            className="p-1.5 rounded-lg text-[#64748B] dark:text-[#A4B1C7] hover:text-[#0F172A] dark:hover:text-[#F3F6FC] hover:bg-[#F1F5F9] dark:hover:bg-[#172033] transition-colors cursor-pointer"
           >
             <X className="w-4 h-4" />
           </button>
         </div>
 
         {/* Quick Batch Actions & AI Depth Controller */}
-        <div className="p-4 bg-zinc-50 dark:bg-zinc-900/60 border-b border-zinc-200 dark:border-zinc-800 flex flex-wrap items-center justify-between gap-3">
+        <div className="p-4 bg-[#F8FAFC] dark:bg-[#080B12] border-b border-[#E2E8F0] dark:border-[#253149] flex flex-wrap items-center justify-between gap-3">
           <div className="flex flex-wrap items-center gap-2">
-            <span className="text-xs font-semibold text-zinc-700 dark:text-zinc-300">
+            <span className="text-xs font-semibold text-[#0F172A] dark:text-[#F3F6FC]">
               Preset Kedalaman Teori:
             </span>
             {[5, 8, 13, 20].map((cnt) => (
@@ -167,8 +167,8 @@ export const TheoryCustomizerModal: React.FC<TheoryCustomizerModalProps> = ({
                 disabled={isExpanding}
                 className={`px-3 py-1 rounded-lg text-xs font-medium transition-all cursor-pointer ${
                   theories.length === cnt
-                    ? "bg-indigo-600 text-white font-bold shadow-xs"
-                    : "bg-white dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 border border-zinc-200 dark:border-zinc-700 hover:bg-zinc-100 dark:hover:bg-zinc-700"
+                    ? "bg-[#7C9CFF] text-[#080B12] font-bold shadow-2xs"
+                    : "bg-white dark:bg-[#111827] text-[#0F172A] dark:text-[#F3F6FC] border border-[#E2E8F0] dark:border-[#253149] hover:border-[#7C9CFF]"
                 }`}
               >
                 {cnt} Teori {cnt === 13 ? "★ Komprehensif" : cnt === 20 ? "★ Disertasi/Tesis" : ""}
@@ -181,7 +181,7 @@ export const TheoryCustomizerModal: React.FC<TheoryCustomizerModalProps> = ({
               type="button"
               onClick={() => handleGenerateTheories(selectedCount)}
               disabled={isExpanding}
-              className="px-3 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold flex items-center gap-1.5 cursor-pointer shadow-xs transition-colors disabled:opacity-50"
+              className="px-3 py-1.5 rounded-lg bg-[#7C9CFF] hover:bg-[#688bf5] text-[#080B12] text-xs font-semibold flex items-center gap-1.5 cursor-pointer shadow-xs transition-colors disabled:opacity-50"
             >
               {isExpanding ? (
                 <RefreshCw className="w-3.5 h-3.5 animate-spin" />
@@ -194,7 +194,7 @@ export const TheoryCustomizerModal: React.FC<TheoryCustomizerModalProps> = ({
             <button
               type="button"
               onClick={handleAddManualTheory}
-              className="px-3 py-1.5 rounded-lg bg-white dark:bg-zinc-800 border border-zinc-300 dark:border-zinc-700 text-zinc-800 dark:text-zinc-200 text-xs font-semibold flex items-center gap-1.5 cursor-pointer hover:bg-zinc-100 dark:hover:bg-zinc-700"
+              className="px-3 py-1.5 rounded-lg bg-white dark:bg-[#111827] border border-[#E2E8F0] dark:border-[#253149] text-[#0F172A] dark:text-[#F3F6FC] text-xs font-semibold flex items-center gap-1.5 cursor-pointer hover:bg-[#F1F5F9] dark:hover:bg-[#172033]"
             >
               <Plus className="w-3.5 h-3.5" />
               <span>Tambah Teori Manual</span>
@@ -204,8 +204,8 @@ export const TheoryCustomizerModal: React.FC<TheoryCustomizerModalProps> = ({
 
         {/* Toast */}
         {toastMessage && (
-          <div className="bg-emerald-50 dark:bg-emerald-950/60 border-b border-emerald-200 dark:border-emerald-800 px-4 py-2 text-xs text-emerald-800 dark:text-emerald-200 flex items-center gap-2 font-medium">
-            <Check className="w-4 h-4 text-emerald-500 flex-shrink-0" />
+          <div className="bg-[#34D399]/15 border-b border-[#34D399]/30 px-4 py-2 text-xs text-[#34D399] flex items-center gap-2 font-medium">
+            <Check className="w-4 h-4 text-[#34D399] flex-shrink-0" />
             <span>{toastMessage}</span>
           </div>
         )}
@@ -215,11 +215,11 @@ export const TheoryCustomizerModal: React.FC<TheoryCustomizerModalProps> = ({
           {theories.map((theory, idx) => (
             <div
               key={idx}
-              className="p-4 rounded-xl bg-zinc-50 dark:bg-zinc-900/40 border border-zinc-200 dark:border-zinc-800 space-y-2.5 relative group"
+              className="p-4 rounded-xl bg-[#F8FAFC] dark:bg-[#111827]/70 border border-[#E2E8F0] dark:border-[#253149] space-y-2.5 relative group"
             >
               <div className="flex items-center justify-between gap-3">
                 <div className="flex items-center gap-2">
-                  <span className="w-6 h-6 rounded-md bg-indigo-100 dark:bg-indigo-950 text-indigo-600 dark:text-indigo-400 font-mono text-xs font-bold flex items-center justify-center border border-indigo-200 dark:border-indigo-800">
+                  <span className="w-6 h-6 rounded-md bg-[#7C9CFF]/15 text-[#7C9CFF] font-mono text-xs font-bold flex items-center justify-center border border-[#7C9CFF]/30">
                     {idx + 1}
                   </span>
                   <input
@@ -227,13 +227,13 @@ export const TheoryCustomizerModal: React.FC<TheoryCustomizerModalProps> = ({
                     value={theory.topic}
                     onChange={(e) => handleUpdateTheory(idx, "topic", e.target.value)}
                     placeholder="Nama Teori / Kerangka Ilmiah..."
-                    className="font-semibold text-xs sm:text-sm text-zinc-900 dark:text-zinc-100 bg-transparent border-b border-transparent hover:border-zinc-300 dark:hover:border-zinc-700 focus:border-indigo-500 focus:outline-hidden w-full max-w-lg"
+                    className="font-semibold text-xs sm:text-sm text-[#0F172A] dark:text-[#F3F6FC] bg-transparent border-b border-transparent hover:border-[#E2E8F0] dark:hover:border-[#253149] focus:border-[#7C9CFF] focus:outline-hidden w-full max-w-lg"
                   />
                 </div>
                 <button
                   type="button"
                   onClick={() => handleRemoveTheory(idx)}
-                  className="p-1 rounded text-zinc-400 hover:text-rose-500 transition-colors cursor-pointer opacity-80 hover:opacity-100"
+                  className="p-1 rounded text-[#64748B] hover:text-rose-500 transition-colors cursor-pointer opacity-80 hover:opacity-100"
                   title="Hapus Teori"
                 >
                   <Trash2 className="w-4 h-4" />
@@ -242,20 +242,20 @@ export const TheoryCustomizerModal: React.FC<TheoryCustomizerModalProps> = ({
 
               {/* Elaboration */}
               <div>
-                <label className="text-[11px] font-mono text-zinc-500 block mb-1">
-                  Uraian Konseptual & Mekanisme Ilmiah:
+                <label className="text-[11px] font-mono text-[#64748B] dark:text-[#A4B1C7] block mb-1">
+                  Uraian Konseptual &amp; Mekanisme Ilmiah:
                 </label>
                 <textarea
                   rows={2}
                   value={theory.elaboration}
                   onChange={(e) => handleUpdateTheory(idx, "elaboration", e.target.value)}
-                  className="w-full px-3 py-1.5 rounded-lg bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 text-xs text-zinc-800 dark:text-zinc-200 leading-relaxed focus:outline-hidden focus:border-indigo-500"
+                  className="w-full px-3 py-1.5 rounded-lg bg-white dark:bg-[#0B101A] border border-[#E2E8F0] dark:border-[#253149] text-xs text-[#0F172A] dark:text-[#F3F6FC] leading-relaxed focus:outline-hidden focus:border-[#7C9CFF]"
                 />
               </div>
 
               {/* Citation */}
               <div className="flex items-center gap-2">
-                <label className="text-[11px] font-mono text-zinc-500 flex-shrink-0">
+                <label className="text-[11px] font-mono text-[#64748B] dark:text-[#A4B1C7] flex-shrink-0">
                   Format Sitasi Dalam Teks:
                 </label>
                 <input
@@ -263,7 +263,7 @@ export const TheoryCustomizerModal: React.FC<TheoryCustomizerModalProps> = ({
                   value={theory.citation}
                   onChange={(e) => handleUpdateTheory(idx, "citation", e.target.value)}
                   placeholder="(Nama Penulis, Tahun)"
-                  className="flex-1 px-2.5 py-1 rounded bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 text-xs text-indigo-600 dark:text-indigo-400 font-mono font-medium focus:outline-hidden focus:border-indigo-500"
+                  className="flex-1 px-2.5 py-1 rounded bg-white dark:bg-[#0B101A] border border-[#E2E8F0] dark:border-[#253149] text-xs text-[#7C9CFF] font-mono font-medium focus:outline-hidden focus:border-[#7C9CFF]"
                 />
               </div>
             </div>
@@ -271,9 +271,9 @@ export const TheoryCustomizerModal: React.FC<TheoryCustomizerModalProps> = ({
         </div>
 
         {/* Footer */}
-        <div className="p-4 border-t border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900/60 flex items-center justify-between">
-          <div className="text-xs text-zinc-500 dark:text-zinc-400 flex items-center gap-2 font-mono">
-            <Layers className="w-4 h-4 text-indigo-500" />
+        <div className="p-4 border-t border-[#E2E8F0] dark:border-[#253149] bg-[#F8FAFC] dark:bg-[#111827] flex items-center justify-between">
+          <div className="text-xs text-[#64748B] dark:text-[#A4B1C7] flex items-center gap-2 font-mono">
+            <Layers className="w-4 h-4 text-[#7C9CFF]" />
             <span>Total: <strong>{theories.length} Teori</strong> &bull; Otomatis sinkron ke Daftar Pustaka</span>
           </div>
 
@@ -281,17 +281,17 @@ export const TheoryCustomizerModal: React.FC<TheoryCustomizerModalProps> = ({
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-2 rounded-lg text-xs font-medium text-zinc-600 dark:text-zinc-400 hover:bg-zinc-200 dark:hover:bg-zinc-800 transition-colors cursor-pointer"
+              className="px-4 py-2 rounded-lg text-xs font-medium text-[#64748B] dark:text-[#A4B1C7] hover:bg-[#F1F5F9] dark:hover:bg-[#172033] transition-colors cursor-pointer"
             >
               Batal
             </button>
             <button
               type="button"
               onClick={handleSave}
-              className="px-4 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold transition-colors flex items-center gap-1.5 cursor-pointer shadow-xs"
+              className="px-4 py-2 rounded-lg bg-[#7C9CFF] hover:bg-[#688bf5] text-[#080B12] text-xs font-semibold transition-colors flex items-center gap-1.5 cursor-pointer shadow-xs"
             >
               <Check className="w-3.5 h-3.5" />
-              <span>Simpan & Terapkan ke Bab II</span>
+              <span>Simpan &amp; Terapkan ke Bab II</span>
             </button>
           </div>
         </div>

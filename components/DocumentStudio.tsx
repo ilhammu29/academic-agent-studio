@@ -69,7 +69,8 @@ import {
   PanelRight,
   SlidersHorizontal,
   Search,
-  Send
+  Send,
+  Plus
 } from "lucide-react";
 
 interface DocumentStudioProps {
@@ -263,6 +264,91 @@ Jawablah dengan ringkas, tajam, bernas, berstandar akademik tinggi, tanpa klise 
     currentDoc.targetDepthPages || 35,
     Math.ceil(totalWordsCount / 280)
   );
+
+  const totalCharactersCount = React.useMemo(() => {
+    return Math.round(totalWordsCount * 6.5);
+  }, [totalWordsCount]);
+
+  const readingTimeMinutes = React.useMemo(() => {
+    return Math.max(1, Math.ceil(totalWordsCount / 220));
+  }, [totalWordsCount]);
+
+  // Microsoft Word reverse-engineered states
+  const [zoomLevel, setZoomLevel] = useState<number>(100);
+  const [isPageCustomizerModalOpen, setIsPageCustomizerModalOpen] = useState<boolean>(false);
+  const [disabledSections, setDisabledSections] = useState<string[]>([]);
+
+  const handleToggleSection = (key: string) => {
+    setDisabledSections(prev => 
+      prev.includes(key) ? prev.filter(k => k !== key) : [...prev, key]
+    );
+  };
+
+  const handleChangeMarginsPreset = (preset: 'dikti' | 'normal' | 'narrow') => {
+    const marginsMap = {
+      dikti: { topCm: 4, bottomCm: 3, leftCm: 4, rightCm: 3 },
+      normal: { topCm: 2.54, bottomCm: 2.54, leftCm: 2.54, rightCm: 2.54 },
+      narrow: { topCm: 1.5, bottomCm: 1.5, leftCm: 1.5, rightCm: 1.5 }
+    };
+    setCurrentDoc(prev => ({
+      ...prev,
+      campusGuideline: {
+        campusName: prev.campusGuideline?.campusName || "Standar Dikti",
+        paperSize: prev.campusGuideline?.paperSize || 'A4',
+        margins: marginsMap[preset],
+        typography: prev.campusGuideline?.typography || { fontFamily: "Times New Roman", heading1SizePt: 14, bodySizePt: 12, lineSpacing: 1.5 },
+        headingStyle: prev.campusGuideline?.headingStyle || "decimal",
+        citationStyle: prev.campusGuideline?.citationStyle || "apa",
+        approvalConfig: prev.campusGuideline?.approvalConfig || { supervisorCount: 2, requiresHeadOfProgram: true, requiresDeanOrFieldMentor: false }
+      }
+    }));
+    setToastMessage(`Margin diubah ke: ${preset === 'dikti' ? 'Standar Dikti (4-4-3-3 cm)' : preset === 'normal' ? 'Normal (2.54 cm)' : 'Sempit (1.5 cm)'}`);
+    setTimeout(() => setToastMessage(null), 2500);
+  };
+
+  const handleChangeLineSpacing = (spacing: number) => {
+    setCurrentDoc(prev => ({
+      ...prev,
+      campusGuideline: {
+        campusName: prev.campusGuideline?.campusName || "Standar Dikti",
+        paperSize: prev.campusGuideline?.paperSize || 'A4',
+        margins: prev.campusGuideline?.margins || { topCm: 4, bottomCm: 3, leftCm: 4, rightCm: 3 },
+        typography: {
+          fontFamily: prev.campusGuideline?.typography?.fontFamily || "Times New Roman",
+          heading1SizePt: prev.campusGuideline?.typography?.heading1SizePt || 14,
+          bodySizePt: prev.campusGuideline?.typography?.bodySizePt || 12,
+          lineSpacing: spacing
+        },
+        headingStyle: prev.campusGuideline?.headingStyle || "decimal",
+        citationStyle: prev.campusGuideline?.citationStyle || "apa",
+        approvalConfig: prev.campusGuideline?.approvalConfig || { supervisorCount: 2, requiresHeadOfProgram: true, requiresDeanOrFieldMentor: false }
+      }
+    }));
+    setToastMessage(`Spasi baris diubah ke: ${spacing}x`);
+    setTimeout(() => setToastMessage(null), 2500);
+  };
+
+  const handleChangeFontFamily = (font: string) => {
+    setCurrentDoc(prev => ({
+      ...prev,
+      campusGuideline: {
+        campusName: prev.campusGuideline?.campusName || "Standar Dikti",
+        paperSize: prev.campusGuideline?.paperSize || 'A4',
+        margins: prev.campusGuideline?.margins || { topCm: 4, bottomCm: 3, leftCm: 4, rightCm: 3 },
+        typography: {
+          fontFamily: font,
+          heading1SizePt: prev.campusGuideline?.typography?.heading1SizePt || 14,
+          bodySizePt: prev.campusGuideline?.typography?.bodySizePt || 12,
+          lineSpacing: prev.campusGuideline?.typography?.lineSpacing || 1.5
+        },
+        headingStyle: prev.campusGuideline?.headingStyle || "decimal",
+        citationStyle: prev.campusGuideline?.citationStyle || "apa",
+        approvalConfig: prev.campusGuideline?.approvalConfig || { supervisorCount: 2, requiresHeadOfProgram: true, requiresDeanOrFieldMentor: false }
+      }
+    }));
+    setToastMessage(`Font dokumen diubah ke: ${font}`);
+    setTimeout(() => setToastMessage(null), 2500);
+  };
 
   // Co-Pilot & Dropdown states
   const [isCopilotOpen, setIsCopilotOpen] = useState(false);
@@ -1110,8 +1196,46 @@ NIP / NIK.
               ))}
             </div>
 
-            {/* Formatting Tools */}
+            {/* Formatting Tools (Microsoft Word Reverse-Engineered Toolbar) */}
             <div className="flex items-center gap-1 border-l border-[#E2E8F0] dark:border-[#253149] pl-2 text-xs">
+              {/* Font Family */}
+              <select
+                value={currentDoc.campusGuideline?.typography?.fontFamily || "Times New Roman"}
+                onChange={(e) => handleChangeFontFamily(e.target.value)}
+                className="px-2 py-1 rounded-md border border-[#E2E8F0] dark:border-[#253149] bg-white dark:bg-[#111827] text-[#0F172A] dark:text-[#F3F6FC] text-[11px] focus:outline-none cursor-pointer"
+                title="Font Resmi Dokumen"
+              >
+                <option value="Times New Roman">Times New Roman</option>
+                <option value="Arial">Arial</option>
+                <option value="Georgia">Georgia</option>
+                <option value="Garamond">Garamond</option>
+              </select>
+
+              {/* Line Spacing */}
+              <select
+                value={currentDoc.campusGuideline?.typography?.lineSpacing || 1.5}
+                onChange={(e) => handleChangeLineSpacing(parseFloat(e.target.value))}
+                className="px-2 py-1 rounded-md border border-[#E2E8F0] dark:border-[#253149] bg-white dark:bg-[#111827] text-[#0F172A] dark:text-[#F3F6FC] text-[11px] focus:outline-none cursor-pointer"
+                title="Spasi Baris Paragraf"
+              >
+                <option value={1.15}>Spasi 1.15x</option>
+                <option value={1.5}>Spasi 1.5x (Dikti)</option>
+                <option value={2.0}>Spasi 2.0x (Double)</option>
+              </select>
+
+              {/* Margin Preset */}
+              <select
+                onChange={(e) => handleChangeMarginsPreset(e.target.value as any)}
+                defaultValue="dikti"
+                className="px-2 py-1 rounded-md border border-[#E2E8F0] dark:border-[#253149] bg-white dark:bg-[#111827] text-[#0F172A] dark:text-[#F3F6FC] text-[11px] focus:outline-none cursor-pointer"
+                title="Margin Kertas A4"
+              >
+                <option value="dikti">Margin Dikti (4-4-3-3)</option>
+                <option value="normal">Margin Normal (2.54)</option>
+                <option value="narrow">Margin Sempit (1.5)</option>
+              </select>
+
+              {/* Citation Style */}
               <button
                 type="button"
                 onClick={() => setCitationStyle(prev => prev === "apa" ? "ieee" : "apa")}
@@ -1121,6 +1245,7 @@ NIP / NIK.
                 {citationStyle === "apa" ? "APA 7th" : "IEEE"}
               </button>
 
+              {/* Heading Style */}
               <select
                 value={currentDoc.campusGuideline?.headingStyle || "decimal"}
                 onChange={(e) => handleChangeHeadingStyle(e.target.value as HeadingStyleType)}
@@ -1132,6 +1257,7 @@ NIP / NIK.
                 <option value="roman">Romawi (I.A)</option>
               </select>
 
+              {/* Watermark Selector */}
               <select
                 value={watermarkType}
                 onChange={(e) => setWatermarkType(e.target.value as any)}
@@ -1145,6 +1271,7 @@ NIP / NIK.
                 <option value="confidential">Confidential</option>
               </select>
 
+              {/* Ruler */}
               <button
                 type="button"
                 onClick={() => setShowMarginRuler(!showMarginRuler)}
@@ -1156,6 +1283,17 @@ NIP / NIK.
                 title="Tampilkan garis margin panduan A4"
               >
                 Ruler
+              </button>
+
+              {/* Page Customizer Trigger */}
+              <button
+                type="button"
+                onClick={() => setIsPageCustomizerModalOpen(true)}
+                className="px-2.5 py-1 rounded-md bg-[#7C9CFF]/15 hover:bg-[#7C9CFF]/25 text-[#7C9CFF] font-semibold text-[11px] border border-[#7C9CFF]/30 flex items-center gap-1 cursor-pointer transition-colors shrink-0"
+                title="Kustomisasi Susunan & Lembar Halaman Dokumen"
+              >
+                <Layers className="w-3.5 h-3.5" />
+                <span>Atur Lembar</span>
               </button>
             </div>
           </div>
@@ -1469,6 +1607,8 @@ NIP / NIK.
                   paddingBottom: `${(currentDoc.campusGuideline?.margins?.bottomCm ?? 3) * 9}px`,
                   paddingLeft: `${(currentDoc.campusGuideline?.margins?.leftCm ?? 4) * 9}px`,
                   paddingRight: `${(currentDoc.campusGuideline?.margins?.rightCm ?? 3) * 9}px`,
+                  transform: zoomLevel !== 100 ? `scale(${zoomLevel / 100})` : undefined,
+                  transformOrigin: "top center",
                 }}
                 className="relative bg-white dark:bg-[#0D131F] text-[#0F172A] dark:text-[#F3F6FC] rounded-lg shadow-xl border border-[#E2E8F0] dark:border-[#1E2638] print:bg-white print:text-black print:p-0 print:border-none print:shadow-none transition-all duration-200"
               >
@@ -1541,6 +1681,7 @@ NIP / NIK.
             <>
               {/* BAGIAN 1: HALAMAN JUDUL / COVER STANDAR DIKTI */}
           {/* ========================================================================= */}
+          {!disabledSections.includes("section-cover") && (
           <div id="section-cover" className="relative text-center pb-12 mb-12 border-b-2 border-[#E2E8F0] dark:border-[#253149] print:border-black print:pb-0 print:mb-0 print:min-h-screen print:flex print:flex-col print:justify-between">
             {/* Action Bar Cover (No-Print) */}
             <div className="no-print mb-6 p-2 rounded-lg bg-[#F8FAFC] dark:bg-[#111827] border border-[#E2E8F0] dark:border-[#253149] flex items-center justify-between flex-wrap gap-2 text-xs">
@@ -1638,10 +1779,12 @@ NIP / NIK.
               [Halaman i - Tidak Dicetak]
             </div>
           </div>
+          )}
 
           {/* ========================================================================= */}
           {/* BAGIAN 2: LEMBAR PENGESAHAN (Halaman ii) */}
           {/* ========================================================================= */}
+          {!disabledSections.includes("section-pengesahan") && (
           <section id="section-pengesahan" className="relative pb-12 mb-12 border-b-2 border-zinc-200 dark:border-zinc-800 print:border-black font-serif text-xs sm:text-sm">
             <div className="flex items-center justify-between mb-4 border-b border-zinc-200 dark:border-zinc-850 pb-2 print:border-black">
               <div className="text-center w-full">
@@ -1779,10 +1922,12 @@ NIP / NIK.
               ii
             </div>
           </section>
+          )}
 
           {/* ========================================================================= */}
           {/* BAGIAN 3: LEMBAR PERNYATAAN ORISINALITAS (Halaman iii) */}
           {/* ========================================================================= */}
+          {!disabledSections.includes("section-orisinalitas") && (
           <section id="section-orisinalitas" className="relative pb-12 mb-12 border-b-2 border-zinc-200 dark:border-zinc-850 print:border-black font-serif text-xs sm:text-sm">
             <div className="flex items-center justify-between mb-4 border-b border-zinc-200 dark:border-zinc-850 pb-2 print:border-black">
               <div className="text-center w-full">
@@ -1866,6 +2011,7 @@ NIP / NIK.
               iii
             </div>
           </section>
+          )}
 
           {/* ========================================================================= */}
           {/* BAGIAN 3B: LEMBAR KHUSUS KAMPUS / BERITA ACARA / UPLOAD SCAN */}
@@ -1936,6 +2082,7 @@ NIP / NIK.
           {/* ========================================================================= */}
           {/* BAGIAN 4: KATA PENGANTAR (Halaman Formal) */}
           {/* ========================================================================= */}
+          {!disabledSections.includes("section-pengantar") && (
           <section id="section-pengantar" className="relative pb-12 mb-12 border-b-2 border-zinc-200 dark:border-zinc-850 print:border-black font-serif text-xs sm:text-sm">
             <div className="flex items-center justify-between mb-4 border-b border-zinc-200 dark:border-zinc-850 pb-2 print:border-black">
               <div className="text-center w-full">
@@ -1984,69 +2131,114 @@ NIP / NIK.
               iv
             </div>
           </section>
+          )}
 
           {/* ========================================================================= */}
-          {/* BAGIAN 5: ABSTRAK & ABSTRACT BILINGUAL (Halaman v) */}
+          {/* BAGIAN 5A: ABSTRAK (BAHASA INDONESIA - Halaman v) */}
           {/* ========================================================================= */}
-          <section id="section-abstrak" className="relative pb-12 mb-12 border-b-2 border-zinc-200 dark:border-zinc-850 print:border-black font-serif text-xs sm:text-sm">
-            <div className="flex items-center justify-between mb-4 border-b border-zinc-200 dark:border-zinc-850 pb-2 print:border-black">
+          {!disabledSections.includes("section-abstrak") && (
+          <section id="section-abstrak" className="relative pb-12 mb-12 border-b-2 border-[#E2E8F0] dark:border-[#253149] print:border-black font-serif text-xs sm:text-sm print:break-after-page">
+            <div className="flex items-center justify-between mb-4 border-b border-[#E2E8F0] dark:border-[#253149] pb-2 print:border-black">
               <div className="text-center w-full">
-                <h2 className="text-base sm:text-lg font-bold text-zinc-900 dark:text-zinc-100 uppercase tracking-wide print:text-black">
+                <span className="text-[10px] font-mono uppercase tracking-widest text-[#64748B] dark:text-[#A4B1C7] block mb-1">
+                  INTISARI KARYA ILMIAH
+                </span>
+                <h2 className="text-base sm:text-lg font-bold text-[#0F172A] dark:text-[#F3F6FC] uppercase tracking-wide print:text-black">
                   ABSTRAK
                 </h2>
               </div>
             </div>
 
             {/* Versi Bahasa Indonesia */}
-            <div className="max-w-2xl mx-auto space-y-3 leading-relaxed text-justify mb-8">
-              <div className="text-center font-sans text-xs space-y-0.5 mb-3">
-                <p className="font-bold text-zinc-900 dark:text-zinc-100 print:text-black uppercase">{currentDoc.title}</p>
-                <p className="text-zinc-600 dark:text-zinc-400 print:text-black">
-                  Nama Mahasiswa: {currentDoc.candidateName} (NIM: {currentDoc.candidateId})
+            <div className="max-w-2xl mx-auto space-y-4 leading-relaxed text-justify mb-8">
+              <div className="text-center text-xs space-y-0.5 mb-4">
+                <p className="font-bold text-[#0F172A] dark:text-[#F3F6FC] print:text-black uppercase text-sm">{currentDoc.title}</p>
+                <p className="text-[#334155] dark:text-[#CBD5E1] print:text-black pt-1">
+                  Oleh: <strong>{currentDoc.candidateName}</strong> (NIM: {currentDoc.candidateId})
                 </p>
-                <p className="text-zinc-500 text-[11px]">{currentDoc.facultyMajor}, {currentDoc.institution}</p>
+                <p className="text-[#64748B] dark:text-[#A4B1C7] text-[11px]">
+                  Program Studi {currentDoc.facultyMajor}, {currentDoc.institution}
+                </p>
               </div>
 
-              <p className="indent-6">
-                {currentDoc.executiveSummary || `Usulan penelitian ini dirancang untuk mengatasi permasalahan mendasar pada objek studi ${currentDoc.targetEntity}. Pendekatan yang diusulkan mengintegrasikan landasan teoretis terdepan dengan metodologi terukur demi mencapai efisiensi dan validitas ilmiah yang tinggi.`}
+              <p className="indent-8">
+                {currentDoc.executiveSummary || `Usulan penelitian ini disusun untuk mengidentifikasi dan memecahkan permasalahan operasional pada ${currentDoc.targetEntity} dengan metodologi ilmiah yang terukur dan teruji secara empiris. Pendekatan yang diusulkan mengintegrasikan landasan teoretis terdepan dengan metodologi terukur demi mencapai efisiensi dan validitas ilmiah yang tinggi.`}
               </p>
-              <p className="indent-6">
-                Metodologi pelaksanaan mencakup tahapan identifikasi kebutuhan, perancangan arsitektur pemecahan masalah, validasi empiris, serta evaluasi berbasis metrik kinerja terstandar. Diharapkan luaran dari kegiatan ini mampu memberikan kontribusi aplikatif berupa prototipe kerja dan pedoman operasional bagi {currentDoc.targetEntity}, serta memperkaya literatur ilmiah di lingkungan {currentDoc.institution}.
+              <p className="indent-8">
+                Metodologi pelaksanaan mencakup tahapan identifikasi kebutuhan riil, perancangan arsitektur pemecahan masalah, validasi empiris di lingkungan operasional {currentDoc.targetEntity}, serta evaluasi berbasis metrik kinerja terstandar. Diharapkan luaran dari kegiatan ini mampu memberikan kontribusi aplikatif berupa prototipe kerja dan pedoman operasional baku bagi {currentDoc.targetEntity}, serta memperkaya literatur ilmiah di lingkungan {currentDoc.institution}.
+              </p>
+              <p className="indent-8">
+                Rancangan kerja ini disusun secara sistematis agar dapat diuji kelayakannya dalam seminar proposal, serta memberikan kepastian tata kelola data, mitigasi risiko teknis, dan etika riset akademik yang ketat.
               </p>
 
-              <div className="pt-2 font-sans text-xs">
+              <div className="pt-3 border-t border-[#E2E8F0] dark:border-[#253149] text-xs">
                 <p>
                   <strong>Kata Kunci:</strong> <em>{currentDoc.category}, {currentDoc.targetDepartment || "Metodologi"}, {currentDoc.facultyMajor.split(" ").slice(0, 2).join(" ")}, Optimasi Sistem, Analisis Kinerja</em>
                 </p>
               </div>
             </div>
 
+            <div className="mt-10 text-center font-serif text-xs text-[#94A3B8]">
+              v
+            </div>
+          </section>
+          )}
+
+          {/* ========================================================================= */}
+          {/* BAGIAN 5B: ABSTRACT (ENGLISH - Halaman vi) */}
+          {/* ========================================================================= */}
+          {!disabledSections.includes("section-abstract-en") && (
+          <section id="section-abstract-en" className="relative pb-12 mb-12 border-b-2 border-[#E2E8F0] dark:border-[#253149] print:border-black font-serif text-xs sm:text-sm print:break-after-page">
+            <div className="flex items-center justify-between mb-4 border-b border-[#E2E8F0] dark:border-[#253149] pb-2 print:border-black">
+              <div className="text-center w-full">
+                <span className="text-[10px] font-mono uppercase tracking-widest text-[#64748B] dark:text-[#A4B1C7] block mb-1">
+                  SCIENTIFIC ABSTRACT
+                </span>
+                <h2 className="text-base sm:text-lg font-bold text-[#0F172A] dark:text-[#F3F6FC] uppercase tracking-wide print:text-black">
+                  ABSTRACT
+                </h2>
+              </div>
+            </div>
+
             {/* Versi Bahasa Inggris (Abstract) */}
-            <div className="max-w-2xl mx-auto pt-6 border-t border-zinc-200 dark:border-zinc-800 print:border-black space-y-3 leading-relaxed text-justify italic">
-              <h3 className="text-sm font-bold text-center uppercase tracking-wider not-italic text-zinc-900 dark:text-zinc-100 print:text-black">
-                ABSTRACT
-              </h3>
-              <p className="indent-6">
-                This academic proposal addresses the fundamental operational and scientific challenges observed within {currentDoc.targetEntity}. The research method rigorously integrates multi-disciplinary foundational theories with systematic empirical measurement protocols to achieve high reliability and rigorous validity.
+            <div className="max-w-2xl mx-auto space-y-4 leading-relaxed text-justify italic mb-8">
+              <div className="text-center text-xs space-y-0.5 mb-4 not-italic">
+                <p className="font-bold text-[#0F172A] dark:text-[#F3F6FC] print:text-black uppercase text-sm italic">{currentDoc.title}</p>
+                <p className="text-[#334155] dark:text-[#CBD5E1] print:text-black pt-1">
+                  Author: <strong>{currentDoc.candidateName}</strong> (Student ID: {currentDoc.candidateId})
+                </p>
+                <p className="text-[#64748B] dark:text-[#A4B1C7] text-[11px]">
+                  Department of {currentDoc.facultyMajor}, {currentDoc.institution}
+                </p>
+              </div>
+
+              <p className="indent-8">
+                This academic research proposal systematically investigates and addresses fundamental operational challenges observed at {currentDoc.targetEntity} through rigorous and empirically validated methodologies. The proposed approach synthesizes cutting-edge theoretical frameworks with precise field measurements to ensure high scientific rigor and practical utility.
               </p>
-              <p className="indent-6">
-                The execution pipeline encompasses structured problem scoping, architectural design, controlled implementation, and comprehensive validation against benchmark industry standards. The expected deliverables include verified technological prototypes, operational standard guidelines, and peer-reviewed academic contributions beneficial to both {currentDoc.targetEntity} and {currentDoc.institution}.
+              <p className="indent-8">
+                The structured execution pipeline encompasses empirical problem scoping, architectural design, systematic deployment, and thorough benchmark validation. The expected deliverables provide concrete operational standards and verified artifacts for {currentDoc.targetEntity}, while advancing the academic body of knowledge at {currentDoc.institution}.
               </p>
-              <div className="pt-2 font-sans text-xs not-italic">
+              <p className="indent-8">
+                Furthermore, this structured methodology strictly guarantees research ethics compliance, institutional data security, and verifiable risk mitigation throughout the research lifecycle.
+              </p>
+
+              <div className="pt-3 border-t border-[#E2E8F0] dark:border-[#253149] text-xs not-italic">
                 <p>
-                  <strong>Keywords:</strong> <em>Academic Research, Applied Methodology, Operational Excellence, Performance Metric, {currentDoc.category.toUpperCase()}</em>
+                  <strong>Keywords:</strong> <em>Academic Research, Applied Methodology, Operational Excellence, {currentDoc.category.toUpperCase()}, Performance Optimization</em>
                 </p>
               </div>
             </div>
 
-            <div className="mt-10 text-center font-serif text-xs text-zinc-400">
-              v
+            <div className="mt-10 text-center font-serif text-xs text-[#94A3B8]">
+              vi
             </div>
           </section>
+          )}
 
           {/* ========================================================================= */}
           {/* BAGIAN 6: DAFTAR ISI FORMAL (Halaman vi) */}
           {/* ========================================================================= */}
+          {!disabledSections.includes("section-daftar-isi") && (
           <section id="section-daftar-isi" className="relative pb-12 mb-12 border-b-2 border-zinc-200 dark:border-zinc-850 print:border-black font-serif text-xs sm:text-sm">
             <div className="flex items-center justify-between mb-6 border-b border-zinc-200 dark:border-zinc-850 pb-2 print:border-black">
               <div className="text-center w-full">
@@ -2115,7 +2307,7 @@ NIP / NIK.
                 })),
                 { title: "KATA PENGANTAR", page: ["iv", "v", "vi", "vii", "viii", "ix", "x"][extraSheets.length] || "iv", anchor: "section-pengantar", isBold: true },
                 { title: "ABSTRAK", page: ["v", "vi", "vii", "viii", "ix", "x", "xi"][extraSheets.length] || "v", anchor: "section-abstrak", isBold: true },
-                { title: "ABSTRACT", page: ["vi", "vii", "viii", "ix", "x", "xi", "xii"][extraSheets.length] || "vi", anchor: "section-abstrak", isBold: true },
+                { title: "ABSTRACT", page: ["vi", "vii", "viii", "ix", "x", "xi", "xii"][extraSheets.length] || "vi", anchor: "section-abstract-en", isBold: true },
                 { title: "DAFTAR ISI", page: ["vii", "viii", "ix", "x", "xi", "xii", "xiii"][extraSheets.length] || "vii", anchor: "section-daftar-isi", isBold: true },
                 { title: "DAFTAR GAMBAR", page: ["viii", "ix", "x", "xi", "xii", "xiii", "xiv"][extraSheets.length] || "viii", anchor: "section-daftar-gambar", isBold: true },
                 { title: "DAFTAR TABEL", page: ["ix", "x", "xi", "xii", "xiii", "xiv", "xv"][extraSheets.length] || "ix", anchor: "section-daftar-tabel", isBold: true },
@@ -2300,10 +2492,12 @@ NIP / NIK.
               vii
             </div>
           </section>
+          )}
 
           {/* ========================================================================= */}
           {/* BAGIAN 7: DAFTAR GAMBAR FORMAL (Halaman vii) */}
           {/* ========================================================================= */}
+          {!disabledSections.includes("section-daftar-gambar") && (
           <section id="section-daftar-gambar" className="relative pb-12 mb-12 border-b-2 border-zinc-200 dark:border-zinc-850 print:border-black font-serif text-xs sm:text-sm">
             <div className="flex items-center justify-between mb-6 border-b border-zinc-200 dark:border-zinc-850 pb-2 print:border-black">
               <div className="text-center w-full">
@@ -2347,10 +2541,12 @@ NIP / NIK.
               viii
             </div>
           </section>
+          )}
 
           {/* ========================================================================= */}
           {/* BAGIAN 8: DAFTAR TABEL FORMAL (Halaman viii) */}
           {/* ========================================================================= */}
+          {!disabledSections.includes("section-daftar-tabel") && (
           <section id="section-daftar-tabel" className="relative pb-12 mb-12 border-b-2 border-zinc-200 dark:border-zinc-850 print:border-black font-serif text-xs sm:text-sm">
             <div className="flex items-center justify-between mb-6 border-b border-zinc-200 dark:border-zinc-850 pb-2 print:border-black">
               <div className="text-center w-full">
@@ -2392,6 +2588,7 @@ NIP / NIK.
               ix
             </div>
           </section>
+          )}
 
               {/* Front Matter Navigation Footer */}
               {naskahSection === "frontmatter" && (
@@ -2416,6 +2613,7 @@ NIP / NIK.
           {(naskahSection === "all" || naskahSection === "bab1") && (
             <>
               {/* BAGIAN 9: RINGKASAN EKSEKUTIF */}
+          {!disabledSections.includes("section-ringkasan") && (
           <div id="section-ringkasan" className="mb-10 p-4 sm:p-5 rounded-lg bg-[#F8FAFC] dark:bg-[#111827]/70 border border-[#E2E8F0] dark:border-[#253149] print:border-gray-300 print:bg-gray-50">
             <div className="flex items-center justify-between mb-2">
               <h3 className="text-xs font-mono font-semibold uppercase tracking-wider text-[#0F172A] dark:text-[#F3F6FC] print:text-black">
@@ -2434,8 +2632,10 @@ NIP / NIK.
               {currentDoc.executiveSummary}
             </p>
           </div>
+          )}
 
           {/* BAB I */}
+          {!disabledSections.includes("section-bab1") && (
           <section id="section-bab1" className="mb-10">
             <div className="border-b border-[#E2E8F0] dark:border-[#253149] pb-2 mb-4 print:border-black">
               <h2 className="text-base sm:text-lg font-serif font-bold text-[#0F172A] dark:text-[#F3F6FC] print:text-black uppercase">
@@ -2521,6 +2721,7 @@ NIP / NIK.
               </div>
             </div>
           </section>
+          )}
 
               {/* Bab 1 Navigation Footer */}
               {naskahSection === "bab1" && (
@@ -2552,6 +2753,7 @@ NIP / NIK.
           {(naskahSection === "all" || naskahSection === "bab2") && (
             <>
               {/* BAB II */}
+              {!disabledSections.includes("section-bab2") && (
               <section id="section-bab2" className="mb-10">
             <div className="border-b border-[#E2E8F0] dark:border-[#253149] pb-2 mb-4 print:border-black flex items-center justify-between">
               <h2 className="text-base sm:text-lg font-serif font-bold text-[#0F172A] dark:text-[#F3F6FC] print:text-black uppercase">
@@ -2732,6 +2934,7 @@ NIP / NIK.
               ))}
             </div>
           </section>
+          )}
 
               {/* Bab 2 Navigation Footer */}
               {naskahSection === "bab2" && (
@@ -2763,6 +2966,7 @@ NIP / NIK.
           {(naskahSection === "all" || naskahSection === "bab3") && (
             <>
               {/* BAB III */}
+              {!disabledSections.includes("section-bab3") && (
               <section id="section-bab3" className="mb-10">
             <div className="border-b border-[#E2E8F0] dark:border-[#253149] pb-2 mb-4 print:border-black flex items-center justify-between">
               <h2 className="text-base sm:text-lg font-serif font-bold text-[#0F172A] dark:text-[#F3F6FC] print:text-black uppercase">
@@ -2930,6 +3134,7 @@ NIP / NIK.
               )}
             </div>
           </section>
+          )}
 
               {/* Bab 3 Navigation Footer */}
               {naskahSection === "bab3" && (
@@ -2961,6 +3166,7 @@ NIP / NIK.
           {(naskahSection === "all" || naskahSection === "bab4") && (
             <>
               {/* BAB IV: MATRIKS TABEL AKADEMIK (3 Garis Horizontal Standar) */}
+              {!disabledSections.includes("section-bab4") && (
               <section id="section-bab4" className="mb-10">
             <div className="border-b border-[#E2E8F0] dark:border-[#253149] pb-2 mb-4 print:border-black">
               <h2 className="text-base sm:text-lg font-serif font-bold text-[#0F172A] dark:text-[#F3F6FC] print:text-black uppercase">
@@ -3075,6 +3281,7 @@ NIP / NIK.
               {currentDoc.bab4.penutup}
             </p>
           </section>
+          )}
 
               {/* Bab 4 Navigation Footer */}
               {naskahSection === "bab4" && (
@@ -3106,6 +3313,7 @@ NIP / NIK.
           {(naskahSection === "all" || naskahSection === "bab5") && (
             <>
               {/* BAB V: KESIMPULAN, REKOMENDASI KONTRIBUSI, & MITIGASI RISIKO */}
+              {!disabledSections.includes("section-bab5") && (
               <section id="section-bab5" className="mb-10">
             <div className="border-b border-[#E2E8F0] dark:border-[#253149] pb-2 mb-4 print:border-black">
               <h2 className="text-base sm:text-lg font-serif font-bold text-[#0F172A] dark:text-[#F3F6FC] print:text-black uppercase">
@@ -3176,6 +3384,7 @@ NIP / NIK.
               </p>
             </div>
           </section>
+          )}
 
               {/* Bab 5 Navigation Footer */}
               {naskahSection === "bab5" && (
@@ -3207,7 +3416,7 @@ NIP / NIK.
           {(naskahSection === "all" || naskahSection === "backmatter") && (
             <>
               {/* DAFTAR PUSTAKA (Standar APA 7th Edition / IEEE) */}
-          {currentDoc.bibliography && currentDoc.bibliography.length > 0 && (
+          {currentDoc.bibliography && currentDoc.bibliography.length > 0 && !disabledSections.includes("section-pustaka") && (
             <section id="section-pustaka" className="mb-10 pt-6 border-t border-[#E2E8F0] dark:border-[#253149] print:border-black">
               <div className="border-b border-[#E2E8F0] dark:border-[#253149] pb-2 mb-4 print:border-black flex items-center justify-between">
                 <h2 className="text-base sm:text-lg font-serif font-bold text-[#0F172A] dark:text-[#F3F6FC] print:text-black uppercase">
@@ -3242,6 +3451,7 @@ NIP / NIK.
           )}
 
           {/* LAMPIRAN-LAMPIRAN AKADEMIK */}
+          {!disabledSections.includes("section-lampiran") && (
           <section id="section-lampiran" className="mt-12 pt-8 border-t-2 border-[#E2E8F0] dark:border-[#253149] print:border-black font-serif">
             <div className="border-b border-[#E2E8F0] dark:border-[#253149] pb-2 mb-6 print:border-black text-center flex flex-col sm:flex-row items-center justify-between gap-3">
               <div className="text-left">
@@ -3441,6 +3651,7 @@ NIP / NIK.
               </div>
             </div>
               </section>
+              )}
 
               {/* Back Matter Navigation Footer */}
               {naskahSection === "backmatter" && (
@@ -4232,6 +4443,190 @@ NIP / NIK.
           </aside>
         )}
       </div>
+
+      {/* ============================================================ */}
+      {/* MICROSOFT WORD REVERSE-ENGINEERED STATUS BAR (Bottom Strip) */}
+      {/* ============================================================ */}
+      <footer className="h-8 min-h-[32px] border-t border-[#E2E8F0] dark:border-[#253149] bg-white/95 dark:bg-[#0B101A]/95 backdrop-blur-md px-3 sm:px-6 flex items-center justify-between text-[11px] font-mono text-[#64748B] dark:text-[#A4B1C7] select-none no-print shrink-0 z-20">
+        
+        {/* Left: Document Metrics Telemetry */}
+        <div className="flex items-center gap-2 sm:gap-3 overflow-x-auto scrollbar-none py-1">
+          <div className="flex items-center gap-1.5 shrink-0 text-[#0F172A] dark:text-[#F3F6FC] font-semibold">
+            <FileText className="w-3.5 h-3.5 text-[#7C9CFF]" />
+            <span>Hal: ~{estimatedPageCount} A4</span>
+          </div>
+          <span>•</span>
+          <div className="shrink-0">
+            <span className="text-[#0F172A] dark:text-[#F3F6FC] font-semibold">~{totalWordsCount.toLocaleString("id-ID")}</span> Kata
+          </div>
+          <span className="hidden sm:inline">•</span>
+          <div className="hidden sm:inline shrink-0">
+            <span className="text-[#0F172A] dark:text-[#F3F6FC] font-semibold">~{totalCharactersCount.toLocaleString("id-ID")}</span> Karakter
+          </div>
+          <span className="hidden md:inline">•</span>
+          <div className="hidden md:inline shrink-0">
+            <span>⏱️ ~{readingTimeMinutes} mnt baca</span>
+          </div>
+          <span className="hidden lg:inline">•</span>
+          <div className="hidden lg:flex items-center gap-1 text-[#34D399] shrink-0 font-medium">
+            <CheckCircle2 className="w-3 h-3" />
+            <span>Standar Dikti Valid</span>
+          </div>
+        </div>
+
+        {/* Right: Word-Style Zoom & Page Controls */}
+        <div className="flex items-center gap-2.5 shrink-0 pl-2">
+          {/* Page Customizer Quick Trigger */}
+          <button
+            type="button"
+            onClick={() => setIsPageCustomizerModalOpen(true)}
+            className="hidden sm:flex items-center gap-1 px-2 py-0.5 rounded border border-[#E2E8F0] dark:border-[#253149] bg-[#F8FAFC] dark:bg-[#111827] text-[#0F172A] dark:text-[#F3F6FC] hover:border-[#7C9CFF] transition-colors cursor-pointer text-[10px]"
+            title="Kustomisasi Susunan Lembar & Halaman Dokumen"
+          >
+            <Layers className="w-3 h-3 text-[#7C9CFF]" />
+            <span>Atur Lembar</span>
+          </button>
+
+          {/* Zoom Controls */}
+          <div className="flex items-center gap-1.5 bg-[#F1F5F9] dark:bg-[#111827] px-2 py-0.5 rounded border border-[#E2E8F0] dark:border-[#253149]">
+            <button
+              type="button"
+              onClick={() => setZoomLevel(prev => Math.max(70, prev - 10))}
+              disabled={zoomLevel <= 70}
+              className="px-1 text-[#64748B] hover:text-[#0F172A] dark:hover:text-[#F3F6FC] disabled:opacity-30 cursor-pointer font-bold"
+              title="Perkecil Kanvas (Zoom Out)"
+            >
+              -
+            </button>
+            <button
+              type="button"
+              onClick={() => setZoomLevel(100)}
+              className="text-[10px] w-9 text-center font-bold text-[#0F172A] dark:text-[#7C9CFF] cursor-pointer hover:underline"
+              title="Klik untuk reset zoom ke 100%"
+            >
+              {zoomLevel}%
+            </button>
+            <button
+              type="button"
+              onClick={() => setZoomLevel(prev => Math.min(150, prev + 10))}
+              disabled={zoomLevel >= 150}
+              className="px-1 text-[#64748B] hover:text-[#0F172A] dark:hover:text-[#F3F6FC] disabled:opacity-30 cursor-pointer font-bold"
+              title="Perbesar Kanvas (Zoom In)"
+            >
+              +
+            </button>
+          </div>
+        </div>
+      </footer>
+
+      {/* MODAL: KUSTOMISASI LEMBAR & SUSUNAN HALAMAN DOKUMEN */}
+      {isPageCustomizerModalOpen && (
+        <div className="fixed inset-0 z-50 bg-black/60 dark:bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="w-full max-w-2xl bg-white dark:bg-[#0B101A] border border-[#E2E8F0] dark:border-[#253149] rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[85vh] animate-in zoom-in-95 duration-150">
+            <div className="p-4 sm:p-5 border-b border-[#E2E8F0] dark:border-[#253149] flex items-center justify-between">
+              <div className="flex items-center gap-2.5">
+                <div className="w-8 h-8 rounded-lg bg-[#7C9CFF]/15 border border-[#7C9CFF]/30 flex items-center justify-center text-[#7C9CFF]">
+                  <Layers className="w-4 h-4" />
+                </div>
+                <div>
+                  <h3 className="text-sm sm:text-base font-bold text-[#0F172A] dark:text-[#F3F6FC]">
+                    Kustomisasi Lembar &amp; Struktur Halaman
+                  </h3>
+                  <p className="text-xs text-[#64748B] dark:text-[#A4B1C7]">
+                    Atur visibilitas lembar, aktifkan lampiran tambahan, atau sesuaikan kelengkapan naskah
+                  </p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setIsPageCustomizerModalOpen(false)}
+                className="p-1.5 rounded-lg text-[#64748B] hover:text-[#0F172A] dark:text-[#A4B1C7] dark:hover:text-[#F3F6FC] hover:bg-[#F1F5F9] dark:hover:bg-[#172033] transition-colors cursor-pointer"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            <div className="p-4 sm:p-5 overflow-y-auto space-y-2 text-xs flex-1">
+              {[
+                { id: "section-cover", label: "Halaman Sampul / Cover Standar Dikti", badge: "Hal i (Wajib)" },
+                { id: "section-pengesahan", label: "Lembar Pengesahan Pembimbing & Penguji", badge: "Hal ii" },
+                { id: "section-orisinalitas", label: "Surat Pernyataan Keaslian & Bebas Plagiarisme", badge: "Hal iii" },
+                { id: "section-pengantar", label: "Kata Pengantar Resmi", badge: "Hal iv" },
+                { id: "section-abstrak", label: "ABSTRAK (Bahasa Indonesia)", badge: "Hal v (Dipisah)" },
+                { id: "section-abstract-en", label: "ABSTRACT (Scientific English)", badge: "Hal vi (Dipisah)" },
+                { id: "section-daftar-isi", label: "Daftar Isi Otomatis", badge: "Hal vii" },
+                { id: "section-daftar-gambar", label: "Daftar Gambar & Diagram", badge: "Hal viii" },
+                { id: "section-daftar-tabel", label: "Daftar Tabel Standar 3-Garis", badge: "Hal ix" },
+                { id: "section-ringkasan", label: "Ringkasan Eksekutif", badge: "Hal x" },
+                { id: "section-bab1", label: "Bab I: Pendahuluan & Latar Belakang Masalah", badge: "Bab Utama" },
+                { id: "section-bab2", label: "Bab II: Tinjauan Pustaka & Sintesis PRISMA", badge: "Bab Utama" },
+                { id: "section-bab3", label: "Bab III: Metodologi & Desain Operasional", badge: "Bab Utama" },
+                { id: "section-bab4", label: "Bab IV: Rencana Kerja & Rencana Anggaran Biaya", badge: "Bab Utama" },
+                { id: "section-bab5", label: "Bab V: Penutup, Rekomendasi & Mitigasi Risiko", badge: "Bab Utama" },
+                { id: "section-pustaka", label: "Daftar Pustaka (Standar APA 7th / IEEE)", badge: "Pustaka" },
+                { id: "section-lampiran", label: "Lampiran-Lampiran (Logbook & Berita Acara)", badge: "Lampiran" },
+              ].map((sheet) => {
+                const isOff = disabledSections.includes(sheet.id);
+                return (
+                  <div
+                    key={sheet.id}
+                    className={`p-3 rounded-xl border flex items-center justify-between transition-all ${
+                      isOff
+                        ? "bg-[#F8FAFC]/50 dark:bg-[#111827]/40 border-[#E2E8F0] dark:border-[#253149] opacity-60"
+                        : "bg-white dark:bg-[#111827] border-[#E2E8F0] dark:border-[#253149] shadow-2xs"
+                    }`}
+                  >
+                    <div className="flex items-center gap-2.5">
+                      <span className={`w-2 h-2 rounded-full ${isOff ? "bg-zinc-400" : "bg-[#34D399]"}`} />
+                      <div>
+                        <p className={`font-semibold ${isOff ? "line-through text-zinc-400" : "text-[#0F172A] dark:text-[#F3F6FC]"}`}>
+                          {sheet.label}
+                        </p>
+                        <span className="text-[10px] font-mono text-[#64748B] dark:text-[#A4B1C7]">
+                          {sheet.badge}
+                        </span>
+                      </div>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => handleToggleSection(sheet.id)}
+                      className={`px-3 py-1 rounded-lg text-[11px] font-medium transition-colors cursor-pointer ${
+                        isOff
+                          ? "bg-zinc-200 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-300"
+                          : "bg-[#7C9CFF]/15 text-[#7C9CFF] border border-[#7C9CFF]/30 font-semibold"
+                      }`}
+                    >
+                      {isOff ? "Nonaktif" : "Aktif ✓"}
+                    </button>
+                  </div>
+                );
+              })}
+            </div>
+
+            <div className="p-4 border-t border-[#E2E8F0] dark:border-[#253149] bg-[#F8FAFC] dark:bg-[#080B12] flex items-center justify-between">
+              <button
+                type="button"
+                onClick={() => {
+                  setIsPageCustomizerModalOpen(false);
+                  setIsCustomSheetModalOpen(true);
+                }}
+                className="px-3 py-1.5 rounded-lg border border-[#E2E8F0] dark:border-[#253149] bg-white dark:bg-[#111827] text-xs font-semibold text-[#0F172A] dark:text-[#F3F6FC] hover:border-[#7C9CFF] flex items-center gap-1.5 transition-colors cursor-pointer shadow-2xs"
+              >
+                <Plus className="w-3.5 h-3.5 text-[#7C9CFF]" />
+                <span>+ Tambah Lembar Khusus / Scan</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setIsPageCustomizerModalOpen(false)}
+                className="px-4 py-1.5 rounded-lg bg-[#0F172A] hover:bg-black text-white dark:bg-[#7C9CFF] dark:hover:bg-[#688bf5] dark:text-[#080B12] text-xs font-semibold cursor-pointer shadow-xs transition-colors"
+              >
+                Selesai
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* MODAL: AUDIT TURNITIN & ANTI-SLOP */}
       <TurnitinPreCheckModal
