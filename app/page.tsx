@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { ProposalCategory, StudioStage, DiagnosticQuestion, ProposalDocument, TreeNode, CampusGuideline } from "@/types/studio";
+import { ProposalCategory, ReportType, StudioStage, DiagnosticQuestion, ProposalDocument, TreeNode, CampusGuideline } from "@/types/studio";
 import AppShell from "@/components/AppShell";
 import { HeroInputView } from "@/components/HeroInputView";
 import { DiagnosticInterview } from "@/components/DiagnosticInterview";
@@ -19,6 +19,7 @@ import DatabaseDrawer from "@/components/DatabaseDrawer";
 import DriveFileManager from "@/components/DriveFileManager";
 import { Presentation, ArrowRight } from "lucide-react";
 import { generateDiagnosticQuestions } from "@/lib/questions";
+import { getAdaptiveDiagnosticQuestions } from "@/lib/diagnosticInterviewEngine.ts";
 import { buildGeneratedDocument, buildVisualTreeGraph } from "@/lib/agentEngine";
 import { 
   UserProfile, 
@@ -36,7 +37,8 @@ export default function Home() {
 
   // App & Workflow Stage
   const [stage, setStage] = useState<StudioStage>("input");
-  const [category, setCategory] = useState<ProposalCategory>("magang");
+  const [category, setCategory] = useState<ProposalCategory>("skripsi");
+  const [reportType, setReportType] = useState<ReportType | undefined>("skripsi");
 
   // Input Stage State
   const [title, setTitle] = useState("");
@@ -83,8 +85,8 @@ export default function Home() {
       alert("Harap tentukan judul proposal terlebih dahulu.");
       return;
     }
-    const fallbackList = generateDiagnosticQuestions(title, category, targetEntity);
-    setQuestions(fallbackList);
+    const adaptiveList = getAdaptiveDiagnosticQuestions(title, category, targetEntity, reportType);
+    setQuestions(adaptiveList);
     setStage("interview");
 
     // Fetch dynamic questions from Gemini in background to upgrade suggestions
@@ -95,7 +97,8 @@ export default function Home() {
         body: JSON.stringify({
           title,
           category,
-          targetEntity
+          targetEntity,
+          reportType
         })
       });
       const data = await res.json();
@@ -327,6 +330,8 @@ export default function Home() {
           <HeroInputView
             category={category}
             setCategory={setCategory}
+            reportType={reportType}
+            setReportType={setReportType}
             title={title}
             setTitle={setTitle}
             targetEntity={targetEntity}
@@ -343,6 +348,9 @@ export default function Home() {
             onOpenGuidelineModal={() => setIsGuidelineModalOpen(true)}
             onOpenConsultation={() => setStage("consultation")}
             activeCampusName={campusGuideline?.campusName}
+            activeDoc={generatedDoc}
+            onNavigateStage={(target) => setStage(target)}
+            onLoadProject={handleLoadProject}
           />
         )}
 

@@ -1,11 +1,13 @@
 "use client";
 
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect, useMemo } from "react";
 import { DiagnosticQuestion, ProposalCategory } from "@/types/studio";
-import { ArrowLeft, ArrowRight, Sparkles, Check, Loader2, Mic, MicOff, Layers } from "lucide-react";
+import { ArrowLeft, ArrowRight, Sparkles, Check, Loader2, Mic, MicOff, Layers, ShieldCheck, AlertCircle } from "lucide-react";
+import { detectMissingInformation } from "@/lib/diagnosticInterviewEngine.ts";
 
 interface DiagnosticInterviewProps {
   category: ProposalCategory;
+  reportType?: string;
   title: string;
   targetEntity?: string;
   questions: DiagnosticQuestion[];
@@ -17,6 +19,7 @@ interface DiagnosticInterviewProps {
 
 export const DiagnosticInterview: React.FC<DiagnosticInterviewProps> = ({
   category,
+  reportType,
   title,
   targetEntity = "",
   questions,
@@ -156,6 +159,10 @@ export const DiagnosticInterview: React.FC<DiagnosticInterviewProps> = ({
   const answeredCount = questions.filter(q => !!answers[q.field]?.trim()).length;
   const progressPercent = Math.round((answeredCount / (questions.length || 1)) * 100);
   const isAllAnswered = answeredCount === questions.length && questions.length > 0;
+
+  const completeness = useMemo(() => {
+    return detectMissingInformation(answers, category, reportType as any);
+  }, [answers, category, reportType]);
 
   return (
     <div className="max-w-4xl mx-auto py-8 sm:py-12 px-4 sm:px-6 w-full animate-in fade-in duration-300">
@@ -309,6 +316,41 @@ export const DiagnosticInterview: React.FC<DiagnosticInterviewProps> = ({
             </div>
           );
         })}
+      </div>
+
+      {/* 2.5 Real-Time Academic Quality Gate Indicator */}
+      <div className="mt-8 p-4 rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900/60 shadow-xs space-y-3">
+        <div className="flex items-center justify-between text-xs">
+          <div className="flex items-center gap-2">
+            <ShieldCheck className="w-4 h-4 text-emerald-500" />
+            <span className="font-bold text-zinc-900 dark:text-zinc-100">
+              Validasi Kesiapan Data &amp; Metodologi
+            </span>
+          </div>
+          <span className="font-mono font-bold text-zinc-700 dark:text-zinc-300">
+            {completeness.completenessPercentage}% Lengkap
+          </span>
+        </div>
+
+        {completeness.missingItems.length > 0 ? (
+          <div className="space-y-1.5 pt-2 border-t border-zinc-100 dark:border-zinc-800 text-xs">
+            <p className="text-[11px] text-amber-700 dark:text-amber-400 font-medium flex items-center gap-1.5">
+              <AlertCircle className="w-3.5 h-3.5" />
+              <span>{completeness.criticalMissingCount > 0 ? "Terdapat variabel kritis yang belum diuraikan:" : "Rekomendasi penajaman jawaban:"}</span>
+            </p>
+            <ul className="space-y-1 text-[11px] text-zinc-600 dark:text-zinc-400 pl-5 list-disc">
+              {completeness.missingItems.slice(0, 3).map((item, i) => (
+                <li key={i}>
+                  <strong className="text-zinc-800 dark:text-zinc-200">{item.variableName}:</strong> {item.remediationAdvice}
+                </li>
+              ))}
+            </ul>
+          </div>
+        ) : (
+          <p className="text-[11px] text-emerald-600 dark:text-emerald-400 font-medium pt-1 border-t border-zinc-100 dark:border-zinc-800">
+            ✓ Seluruh variabel penelitian telah terpenuhi. Dokumen siap diorkestrasi oleh Agen AI secara mendalam.
+          </p>
+        )}
       </div>
 
       {/* 3. Bottom Action Navigation */}
