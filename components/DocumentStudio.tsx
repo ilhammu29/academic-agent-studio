@@ -777,7 +777,7 @@ NIP / NIK.
   };
 
   return (
-    <div className="w-full min-h-[calc(100vh-64px)] flex flex-col bg-zinc-50 dark:bg-zinc-950 text-zinc-900 dark:text-zinc-100">
+    <div className="w-full h-[calc(100vh-4rem)] max-h-[calc(100vh-4rem)] flex flex-col overflow-hidden bg-[#F8FAFC] dark:bg-[#080B12] text-[#0F172A] dark:text-[#F3F6FC]">
       
       {/* Toast Notification */}
       {toastMessage && (
@@ -1035,6 +1035,215 @@ NIP / NIK.
         </div>
       </header>
 
+      {/* 1.5 Sticky Category & Chapter Sub-Toolbar Ribbon */}
+      <div className="h-11 min-h-[44px] border-b border-[#E2E8F0] dark:border-[#253149] bg-white/95 dark:bg-[#0B101A]/95 backdrop-blur-md px-3 sm:px-6 flex items-center justify-between gap-3 overflow-x-auto no-print shrink-0 z-20">
+        
+        {/* Left: 3 Main Workspace Categories */}
+        <div className="flex items-center gap-1 shrink-0">
+          <button
+            type="button"
+            onClick={() => { setWorkspaceCategory("naskah"); setActiveTab("naskah"); }}
+            className={`px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-all cursor-pointer ${
+              workspaceCategory === "naskah"
+                ? "bg-[#0F172A] text-white dark:bg-[#7C9CFF] dark:text-[#080B12] shadow-xs"
+                : "text-[#64748B] dark:text-[#A4B1C7] hover:bg-[#F1F5F9] dark:hover:bg-[#172033]"
+            }`}
+          >
+            <FileText className="w-3.5 h-3.5" />
+            <span>Naskah Dokumen</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => { setWorkspaceCategory("metodologi"); setActiveTab(metodologiTab); }}
+            className={`px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-all cursor-pointer ${
+              workspaceCategory === "metodologi"
+                ? "bg-[#0F172A] text-white dark:bg-[#7C9CFF] dark:text-[#080B12] shadow-xs"
+                : "text-[#64748B] dark:text-[#A4B1C7] hover:bg-[#F1F5F9] dark:hover:bg-[#172033]"
+            }`}
+          >
+            <Network className="w-3.5 h-3.5" />
+            <span>Metodologi &amp; Alur</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => { setWorkspaceCategory("sidang"); setActiveTab(sidangTab); }}
+            className={`px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-all cursor-pointer ${
+              workspaceCategory === "sidang"
+                ? "bg-[#0F172A] text-white dark:bg-[#7C9CFF] dark:text-[#080B12] shadow-xs"
+                : "text-[#64748B] dark:text-[#A4B1C7] hover:bg-[#F1F5F9] dark:hover:bg-[#172033]"
+            }`}
+          >
+            <GraduationCap className="w-3.5 h-3.5" />
+            <span>Sidang &amp; Audit</span>
+          </button>
+        </div>
+
+        {/* Right: Category Specific Controls */}
+        {workspaceCategory === "naskah" && (
+          <div className="flex items-center gap-2 shrink-0">
+            {/* Chapter Jump Selector */}
+            <div className="flex items-center gap-0.5 bg-[#F1F5F9] dark:bg-[#111827] p-0.5 rounded-lg border border-[#E2E8F0] dark:border-[#253149] text-xs">
+              {[
+                { id: "all", label: "Semua" },
+                { id: "frontmatter", label: "Cover" },
+                { id: "bab1", label: "Bab I" },
+                { id: "bab2", label: "Bab II" },
+                { id: "bab3", label: "Bab III" },
+                { id: "bab4", label: "Bab IV" },
+                { id: "bab5", label: "Bab V" },
+                { id: "backmatter", label: "Pustaka" }
+              ].map((s) => (
+                <button
+                  key={s.id}
+                  type="button"
+                  onClick={() => setNaskahSection(s.id as any)}
+                  className={`px-2 py-0.5 rounded-md font-medium text-[11px] transition-all cursor-pointer ${
+                    naskahSection === s.id
+                      ? "bg-white dark:bg-[#172033] text-[#7C9CFF] font-bold shadow-2xs"
+                      : "text-[#64748B] dark:text-[#A4B1C7] hover:text-[#0F172A] dark:hover:text-[#F3F6FC]"
+                  }`}
+                >
+                  {s.label}
+                </button>
+              ))}
+            </div>
+
+            {/* Formatting Tools */}
+            <div className="flex items-center gap-1 border-l border-[#E2E8F0] dark:border-[#253149] pl-2 text-xs">
+              <button
+                type="button"
+                onClick={() => setCitationStyle(prev => prev === "apa" ? "ieee" : "apa")}
+                className="px-2 py-1 rounded-md border border-[#E2E8F0] dark:border-[#253149] bg-white dark:bg-[#111827] text-[#0F172A] dark:text-[#F3F6FC] font-mono text-[11px] hover:border-[#7C9CFF] transition-colors cursor-pointer"
+                title="Ganti format sitasi APA 7th / IEEE"
+              >
+                {citationStyle === "apa" ? "APA 7th" : "IEEE"}
+              </button>
+
+              <select
+                value={currentDoc.campusGuideline?.headingStyle || "decimal"}
+                onChange={(e) => handleChangeHeadingStyle(e.target.value as HeadingStyleType)}
+                className="px-2 py-1 rounded-md border border-[#E2E8F0] dark:border-[#253149] bg-white dark:bg-[#111827] text-[#0F172A] dark:text-[#F3F6FC] text-[11px] focus:outline-none cursor-pointer"
+                title="Gaya Penomoran Sub-bab"
+              >
+                <option value="decimal">Desimal (1.1)</option>
+                <option value="alphanumeric">Alfanumerik (A.)</option>
+                <option value="roman">Romawi (I.A)</option>
+              </select>
+
+              <select
+                value={watermarkType}
+                onChange={(e) => setWatermarkType(e.target.value as any)}
+                className="px-2 py-1 rounded-md border border-[#E2E8F0] dark:border-[#253149] bg-white dark:bg-[#111827] text-[#0F172A] dark:text-[#F3F6FC] text-[11px] focus:outline-none cursor-pointer"
+                title="Watermark Kertas"
+              >
+                <option value="none">Watermark: Nonaktif</option>
+                <option value="draft">Draf Usulan</option>
+                <option value="plagiarisme_ok">Bebas Plagiasi</option>
+                <option value="siap_sidang">Siap Sidang</option>
+                <option value="confidential">Confidential</option>
+              </select>
+
+              <button
+                type="button"
+                onClick={() => setShowMarginRuler(!showMarginRuler)}
+                className={`px-2 py-1 rounded-md border text-[11px] font-mono transition-colors cursor-pointer ${
+                  showMarginRuler
+                    ? "bg-[#7C9CFF] text-[#080B12] border-[#7C9CFF] font-bold"
+                    : "bg-white dark:bg-[#111827] text-[#64748B] dark:text-[#A4B1C7] border-[#E2E8F0] dark:border-[#253149]"
+                }`}
+                title="Tampilkan garis margin panduan A4"
+              >
+                Ruler
+              </button>
+            </div>
+          </div>
+        )}
+
+        {workspaceCategory === "metodologi" && (
+          <div className="flex items-center gap-1 shrink-0">
+            <button
+              type="button"
+              onClick={() => { setMetodologiTab("flowchart"); setActiveTab("flowchart"); }}
+              className={`px-2.5 py-1 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-all cursor-pointer ${
+                activeTab === "flowchart"
+                  ? "bg-[#0F172A] text-white dark:bg-[#172033] dark:text-[#7C9CFF] border border-[#7C9CFF]/40 shadow-xs"
+                  : "text-[#64748B] dark:text-[#A4B1C7] hover:bg-[#F1F5F9] dark:hover:bg-[#172033]"
+              }`}
+            >
+              <Network className="w-3.5 h-3.5" />
+              <span>Bagan Alir Riset</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => { setMetodologiTab("tree"); setActiveTab("tree"); }}
+              className={`px-2.5 py-1 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-all cursor-pointer ${
+                activeTab === "tree"
+                  ? "bg-[#0F172A] text-white dark:bg-[#172033] dark:text-[#7C9CFF] border border-[#7C9CFF]/40 shadow-xs"
+                  : "text-[#64748B] dark:text-[#A4B1C7] hover:bg-[#F1F5F9] dark:hover:bg-[#172033]"
+              }`}
+            >
+              <Compass className="w-3.5 h-3.5" />
+              <span>Pohon Alur (Tree)</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => { setMetodologiTab("jadwal"); setActiveTab("jadwal"); }}
+              className={`px-2.5 py-1 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-all cursor-pointer ${
+                activeTab === "jadwal"
+                  ? "bg-[#0F172A] text-white dark:bg-[#172033] dark:text-[#7C9CFF] border border-[#7C9CFF]/40 shadow-xs"
+                  : "text-[#64748B] dark:text-[#A4B1C7] hover:bg-[#F1F5F9] dark:hover:bg-[#172033]"
+              }`}
+            >
+              <CalendarDays className="w-3.5 h-3.5" />
+              <span>Matriks Jadwal (Gantt)</span>
+            </button>
+          </div>
+        )}
+
+        {workspaceCategory === "sidang" && (
+          <div className="flex items-center gap-1 shrink-0">
+            <button
+              type="button"
+              onClick={() => { setSidangTab("defense"); setActiveTab("defense"); }}
+              className={`px-2.5 py-1 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-all cursor-pointer ${
+                activeTab === "defense"
+                  ? "bg-[#0F172A] text-white dark:bg-[#172033] dark:text-[#7C9CFF] border border-[#7C9CFF]/40 shadow-xs"
+                  : "text-[#64748B] dark:text-[#A4B1C7] hover:bg-[#F1F5F9] dark:hover:bg-[#172033]"
+              }`}
+            >
+              <ShieldAlert className="w-3.5 h-3.5 text-[#FBBF24]" />
+              <span>Tanya Jawab Sidang</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => { setSidangTab("revisionMatrix"); setActiveTab("revisionMatrix"); }}
+              className={`px-2.5 py-1 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-all cursor-pointer ${
+                activeTab === "revisionMatrix"
+                  ? "bg-[#0F172A] text-white dark:bg-[#172033] dark:text-[#7C9CFF] border border-[#7C9CFF]/40 shadow-xs"
+                  : "text-[#64748B] dark:text-[#A4B1C7] hover:bg-[#F1F5F9] dark:hover:bg-[#172033]"
+              }`}
+            >
+              <Layers className="w-3.5 h-3.5 text-[#9B8CFF]" />
+              <span>Matriks Revisi Dosen</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => { setSidangTab("audit"); setActiveTab("audit"); }}
+              className={`px-2.5 py-1 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-all cursor-pointer ${
+                activeTab === "audit"
+                  ? "bg-[#0F172A] text-white dark:bg-[#172033] dark:text-[#7C9CFF] border border-[#7C9CFF]/40 shadow-xs"
+                  : "text-[#64748B] dark:text-[#A4B1C7] hover:bg-[#F1F5F9] dark:hover:bg-[#172033]"
+              }`}
+            >
+              <ShieldCheck className="w-3.5 h-3.5 text-[#34D399]" />
+              <span>Audit Turnitin &amp; QA</span>
+            </button>
+          </div>
+        )}
+      </div>
+
       {/* 2. Three-Panel Workspace Body */}
       <div className="flex-1 flex overflow-hidden">
         {/* PANEL 1: LEFT DOCUMENT OUTLINE / CHAPTER NAVIGATION (Collapsible) */}
@@ -1052,46 +1261,6 @@ NIP / NIK.
                 title="Tutup Navigasi Bab"
               >
                 <X className="w-3.5 h-3.5" />
-              </button>
-            </div>
-
-            {/* Primary Category Switcher */}
-            <div className="p-2 space-y-1 border-b border-[#E2E8F0] dark:border-[#253149]">
-              <button
-                type="button"
-                onClick={() => { setWorkspaceCategory("naskah"); setActiveTab("naskah"); }}
-                className={`w-full flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-semibold transition-all cursor-pointer text-left ${
-                  workspaceCategory === "naskah"
-                    ? "bg-[#0F172A] text-white dark:bg-[#172033] dark:text-[#7C9CFF] shadow-xs"
-                    : "text-[#475569] dark:text-[#A4B1C7] hover:bg-[#F1F5F9] dark:hover:bg-[#172033]"
-                }`}
-              >
-                <FileText className="w-3.5 h-3.5 shrink-0" />
-                <span>Naskah Dokumen</span>
-              </button>
-              <button
-                type="button"
-                onClick={() => { setWorkspaceCategory("metodologi"); setActiveTab(metodologiTab); }}
-                className={`w-full flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-semibold transition-all cursor-pointer text-left ${
-                  workspaceCategory === "metodologi"
-                    ? "bg-[#0F172A] text-white dark:bg-[#172033] dark:text-[#7C9CFF] shadow-xs"
-                    : "text-[#475569] dark:text-[#A4B1C7] hover:bg-[#F1F5F9] dark:hover:bg-[#172033]"
-                }`}
-              >
-                <Network className="w-3.5 h-3.5 shrink-0" />
-                <span>Metodologi &amp; Alur</span>
-              </button>
-              <button
-                type="button"
-                onClick={() => { setWorkspaceCategory("sidang"); setActiveTab(sidangTab); }}
-                className={`w-full flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-semibold transition-all cursor-pointer text-left ${
-                  workspaceCategory === "sidang"
-                    ? "bg-[#0F172A] text-white dark:bg-[#172033] dark:text-[#7C9CFF] shadow-xs"
-                    : "text-[#475569] dark:text-[#A4B1C7] hover:bg-[#F1F5F9] dark:hover:bg-[#172033]"
-                }`}
-              >
-                <GraduationCap className="w-3.5 h-3.5 shrink-0" />
-                <span>Sidang &amp; Evaluasi</span>
               </button>
             </div>
 
@@ -1286,198 +1455,23 @@ NIP / NIK.
           </aside>
         )}
 
-        {/* PANEL 2: CENTER DOCUMENT CANVAS (Spacious & Clean) */}
-        <main className="flex-1 overflow-y-auto px-3 sm:px-6 md:px-8 py-5 flex flex-col items-center bg-[#F8FAFC] dark:bg-[#080B12]">
-          <div className="w-full max-w-4xl space-y-4">
+        {/* PANEL 2: CENTER DOCUMENT CANVAS (Spacious & Clean Academic Sheet) */}
+        <main className="flex-1 overflow-y-auto px-3 sm:px-6 md:px-8 py-6 flex flex-col items-center bg-[#F1F5F9] dark:bg-[#080B12]">
+          <div className="w-full max-w-[880px] space-y-6">
 
-      {/* 3. Sub-Pills / Chapter Switcher for Active Category */}
-      {workspaceCategory === "naskah" && (
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-3 mb-4 no-print border-b border-zinc-100 dark:border-zinc-850/60">
-          {/* Chapter Selector Pills */}
-          <div className="flex items-center gap-1 overflow-x-auto pb-1 scrollbar-none text-xs">
-            {[
-              { id: "all", label: "Semua Halaman" },
-              { id: "frontmatter", label: "Cover & Awal" },
-              { id: "bab1", label: "Bab I" },
-              { id: "bab2", label: "Bab II", badge: `${currentDoc.bab2?.landasanTeori?.length || 13}` },
-              { id: "bab3", label: "Bab III" },
-              { id: "bab4", label: "Bab IV" },
-              { id: "bab5", label: "Bab V" },
-              { id: "backmatter", label: "Pustaka & Lampiran" }
-            ].map((s) => {
-              const isActive = naskahSection === s.id;
-              return (
-                <button
-                  key={s.id}
-                  type="button"
-                  onClick={() => setNaskahSection(s.id as any)}
-                  className={`px-3 py-1 rounded-md transition-all cursor-pointer flex items-center gap-1.5 whitespace-nowrap text-xs ${
-                    isActive
-                      ? "bg-zinc-200 dark:bg-zinc-800 text-zinc-950 dark:text-zinc-100 font-bold shadow-2xs"
-                      : "text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 hover:bg-zinc-100 dark:hover:bg-zinc-900"
-                  }`}
-                >
-                  <span>{s.label}</span>
-                  {s.badge && (
-                    <span className="text-[9px] px-1 py-0.2 rounded-full font-mono bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 font-semibold">
-                      {s.badge}
-                    </span>
-                  )}
-                </button>
-              );
-            })}
-          </div>
-
-          {/* Quick Formatting Controls */}
-          <div className="flex items-center gap-1.5 text-xs flex-shrink-0 self-end sm:self-auto">
-            {/* Citation Style */}
-            <button
-              type="button"
-              onClick={() => setCitationStyle(prev => prev === "apa" ? "ieee" : "apa")}
-              className="px-2 py-1 rounded-md border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-zinc-700 dark:text-zinc-300 font-mono text-[11px] hover:bg-zinc-50 dark:hover:bg-zinc-850 transition-colors cursor-pointer shadow-2xs"
-              title="Ganti format sitasi APA / IEEE"
-            >
-              {citationStyle === "apa" ? "Sitasi APA 7th" : "Sitasi IEEE"}
-            </button>
-
-            {/* Heading Style */}
-            <select
-              value={currentDoc.campusGuideline?.headingStyle || "decimal"}
-              onChange={(e) => handleChangeHeadingStyle(e.target.value as HeadingStyleType)}
-              className="px-2 py-1 rounded-md border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-zinc-700 dark:text-zinc-300 text-[11px] focus:outline-hidden cursor-pointer shadow-2xs"
-              title="Gaya Penomoran Sub-bab"
-            >
-              <option value="decimal">Desimal (1.1, 1.2)</option>
-              <option value="alphanumeric">Alfanumerik (A., B., 1.)</option>
-              <option value="roman">Romawi (I.A, I.B)</option>
-            </select>
-
-            {/* Watermark Selector */}
-            <select
-              value={watermarkType}
-              onChange={(e) => setWatermarkType(e.target.value as any)}
-              className="px-2 py-1 rounded-md border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-zinc-700 dark:text-zinc-300 text-[11px] focus:outline-hidden cursor-pointer shadow-2xs"
-              title="Watermark Kertas"
-            >
-              <option value="none">Watermark: Nonaktif</option>
-              <option value="draft">Draf Usulan</option>
-              <option value="plagiarisme_ok">Bebas Plagiasi</option>
-              <option value="siap_sidang">Siap Sidang</option>
-              <option value="confidential">Confidential</option>
-            </select>
-
-            {/* Ruler Toggle */}
-            <button
-              type="button"
-              onClick={() => setShowMarginRuler(!showMarginRuler)}
-              className={`p-1 rounded-md border text-xs transition-colors cursor-pointer ${
-                showMarginRuler
-                  ? "bg-indigo-600 text-white border-indigo-600"
-                  : "bg-white dark:bg-zinc-900 text-zinc-600 dark:text-zinc-400 border-zinc-200 dark:border-zinc-800 hover:bg-zinc-50"
-              }`}
-              title="Tampilkan garis margin A4"
-            >
-              <span className="text-[10px] font-mono px-1">Ruler</span>
-            </button>
-          </div>
-        </div>
-      )}
-
-      {workspaceCategory === "metodologi" && (
-        <div className="flex items-center gap-1.5 pb-3 mb-4 overflow-x-auto text-xs font-medium no-print">
-          <button
-            type="button"
-            onClick={() => { setMetodologiTab("flowchart"); setActiveTab("flowchart"); }}
-            className={`px-3 py-1.5 rounded-lg transition-all cursor-pointer flex items-center gap-1.5 ${
-              activeTab === "flowchart"
-                ? "bg-zinc-900 text-white dark:bg-zinc-100 dark:text-black font-semibold shadow-xs"
-                : "bg-white dark:bg-zinc-900 text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800 border border-zinc-200 dark:border-zinc-800"
-            }`}
-          >
-            <Network className="w-3.5 h-3.5" />
-            <span>Bagan Alir Penelitian (Bagan Resmi)</span>
-          </button>
-          <button
-            type="button"
-            onClick={() => { setMetodologiTab("tree"); setActiveTab("tree"); }}
-            className={`px-3 py-1.5 rounded-lg transition-all cursor-pointer flex items-center gap-1.5 ${
-              activeTab === "tree"
-                ? "bg-zinc-900 text-white dark:bg-zinc-100 dark:text-black font-semibold shadow-xs"
-                : "bg-white dark:bg-zinc-900 text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800 border border-zinc-200 dark:border-zinc-800"
-            }`}
-          >
-            <Compass className="w-3.5 h-3.5" />
-            <span>Pohon Alur Riset (Tree Graph)</span>
-          </button>
-          <button
-            type="button"
-            onClick={() => { setMetodologiTab("jadwal"); setActiveTab("jadwal"); }}
-            className={`px-3 py-1.5 rounded-lg transition-all cursor-pointer flex items-center gap-1.5 ${
-              activeTab === "jadwal"
-                ? "bg-zinc-900 text-white dark:bg-zinc-100 dark:text-black font-semibold shadow-xs"
-                : "bg-white dark:bg-zinc-900 text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800 border border-zinc-200 dark:border-zinc-800"
-            }`}
-          >
-            <CalendarDays className="w-3.5 h-3.5" />
-            <span>Matriks Jadwal &amp; Timeline (Gantt)</span>
-          </button>
-        </div>
-      )}
-
-      {workspaceCategory === "sidang" && (
-        <div className="flex items-center gap-1.5 pb-3 mb-4 overflow-x-auto text-xs font-medium no-print">
-          <button
-            type="button"
-            onClick={() => { setSidangTab("defense"); setActiveTab("defense"); }}
-            className={`px-3 py-1.5 rounded-lg transition-all cursor-pointer flex items-center gap-1.5 ${
-              activeTab === "defense"
-                ? "bg-zinc-900 text-white dark:bg-zinc-100 dark:text-black font-semibold shadow-xs"
-                : "bg-white dark:bg-zinc-900 text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800 border border-zinc-200 dark:border-zinc-800"
-            }`}
-          >
-            <ShieldAlert className="w-3.5 h-3.5 text-amber-500" />
-            <span>Tanya Jawab Sidang Penguji</span>
-          </button>
-          <button
-            type="button"
-            onClick={() => { setSidangTab("revisionMatrix"); setActiveTab("revisionMatrix"); }}
-            className={`px-3 py-1.5 rounded-lg transition-all cursor-pointer flex items-center gap-1.5 ${
-              activeTab === "revisionMatrix"
-                ? "bg-zinc-900 text-white dark:bg-zinc-100 dark:text-black font-semibold shadow-xs"
-                : "bg-white dark:bg-zinc-900 text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800 border border-zinc-200 dark:border-zinc-800"
-            }`}
-          >
-            <Layers className="w-3.5 h-3.5 text-indigo-500" />
-            <span>Matriks Revisi Dosen</span>
-          </button>
-          <button
-            type="button"
-            onClick={() => { setSidangTab("audit"); setActiveTab("audit"); }}
-            className={`px-3 py-1.5 rounded-lg transition-all cursor-pointer flex items-center gap-1.5 ${
-              activeTab === "audit"
-                ? "bg-zinc-900 text-white dark:bg-zinc-100 dark:text-black font-semibold shadow-xs"
-                : "bg-white dark:bg-zinc-900 text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800 border border-zinc-200 dark:border-zinc-800"
-            }`}
-          >
-            <ShieldCheck className="w-3.5 h-3.5 text-emerald-500" />
-            <span>Audit Turnitin &amp; Orisinalitas</span>
-          </button>
-        </div>
-      )}
-
-      {/* TAB 1: NASKAH PROPOSAL LENGKAP */}
-      {activeTab === "naskah" && (
-        <article 
-          style={{
-            fontFamily: `${currentDoc.campusGuideline?.typography?.fontFamily || "Times New Roman"}, serif`,
-            lineHeight: currentDoc.campusGuideline?.typography?.lineSpacing === 2.0 ? "2.0" : "1.65",
-            paddingTop: `${(currentDoc.campusGuideline?.margins?.topCm ?? 4) * 9}px`,
-            paddingBottom: `${(currentDoc.campusGuideline?.margins?.bottomCm ?? 3) * 9}px`,
-            paddingLeft: `${(currentDoc.campusGuideline?.margins?.leftCm ?? 4) * 9}px`,
-            paddingRight: `${(currentDoc.campusGuideline?.margins?.rightCm ?? 3) * 9}px`,
-          }}
-          className="relative bg-white dark:bg-zinc-950 rounded-2xl border border-zinc-200 dark:border-zinc-900 shadow-sm text-zinc-900 dark:text-zinc-100 print:bg-white print:text-black print:p-0 print:border-none print:shadow-none transition-all duration-200"
-        >
+            {/* TAB 1: NASKAH PROPOSAL LENGKAP */}
+            {activeTab === "naskah" && (
+              <article 
+                style={{
+                  fontFamily: `${currentDoc.campusGuideline?.typography?.fontFamily || "Times New Roman"}, serif`,
+                  lineHeight: currentDoc.campusGuideline?.typography?.lineSpacing === 2.0 ? "2.0" : "1.65",
+                  paddingTop: `${(currentDoc.campusGuideline?.margins?.topCm ?? 4) * 9}px`,
+                  paddingBottom: `${(currentDoc.campusGuideline?.margins?.bottomCm ?? 3) * 9}px`,
+                  paddingLeft: `${(currentDoc.campusGuideline?.margins?.leftCm ?? 4) * 9}px`,
+                  paddingRight: `${(currentDoc.campusGuideline?.margins?.rightCm ?? 3) * 9}px`,
+                }}
+                className="relative bg-white dark:bg-[#0D131F] text-[#0F172A] dark:text-[#F3F6FC] rounded-lg shadow-xl border border-[#E2E8F0] dark:border-[#1E2638] print:bg-white print:text-black print:p-0 print:border-none print:shadow-none transition-all duration-200"
+              >
           {/* Watermark Diagonal Overlay */}
           {watermarkType !== "none" && (
             <div className="pointer-events-none absolute inset-0 overflow-hidden select-none z-10 flex flex-col justify-around items-center opacity-[0.05] dark:opacity-[0.07] print:opacity-[0.09] text-zinc-900 dark:text-zinc-100 print:text-black">
@@ -1514,11 +1508,11 @@ NIP / NIK.
           
           {/* Chapter Focus Mode Indicator (Only when a specific chapter is isolated) */}
           {naskahSection !== "all" && (
-            <div className="no-print mb-8 p-3 rounded-xl bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 flex flex-wrap items-center justify-between gap-2 text-xs">
+            <div className="no-print mb-6 px-3.5 py-2.5 rounded-lg bg-[#F8FAFC] dark:bg-[#111827] border border-[#E2E8F0] dark:border-[#253149] flex flex-wrap items-center justify-between gap-2 text-xs">
               <div className="flex items-center gap-2">
-                <span className="w-2 h-2 rounded-full bg-indigo-500 animate-pulse"></span>
-                <span className="font-semibold text-zinc-900 dark:text-zinc-100">
-                  Mode Fokus: {
+                <span className="w-2 h-2 rounded-full bg-[#7C9CFF] animate-pulse"></span>
+                <span className="font-semibold text-[#0F172A] dark:text-[#F3F6FC]">
+                  Fokus Bagian: {
                     naskahSection === "frontmatter" ? "Cover & Kelengkapan Awal" :
                     naskahSection === "bab1" ? "Bab I: Pendahuluan" :
                     naskahSection === "bab2" ? `Bab II: Tinjauan Pustaka (${currentDoc.bab2?.landasanTeori?.length || 13} Teori)` :
@@ -1528,13 +1522,12 @@ NIP / NIK.
                     "Daftar Pustaka, Logbook & Berita Acara"
                   }
                 </span>
-                <span className="text-zinc-400 dark:text-zinc-500">•</span>
-                <span className="text-zinc-500 text-[11px]">Halaman terpisah agar penulisan &amp; telaah lebih terfokus</span>
+                <span className="text-[#64748B] dark:text-[#A4B1C7] text-[11px] hidden sm:inline">• Menampilkan bab terisolasi untuk fokus telaah</span>
               </div>
               <button
                 type="button"
                 onClick={() => setNaskahSection("all")}
-                className="text-xs text-indigo-600 dark:text-indigo-400 hover:underline font-semibold cursor-pointer"
+                className="text-xs text-[#7C9CFF] hover:underline font-semibold cursor-pointer"
               >
                 Lihat Naskah Lengkap (Utuh) ≡
               </button>
@@ -1548,28 +1541,28 @@ NIP / NIK.
             <>
               {/* BAGIAN 1: HALAMAN JUDUL / COVER STANDAR DIKTI */}
           {/* ========================================================================= */}
-          <div id="section-cover" className="relative text-center pb-12 mb-12 border-b-2 border-zinc-200 dark:border-zinc-800 print:border-black print:pb-0 print:mb-0 print:min-h-screen print:flex print:flex-col print:justify-between">
+          <div id="section-cover" className="relative text-center pb-12 mb-12 border-b-2 border-[#E2E8F0] dark:border-[#253149] print:border-black print:pb-0 print:mb-0 print:min-h-screen print:flex print:flex-col print:justify-between">
             {/* Action Bar Cover (No-Print) */}
-            <div className="no-print mb-6 p-2.5 rounded-xl bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 flex items-center justify-between flex-wrap gap-2 text-xs">
-              <span className="font-mono text-zinc-500 text-[11px] flex items-center gap-1.5">
-                <Landmark className="w-3.5 h-3.5 text-indigo-500" />
+            <div className="no-print mb-6 p-2 rounded-lg bg-[#F8FAFC] dark:bg-[#111827] border border-[#E2E8F0] dark:border-[#253149] flex items-center justify-between flex-wrap gap-2 text-xs">
+              <span className="font-mono text-[#64748B] dark:text-[#A4B1C7] text-[11px] flex items-center gap-1.5">
+                <Landmark className="w-3.5 h-3.5 text-[#7C9CFF]" />
                 Format Cover Standar Dikti (Logo 6x6 s.d. 7x7 cm)
               </span>
               <div className="flex items-center gap-1.5">
                 <button
                   type="button"
                   onClick={() => setIsCampusLogoModalOpen(true)}
-                  className="px-2.5 py-1 rounded-lg bg-white dark:bg-zinc-850 border border-zinc-200 dark:border-zinc-700 text-zinc-800 dark:text-zinc-200 hover:border-indigo-400 text-[11px] font-medium flex items-center gap-1.5 cursor-pointer shadow-xs transition-colors"
+                  className="px-2.5 py-1 rounded-md bg-white dark:bg-[#172033] border border-[#E2E8F0] dark:border-[#253149] text-[#0F172A] dark:text-[#F3F6FC] hover:border-[#7C9CFF] text-[11px] font-medium flex items-center gap-1.5 cursor-pointer shadow-2xs transition-colors"
                 >
-                  <ImageIcon className="w-3 h-3 text-indigo-500" />
+                  <ImageIcon className="w-3 h-3 text-[#7C9CFF]" />
                   <span>{currentDoc.campusLogoUrl ? "Ganti Logo Kampus" : "Unggah / Pilih Logo"}</span>
                 </button>
                 <button
                   type="button"
                   onClick={() => setIsCustomSheetModalOpen(true)}
-                  className="px-2.5 py-1 rounded-lg bg-white dark:bg-zinc-850 border border-zinc-200 dark:border-zinc-700 text-zinc-800 dark:text-zinc-200 hover:border-indigo-400 text-[11px] font-medium flex items-center gap-1.5 cursor-pointer shadow-xs transition-colors"
+                  className="px-2.5 py-1 rounded-md bg-white dark:bg-[#172033] border border-[#E2E8F0] dark:border-[#253149] text-[#0F172A] dark:text-[#F3F6FC] hover:border-[#7C9CFF] text-[11px] font-medium flex items-center gap-1.5 cursor-pointer shadow-2xs transition-colors"
                 >
-                  <FileSignature className="w-3 h-3 text-emerald-500" />
+                  <FileSignature className="w-3 h-3 text-[#34D399]" />
                   <span>Lembar Pengesahan & Scan</span>
                 </button>
               </div>
@@ -2402,12 +2395,12 @@ NIP / NIK.
 
               {/* Front Matter Navigation Footer */}
               {naskahSection === "frontmatter" && (
-                <div className="flex items-center justify-between pt-8 mt-12 border-t border-zinc-200 dark:border-zinc-800 text-xs font-medium no-print">
+                <div className="flex items-center justify-between pt-8 mt-12 border-t border-[#E2E8F0] dark:border-[#253149] text-xs font-medium no-print">
                   <div></div>
                   <button
                     type="button"
                     onClick={() => { setNaskahSection("bab1"); window.scrollTo({ top: 0, behavior: "smooth" }); }}
-                    className="px-4 py-2 rounded-lg bg-zinc-900 hover:bg-black text-white dark:bg-zinc-100 dark:hover:bg-white dark:text-black font-semibold text-xs flex items-center gap-1.5 transition-colors cursor-pointer shadow-xs"
+                    className="px-4 py-2 rounded-lg bg-[#0F172A] hover:bg-black text-white dark:bg-[#7C9CFF] dark:hover:bg-[#688bf5] dark:text-[#080B12] font-semibold text-xs flex items-center gap-1.5 transition-colors cursor-pointer shadow-xs"
                   >
                     <span>Lanjut ke Bab I: Pendahuluan</span>
                     <ChevronRight className="w-4 h-4" />
@@ -2423,44 +2416,44 @@ NIP / NIK.
           {(naskahSection === "all" || naskahSection === "bab1") && (
             <>
               {/* BAGIAN 9: RINGKASAN EKSEKUTIF */}
-          <div id="section-ringkasan" className="mb-10 p-4 sm:p-5 rounded-xl bg-zinc-50 dark:bg-zinc-900/60 border border-zinc-200 dark:border-zinc-850 print:border-gray-300 print:bg-gray-50">
+          <div id="section-ringkasan" className="mb-10 p-4 sm:p-5 rounded-lg bg-[#F8FAFC] dark:bg-[#111827]/70 border border-[#E2E8F0] dark:border-[#253149] print:border-gray-300 print:bg-gray-50">
             <div className="flex items-center justify-between mb-2">
-              <h3 className="text-xs font-mono font-semibold uppercase tracking-wider text-zinc-800 dark:text-zinc-300 print:text-black">
+              <h3 className="text-xs font-mono font-semibold uppercase tracking-wider text-[#0F172A] dark:text-[#F3F6FC] print:text-black">
                 Ringkasan Eksekutif
               </h3>
               <button
                 type="button"
                 onClick={() => handleRefineWithAI("executiveSummary", "Ringkasan Eksekutif", currentDoc.executiveSummary)}
-                className="no-print text-[11px] font-mono text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 bg-white dark:bg-zinc-900 px-2 py-0.5 rounded border border-zinc-200 dark:border-zinc-800 flex items-center gap-1 cursor-pointer transition-colors shadow-xs"
+                className="no-print opacity-70 hover:opacity-100 text-[11px] font-mono text-[#64748B] hover:text-[#7C9CFF] dark:text-[#A4B1C7] dark:hover:text-[#7C9CFF] bg-white dark:bg-[#172033] px-2 py-0.5 rounded border border-[#E2E8F0] dark:border-[#253149] hover:border-[#7C9CFF] flex items-center gap-1 cursor-pointer transition-all shadow-2xs"
               >
-                <Sparkles className="w-3 h-3 text-zinc-500 dark:text-zinc-400" />
+                <Sparkles className="w-3 h-3 text-[#7C9CFF]" />
                 <span>Revisi AI</span>
               </button>
             </div>
-            <p className="text-xs sm:text-sm text-zinc-700 dark:text-zinc-300 leading-relaxed font-sans print:text-black">
+            <p className="text-xs sm:text-sm text-[#334155] dark:text-[#CBD5E1] leading-relaxed print:text-black">
               {currentDoc.executiveSummary}
             </p>
           </div>
 
           {/* BAB I */}
           <section id="section-bab1" className="mb-10">
-            <div className="border-b border-zinc-200 dark:border-zinc-850 pb-2 mb-4 print:border-black">
-              <h2 className="text-base sm:text-lg font-serif font-bold text-zinc-900 dark:text-zinc-100 print:text-black uppercase">
+            <div className="border-b border-[#E2E8F0] dark:border-[#253149] pb-2 mb-4 print:border-black">
+              <h2 className="text-base sm:text-lg font-serif font-bold text-[#0F172A] dark:text-[#F3F6FC] print:text-black uppercase">
                 {currentDoc.bab1.title}
               </h2>
             </div>
 
-            <div className="space-y-4 text-xs sm:text-sm text-zinc-800 dark:text-zinc-300 leading-relaxed text-justify print:text-black font-sans">
+            <div className="space-y-4 text-xs sm:text-sm text-[#334155] dark:text-[#CBD5E1] leading-relaxed text-justify print:text-black">
               <div className="flex items-center justify-between pt-1">
-                <h3 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100 print:text-black font-serif">
+                <h3 className="text-sm font-semibold text-[#0F172A] dark:text-[#F3F6FC] print:text-black font-serif">
                   {getSectionHeading(1, 0, "Latar Belakang Masalah", currentDoc.campusGuideline?.headingStyle)}
                 </h3>
                 <button
                   type="button"
                   onClick={() => handleRefineWithAI("bab1.latarBelakang", "1.1 Latar Belakang Masalah", currentDoc.bab1.latarBelakang.join("\n\n"))}
-                  className="no-print text-[11px] font-mono text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-100 bg-zinc-100 dark:bg-zinc-900 px-2 py-0.5 rounded border border-zinc-200 dark:border-zinc-800 flex items-center gap-1 cursor-pointer transition-colors shadow-xs"
+                  className="no-print opacity-70 hover:opacity-100 text-[11px] font-mono text-[#64748B] hover:text-[#7C9CFF] dark:text-[#A4B1C7] dark:hover:text-[#7C9CFF] bg-white dark:bg-[#172033] px-2 py-0.5 rounded border border-[#E2E8F0] dark:border-[#253149] hover:border-[#7C9CFF] flex items-center gap-1 cursor-pointer transition-all shadow-2xs"
                 >
-                  <Sparkles className="w-3 h-3 text-zinc-500 dark:text-zinc-400" />
+                  <Sparkles className="w-3 h-3 text-[#7C9CFF]" />
                   <span>Revisi AI</span>
                 </button>
               </div>
@@ -2469,15 +2462,15 @@ NIP / NIK.
               ))}
 
               <div className="flex items-center justify-between pt-2">
-                <h3 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100 print:text-black font-serif">
+                <h3 className="text-sm font-semibold text-[#0F172A] dark:text-[#F3F6FC] print:text-black font-serif">
                   {getSectionHeading(1, 1, "Rumusan Masalah", currentDoc.campusGuideline?.headingStyle)}
                 </h3>
                 <button
                   type="button"
                   onClick={() => handleRefineWithAI("bab1.rumusanMasalah", "1.2 Rumusan Masalah", currentDoc.bab1.rumusanMasalah.join("\n"))}
-                  className="no-print text-[11px] font-mono text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-100 bg-zinc-100 dark:bg-zinc-900 px-2 py-0.5 rounded border border-zinc-200 dark:border-zinc-800 flex items-center gap-1 cursor-pointer transition-colors shadow-xs"
+                  className="no-print opacity-70 hover:opacity-100 text-[11px] font-mono text-[#64748B] hover:text-[#7C9CFF] dark:text-[#A4B1C7] dark:hover:text-[#7C9CFF] bg-white dark:bg-[#172033] px-2 py-0.5 rounded border border-[#E2E8F0] dark:border-[#253149] hover:border-[#7C9CFF] flex items-center gap-1 cursor-pointer transition-all shadow-2xs"
                 >
-                  <Sparkles className="w-3 h-3 text-zinc-500 dark:text-zinc-400" />
+                  <Sparkles className="w-3 h-3 text-[#7C9CFF]" />
                   <span>Revisi AI</span>
                 </button>
               </div>
@@ -2531,11 +2524,11 @@ NIP / NIK.
 
               {/* Bab 1 Navigation Footer */}
               {naskahSection === "bab1" && (
-                <div className="flex items-center justify-between pt-8 mt-12 border-t border-zinc-200 dark:border-zinc-800 text-xs font-medium no-print">
+                <div className="flex items-center justify-between pt-8 mt-12 border-t border-[#E2E8F0] dark:border-[#253149] text-xs font-medium no-print">
                   <button
                     type="button"
                     onClick={() => { setNaskahSection("frontmatter"); window.scrollTo({ top: 0, behavior: "smooth" }); }}
-                    className="px-3.5 py-2 rounded-lg border border-zinc-200 dark:border-zinc-800 hover:bg-zinc-100 dark:hover:bg-zinc-850 transition-colors flex items-center gap-1.5 cursor-pointer text-zinc-700 dark:text-zinc-300"
+                    className="px-3.5 py-2 rounded-lg border border-[#E2E8F0] dark:border-[#253149] hover:bg-[#F1F5F9] dark:hover:bg-[#172033] transition-colors flex items-center gap-1.5 cursor-pointer text-[#64748B] dark:text-[#A4B1C7]"
                   >
                     <ChevronLeft className="w-4 h-4" />
                     <span>Kelengkapan Awal</span>
@@ -2543,7 +2536,7 @@ NIP / NIK.
                   <button
                     type="button"
                     onClick={() => { setNaskahSection("bab2"); window.scrollTo({ top: 0, behavior: "smooth" }); }}
-                    className="px-4 py-2 rounded-lg bg-zinc-900 hover:bg-black text-white dark:bg-zinc-100 dark:hover:bg-white dark:text-black font-semibold text-xs flex items-center gap-1.5 transition-colors cursor-pointer shadow-xs"
+                    className="px-4 py-2 rounded-lg bg-[#0F172A] hover:bg-black text-white dark:bg-[#7C9CFF] dark:hover:bg-[#688bf5] dark:text-[#080B12] font-semibold text-xs flex items-center gap-1.5 transition-colors cursor-pointer shadow-xs"
                   >
                     <span>Lanjut ke Bab II: Tinjauan Pustaka</span>
                     <ChevronRight className="w-4 h-4" />
@@ -2560,29 +2553,29 @@ NIP / NIK.
             <>
               {/* BAB II */}
               <section id="section-bab2" className="mb-10">
-            <div className="border-b border-zinc-200 dark:border-zinc-850 pb-2 mb-4 print:border-black flex items-center justify-between">
-              <h2 className="text-base sm:text-lg font-serif font-bold text-zinc-900 dark:text-zinc-100 print:text-black uppercase">
+            <div className="border-b border-[#E2E8F0] dark:border-[#253149] pb-2 mb-4 print:border-black flex items-center justify-between">
+              <h2 className="text-base sm:text-lg font-serif font-bold text-[#0F172A] dark:text-[#F3F6FC] print:text-black uppercase">
                 {currentDoc.bab2.title}
               </h2>
               <button
                 type="button"
                 onClick={() => setIsTheoryCustomizerModalOpen(true)}
-                className="no-print text-[11px] font-mono text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 bg-indigo-50 dark:bg-indigo-950/50 px-2.5 py-1 rounded-lg border border-indigo-200 dark:border-indigo-800 flex items-center gap-1.5 cursor-pointer transition-colors shadow-xs"
+                className="no-print text-[11px] font-mono text-[#7C9CFF] hover:text-[#9B8CFF] bg-[#7C9CFF]/10 hover:bg-[#7C9CFF]/15 px-2.5 py-1 rounded-lg border border-[#7C9CFF]/30 flex items-center gap-1.5 cursor-pointer transition-colors shadow-2xs"
               >
-                <Sparkles className="w-3.5 h-3.5 text-indigo-500" />
+                <Sparkles className="w-3.5 h-3.5 text-[#7C9CFF]" />
                 <span>Kustomisasi Teori ({currentDoc.bab2.landasanTeori?.length || 13} Teori)</span>
               </button>
             </div>
 
             {/* Depth Banner & Customizer Alert */}
-            <div className="no-print mb-4 p-3 rounded-xl bg-indigo-50/70 dark:bg-indigo-950/40 border border-indigo-200 dark:border-indigo-850 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
+            <div className="no-print mb-4 p-3 rounded-lg bg-[#F8FAFC] dark:bg-[#111827] border border-[#E2E8F0] dark:border-[#253149] flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
               <div className="flex items-center gap-2">
-                <BookOpen className="w-4 h-4 text-indigo-600 dark:text-indigo-400 flex-shrink-0" />
+                <BookOpen className="w-4 h-4 text-[#7C9CFF] shrink-0" />
                 <div>
-                  <p className="font-semibold text-zinc-900 dark:text-zinc-100">
+                  <p className="font-semibold text-[#0F172A] dark:text-[#F3F6FC]">
                     Kedalaman Bab II: {currentDoc.bab2.landasanTeori?.length || 0} Landasan Teori Ilmiah Otoritatif
                   </p>
-                  <p className="text-[11px] text-zinc-500 dark:text-zinc-400">
+                  <p className="text-[11px] text-[#64748B] dark:text-[#A4B1C7]">
                     Setiap teori disinkronkan langsung dengan sitasi jurnal pada Daftar Pustaka ({citationStyle === "apa" ? "APA 7th" : "IEEE"})
                   </p>
                 </div>
@@ -2590,14 +2583,14 @@ NIP / NIK.
               <button
                 type="button"
                 onClick={() => setIsTheoryCustomizerModalOpen(true)}
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white font-medium text-xs shadow-xs transition-colors cursor-pointer self-start sm:self-auto"
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#0F172A] hover:bg-black text-white dark:bg-[#7C9CFF] dark:hover:bg-[#688bf5] dark:text-[#080B12] font-semibold text-xs shadow-xs transition-colors cursor-pointer self-start sm:self-auto"
               >
                 <Sparkles className="w-3.5 h-3.5" />
                 <span>+ Atur Jumlah Teori (5, 8, 13, 20)</span>
               </button>
             </div>
 
-            <div className="space-y-4 text-xs sm:text-sm text-zinc-800 dark:text-zinc-300 leading-relaxed text-justify print:text-black font-sans">
+            <div className="space-y-4 text-xs sm:text-sm text-[#334155] dark:text-[#CBD5E1] leading-relaxed text-justify print:text-black">
               {currentDoc.category === "magang" ? (
                 /* Format Khusus Magang: Profil Perusahaan, Visi Misi, Struktur Organisasi */
                 <>
@@ -2742,11 +2735,11 @@ NIP / NIK.
 
               {/* Bab 2 Navigation Footer */}
               {naskahSection === "bab2" && (
-                <div className="flex items-center justify-between pt-8 mt-12 border-t border-zinc-200 dark:border-zinc-800 text-xs font-medium no-print">
+                <div className="flex items-center justify-between pt-8 mt-12 border-t border-[#E2E8F0] dark:border-[#253149] text-xs font-medium no-print">
                   <button
                     type="button"
                     onClick={() => { setNaskahSection("bab1"); window.scrollTo({ top: 0, behavior: "smooth" }); }}
-                    className="px-3.5 py-2 rounded-lg border border-zinc-200 dark:border-zinc-800 hover:bg-zinc-100 dark:hover:bg-zinc-850 transition-colors flex items-center gap-1.5 cursor-pointer text-zinc-700 dark:text-zinc-300"
+                    className="px-3.5 py-2 rounded-lg border border-[#E2E8F0] dark:border-[#253149] hover:bg-[#F1F5F9] dark:hover:bg-[#172033] transition-colors flex items-center gap-1.5 cursor-pointer text-[#64748B] dark:text-[#A4B1C7]"
                   >
                     <ChevronLeft className="w-4 h-4" />
                     <span>Bab I: Pendahuluan</span>
@@ -2754,7 +2747,7 @@ NIP / NIK.
                   <button
                     type="button"
                     onClick={() => { setNaskahSection("bab3"); window.scrollTo({ top: 0, behavior: "smooth" }); }}
-                    className="px-4 py-2 rounded-lg bg-zinc-900 hover:bg-black text-white dark:bg-zinc-100 dark:hover:bg-white dark:text-black font-semibold text-xs flex items-center gap-1.5 transition-colors cursor-pointer shadow-xs"
+                    className="px-4 py-2 rounded-lg bg-[#0F172A] hover:bg-black text-white dark:bg-[#7C9CFF] dark:hover:bg-[#688bf5] dark:text-[#080B12] font-semibold text-xs flex items-center gap-1.5 transition-colors cursor-pointer shadow-xs"
                   >
                     <span>Lanjut ke Bab III: Metodologi</span>
                     <ChevronRight className="w-4 h-4" />
@@ -2771,46 +2764,46 @@ NIP / NIK.
             <>
               {/* BAB III */}
               <section id="section-bab3" className="mb-10">
-            <div className="border-b border-zinc-200 dark:border-zinc-850 pb-2 mb-4 print:border-black flex items-center justify-between">
-              <h2 className="text-base sm:text-lg font-serif font-bold text-zinc-900 dark:text-zinc-100 print:text-black uppercase">
+            <div className="border-b border-[#E2E8F0] dark:border-[#253149] pb-2 mb-4 print:border-black flex items-center justify-between">
+              <h2 className="text-base sm:text-lg font-serif font-bold text-[#0F172A] dark:text-[#F3F6FC] print:text-black uppercase">
                 {currentDoc.bab3.title}
               </h2>
               <button
                 type="button"
                 onClick={() => setIsImageManagerModalOpen(true)}
-                className="no-print text-[11px] font-mono text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 bg-white dark:bg-zinc-900 px-2.5 py-1 rounded-lg border border-zinc-200 dark:border-zinc-800 flex items-center gap-1.5 cursor-pointer shadow-xs"
+                className="no-print text-[11px] font-mono text-[#64748B] dark:text-[#A4B1C7] hover:text-[#0F172A] dark:hover:text-[#F3F6FC] bg-white dark:bg-[#172033] px-2.5 py-1 rounded-md border border-[#E2E8F0] dark:border-[#253149] hover:border-[#7C9CFF] flex items-center gap-1.5 cursor-pointer shadow-2xs transition-colors"
               >
-                <ImageIcon className="w-3.5 h-3.5 text-indigo-500" />
+                <ImageIcon className="w-3.5 h-3.5 text-[#7C9CFF]" />
                 <span>+ Sisipkan Gambar / Diagram</span>
               </button>
             </div>
 
             {/* Formal Academic Figure 3.1: Bagan Alir Tahapan Pelaksanaan */}
-            <div className="my-6 p-4 rounded-xl border border-zinc-200 dark:border-zinc-800 bg-zinc-50/50 dark:bg-zinc-900/30 text-center">
+            <div className="my-6 p-4 rounded-xl border border-[#E2E8F0] dark:border-[#253149] bg-[#F8FAFC] dark:bg-[#111827]/50 text-center">
               <div className="max-w-2xl mx-auto py-2">
                 <AcademicFlowchartDiagram doc={currentDoc} type="methodology" />
               </div>
-              <p className="text-xs font-serif font-bold text-zinc-900 dark:text-zinc-100 mt-2 text-center">
+              <p className="text-xs font-serif font-bold text-[#0F172A] dark:text-[#F3F6FC] mt-2 text-center">
                 Gambar 3.1 Bagan Alir Tahapan Pelaksanaan {currentDoc.category === "magang" ? "Kegiatan Magang & Analisis" : "Penelitian"}
               </p>
             </div>
 
             {/* Inserted Chapter 3 Custom Figures */}
             {currentDoc.documentFigures?.filter(f => f.chapterPlacement === 3).map((fig, fIdx) => (
-              <div key={fig.id || fIdx} className="my-6 p-4 rounded-xl border border-zinc-200 dark:border-zinc-850 bg-zinc-50/50 dark:bg-zinc-900/30 text-center">
+              <div key={fig.id || fIdx} className="my-6 p-4 rounded-xl border border-[#E2E8F0] dark:border-[#253149] bg-[#F8FAFC] dark:bg-[#111827]/50 text-center">
                 <img
                   src={fig.imageDataUrl}
                   alt={fig.caption}
                   className="max-h-80 object-contain mx-auto rounded-lg shadow-xs"
                 />
-                <p className="text-xs font-serif font-bold text-zinc-900 dark:text-zinc-100 mt-2 text-center">
+                <p className="text-xs font-serif font-bold text-[#0F172A] dark:text-[#F3F6FC] mt-2 text-center">
                   {fig.figureNumber || `Gambar 3.${fIdx + 2}`} {fig.caption}
                 </p>
-                {fig.source && <p className="text-[11px] text-zinc-500 font-sans mt-0.5">Sumber: {fig.source}</p>}
+                {fig.source && <p className="text-[11px] text-[#64748B] dark:text-[#A4B1C7] mt-0.5">Sumber: {fig.source}</p>}
               </div>
             ))}
 
-            <div className="space-y-4 text-xs sm:text-sm text-zinc-800 dark:text-zinc-300 leading-relaxed text-justify print:text-black font-sans">
+            <div className="space-y-4 text-xs sm:text-sm text-[#334155] dark:text-[#CBD5E1] leading-relaxed text-justify print:text-black">
               {currentDoc.category === "magang" ? (
                 /* Format Khusus Magang: Metode Kerja, WBS, Perangkat, Kompetensi */
                 <>
@@ -2940,11 +2933,11 @@ NIP / NIK.
 
               {/* Bab 3 Navigation Footer */}
               {naskahSection === "bab3" && (
-                <div className="flex items-center justify-between pt-8 mt-12 border-t border-zinc-200 dark:border-zinc-800 text-xs font-medium no-print">
+                <div className="flex items-center justify-between pt-8 mt-12 border-t border-[#E2E8F0] dark:border-[#253149] text-xs font-medium no-print">
                   <button
                     type="button"
                     onClick={() => { setNaskahSection("bab2"); window.scrollTo({ top: 0, behavior: "smooth" }); }}
-                    className="px-3.5 py-2 rounded-lg border border-zinc-200 dark:border-zinc-800 hover:bg-zinc-100 dark:hover:bg-zinc-850 transition-colors flex items-center gap-1.5 cursor-pointer text-zinc-700 dark:text-zinc-300"
+                    className="px-3.5 py-2 rounded-lg border border-[#E2E8F0] dark:border-[#253149] hover:bg-[#F1F5F9] dark:hover:bg-[#172033] transition-colors flex items-center gap-1.5 cursor-pointer text-[#64748B] dark:text-[#A4B1C7]"
                   >
                     <ChevronLeft className="w-4 h-4" />
                     <span>Bab II: Tinjauan Pustaka</span>
@@ -2952,7 +2945,7 @@ NIP / NIK.
                   <button
                     type="button"
                     onClick={() => { setNaskahSection("bab4"); window.scrollTo({ top: 0, behavior: "smooth" }); }}
-                    className="px-4 py-2 rounded-lg bg-zinc-900 hover:bg-black text-white dark:bg-zinc-100 dark:hover:bg-white dark:text-black font-semibold text-xs flex items-center gap-1.5 transition-colors cursor-pointer shadow-xs"
+                    className="px-4 py-2 rounded-lg bg-[#0F172A] hover:bg-black text-white dark:bg-[#7C9CFF] dark:hover:bg-[#688bf5] dark:text-[#080B12] font-semibold text-xs flex items-center gap-1.5 transition-colors cursor-pointer shadow-xs"
                   >
                     <span>Lanjut ke Bab IV: Rencana Kerja</span>
                     <ChevronRight className="w-4 h-4" />
@@ -2969,34 +2962,34 @@ NIP / NIK.
             <>
               {/* BAB IV: MATRIKS TABEL AKADEMIK (3 Garis Horizontal Standar) */}
               <section id="section-bab4" className="mb-10">
-            <div className="border-b border-zinc-200 dark:border-zinc-850 pb-2 mb-4 print:border-black">
-              <h2 className="text-base sm:text-lg font-serif font-bold text-zinc-900 dark:text-zinc-100 print:text-black uppercase">
+            <div className="border-b border-[#E2E8F0] dark:border-[#253149] pb-2 mb-4 print:border-black">
+              <h2 className="text-base sm:text-lg font-serif font-bold text-[#0F172A] dark:text-[#F3F6FC] print:text-black uppercase">
                 {currentDoc.bab4.title}
               </h2>
             </div>
 
-            <h3 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100 print:text-black font-serif mb-3">
+            <h3 className="text-sm font-semibold text-[#0F172A] dark:text-[#F3F6FC] print:text-black font-serif mb-3">
               Tabel 4.1 {currentDoc.category === "magang" ? "Matriks Rencana Kerja Mingguan (Logbook)" : "Jadwal Pelaksanaan Penelitian (Gantt Chart)"}
             </h3>
 
             {/* Academic 3-line Table */}
             <div className="overflow-x-auto my-4">
-              <table className="w-full text-left text-xs font-sans border-t-2 border-b-2 border-zinc-300 dark:border-zinc-700 print:border-black">
+              <table className="w-full text-left text-xs border-t-2 border-b-2 border-zinc-300 dark:border-zinc-700 print:border-black">
                 <thead>
-                  <tr className="border-b border-zinc-200 dark:border-zinc-800 print:border-black font-semibold text-zinc-900 dark:text-zinc-100 print:text-black">
+                  <tr className="border-b border-[#E2E8F0] dark:border-[#253149] print:border-black font-semibold text-[#0F172A] dark:text-[#F3F6FC] print:text-black">
                     <th className="py-2 px-3">Minggu</th>
                     <th className="py-2 px-3">Tahap Pelaksanaan</th>
                     <th className="py-2 px-3">Rincian Aktivitas</th>
                     <th className="py-2 px-3">Target Luaran (Output)</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-zinc-200 dark:divide-zinc-800 print:divide-gray-300 text-zinc-700 dark:text-zinc-300 print:text-black">
+                <tbody className="divide-y divide-[#E2E8F0] dark:divide-[#253149] print:divide-gray-300 text-[#334155] dark:text-[#CBD5E1] print:text-black">
                   {currentDoc.bab4.jadwalMatriks.map((row, idx) => (
                     <tr key={idx}>
-                      <td className="py-2.5 px-3 font-mono font-medium text-zinc-900 dark:text-zinc-200 print:text-black whitespace-nowrap">
+                      <td className="py-2.5 px-3 font-mono font-medium text-[#0F172A] dark:text-[#F3F6FC] print:text-black whitespace-nowrap">
                         Mg {row.week}
                       </td>
-                      <td className="py-2.5 px-3 font-medium text-zinc-900 dark:text-zinc-100 print:text-black">
+                      <td className="py-2.5 px-3 font-medium text-[#0F172A] dark:text-[#F3F6FC] print:text-black">
                         {row.phase}
                       </td>
                       <td className="py-2.5 px-3">
@@ -3004,14 +2997,14 @@ NIP / NIK.
                           {row.activities.map((act, aIdx) => <li key={aIdx}>{act}</li>)}
                         </ul>
                       </td>
-                      <td className="py-2.5 px-3 font-mono text-[11px] text-zinc-600 dark:text-zinc-300 print:text-black">
+                      <td className="py-2.5 px-3 font-mono text-[11px] text-[#64748B] dark:text-[#A4B1C7] print:text-black">
                         {row.output}
                       </td>
                     </tr>
                   ))}
                 </tbody>
               </table>
-              <p className="text-[11px] text-zinc-500 mt-2 italic print:text-gray-600">
+              <p className="text-[11px] text-[#64748B] dark:text-[#A4B1C7] mt-2 italic print:text-gray-600">
                 *Tabel terbuka 3 garis horizontal sesuai kaidah penulisan karya ilmiah perguruan tinggi.
               </p>
             </div>
@@ -3085,11 +3078,11 @@ NIP / NIK.
 
               {/* Bab 4 Navigation Footer */}
               {naskahSection === "bab4" && (
-                <div className="flex items-center justify-between pt-8 mt-12 border-t border-zinc-200 dark:border-zinc-800 text-xs font-medium no-print">
+                <div className="flex items-center justify-between pt-8 mt-12 border-t border-[#E2E8F0] dark:border-[#253149] text-xs font-medium no-print">
                   <button
                     type="button"
                     onClick={() => { setNaskahSection("bab3"); window.scrollTo({ top: 0, behavior: "smooth" }); }}
-                    className="px-3.5 py-2 rounded-lg border border-zinc-200 dark:border-zinc-800 hover:bg-zinc-100 dark:hover:bg-zinc-850 transition-colors flex items-center gap-1.5 cursor-pointer text-zinc-700 dark:text-zinc-300"
+                    className="px-3.5 py-2 rounded-lg border border-[#E2E8F0] dark:border-[#253149] hover:bg-[#F1F5F9] dark:hover:bg-[#172033] transition-colors flex items-center gap-1.5 cursor-pointer text-[#64748B] dark:text-[#A4B1C7]"
                   >
                     <ChevronLeft className="w-4 h-4" />
                     <span>Bab III: Metodologi</span>
@@ -3097,7 +3090,7 @@ NIP / NIK.
                   <button
                     type="button"
                     onClick={() => { setNaskahSection("bab5"); window.scrollTo({ top: 0, behavior: "smooth" }); }}
-                    className="px-4 py-2 rounded-lg bg-zinc-900 hover:bg-black text-white dark:bg-zinc-100 dark:hover:bg-white dark:text-black font-semibold text-xs flex items-center gap-1.5 transition-colors cursor-pointer shadow-xs"
+                    className="px-4 py-2 rounded-lg bg-[#0F172A] hover:bg-black text-white dark:bg-[#7C9CFF] dark:hover:bg-[#688bf5] dark:text-[#080B12] font-semibold text-xs flex items-center gap-1.5 transition-colors cursor-pointer shadow-xs"
                   >
                     <span>Lanjut ke Bab V: Penutup</span>
                     <ChevronRight className="w-4 h-4" />
@@ -3114,13 +3107,13 @@ NIP / NIK.
             <>
               {/* BAB V: KESIMPULAN, REKOMENDASI KONTRIBUSI, & MITIGASI RISIKO */}
               <section id="section-bab5" className="mb-10">
-            <div className="border-b border-zinc-200 dark:border-zinc-850 pb-2 mb-4 print:border-black">
-              <h2 className="text-base sm:text-lg font-serif font-bold text-zinc-900 dark:text-zinc-100 print:text-black uppercase">
+            <div className="border-b border-[#E2E8F0] dark:border-[#253149] pb-2 mb-4 print:border-black">
+              <h2 className="text-base sm:text-lg font-serif font-bold text-[#0F172A] dark:text-[#F3F6FC] print:text-black uppercase">
                 {currentDoc.bab5?.title || (currentDoc.category === "magang" ? "BAB V: PENUTUP, KONTRIBUSI, & MITIGASI RISIKO" : "BAB V: KESIMPULAN, REKOMENDASI KONTRIBUSI, & MITIGASI RISIKO")}
               </h2>
             </div>
 
-            <div className="space-y-4 text-xs sm:text-sm text-zinc-800 dark:text-zinc-300 leading-relaxed text-justify print:text-black font-sans">
+            <div className="space-y-4 text-xs sm:text-sm text-[#334155] dark:text-[#CBD5E1] leading-relaxed text-justify print:text-black">
               <h3 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100 print:text-black font-serif pt-1">
                 {getSectionHeading(5, 0, "Kesimpulan Rencana Usulan", currentDoc.campusGuideline?.headingStyle)}
               </h3>
@@ -3186,11 +3179,11 @@ NIP / NIK.
 
               {/* Bab 5 Navigation Footer */}
               {naskahSection === "bab5" && (
-                <div className="flex items-center justify-between pt-8 mt-12 border-t border-zinc-200 dark:border-zinc-800 text-xs font-medium no-print">
+                <div className="flex items-center justify-between pt-8 mt-12 border-t border-[#E2E8F0] dark:border-[#253149] text-xs font-medium no-print">
                   <button
                     type="button"
                     onClick={() => { setNaskahSection("bab4"); window.scrollTo({ top: 0, behavior: "smooth" }); }}
-                    className="px-3.5 py-2 rounded-lg border border-zinc-200 dark:border-zinc-800 hover:bg-zinc-100 dark:hover:bg-zinc-850 transition-colors flex items-center gap-1.5 cursor-pointer text-zinc-700 dark:text-zinc-300"
+                    className="px-3.5 py-2 rounded-lg border border-[#E2E8F0] dark:border-[#253149] hover:bg-[#F1F5F9] dark:hover:bg-[#172033] transition-colors flex items-center gap-1.5 cursor-pointer text-[#64748B] dark:text-[#A4B1C7]"
                   >
                     <ChevronLeft className="w-4 h-4" />
                     <span>Bab IV: Rencana Kerja</span>
@@ -3198,7 +3191,7 @@ NIP / NIK.
                   <button
                     type="button"
                     onClick={() => { setNaskahSection("backmatter"); window.scrollTo({ top: 0, behavior: "smooth" }); }}
-                    className="px-4 py-2 rounded-lg bg-zinc-900 hover:bg-black text-white dark:bg-zinc-100 dark:hover:bg-white dark:text-black font-semibold text-xs flex items-center gap-1.5 transition-colors cursor-pointer shadow-xs"
+                    className="px-4 py-2 rounded-lg bg-[#0F172A] hover:bg-black text-white dark:bg-[#7C9CFF] dark:hover:bg-[#688bf5] dark:text-[#080B12] font-semibold text-xs flex items-center gap-1.5 transition-colors cursor-pointer shadow-xs"
                   >
                     <span>Daftar Pustaka &amp; Lampiran</span>
                     <ChevronRight className="w-4 h-4" />
@@ -3215,30 +3208,30 @@ NIP / NIK.
             <>
               {/* DAFTAR PUSTAKA (Standar APA 7th Edition / IEEE) */}
           {currentDoc.bibliography && currentDoc.bibliography.length > 0 && (
-            <section id="section-pustaka" className="mb-10 pt-6 border-t border-zinc-200 dark:border-zinc-850 print:border-black">
-              <div className="border-b border-zinc-200 dark:border-zinc-850 pb-2 mb-4 print:border-black flex items-center justify-between">
-                <h2 className="text-base sm:text-lg font-serif font-bold text-zinc-900 dark:text-zinc-100 print:text-black uppercase">
+            <section id="section-pustaka" className="mb-10 pt-6 border-t border-[#E2E8F0] dark:border-[#253149] print:border-black">
+              <div className="border-b border-[#E2E8F0] dark:border-[#253149] pb-2 mb-4 print:border-black flex items-center justify-between">
+                <h2 className="text-base sm:text-lg font-serif font-bold text-[#0F172A] dark:text-[#F3F6FC] print:text-black uppercase">
                   DAFTAR PUSTAKA ({citationStyle === "apa" ? "STANDAR APA 7TH EDITION" : "STANDAR IEEE"})
                 </h2>
-                <span className="no-print text-[10px] font-mono px-2 py-0.5 rounded bg-zinc-100 dark:bg-zinc-900 text-zinc-600 dark:text-zinc-400 border border-zinc-200 dark:border-zinc-800">
+                <span className="no-print text-[10px] font-mono px-2 py-0.5 rounded bg-[#F8FAFC] dark:bg-[#111827] text-[#64748B] dark:text-[#A4B1C7] border border-[#E2E8F0] dark:border-[#253149]">
                   {citationStyle === "apa" ? "Format: Nama, Tahun" : "Format: Numerik [N]"}
                 </span>
               </div>
-              <div className="space-y-3 text-xs text-zinc-700 dark:text-zinc-300 print:text-black font-sans">
+              <div className="space-y-3 text-xs sm:text-sm text-[#334155] dark:text-[#CBD5E1] print:text-black">
                 {currentDoc.bibliography.map((bib, bIdx) => (
                   <p key={bib.id} className="pl-6 -indent-6 leading-relaxed">
                     {citationStyle === "ieee" ? (
                       <>
-                        <span className="font-mono font-bold text-zinc-900 dark:text-zinc-100 mr-1.5">[{bIdx + 1}]</span>
-                        <span className="text-zinc-800 dark:text-zinc-200 print:text-black">{bib.author}</span>, "{bib.title}," <em>{bib.source}</em>, {bib.year}.
+                        <span className="font-mono font-bold text-[#0F172A] dark:text-[#F3F6FC] mr-1.5">[{bIdx + 1}]</span>
+                        <span className="text-[#334155] dark:text-[#CBD5E1] print:text-black">{bib.author}</span>, "{bib.title}," <em>{bib.source}</em>, {bib.year}.
                       </>
                     ) : (
                       <>
-                        <span className="font-medium text-zinc-800 dark:text-zinc-200 print:text-black">{bib.author}</span> ({bib.year}). <em>{bib.title}</em>. {bib.source}
+                        <span className="font-medium text-[#334155] dark:text-[#CBD5E1] print:text-black">{bib.author}</span> ({bib.year}). <em>{bib.title}</em>. {bib.source}
                       </>
                     )}
                     {bib.doiUrl && (
-                      <span className="block pl-0 font-mono text-[10px] text-zinc-500 print:text-gray-600 mt-0.5">
+                      <span className="block pl-0 font-mono text-[10px] text-[#64748B] dark:text-[#A4B1C7] print:text-gray-600 mt-0.5">
                         DOI/URL: {bib.doiUrl}
                       </span>
                     )}
@@ -3249,13 +3242,13 @@ NIP / NIK.
           )}
 
           {/* LAMPIRAN-LAMPIRAN AKADEMIK */}
-          <section id="section-lampiran" className="mt-12 pt-8 border-t-2 border-zinc-300 dark:border-zinc-800 print:border-black font-sans">
-            <div className="border-b border-zinc-200 dark:border-zinc-850 pb-2 mb-6 print:border-black text-center flex flex-col sm:flex-row items-center justify-between gap-3">
+          <section id="section-lampiran" className="mt-12 pt-8 border-t-2 border-[#E2E8F0] dark:border-[#253149] print:border-black font-serif">
+            <div className="border-b border-[#E2E8F0] dark:border-[#253149] pb-2 mb-6 print:border-black text-center flex flex-col sm:flex-row items-center justify-between gap-3">
               <div className="text-left">
-                <span className="text-[10px] font-mono uppercase tracking-widest text-zinc-500 dark:text-zinc-400 block mb-1">
+                <span className="text-[10px] font-mono uppercase tracking-widest text-[#64748B] dark:text-[#A4B1C7] block mb-1">
                   BERKAS PENDUKUNG, LOGBOOK &amp; INSTRUMEN BAKU
                 </span>
-                <h2 className="text-base sm:text-lg font-serif font-bold text-zinc-900 dark:text-zinc-100 print:text-black uppercase">
+                <h2 className="text-base sm:text-lg font-serif font-bold text-[#0F172A] dark:text-[#F3F6FC] print:text-black uppercase">
                   LAMPIRAN-LAMPIRAN DOKUMEN USULAN
                 </h2>
               </div>
@@ -3263,7 +3256,7 @@ NIP / NIK.
                 <button
                   type="button"
                   onClick={() => setIsLogbookModalOpen(true)}
-                  className="px-3 py-1.5 rounded-lg bg-indigo-50 dark:bg-indigo-950/50 border border-indigo-200 dark:border-indigo-850 text-indigo-700 dark:text-indigo-300 hover:bg-indigo-100 text-xs font-mono font-medium flex items-center gap-1.5 cursor-pointer shadow-xs transition-colors"
+                  className="px-3 py-1.5 rounded-lg bg-[#7C9CFF]/10 dark:bg-[#7C9CFF]/15 border border-[#7C9CFF]/30 text-[#7C9CFF] hover:bg-[#7C9CFF]/20 text-xs font-mono font-medium flex items-center gap-1.5 cursor-pointer shadow-2xs transition-colors"
                 >
                   <CalendarDays className="w-3.5 h-3.5" />
                   <span>Kelola Logbook ({currentDoc.logbookEntries?.length || 0} Entri)</span>
@@ -3271,7 +3264,7 @@ NIP / NIK.
                 <button
                   type="button"
                   onClick={() => setIsDefenseMinutesModalOpen(true)}
-                  className="px-3 py-1.5 rounded-lg bg-emerald-50 dark:bg-emerald-950/50 border border-emerald-200 dark:border-emerald-850 text-emerald-700 dark:text-emerald-300 hover:bg-emerald-100 text-xs font-mono font-medium flex items-center gap-1.5 cursor-pointer shadow-xs transition-colors"
+                  className="px-3 py-1.5 rounded-lg bg-[#34D399]/10 dark:bg-[#34D399]/15 border border-[#34D399]/30 text-[#34D399] hover:bg-[#34D399]/20 text-xs font-mono font-medium flex items-center gap-1.5 cursor-pointer shadow-2xs transition-colors"
                 >
                   <FileSignature className="w-3.5 h-3.5" />
                   <span>Berita Acara Sidang</span>
@@ -3451,11 +3444,11 @@ NIP / NIK.
 
               {/* Back Matter Navigation Footer */}
               {naskahSection === "backmatter" && (
-                <div className="flex items-center justify-between pt-8 mt-12 border-t border-zinc-200 dark:border-zinc-800 text-xs font-medium no-print">
+                <div className="flex items-center justify-between pt-8 mt-12 border-t border-[#E2E8F0] dark:border-[#253149] text-xs font-medium no-print">
                   <button
                     type="button"
                     onClick={() => { setNaskahSection("bab5"); window.scrollTo({ top: 0, behavior: "smooth" }); }}
-                    className="px-3.5 py-2 rounded-lg border border-zinc-200 dark:border-zinc-800 hover:bg-zinc-100 dark:hover:bg-zinc-850 transition-colors flex items-center gap-1.5 cursor-pointer text-zinc-700 dark:text-zinc-300"
+                    className="px-3.5 py-2 rounded-lg border border-[#E2E8F0] dark:border-[#253149] hover:bg-[#F1F5F9] dark:hover:bg-[#172033] transition-colors flex items-center gap-1.5 cursor-pointer text-[#64748B] dark:text-[#A4B1C7]"
                   >
                     <ChevronLeft className="w-4 h-4" />
                     <span>Bab V: Penutup</span>
@@ -3463,7 +3456,7 @@ NIP / NIK.
                   <button
                     type="button"
                     onClick={() => { setNaskahSection("all"); window.scrollTo({ top: 0, behavior: "smooth" }); }}
-                    className="px-4 py-2 rounded-lg bg-zinc-900 hover:bg-black text-white dark:bg-zinc-100 dark:hover:bg-white dark:text-black font-semibold text-xs transition-colors cursor-pointer"
+                    className="px-4 py-2 rounded-lg bg-[#0F172A] hover:bg-black text-white dark:bg-[#7C9CFF] dark:hover:bg-[#688bf5] dark:text-[#080B12] font-semibold text-xs transition-colors cursor-pointer shadow-xs"
                   >
                     <span>Tampilkan Semua Halaman (Utuh) ≡</span>
                   </button>
