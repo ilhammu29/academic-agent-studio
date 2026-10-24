@@ -82,6 +82,9 @@ export const DocumentStudio: React.FC<DocumentStudioProps> = ({
   const [currentDoc, setCurrentDoc] = useState<ProposalDocument>(doc);
   const [activeTab, setActiveTab] = useState<"naskah" | "flowchart" | "tree" | "jadwal" | "slides" | "audit" | "defense" | "revisionMatrix">("naskah");
   const [workspaceCategory, setWorkspaceCategory] = useState<"naskah" | "metodologi" | "sidang" | "kualitas">("naskah");
+  const [naskahSection, setNaskahSection] = useState<"all" | "frontmatter" | "bab1" | "bab2" | "bab3" | "bab4" | "bab5" | "backmatter">("all");
+  const [metodologiTab, setMetodologiTab] = useState<"flowchart" | "tree" | "jadwal">("flowchart");
+  const [sidangTab, setSidangTab] = useState<"defense" | "revisionMatrix" | "audit">("defense");
   const [jadwalViewMode, setJadwalViewMode] = useState<"gantt" | "detail">("gantt");
   const [copied, setCopied] = useState(false);
   const [activeSlideIndex, setActiveSlideIndex] = useState(0);
@@ -634,27 +637,20 @@ NIP / NIK.
         </div>
       )}
 
-      {/* 1. Sleek Consolidated Action Bar & Document Metadata */}
-      <div className="pb-5 mb-5 border-b border-zinc-200 dark:border-zinc-850 flex flex-col lg:flex-row lg:items-center justify-between gap-4 no-print">
-        {/* Left Cluster: Category, Saved Status, Title, Author Info */}
-        <div className="space-y-1.5 min-w-0">
-          <div className="flex items-center gap-2 flex-wrap">
-            <span className="text-[10px] uppercase font-mono tracking-wider px-2.5 py-0.5 rounded-full bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 font-semibold border border-zinc-200 dark:border-zinc-700/50">
+      {/* 1. Minimalist Studio Top Action Bar */}
+      <div className="pb-4 mb-4 border-b border-zinc-200 dark:border-zinc-800 flex flex-col md:flex-row md:items-center justify-between gap-3 no-print">
+        {/* Left: Metadata & Status */}
+        <div className="space-y-1 min-w-0">
+          <div className="flex items-center gap-2 flex-wrap text-xs">
+            <span className="text-[10px] uppercase font-mono font-bold tracking-wider px-2.5 py-0.5 rounded-full bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 border border-zinc-200 dark:border-zinc-700">
               {currentDoc.category === "magang" ? "Magang Industri" : currentDoc.category === "skripsi" ? "Skripsi / TA" : "Tesis & Riset"}
             </span>
-            <button
-              type="button"
-              onClick={() => setIsGuidelineModalOpen(true)}
-              title="Klik untuk memilih preset kampus (UGM, UI, ITB, dll.) atau memindai PDF buku pedoman kampus Anda"
-              className="inline-flex items-center gap-1.5 text-[10px] font-mono px-2.5 py-0.5 rounded-full bg-indigo-50 dark:bg-indigo-950/50 hover:bg-indigo-100 dark:hover:bg-indigo-900/60 text-indigo-700 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-800/60 transition-colors cursor-pointer"
-            >
-              <Landmark className="w-3 h-3 text-indigo-500" />
-              <span>
-                Format: {currentDoc.campusGuideline?.campusName || "Standar Dikti"} ({currentDoc.campusGuideline?.margins ? `${currentDoc.campusGuideline.margins.leftCm}-${currentDoc.campusGuideline.margins.topCm}-${currentDoc.campusGuideline.margins.rightCm}-${currentDoc.campusGuideline.margins.bottomCm} cm` : "4-4-3-3 cm"})
-              </span>
-            </button>
+            <span className="text-zinc-300 dark:text-zinc-700">•</span>
+            <span className="text-zinc-700 dark:text-zinc-300 font-medium">{currentDoc.candidateName}</span>
+            <span className="text-zinc-300 dark:text-zinc-700">•</span>
+            <span className="text-zinc-500">{currentDoc.targetEntity}</span>
             {lastSaved && (
-              <span className="inline-flex items-center gap-1 text-[10px] font-mono text-zinc-500 dark:text-zinc-400">
+              <span className="inline-flex items-center gap-1 text-[11px] font-mono text-zinc-400 ml-1">
                 <CheckCircle2 className="w-3 h-3 text-emerald-500" />
                 <span>Auto-saved {lastSaved}</span>
               </span>
@@ -663,52 +659,22 @@ NIP / NIK.
           <h1 className="text-base sm:text-lg font-bold text-zinc-900 dark:text-zinc-100 tracking-tight leading-snug line-clamp-1" title={currentDoc.title}>
             {currentDoc.title}
           </h1>
-          <p className="text-xs text-zinc-500 dark:text-zinc-400 flex items-center gap-2 flex-wrap">
-            <span className="text-zinc-800 dark:text-zinc-200 font-medium">{currentDoc.candidateName}</span>
-            <span>&bull;</span>
-            <span>{currentDoc.targetEntity}</span>
-            <span>&bull;</span>
-            <span>{currentDoc.durationMonths} Bulan</span>
-          </p>
         </div>
 
-        {/* Right Cluster: Undo/Redo, APA/IEEE switch, Tools dropdown, Export dropdown, Copilot button */}
-        <div className="flex items-center flex-wrap gap-2 lg:self-center">
-          {/* Undo & Redo History */}
-          <div className="flex items-center border border-zinc-200 dark:border-zinc-800 rounded-lg overflow-hidden bg-white dark:bg-zinc-900 shadow-xs">
-            <button
-              type="button"
-              onClick={handleUndo}
-              disabled={historyIndex <= 0}
-              className="p-2 hover:bg-zinc-100 dark:hover:bg-zinc-800 disabled:opacity-30 text-zinc-600 dark:text-zinc-400 transition-colors cursor-pointer"
-              title="Undo perubahan naskah"
-            >
-              <RotateCcw className="w-3.5 h-3.5" />
-            </button>
-            <div className="w-[1px] h-4 bg-zinc-200 dark:bg-zinc-800"></div>
-            <button
-              type="button"
-              onClick={handleRedo}
-              disabled={historyIndex >= history.length - 1}
-              className="p-2 hover:bg-zinc-100 dark:hover:bg-zinc-800 disabled:opacity-30 text-zinc-600 dark:text-zinc-400 transition-colors cursor-pointer"
-              title="Redo perubahan naskah"
-            >
-              <RotateCw className="w-3.5 h-3.5" />
-            </button>
-          </div>
-
-          {/* Citation Switcher Pill */}
+        {/* Right: Actions Cluster */}
+        <div className="flex items-center flex-wrap gap-2 md:self-center">
+          {/* Format Kampus Pill */}
           <button
             type="button"
-            onClick={() => setCitationStyle(prev => prev === "apa" ? "ieee" : "apa")}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 hover:bg-zinc-50 dark:hover:bg-zinc-800 text-zinc-700 dark:text-zinc-300 text-xs font-mono transition-all cursor-pointer shadow-xs"
-            title="Ganti format kutipan & daftar pustaka antara APA 7th Edition dan IEEE"
+            onClick={() => setIsGuidelineModalOpen(true)}
+            className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 hover:bg-zinc-50 dark:hover:bg-zinc-850 text-zinc-700 dark:text-zinc-300 text-xs font-medium transition-all cursor-pointer shadow-xs"
+            title="Klik untuk memilih preset kampus atau memindai PDF pedoman"
           >
-            <BookmarkCheck className="w-3.5 h-3.5 text-zinc-500 dark:text-zinc-400" />
-            <span>{citationStyle === "apa" ? "APA 7th" : "IEEE"}</span>
+            <Landmark className="w-3.5 h-3.5 text-indigo-500 flex-shrink-0" />
+            <span className="truncate max-w-[130px]">{currentDoc.campusGuideline?.campusName.split("(")[0].trim() || "Standar Dikti"}</span>
           </button>
 
-          {/* Dropdown 1: Alat Riset */}
+          {/* Kelola Naskah Dropdown */}
           <div className="relative" ref={toolsDropdownRef}>
             <button
               type="button"
@@ -719,110 +685,124 @@ NIP / NIK.
               className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-xs font-medium transition-all cursor-pointer shadow-xs ${
                 isToolsDropdownOpen
                   ? "bg-zinc-900 text-white dark:bg-zinc-100 dark:text-black border-zinc-900 dark:border-zinc-100"
-                  : "border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 hover:bg-zinc-50 dark:hover:bg-zinc-800 text-zinc-800 dark:text-zinc-200"
+                  : "border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 hover:bg-zinc-50 dark:hover:bg-zinc-850 text-zinc-800 dark:text-zinc-200"
               }`}
             >
-              <ClipboardList className="w-3.5 h-3.5" />
-              <span>Alat Riset</span>
-              <ChevronDown className={`w-3.5 h-3.5 transition-transform ${isToolsDropdownOpen ? "rotate-180" : ""}`} />
+              <ClipboardList className="w-3.5 h-3.5 text-zinc-500" />
+              <span>Kelola Naskah</span>
+              <ChevronDown className={`w-3 h-3 transition-transform ${isToolsDropdownOpen ? "rotate-180" : ""}`} />
             </button>
 
             {isToolsDropdownOpen && (
-              <div className="absolute right-0 mt-2 w-64 rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-1.5 shadow-xl z-30 animate-in fade-in zoom-in-95 duration-100">
-                <button
-                  type="button"
-                  onClick={() => {
-                    setIsToolsDropdownOpen(false);
-                    setIsConsultationModalOpen(true);
-                  }}
-                  className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-medium text-emerald-700 dark:text-emerald-300 hover:bg-emerald-50 dark:hover:bg-emerald-950/40 transition-colors text-left cursor-pointer border-b border-zinc-100 dark:border-zinc-800/80 mb-1"
-                >
-                  <GraduationCap className="w-4 h-4 text-emerald-600 flex-shrink-0" />
-                  <div>
-                    <p className="font-semibold text-zinc-900 dark:text-zinc-100">Klinik Bimbingan Ide & Alur (AI)</p>
-                    <p className="text-[10px] text-zinc-500">Konsultasi masalah lapangan & alur riset</p>
-                  </div>
-                </button>
+              <div className="absolute right-0 mt-2 w-64 rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-1.5 shadow-xl z-30 animate-in fade-in zoom-in-95 duration-100 divide-y divide-zinc-100 dark:divide-zinc-800/80">
+                <div className="p-1 space-y-0.5">
+                  <span className="text-[10px] font-semibold text-zinc-400 dark:text-zinc-500 px-2 py-0.5 uppercase tracking-wider block">Bagian &amp; Lampiran</span>
+                  <button
+                    type="button"
+                    onClick={() => { setIsToolsDropdownOpen(false); setIsCampusLogoModalOpen(true); }}
+                    className="w-full flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-xs font-medium text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors text-left cursor-pointer"
+                  >
+                    <Landmark className="w-3.5 h-3.5 text-sky-500 flex-shrink-0" />
+                    <span>Logo Kampus &amp; Sampul</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => { setIsToolsDropdownOpen(false); setIsTheoryCustomizerModalOpen(true); }}
+                    className="w-full flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-xs font-medium text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors text-left cursor-pointer"
+                  >
+                    <BookOpen className="w-3.5 h-3.5 text-indigo-500 flex-shrink-0" />
+                    <span>Kustomisasi Landasan Teori ({currentDoc.bab2?.landasanTeori?.length || 13})</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => { setIsToolsDropdownOpen(false); setIsCustomSheetModalOpen(true); }}
+                    className="w-full flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-xs font-medium text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors text-left cursor-pointer"
+                  >
+                    <FileSignature className="w-3.5 h-3.5 text-amber-500 flex-shrink-0" />
+                    <span>Lembar Khusus &amp; Berkas Scan</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => { setIsToolsDropdownOpen(false); setIsImageManagerModalOpen(true); }}
+                    className="w-full flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-xs font-medium text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors text-left cursor-pointer"
+                  >
+                    <ImageIcon className="w-3.5 h-3.5 text-emerald-500 flex-shrink-0" />
+                    <span>Gambar &amp; Diagram Bab</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => { setIsToolsDropdownOpen(false); setIsLogbookModalOpen(true); }}
+                    className="w-full flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-xs font-medium text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors text-left cursor-pointer"
+                  >
+                    <CalendarDays className="w-3.5 h-3.5 text-blue-500 flex-shrink-0" />
+                    <span>Logbook Catatan Lapangan</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => { setIsToolsDropdownOpen(false); setIsDefenseMinutesModalOpen(true); }}
+                    className="w-full flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-xs font-medium text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors text-left cursor-pointer"
+                  >
+                    <FileCheck2 className="w-3.5 h-3.5 text-rose-500 flex-shrink-0" />
+                    <span>Berita Acara Sidang</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => { setIsToolsDropdownOpen(false); setIsApprovalModalOpen(true); }}
+                    className="w-full flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-xs font-medium text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors text-left cursor-pointer"
+                  >
+                    <CheckCircle2 className="w-3.5 h-3.5 text-teal-500 flex-shrink-0" />
+                    <span>Lembar Pengesahan Dosen</span>
+                  </button>
+                </div>
 
-                <button
-                  type="button"
-                  onClick={() => {
-                    setIsToolsDropdownOpen(false);
-                    setIsGuidelineModalOpen(true);
-                  }}
-                  className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-medium text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors text-left cursor-pointer"
-                >
-                  <Landmark className="w-4 h-4 text-indigo-500 flex-shrink-0" />
-                  <div>
-                    <p className="font-semibold text-zinc-900 dark:text-zinc-100">Format Kampus & Panduan (AI)</p>
-                    <p className="text-[10px] text-zinc-500">Pindai PDF / Pilih Preset Kampus Populer</p>
-                  </div>
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => {
-                    setIsToolsDropdownOpen(false);
-                    setIsTurnitinModalOpen(true);
-                  }}
-                  className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-medium text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors text-left cursor-pointer"
-                >
-                  <ShieldCheck className="w-4 h-4 text-emerald-500 flex-shrink-0" />
-                  <div>
-                    <p className="font-semibold text-zinc-900 dark:text-zinc-100">Audit Turnitin & Anti-Slop</p>
-                    <p className="text-[10px] text-zinc-500">Cek orisinalitas & indikator klise AI</p>
-                  </div>
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => {
-                    setIsToolsDropdownOpen(false);
-                    setIsInstrumentModalOpen(true);
-                  }}
-                  className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-medium text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors text-left cursor-pointer"
-                >
-                  <ClipboardList className="w-4 h-4 text-blue-500 flex-shrink-0" />
-                  <div>
-                    <p className="font-semibold text-zinc-900 dark:text-zinc-100">Instrumen Riset & Angket</p>
-                    <p className="text-[10px] text-zinc-500">Skala Likert, Wawancara, & Observasi</p>
-                  </div>
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => {
-                    setIsToolsDropdownOpen(false);
-                    setIsApprovalModalOpen(true);
-                  }}
-                  className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-medium text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors text-left cursor-pointer"
-                >
-                  <FileSignature className="w-4 h-4 text-amber-500 flex-shrink-0" />
-                  <div>
-                    <p className="font-semibold text-zinc-900 dark:text-zinc-100">Lembar Pengesahan Dosen</p>
-                    <p className="text-[10px] text-zinc-500">Data Pembimbing & NIP Kaprodi</p>
-                  </div>
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => {
-                    setIsToolsDropdownOpen(false);
-                    setIsLitModalOpen(true);
-                  }}
-                  className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-medium text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors text-left cursor-pointer"
-                >
-                  <BookOpen className="w-4 h-4 text-purple-500 flex-shrink-0" />
-                  <div>
-                    <p className="font-semibold text-zinc-900 dark:text-zinc-100">Literatur Jurnal & Matriks</p>
-                    <p className="text-[10px] text-zinc-500">Pencarian paper & sintesis PRISMA</p>
-                  </div>
-                </button>
+                <div className="p-1 space-y-0.5">
+                  <span className="text-[10px] font-semibold text-zinc-400 dark:text-zinc-500 px-2 py-0.5 uppercase tracking-wider block">Pedoman &amp; Bimbingan AI</span>
+                  <button
+                    type="button"
+                    onClick={() => { setIsToolsDropdownOpen(false); setIsGuidelineModalOpen(true); }}
+                    className="w-full flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-xs font-medium text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors text-left cursor-pointer"
+                  >
+                    <Landmark className="w-3.5 h-3.5 text-purple-500 flex-shrink-0" />
+                    <span>Format Pedoman Kampus</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => { setIsToolsDropdownOpen(false); setIsInstrumentModalOpen(true); }}
+                    className="w-full flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-xs font-medium text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors text-left cursor-pointer"
+                  >
+                    <ClipboardList className="w-3.5 h-3.5 text-blue-500 flex-shrink-0" />
+                    <span>Instrumen Riset &amp; Angket</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => { setIsToolsDropdownOpen(false); setIsTurnitinModalOpen(true); }}
+                    className="w-full flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-xs font-medium text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors text-left cursor-pointer"
+                  >
+                    <ShieldCheck className="w-3.5 h-3.5 text-emerald-500 flex-shrink-0" />
+                    <span>Audit Turnitin &amp; Anti-Slop</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => { setIsToolsDropdownOpen(false); setIsLitModalOpen(true); }}
+                    className="w-full flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-xs font-medium text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors text-left cursor-pointer"
+                  >
+                    <BookOpen className="w-3.5 h-3.5 text-purple-500 flex-shrink-0" />
+                    <span>Literatur Jurnal Primer (PRISMA)</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => { setIsToolsDropdownOpen(false); setIsConsultationModalOpen(true); }}
+                    className="w-full flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-xs font-medium text-emerald-600 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-950/40 transition-colors text-left cursor-pointer"
+                  >
+                    <GraduationCap className="w-3.5 h-3.5 flex-shrink-0" />
+                    <span>Klinik Bimbingan AI Mentor</span>
+                  </button>
+                </div>
               </div>
             )}
           </div>
 
-          {/* Dropdown 2: Unduh & Ekspor */}
+          {/* Ekspor Dropdown */}
           <div className="relative" ref={exportDropdownRef}>
             <button
               type="button"
@@ -833,22 +813,19 @@ NIP / NIK.
               className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-xs font-medium transition-all cursor-pointer shadow-xs ${
                 isExportDropdownOpen
                   ? "bg-zinc-900 text-white dark:bg-zinc-100 dark:text-black border-zinc-900 dark:border-zinc-100"
-                  : "border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 hover:bg-zinc-50 dark:hover:bg-zinc-800 text-zinc-800 dark:text-zinc-200"
+                  : "border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 hover:bg-zinc-50 dark:hover:bg-zinc-850 text-zinc-800 dark:text-zinc-200"
               }`}
             >
-              <FileDown className="w-3.5 h-3.5" />
+              <FileDown className="w-3.5 h-3.5 text-zinc-500" />
               <span>Ekspor</span>
-              <ChevronDown className={`w-3.5 h-3.5 transition-transform ${isExportDropdownOpen ? "rotate-180" : ""}`} />
+              <ChevronDown className={`w-3 h-3 transition-transform ${isExportDropdownOpen ? "rotate-180" : ""}`} />
             </button>
 
             {isExportDropdownOpen && (
               <div className="absolute right-0 mt-2 w-60 rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-1.5 shadow-xl z-30 animate-in fade-in zoom-in-95 duration-100">
                 <button
                   type="button"
-                  onClick={() => {
-                    setIsExportDropdownOpen(false);
-                    handleDownloadDocx();
-                  }}
+                  onClick={() => { setIsExportDropdownOpen(false); handleDownloadDocx(); }}
                   disabled={isExportingDocx}
                   className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-medium text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors text-left cursor-pointer"
                 >
@@ -857,16 +834,13 @@ NIP / NIK.
                     <p className="font-semibold text-zinc-900 dark:text-zinc-100">
                       {isExportingDocx ? "Menyusun Word..." : "Dokumen Word (.docx)"}
                     </p>
-                    <p className="text-[10px] text-zinc-500">Standar nomor halaman & margin kampus</p>
+                    <p className="text-[10px] text-zinc-500">Standar nomor halaman &amp; margin kampus</p>
                   </div>
                 </button>
 
                 <button
                   type="button"
-                  onClick={() => {
-                    setIsExportDropdownOpen(false);
-                    handleDownloadPptx();
-                  }}
+                  onClick={() => { setIsExportDropdownOpen(false); handleDownloadPptx(); }}
                   disabled={isExportingPptx}
                   className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-medium text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors text-left cursor-pointer"
                 >
@@ -882,10 +856,7 @@ NIP / NIK.
                 {onOpenPresentationStudio && (
                   <button
                     type="button"
-                    onClick={() => {
-                      setIsExportDropdownOpen(false);
-                      onOpenPresentationStudio();
-                    }}
+                    onClick={() => { setIsExportDropdownOpen(false); onOpenPresentationStudio(); }}
                     className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-medium text-orange-600 dark:text-orange-400 hover:bg-orange-50 dark:hover:bg-orange-950/40 transition-colors text-left cursor-pointer"
                   >
                     <ExternalLink className="w-4 h-4 text-orange-500 flex-shrink-0" />
@@ -893,7 +864,7 @@ NIP / NIK.
                       <p className="font-semibold text-zinc-900 dark:text-zinc-100">
                         Buka Slide Studio Terpisah ↗
                       </p>
-                      <p className="text-[10px] text-zinc-500">Visual AI, tema eksekutif & simulasi latihan sidang</p>
+                      <p className="text-[10px] text-zinc-500">Visual AI &amp; latihan simulasi sidang</p>
                     </div>
                   </button>
                 )}
@@ -902,31 +873,25 @@ NIP / NIK.
 
                 <button
                   type="button"
-                  onClick={() => {
-                    setIsExportDropdownOpen(false);
-                    handleExportBibTeX();
-                  }}
-                  className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-medium text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors text-left cursor-pointer"
+                  onClick={() => { setIsExportDropdownOpen(false); handleExportBibTeX(); }}
+                  className="w-full flex items-center gap-2.5 px-3 py-1.5 rounded-lg text-xs font-medium text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors text-left cursor-pointer"
                 >
                   <BookMarked className="w-4 h-4 text-zinc-400 flex-shrink-0" />
                   <div>
                     <p className="font-semibold text-zinc-900 dark:text-zinc-100">Kutipan BibTeX (.bib)</p>
-                    <p className="text-[10px] text-zinc-500">Untuk Mendeley & Zotero</p>
+                    <p className="text-[10px] text-zinc-500">Untuk Mendeley &amp; Zotero</p>
                   </div>
                 </button>
 
                 <button
                   type="button"
-                  onClick={() => {
-                    setIsExportDropdownOpen(false);
-                    handleExportRIS();
-                  }}
-                  className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-medium text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors text-left cursor-pointer"
+                  onClick={() => { setIsExportDropdownOpen(false); handleExportRIS(); }}
+                  className="w-full flex items-center gap-2.5 px-3 py-1.5 rounded-lg text-xs font-medium text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors text-left cursor-pointer"
                 >
                   <BookmarkCheck className="w-4 h-4 text-zinc-400 flex-shrink-0" />
                   <div>
                     <p className="font-semibold text-zinc-900 dark:text-zinc-100">Kutipan RIS (.ris)</p>
-                    <p className="text-[10px] text-zinc-500">Untuk EndNote & RefWorks</p>
+                    <p className="text-[10px] text-zinc-500">Untuk EndNote &amp; RefWorks</p>
                   </div>
                 </button>
 
@@ -934,28 +899,20 @@ NIP / NIK.
 
                 <button
                   type="button"
-                  onClick={() => {
-                    setIsExportDropdownOpen(false);
-                    handleCopy();
-                  }}
-                  className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-medium text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors text-left cursor-pointer"
+                  onClick={() => { setIsExportDropdownOpen(false); handleCopy(); }}
+                  className="w-full flex items-center gap-2.5 px-3 py-1.5 rounded-lg text-xs font-medium text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors text-left cursor-pointer"
                 >
                   <Copy className="w-4 h-4 text-zinc-400 flex-shrink-0" />
                   <div>
-                    <p className="font-semibold text-zinc-900 dark:text-zinc-100">
-                      {copied ? "Tersalin ke Clipboard" : "Salin Markdown (.md)"}
-                    </p>
+                    <p className="font-semibold text-zinc-900 dark:text-zinc-100">{copied ? "Tersalin ke Clipboard" : "Salin Markdown (.md)"}</p>
                     <p className="text-[10px] text-zinc-500">Naskah lengkap format Markdown</p>
                   </div>
                 </button>
 
                 <button
                   type="button"
-                  onClick={() => {
-                    setIsExportDropdownOpen(false);
-                    handlePrint();
-                  }}
-                  className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-medium text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors text-left cursor-pointer"
+                  onClick={() => { setIsExportDropdownOpen(false); handlePrint(); }}
+                  className="w-full flex items-center gap-2.5 px-3 py-1.5 rounded-lg text-xs font-medium text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors text-left cursor-pointer"
                 >
                   <Printer className="w-4 h-4 text-zinc-400 flex-shrink-0" />
                   <div>
@@ -967,16 +924,16 @@ NIP / NIK.
             )}
           </div>
 
-          {/* Dedicated Simpan ke Arsip Proyek Button */}
+          {/* Simpan ke Arsip */}
           <button
             type="button"
             onClick={handleSaveToArchive}
             disabled={isSavingArchive}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-900 hover:bg-zinc-50 dark:hover:bg-zinc-800 text-zinc-900 dark:text-zinc-100 text-xs font-semibold shadow-xs transition-all cursor-pointer disabled:opacity-50"
-            title="Simpan naskah dan perubahan ini ke database arsip"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-zinc-200 dark:border-zinc-750 bg-white dark:bg-zinc-900 hover:bg-zinc-50 dark:hover:bg-zinc-800 text-zinc-900 dark:text-zinc-100 text-xs font-semibold shadow-xs transition-all cursor-pointer disabled:opacity-50"
+            title="Simpan naskah ke database arsip"
           >
             <Bookmark className="w-3.5 h-3.5 text-amber-500" />
-            <span>{isSavingArchive ? "Menyimpan..." : "Simpan ke Arsip"}</span>
+            <span className="hidden sm:inline">{isSavingArchive ? "Menyimpan..." : "Simpan"}</span>
           </button>
 
           {/* Co-Pilot AI Slide-over Drawer Trigger */}
@@ -984,494 +941,275 @@ NIP / NIK.
             type="button"
             onClick={() => setIsCopilotOpen(true)}
             className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg bg-zinc-950 hover:bg-black text-white dark:bg-zinc-100 dark:hover:bg-white dark:text-black text-xs font-semibold shadow-xs transition-all cursor-pointer"
-            title="Buka asisten Co-Pilot AI untuk konsultasi metodologi & simulasi penguji"
+            title="Buka asisten Co-Pilot AI untuk telaah naskah"
           >
-            <Bot className="w-3.5 h-3.5" />
-            <span>Co-Pilot AI</span>
+            <Bot className="w-3.5 h-3.5 text-sky-400 dark:text-sky-600" />
+            <span>Co-Pilot</span>
           </button>
+
+          {/* Undo & Redo */}
+          <div className="flex items-center border border-zinc-200 dark:border-zinc-800 rounded-lg overflow-hidden bg-white dark:bg-zinc-900 shadow-xs">
+            <button
+              type="button"
+              onClick={handleUndo}
+              disabled={historyIndex <= 0}
+              className="p-1.5 hover:bg-zinc-100 dark:hover:bg-zinc-800 disabled:opacity-30 text-zinc-600 dark:text-zinc-400 transition-colors cursor-pointer"
+              title="Undo perubahan naskah"
+            >
+              <RotateCcw className="w-3.5 h-3.5" />
+            </button>
+            <div className="w-[1px] h-4 bg-zinc-200 dark:bg-zinc-800"></div>
+            <button
+              type="button"
+              onClick={handleRedo}
+              disabled={historyIndex >= history.length - 1}
+              className="p-1.5 hover:bg-zinc-100 dark:hover:bg-zinc-800 disabled:opacity-30 text-zinc-600 dark:text-zinc-400 transition-colors cursor-pointer"
+              title="Redo perubahan naskah"
+            >
+              <RotateCw className="w-3.5 h-3.5" />
+            </button>
+          </div>
         </div>
       </div>
 
-      {/* 2. Structured Category Navigation Bar (Clean Grouping) */}
-      <div className="border-b border-zinc-200 dark:border-zinc-850 pb-3 mb-4 no-print space-y-2.5">
-        
-        {/* Tier 1: Main Category Segment Tabs */}
-        <div className="flex items-center gap-1.5 overflow-x-auto pb-1 scrollbar-none">
+      {/* 2. Structured Primary Category Tabs */}
+      <div className="flex items-center justify-between gap-2 border-b border-zinc-200 dark:border-zinc-800 pb-2 mb-3 no-print overflow-x-auto">
+        <div className="flex items-center gap-1.5">
           <button
             type="button"
             onClick={() => {
               setWorkspaceCategory("naskah");
               setActiveTab("naskah");
             }}
-            className={`flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-xs font-medium transition-all cursor-pointer whitespace-nowrap ${
+            className={`flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer whitespace-nowrap ${
               workspaceCategory === "naskah"
-                ? "bg-zinc-950 text-white dark:bg-zinc-100 dark:text-black font-semibold shadow-xs"
-                : "text-zinc-600 dark:text-zinc-400 hover:text-zinc-950 dark:hover:text-zinc-100 hover:bg-zinc-100 dark:hover:bg-zinc-900 border border-transparent"
+                ? "bg-zinc-950 text-white dark:bg-zinc-100 dark:text-black shadow-xs"
+                : "text-zinc-600 dark:text-zinc-400 hover:text-zinc-950 dark:hover:text-zinc-100 hover:bg-zinc-100 dark:hover:bg-zinc-900"
             }`}
           >
             <FileText className="w-3.5 h-3.5" />
-            <span>1. Naskah &amp; Publikasi</span>
+            <span>Naskah Dokumen</span>
           </button>
 
           <button
             type="button"
             onClick={() => {
               setWorkspaceCategory("metodologi");
-              setActiveTab("jadwal");
+              setActiveTab(metodologiTab);
             }}
-            className={`flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-xs font-medium transition-all cursor-pointer whitespace-nowrap ${
+            className={`flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer whitespace-nowrap ${
               workspaceCategory === "metodologi"
-                ? "bg-zinc-950 text-white dark:bg-zinc-100 dark:text-black font-semibold shadow-xs"
-                : "text-zinc-600 dark:text-zinc-400 hover:text-zinc-950 dark:hover:text-zinc-100 hover:bg-zinc-100 dark:hover:bg-zinc-900 border border-transparent"
+                ? "bg-zinc-950 text-white dark:bg-zinc-100 dark:text-black shadow-xs"
+                : "text-zinc-600 dark:text-zinc-400 hover:text-zinc-950 dark:hover:text-zinc-100 hover:bg-zinc-100 dark:hover:bg-zinc-900"
             }`}
           >
             <Network className="w-3.5 h-3.5" />
-            <span>2. Metodologi &amp; Alur Kerja</span>
+            <span>Metodologi &amp; Alur</span>
           </button>
 
           <button
             type="button"
             onClick={() => {
               setWorkspaceCategory("sidang");
-              setActiveTab("defense");
+              setActiveTab(sidangTab);
             }}
-            className={`flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-xs font-medium transition-all cursor-pointer whitespace-nowrap ${
+            className={`flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer whitespace-nowrap ${
               workspaceCategory === "sidang"
-                ? "bg-zinc-950 text-white dark:bg-zinc-100 dark:text-black font-semibold shadow-xs"
-                : "text-zinc-600 dark:text-zinc-400 hover:text-zinc-950 dark:hover:text-zinc-100 hover:bg-zinc-100 dark:hover:bg-zinc-900 border border-transparent"
+                ? "bg-zinc-950 text-white dark:bg-zinc-100 dark:text-black shadow-xs"
+                : "text-zinc-600 dark:text-zinc-400 hover:text-zinc-950 dark:hover:text-zinc-100 hover:bg-zinc-100 dark:hover:bg-zinc-900"
             }`}
           >
             <GraduationCap className="w-3.5 h-3.5" />
-            <span>3. Kesiapan Sidang &amp; Bimbingan</span>
+            <span>Sidang &amp; Evaluasi</span>
           </button>
+        </div>
 
+        {/* Quick link to dedicated Presentation Studio */}
+        {onOpenPresentationStudio && (
           <button
             type="button"
-            onClick={() => {
-              setWorkspaceCategory("kualitas");
-              setActiveTab("audit");
-            }}
-            className={`flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-xs font-medium transition-all cursor-pointer whitespace-nowrap ${
-              workspaceCategory === "kualitas"
-                ? "bg-zinc-950 text-white dark:bg-zinc-100 dark:text-black font-semibold shadow-xs"
-                : "text-zinc-600 dark:text-zinc-400 hover:text-zinc-950 dark:hover:text-zinc-100 hover:bg-zinc-100 dark:hover:bg-zinc-900 border border-transparent"
-            }`}
+            onClick={onOpenPresentationStudio}
+            className="px-3 py-1.5 rounded-lg text-xs font-semibold text-orange-600 dark:text-orange-400 hover:bg-orange-50 dark:hover:bg-orange-950/30 transition-all cursor-pointer flex items-center gap-1.5 ml-auto border border-orange-200 dark:border-orange-900/50"
+            title="Buka studio presentasi slide 16:9 eksekutif"
           >
-            <ShieldCheck className="w-3.5 h-3.5" />
-            <span>4. Kualitas &amp; Orisinalitas</span>
+            <Presentation className="w-3.5 h-3.5 text-orange-500" />
+            <span>Slide Studio (16:9) ↗</span>
           </button>
-        </div>
-
-        {/* Tier 2: Contextual Sub-Pills for the Active Category */}
-        <div className="flex items-center gap-1.5 overflow-x-auto pb-1 text-xs">
-          {workspaceCategory === "naskah" && (
-            <>
-              <button
-                type="button"
-                onClick={() => setActiveTab("naskah")}
-                className={`px-3 py-1 rounded-md transition-all cursor-pointer flex items-center gap-1.5 ${
-                  activeTab === "naskah"
-                    ? "bg-zinc-200 dark:bg-zinc-800 text-zinc-950 dark:text-zinc-100 font-semibold"
-                    : "text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 hover:bg-zinc-100 dark:hover:bg-zinc-900"
-                }`}
-              >
-                <FileText className="w-3 h-3" />
-                <span>Naskah Proposal (A4)</span>
-              </button>
-
-              <button
-                type="button"
-                onClick={() => setIsCampusLogoModalOpen(true)}
-                className="px-3 py-1 rounded-md text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 hover:bg-zinc-100 dark:hover:bg-zinc-900 transition-all cursor-pointer flex items-center gap-1.5"
-              >
-                <Landmark className="w-3 h-3 text-sky-500" />
-                <span>Logo Kampus</span>
-              </button>
-
-              <button
-                type="button"
-                onClick={() => setIsTheoryCustomizerModalOpen(true)}
-                className="px-3 py-1 rounded-md text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 hover:bg-zinc-100 dark:hover:bg-zinc-900 transition-all cursor-pointer flex items-center gap-1.5"
-              >
-                <BookOpen className="w-3 h-3 text-indigo-500" />
-                <span>13 Teori &amp; Jurnal</span>
-              </button>
-
-              <button
-                type="button"
-                onClick={() => setIsCustomSheetModalOpen(true)}
-                className="px-3 py-1 rounded-md text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 hover:bg-zinc-100 dark:hover:bg-zinc-900 transition-all cursor-pointer flex items-center gap-1.5"
-              >
-                <FileSignature className="w-3 h-3 text-amber-500" />
-                <span>Lembar Khusus &amp; Scan</span>
-              </button>
-
-              <button
-                type="button"
-                onClick={() => setIsImageManagerModalOpen(true)}
-                className="px-3 py-1 rounded-md text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 hover:bg-zinc-100 dark:hover:bg-zinc-900 transition-all cursor-pointer flex items-center gap-1.5"
-              >
-                <ImageIcon className="w-3 h-3 text-emerald-500" />
-                <span>Gambar &amp; Diagram Bab</span>
-              </button>
-
-              <button
-                type="button"
-                onClick={() => setIsInstrumentModalOpen(true)}
-                className="px-3 py-1 rounded-md text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 hover:bg-zinc-100 dark:hover:bg-zinc-900 transition-all cursor-pointer flex items-center gap-1.5"
-              >
-                <ClipboardList className="w-3 h-3 text-blue-500" />
-                <span>Instrumen Riset</span>
-              </button>
-
-              <button
-                type="button"
-                onClick={() => setIsGuidelineModalOpen(true)}
-                className="px-3 py-1 rounded-md text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 hover:bg-zinc-100 dark:hover:bg-zinc-900 transition-all cursor-pointer flex items-center gap-1.5"
-              >
-                <Landmark className="w-3 h-3 text-purple-500" />
-                <span>Format Kampus ({currentDoc.campusGuideline?.campusName.split("(")[0].trim() || "Standar Dikti"})</span>
-              </button>
-            </>
-          )}
-
-          {workspaceCategory === "metodologi" && (
-            <>
-              <button
-                type="button"
-                onClick={() => setActiveTab("jadwal")}
-                className={`px-3 py-1 rounded-md transition-all cursor-pointer flex items-center gap-1.5 ${
-                  activeTab === "jadwal"
-                    ? "bg-zinc-200 dark:bg-zinc-800 text-zinc-950 dark:text-zinc-100 font-semibold"
-                    : "text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 hover:bg-zinc-100 dark:hover:bg-zinc-900"
-                }`}
-              >
-                <CalendarDays className="w-3 h-3" />
-                <span>Matriks Jadwal &amp; Timeline</span>
-              </button>
-
-              <button
-                type="button"
-                onClick={() => setIsLogbookModalOpen(true)}
-                className="px-3 py-1 rounded-md text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 hover:bg-zinc-100 dark:hover:bg-zinc-900 transition-all cursor-pointer flex items-center gap-1.5"
-              >
-                <CalendarDays className="w-3 h-3 text-emerald-500" />
-                <span>Logbook Lapangan</span>
-              </button>
-
-              <button
-                type="button"
-                onClick={() => setActiveTab("flowchart")}
-                className={`px-3 py-1 rounded-md transition-all cursor-pointer flex items-center gap-1.5 ${
-                  activeTab === "flowchart"
-                    ? "bg-zinc-200 dark:bg-zinc-800 text-zinc-950 dark:text-zinc-100 font-semibold"
-                    : "text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 hover:bg-zinc-100 dark:hover:bg-zinc-900"
-                }`}
-              >
-                <Network className="w-3 h-3" />
-                <span>Bagan Alir Penelitian (Bagan Resmi)</span>
-              </button>
-
-              <button
-                type="button"
-                onClick={() => setActiveTab("tree")}
-                className={`px-3 py-1 rounded-md transition-all cursor-pointer flex items-center gap-1.5 ${
-                  activeTab === "tree"
-                    ? "bg-zinc-200 dark:bg-zinc-800 text-zinc-950 dark:text-zinc-100 font-semibold"
-                    : "text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 hover:bg-zinc-100 dark:hover:bg-zinc-900"
-                }`}
-              >
-                <Compass className="w-3 h-3" />
-                <span>Pohon Alur Riset &amp; Roadmap Belajar</span>
-              </button>
-            </>
-          )}
-
-          {workspaceCategory === "sidang" && (
-            <>
-              <button
-                type="button"
-                onClick={() => setActiveTab("defense")}
-                className={`px-3 py-1 rounded-md transition-all cursor-pointer flex items-center gap-1.5 ${
-                  activeTab === "defense"
-                    ? "bg-zinc-200 dark:bg-zinc-800 text-zinc-950 dark:text-zinc-100 font-semibold"
-                    : "text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 hover:bg-zinc-100 dark:hover:bg-zinc-900"
-                }`}
-              >
-                <ShieldAlert className="w-3 h-3" />
-                <span>Tanya Jawab Sidang Penguji</span>
-              </button>
-
-              <button
-                type="button"
-                onClick={() => setIsDefenseMinutesModalOpen(true)}
-                className="px-3 py-1 rounded-md text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 hover:bg-zinc-100 dark:hover:bg-zinc-900 transition-all cursor-pointer flex items-center gap-1.5"
-              >
-                <FileSignature className="w-3 h-3 text-amber-500" />
-                <span>Berita Acara Sidang</span>
-              </button>
-
-              <button
-                type="button"
-                onClick={() => {
-                  if (onOpenPresentationStudio) {
-                    onOpenPresentationStudio();
-                  } else {
-                    setActiveTab("slides");
-                  }
-                }}
-                className={`px-3 py-1 rounded-md transition-all cursor-pointer flex items-center gap-1.5 ${
-                  activeTab === "slides"
-                    ? "bg-zinc-200 dark:bg-zinc-800 text-zinc-950 dark:text-zinc-100 font-semibold"
-                    : "text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 hover:bg-zinc-100 dark:hover:bg-zinc-900"
-                }`}
-              >
-                <Presentation className="w-3 h-3 text-orange-500" />
-                <span>Slide Sidang (16:9 Eksekutif)</span>
-                {onOpenPresentationStudio && (
-                  <span className="text-[9px] px-1.5 py-0.5 rounded bg-orange-500/10 text-orange-600 dark:text-orange-400 font-semibold">
-                    Studio ↗
-                  </span>
-                )}
-              </button>
-
-              <button
-                type="button"
-                onClick={() => setActiveTab("revisionMatrix")}
-                className={`px-3 py-1 rounded-md transition-all cursor-pointer flex items-center gap-1.5 ${
-                  activeTab === "revisionMatrix"
-                    ? "bg-zinc-200 dark:bg-zinc-800 text-zinc-950 dark:text-zinc-100 font-semibold"
-                    : "text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 hover:bg-zinc-100 dark:hover:bg-zinc-900"
-                }`}
-              >
-                <Layers className="w-3 h-3" />
-                <span>Matriks Revisi Dosen</span>
-              </button>
-            </>
-          )}
-
-          {workspaceCategory === "kualitas" && (
-            <>
-              <button
-                type="button"
-                onClick={() => setActiveTab("audit")}
-                className={`px-3 py-1 rounded-md transition-all cursor-pointer flex items-center gap-1.5 ${
-                  activeTab === "audit"
-                    ? "bg-zinc-200 dark:bg-zinc-800 text-zinc-950 dark:text-zinc-100 font-semibold"
-                    : "text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 hover:bg-zinc-100 dark:hover:bg-zinc-900"
-                }`}
-              >
-                <ShieldCheck className="w-3 h-3" />
-                <span>Audit Kualitas Ilmiah</span>
-              </button>
-
-              <button
-                type="button"
-                onClick={() => setIsTurnitinModalOpen(true)}
-                className="px-3 py-1 rounded-md text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 hover:bg-zinc-100 dark:hover:bg-zinc-900 transition-all cursor-pointer flex items-center gap-1.5"
-              >
-                <ShieldCheck className="w-3 h-3 text-emerald-500" />
-                <span>Cek Turnitin &amp; Orisinalitas</span>
-              </button>
-
-              <button
-                type="button"
-                onClick={() => setIsLitModalOpen(true)}
-                className="px-3 py-1 rounded-md text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 hover:bg-zinc-100 dark:hover:bg-zinc-900 transition-all cursor-pointer flex items-center gap-1.5"
-              >
-                <BookOpen className="w-3 h-3 text-purple-500" />
-                <span>Literatur Jurnal Primer (PRISMA)</span>
-              </button>
-            </>
-          )}
-        </div>
+        )}
       </div>
 
-      {/* QUICK JUMP OUTLINE RAIL (Only for Naskah Tab) */}
-      {activeTab === "naskah" && (
-        <div className="flex items-center gap-1.5 pb-3 mb-3 overflow-x-auto text-[11px] font-mono no-print">
-          <span className="text-zinc-400 dark:text-zinc-500 flex items-center gap-1 mr-1 text-[11px] font-bold">
-            <Compass className="w-3.5 h-3.5 text-sky-500" /> Navigasi Bab:
-          </span>
+      {/* 3. Sub-Pills / Chapter Switcher for Active Category */}
+      {workspaceCategory === "naskah" && (
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-3 mb-4 no-print border-b border-zinc-100 dark:border-zinc-850/60">
+          {/* Chapter Selector Pills */}
+          <div className="flex items-center gap-1 overflow-x-auto pb-1 scrollbar-none text-xs">
+            {[
+              { id: "all", label: "Semua Halaman" },
+              { id: "frontmatter", label: "Cover & Awal" },
+              { id: "bab1", label: "Bab I" },
+              { id: "bab2", label: "Bab II", badge: `${currentDoc.bab2?.landasanTeori?.length || 13}` },
+              { id: "bab3", label: "Bab III" },
+              { id: "bab4", label: "Bab IV" },
+              { id: "bab5", label: "Bab V" },
+              { id: "backmatter", label: "Pustaka & Lampiran" }
+            ].map((s) => {
+              const isActive = naskahSection === s.id;
+              return (
+                <button
+                  key={s.id}
+                  type="button"
+                  onClick={() => setNaskahSection(s.id as any)}
+                  className={`px-3 py-1 rounded-md transition-all cursor-pointer flex items-center gap-1.5 whitespace-nowrap text-xs ${
+                    isActive
+                      ? "bg-zinc-200 dark:bg-zinc-800 text-zinc-950 dark:text-zinc-100 font-bold shadow-2xs"
+                      : "text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 hover:bg-zinc-100 dark:hover:bg-zinc-900"
+                  }`}
+                >
+                  <span>{s.label}</span>
+                  {s.badge && (
+                    <span className="text-[9px] px-1 py-0.2 rounded-full font-mono bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 font-semibold">
+                      {s.badge}
+                    </span>
+                  )}
+                </button>
+              );
+            })}
+          </div>
+
+          {/* Quick Formatting Controls */}
+          <div className="flex items-center gap-1.5 text-xs flex-shrink-0 self-end sm:self-auto">
+            {/* Citation Style */}
+            <button
+              type="button"
+              onClick={() => setCitationStyle(prev => prev === "apa" ? "ieee" : "apa")}
+              className="px-2 py-1 rounded-md border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-zinc-700 dark:text-zinc-300 font-mono text-[11px] hover:bg-zinc-50 dark:hover:bg-zinc-850 transition-colors cursor-pointer shadow-2xs"
+              title="Ganti format sitasi APA / IEEE"
+            >
+              {citationStyle === "apa" ? "Sitasi APA 7th" : "Sitasi IEEE"}
+            </button>
+
+            {/* Heading Style */}
+            <select
+              value={currentDoc.campusGuideline?.headingStyle || "decimal"}
+              onChange={(e) => handleChangeHeadingStyle(e.target.value as HeadingStyleType)}
+              className="px-2 py-1 rounded-md border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-zinc-700 dark:text-zinc-300 text-[11px] focus:outline-hidden cursor-pointer shadow-2xs"
+              title="Gaya Penomoran Sub-bab"
+            >
+              <option value="decimal">Desimal (1.1, 1.2)</option>
+              <option value="alphanumeric">Alfanumerik (A., B., 1.)</option>
+              <option value="roman">Romawi (I.A, I.B)</option>
+            </select>
+
+            {/* Watermark Selector */}
+            <select
+              value={watermarkType}
+              onChange={(e) => setWatermarkType(e.target.value as any)}
+              className="px-2 py-1 rounded-md border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-zinc-700 dark:text-zinc-300 text-[11px] focus:outline-hidden cursor-pointer shadow-2xs"
+              title="Watermark Kertas"
+            >
+              <option value="none">Watermark: Nonaktif</option>
+              <option value="draft">Draf Usulan</option>
+              <option value="plagiarisme_ok">Bebas Plagiasi</option>
+              <option value="siap_sidang">Siap Sidang</option>
+              <option value="confidential">Confidential</option>
+            </select>
+
+            {/* Ruler Toggle */}
+            <button
+              type="button"
+              onClick={() => setShowMarginRuler(!showMarginRuler)}
+              className={`p-1 rounded-md border text-xs transition-colors cursor-pointer ${
+                showMarginRuler
+                  ? "bg-indigo-600 text-white border-indigo-600"
+                  : "bg-white dark:bg-zinc-900 text-zinc-600 dark:text-zinc-400 border-zinc-200 dark:border-zinc-800 hover:bg-zinc-50"
+              }`}
+              title="Tampilkan garis margin A4"
+            >
+              <span className="text-[10px] font-mono px-1">Ruler</span>
+            </button>
+          </div>
+        </div>
+      )}
+
+      {workspaceCategory === "metodologi" && (
+        <div className="flex items-center gap-1.5 pb-3 mb-4 overflow-x-auto text-xs font-medium no-print">
           <button
             type="button"
-            onClick={() => scrollToSection("section-cover")}
-            className="px-2.5 py-1 rounded-md bg-zinc-100 dark:bg-zinc-900 text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 hover:bg-zinc-200 dark:hover:bg-zinc-800 whitespace-nowrap transition-colors cursor-pointer"
+            onClick={() => { setMetodologiTab("flowchart"); setActiveTab("flowchart"); }}
+            className={`px-3 py-1.5 rounded-lg transition-all cursor-pointer flex items-center gap-1.5 ${
+              activeTab === "flowchart"
+                ? "bg-zinc-900 text-white dark:bg-zinc-100 dark:text-black font-semibold shadow-xs"
+                : "bg-white dark:bg-zinc-900 text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800 border border-zinc-200 dark:border-zinc-800"
+            }`}
           >
-            Cover &amp; Logo
+            <Network className="w-3.5 h-3.5" />
+            <span>Bagan Alir Penelitian (Bagan Resmi)</span>
           </button>
           <button
             type="button"
-            onClick={() => scrollToSection("section-pengesahan")}
-            className="px-2.5 py-1 rounded-md bg-zinc-100 dark:bg-zinc-900 text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 hover:bg-zinc-200 dark:hover:bg-zinc-800 whitespace-nowrap transition-colors cursor-pointer"
+            onClick={() => { setMetodologiTab("tree"); setActiveTab("tree"); }}
+            className={`px-3 py-1.5 rounded-lg transition-all cursor-pointer flex items-center gap-1.5 ${
+              activeTab === "tree"
+                ? "bg-zinc-900 text-white dark:bg-zinc-100 dark:text-black font-semibold shadow-xs"
+                : "bg-white dark:bg-zinc-900 text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800 border border-zinc-200 dark:border-zinc-800"
+            }`}
           >
-            Pengesahan
+            <Compass className="w-3.5 h-3.5" />
+            <span>Pohon Alur Riset (Tree Graph)</span>
           </button>
           <button
             type="button"
-            onClick={() => scrollToSection("section-orisinalitas")}
-            className="px-2.5 py-1 rounded-md bg-zinc-100 dark:bg-zinc-900 text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 hover:bg-zinc-200 dark:hover:bg-zinc-800 whitespace-nowrap transition-colors cursor-pointer"
+            onClick={() => { setMetodologiTab("jadwal"); setActiveTab("jadwal"); }}
+            className={`px-3 py-1.5 rounded-lg transition-all cursor-pointer flex items-center gap-1.5 ${
+              activeTab === "jadwal"
+                ? "bg-zinc-900 text-white dark:bg-zinc-100 dark:text-black font-semibold shadow-xs"
+                : "bg-white dark:bg-zinc-900 text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800 border border-zinc-200 dark:border-zinc-800"
+            }`}
           >
-            Orisinalitas
-          </button>
-          <button
-            type="button"
-            onClick={() => scrollToSection("section-pengantar")}
-            className="px-2.5 py-1 rounded-md bg-zinc-100 dark:bg-zinc-900 text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 hover:bg-zinc-200 dark:hover:bg-zinc-800 whitespace-nowrap transition-colors cursor-pointer"
-          >
-            Pengantar
-          </button>
-          <button
-            type="button"
-            onClick={() => scrollToSection("section-abstrak")}
-            className="px-2.5 py-1 rounded-md bg-zinc-100 dark:bg-zinc-900 text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 hover:bg-zinc-200 dark:hover:bg-zinc-800 whitespace-nowrap transition-colors cursor-pointer"
-          >
-            Abstrak
-          </button>
-          <button
-            type="button"
-            onClick={() => scrollToSection("section-daftar-isi")}
-            className="px-2.5 py-1 rounded-md bg-zinc-100 dark:bg-zinc-900 text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 hover:bg-zinc-200 dark:hover:bg-zinc-800 whitespace-nowrap transition-colors cursor-pointer"
-          >
-            Daftar Isi
-          </button>
-          <button
-            type="button"
-            onClick={() => scrollToSection("section-daftar-gambar")}
-            className="px-2.5 py-1 rounded-md bg-zinc-100 dark:bg-zinc-900 text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 hover:bg-zinc-200 dark:hover:bg-zinc-800 whitespace-nowrap transition-colors cursor-pointer"
-          >
-            Daftar Gambar ({currentDoc.documentFigures?.length || 0})
-          </button>
-          <button
-            type="button"
-            onClick={() => scrollToSection("section-daftar-tabel")}
-            className="px-2.5 py-1 rounded-md bg-zinc-100 dark:bg-zinc-900 text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 hover:bg-zinc-200 dark:hover:bg-zinc-800 whitespace-nowrap transition-colors cursor-pointer"
-          >
-            Daftar Tabel
-          </button>
-          <button
-            type="button"
-            onClick={() => scrollToSection("section-bab1")}
-            className="px-2.5 py-1 rounded-md bg-zinc-100 dark:bg-zinc-900 text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 hover:bg-zinc-200 dark:hover:bg-zinc-800 whitespace-nowrap transition-colors cursor-pointer"
-          >
-            Bab I: Pendahuluan
-          </button>
-          <button
-            type="button"
-            onClick={() => scrollToSection("section-bab2")}
-            className="px-2.5 py-1 rounded-md bg-indigo-50 dark:bg-indigo-950/80 text-indigo-700 dark:text-indigo-300 font-bold hover:bg-indigo-100 whitespace-nowrap transition-colors cursor-pointer"
-          >
-            Bab II: Teori ({currentDoc.bab2.landasanTeori.length} Teori)
-          </button>
-          <button
-            type="button"
-            onClick={() => scrollToSection("section-bab3")}
-            className="px-2.5 py-1 rounded-md bg-zinc-100 dark:bg-zinc-900 text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 hover:bg-zinc-200 dark:hover:bg-zinc-800 whitespace-nowrap transition-colors cursor-pointer"
-          >
-            Bab III: Metodologi
-          </button>
-          <button
-            type="button"
-            onClick={() => scrollToSection("section-bab4")}
-            className="px-2.5 py-1 rounded-md bg-zinc-100 dark:bg-zinc-900 text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 hover:bg-zinc-200 dark:hover:bg-zinc-800 whitespace-nowrap transition-colors cursor-pointer"
-          >
-            Bab IV: Jadwal &amp; RAB
-          </button>
-          <button
-            type="button"
-            onClick={() => scrollToSection("section-bab5")}
-            className="px-2.5 py-1 rounded-md bg-zinc-100 dark:bg-zinc-900 text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 hover:bg-zinc-200 dark:hover:bg-zinc-800 whitespace-nowrap transition-colors cursor-pointer"
-          >
-            Bab V: Kesimpulan
-          </button>
-          <button
-            type="button"
-            onClick={() => scrollToSection("section-pustaka")}
-            className="px-2.5 py-1 rounded-md bg-zinc-100 dark:bg-zinc-900 text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 hover:bg-zinc-200 dark:hover:bg-zinc-800 whitespace-nowrap transition-colors cursor-pointer font-bold"
-          >
-            Daftar Pustaka ({currentDoc.bibliography?.length || 0})
-          </button>
-          <button
-            type="button"
-            onClick={() => scrollToSection("section-lampiran")}
-            className="px-2.5 py-1 rounded-md bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 hover:bg-emerald-100 whitespace-nowrap transition-colors cursor-pointer font-bold"
-          >
-            Lampiran &amp; Logbook
+            <CalendarDays className="w-3.5 h-3.5" />
+            <span>Matriks Jadwal &amp; Timeline (Gantt)</span>
           </button>
         </div>
       )}
 
-      {/* INTERACTIVE CAMPUS FORMAT INSPECTOR BAR */}
-      {activeTab === "naskah" && (
-        <div className="mb-4 p-3 rounded-xl bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 shadow-xs flex flex-wrap items-center justify-between gap-3 text-xs no-print">
-          <div className="flex flex-wrap items-center gap-2">
-            <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-indigo-50 dark:bg-indigo-950/60 text-indigo-700 dark:text-indigo-300 font-semibold border border-indigo-200 dark:border-indigo-800/80">
-              <Landmark className="w-3.5 h-3.5" />
-              <span>Format: {currentDoc.campusGuideline?.campusName || "Standar Dikti"}</span>
-            </div>
-
-            <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-zinc-100 dark:bg-zinc-800/80 text-zinc-700 dark:text-zinc-300 font-mono text-[11px]">
-              <span>Margin: Kiri {currentDoc.campusGuideline?.margins?.leftCm ?? 4}cm • Atas {currentDoc.campusGuideline?.margins?.topCm ?? 4}cm • Kanan {currentDoc.campusGuideline?.margins?.rightCm ?? 3}cm • Bawah {currentDoc.campusGuideline?.margins?.bottomCm ?? 3}cm</span>
-            </div>
-
-            <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-zinc-100 dark:bg-zinc-800/80 text-zinc-700 dark:text-zinc-300 font-mono text-[11px]">
-              <span>Font: {currentDoc.campusGuideline?.typography?.fontFamily || "Times New Roman"} • Spasi {currentDoc.campusGuideline?.typography?.lineSpacing || 1.5}</span>
-            </div>
-          </div>
-
-          <div className="flex flex-wrap items-center gap-2">
-            {/* Heading Style Switcher */}
-            <div className="flex items-center gap-1.5 px-2 py-1 rounded-md border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-xs">
-              <span className="text-[11px] text-zinc-500 dark:text-zinc-400">Penomoran:</span>
-              <select
-                value={currentDoc.campusGuideline?.headingStyle || "decimal"}
-                onChange={(e) => handleChangeHeadingStyle(e.target.value as HeadingStyleType)}
-                className="bg-transparent font-medium text-zinc-800 dark:text-zinc-200 text-xs focus:outline-hidden cursor-pointer"
-              >
-                <option value="decimal">Desimal (1.1, 1.2)</option>
-                <option value="alphanumeric">Alfanumerik (A., B., 1.)</option>
-                <option value="roman">Romawi (I.A, I.B)</option>
-              </select>
-            </div>
-
-            {/* Watermark Selector */}
-            <div className="flex items-center gap-1.5 px-2 py-1 rounded-md border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-xs">
-              <span className="text-[11px] text-zinc-500 dark:text-zinc-400">Watermark:</span>
-              <select
-                value={watermarkType}
-                onChange={(e) => setWatermarkType(e.target.value as any)}
-                className="bg-transparent font-medium text-zinc-800 dark:text-zinc-200 text-xs focus:outline-hidden cursor-pointer"
-              >
-                <option value="none">Tanpa Watermark</option>
-                <option value="draft">Draf Usulan</option>
-                <option value="plagiarisme_ok">Bebas Plagiasi</option>
-                <option value="siap_sidang">Siap Sidang</option>
-                <option value="confidential">Confidential</option>
-              </select>
-            </div>
-
-            {/* Toggle Ruler Guide */}
-            <button
-              type="button"
-              onClick={() => setShowMarginRuler(!showMarginRuler)}
-              className={`px-2.5 py-1 rounded-md border text-xs font-medium transition-colors cursor-pointer flex items-center gap-1.5 ${
-                showMarginRuler
-                  ? "bg-indigo-600 text-white border-indigo-600 shadow-xs"
-                  : "bg-zinc-50 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 border-zinc-200 dark:border-zinc-700 hover:bg-zinc-100"
-              }`}
-            >
-              <span>{showMarginRuler ? "✓ Batas Margin Aktif" : "Tampilkan Margin"}</span>
-            </button>
-
-            {/* Change Guideline */}
-            <button
-              type="button"
-              onClick={() => setIsGuidelineModalOpen(true)}
-              className="px-2.5 py-1 rounded-md bg-zinc-900 text-white dark:bg-zinc-100 dark:text-black font-semibold text-xs hover:bg-black dark:hover:bg-white transition-colors cursor-pointer shadow-xs"
-            >
-              Pindai / Ubah Format
-            </button>
-          </div>
+      {workspaceCategory === "sidang" && (
+        <div className="flex items-center gap-1.5 pb-3 mb-4 overflow-x-auto text-xs font-medium no-print">
+          <button
+            type="button"
+            onClick={() => { setSidangTab("defense"); setActiveTab("defense"); }}
+            className={`px-3 py-1.5 rounded-lg transition-all cursor-pointer flex items-center gap-1.5 ${
+              activeTab === "defense"
+                ? "bg-zinc-900 text-white dark:bg-zinc-100 dark:text-black font-semibold shadow-xs"
+                : "bg-white dark:bg-zinc-900 text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800 border border-zinc-200 dark:border-zinc-800"
+            }`}
+          >
+            <ShieldAlert className="w-3.5 h-3.5 text-amber-500" />
+            <span>Tanya Jawab Sidang Penguji</span>
+          </button>
+          <button
+            type="button"
+            onClick={() => { setSidangTab("revisionMatrix"); setActiveTab("revisionMatrix"); }}
+            className={`px-3 py-1.5 rounded-lg transition-all cursor-pointer flex items-center gap-1.5 ${
+              activeTab === "revisionMatrix"
+                ? "bg-zinc-900 text-white dark:bg-zinc-100 dark:text-black font-semibold shadow-xs"
+                : "bg-white dark:bg-zinc-900 text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800 border border-zinc-200 dark:border-zinc-800"
+            }`}
+          >
+            <Layers className="w-3.5 h-3.5 text-indigo-500" />
+            <span>Matriks Revisi Dosen</span>
+          </button>
+          <button
+            type="button"
+            onClick={() => { setSidangTab("audit"); setActiveTab("audit"); }}
+            className={`px-3 py-1.5 rounded-lg transition-all cursor-pointer flex items-center gap-1.5 ${
+              activeTab === "audit"
+                ? "bg-zinc-900 text-white dark:bg-zinc-100 dark:text-black font-semibold shadow-xs"
+                : "bg-white dark:bg-zinc-900 text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800 border border-zinc-200 dark:border-zinc-800"
+            }`}
+          >
+            <ShieldCheck className="w-3.5 h-3.5 text-emerald-500" />
+            <span>Audit Turnitin &amp; Orisinalitas</span>
+          </button>
         </div>
       )}
 
@@ -1522,8 +1260,41 @@ NIP / NIK.
             </div>
           )}
           
+          {/* Chapter Focus Mode Indicator (Only when a specific chapter is isolated) */}
+          {naskahSection !== "all" && (
+            <div className="no-print mb-8 p-3 rounded-xl bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 flex flex-wrap items-center justify-between gap-2 text-xs">
+              <div className="flex items-center gap-2">
+                <span className="w-2 h-2 rounded-full bg-indigo-500 animate-pulse"></span>
+                <span className="font-semibold text-zinc-900 dark:text-zinc-100">
+                  Mode Fokus: {
+                    naskahSection === "frontmatter" ? "Cover & Kelengkapan Awal" :
+                    naskahSection === "bab1" ? "Bab I: Pendahuluan" :
+                    naskahSection === "bab2" ? `Bab II: Tinjauan Pustaka (${currentDoc.bab2?.landasanTeori?.length || 13} Teori)` :
+                    naskahSection === "bab3" ? "Bab III: Metodologi / Pelaksanaan" :
+                    naskahSection === "bab4" ? "Bab IV: Rencana Kerja & Analisis" :
+                    naskahSection === "bab5" ? "Bab V: Penutup & Rekomendasi" :
+                    "Daftar Pustaka, Logbook & Berita Acara"
+                  }
+                </span>
+                <span className="text-zinc-400 dark:text-zinc-500">•</span>
+                <span className="text-zinc-500 text-[11px]">Halaman terpisah agar penulisan &amp; telaah lebih terfokus</span>
+              </div>
+              <button
+                type="button"
+                onClick={() => setNaskahSection("all")}
+                className="text-xs text-indigo-600 dark:text-indigo-400 hover:underline font-semibold cursor-pointer"
+              >
+                Lihat Naskah Lengkap (Utuh) ≡
+              </button>
+            </div>
+          )}
+
           {/* ========================================================================= */}
-          {/* BAGIAN 1: HALAMAN JUDUL / COVER STANDAR DIKTI */}
+          {/* KELENGKAPAN AWAL (FRONT MATTER) */}
+          {/* ========================================================================= */}
+          {(naskahSection === "all" || naskahSection === "frontmatter") && (
+            <>
+              {/* BAGIAN 1: HALAMAN JUDUL / COVER STANDAR DIKTI */}
           {/* ========================================================================= */}
           <div id="section-cover" className="relative text-center pb-12 mb-12 border-b-2 border-zinc-200 dark:border-zinc-800 print:border-black print:pb-0 print:mb-0 print:min-h-screen print:flex print:flex-col print:justify-between">
             {/* Action Bar Cover (No-Print) */}
@@ -2377,9 +2148,29 @@ NIP / NIK.
             </div>
           </section>
 
+              {/* Front Matter Navigation Footer */}
+              {naskahSection === "frontmatter" && (
+                <div className="flex items-center justify-between pt-8 mt-12 border-t border-zinc-200 dark:border-zinc-800 text-xs font-medium no-print">
+                  <div></div>
+                  <button
+                    type="button"
+                    onClick={() => { setNaskahSection("bab1"); window.scrollTo({ top: 0, behavior: "smooth" }); }}
+                    className="px-4 py-2 rounded-lg bg-zinc-900 hover:bg-black text-white dark:bg-zinc-100 dark:hover:bg-white dark:text-black font-semibold text-xs flex items-center gap-1.5 transition-colors cursor-pointer shadow-xs"
+                  >
+                    <span>Lanjut ke Bab I: Pendahuluan</span>
+                    <ChevronRight className="w-4 h-4" />
+                  </button>
+                </div>
+              )}
+            </>
+          )}
+
           {/* ========================================================================= */}
-          {/* BAGIAN 9: RINGKASAN EKSEKUTIF */}
+          {/* BAB I: PENDAHULUAN */}
           {/* ========================================================================= */}
+          {(naskahSection === "all" || naskahSection === "bab1") && (
+            <>
+              {/* BAGIAN 9: RINGKASAN EKSEKUTIF */}
           <div id="section-ringkasan" className="mb-10 p-4 sm:p-5 rounded-xl bg-zinc-50 dark:bg-zinc-900/60 border border-zinc-200 dark:border-zinc-850 print:border-gray-300 print:bg-gray-50">
             <div className="flex items-center justify-between mb-2">
               <h3 className="text-xs font-mono font-semibold uppercase tracking-wider text-zinc-800 dark:text-zinc-300 print:text-black">
@@ -2486,8 +2277,37 @@ NIP / NIK.
             </div>
           </section>
 
-          {/* BAB II */}
-          <section id="section-bab2" className="mb-10">
+              {/* Bab 1 Navigation Footer */}
+              {naskahSection === "bab1" && (
+                <div className="flex items-center justify-between pt-8 mt-12 border-t border-zinc-200 dark:border-zinc-800 text-xs font-medium no-print">
+                  <button
+                    type="button"
+                    onClick={() => { setNaskahSection("frontmatter"); window.scrollTo({ top: 0, behavior: "smooth" }); }}
+                    className="px-3.5 py-2 rounded-lg border border-zinc-200 dark:border-zinc-800 hover:bg-zinc-100 dark:hover:bg-zinc-850 transition-colors flex items-center gap-1.5 cursor-pointer text-zinc-700 dark:text-zinc-300"
+                  >
+                    <ChevronLeft className="w-4 h-4" />
+                    <span>Kelengkapan Awal</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => { setNaskahSection("bab2"); window.scrollTo({ top: 0, behavior: "smooth" }); }}
+                    className="px-4 py-2 rounded-lg bg-zinc-900 hover:bg-black text-white dark:bg-zinc-100 dark:hover:bg-white dark:text-black font-semibold text-xs flex items-center gap-1.5 transition-colors cursor-pointer shadow-xs"
+                  >
+                    <span>Lanjut ke Bab II: Tinjauan Pustaka</span>
+                    <ChevronRight className="w-4 h-4" />
+                  </button>
+                </div>
+              )}
+            </>
+          )}
+
+          {/* ========================================================================= */}
+          {/* BAB II: TINJAUAN PUSTAKA */}
+          {/* ========================================================================= */}
+          {(naskahSection === "all" || naskahSection === "bab2") && (
+            <>
+              {/* BAB II */}
+              <section id="section-bab2" className="mb-10">
             <div className="border-b border-zinc-200 dark:border-zinc-850 pb-2 mb-4 print:border-black flex items-center justify-between">
               <h2 className="text-base sm:text-lg font-serif font-bold text-zinc-900 dark:text-zinc-100 print:text-black uppercase">
                 {currentDoc.bab2.title}
@@ -2668,8 +2488,37 @@ NIP / NIK.
             </div>
           </section>
 
-          {/* BAB III */}
-          <section id="section-bab3" className="mb-10">
+              {/* Bab 2 Navigation Footer */}
+              {naskahSection === "bab2" && (
+                <div className="flex items-center justify-between pt-8 mt-12 border-t border-zinc-200 dark:border-zinc-800 text-xs font-medium no-print">
+                  <button
+                    type="button"
+                    onClick={() => { setNaskahSection("bab1"); window.scrollTo({ top: 0, behavior: "smooth" }); }}
+                    className="px-3.5 py-2 rounded-lg border border-zinc-200 dark:border-zinc-800 hover:bg-zinc-100 dark:hover:bg-zinc-850 transition-colors flex items-center gap-1.5 cursor-pointer text-zinc-700 dark:text-zinc-300"
+                  >
+                    <ChevronLeft className="w-4 h-4" />
+                    <span>Bab I: Pendahuluan</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => { setNaskahSection("bab3"); window.scrollTo({ top: 0, behavior: "smooth" }); }}
+                    className="px-4 py-2 rounded-lg bg-zinc-900 hover:bg-black text-white dark:bg-zinc-100 dark:hover:bg-white dark:text-black font-semibold text-xs flex items-center gap-1.5 transition-colors cursor-pointer shadow-xs"
+                  >
+                    <span>Lanjut ke Bab III: Metodologi</span>
+                    <ChevronRight className="w-4 h-4" />
+                  </button>
+                </div>
+              )}
+            </>
+          )}
+
+          {/* ========================================================================= */}
+          {/* BAB III: METODOLOGI */}
+          {/* ========================================================================= */}
+          {(naskahSection === "all" || naskahSection === "bab3") && (
+            <>
+              {/* BAB III */}
+              <section id="section-bab3" className="mb-10">
             <div className="border-b border-zinc-200 dark:border-zinc-850 pb-2 mb-4 print:border-black flex items-center justify-between">
               <h2 className="text-base sm:text-lg font-serif font-bold text-zinc-900 dark:text-zinc-100 print:text-black uppercase">
                 {currentDoc.bab3.title}
@@ -2837,8 +2686,37 @@ NIP / NIK.
             </div>
           </section>
 
-          {/* BAB IV: MATRIKS TABEL AKADEMIK (3 Garis Horizontal Standar) */}
-          <section id="section-bab4" className="mb-10">
+              {/* Bab 3 Navigation Footer */}
+              {naskahSection === "bab3" && (
+                <div className="flex items-center justify-between pt-8 mt-12 border-t border-zinc-200 dark:border-zinc-800 text-xs font-medium no-print">
+                  <button
+                    type="button"
+                    onClick={() => { setNaskahSection("bab2"); window.scrollTo({ top: 0, behavior: "smooth" }); }}
+                    className="px-3.5 py-2 rounded-lg border border-zinc-200 dark:border-zinc-800 hover:bg-zinc-100 dark:hover:bg-zinc-850 transition-colors flex items-center gap-1.5 cursor-pointer text-zinc-700 dark:text-zinc-300"
+                  >
+                    <ChevronLeft className="w-4 h-4" />
+                    <span>Bab II: Tinjauan Pustaka</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => { setNaskahSection("bab4"); window.scrollTo({ top: 0, behavior: "smooth" }); }}
+                    className="px-4 py-2 rounded-lg bg-zinc-900 hover:bg-black text-white dark:bg-zinc-100 dark:hover:bg-white dark:text-black font-semibold text-xs flex items-center gap-1.5 transition-colors cursor-pointer shadow-xs"
+                  >
+                    <span>Lanjut ke Bab IV: Rencana Kerja</span>
+                    <ChevronRight className="w-4 h-4" />
+                  </button>
+                </div>
+              )}
+            </>
+          )}
+
+          {/* ========================================================================= */}
+          {/* BAB IV: RENCANA KERJA & ANALISIS */}
+          {/* ========================================================================= */}
+          {(naskahSection === "all" || naskahSection === "bab4") && (
+            <>
+              {/* BAB IV: MATRIKS TABEL AKADEMIK (3 Garis Horizontal Standar) */}
+              <section id="section-bab4" className="mb-10">
             <div className="border-b border-zinc-200 dark:border-zinc-850 pb-2 mb-4 print:border-black">
               <h2 className="text-base sm:text-lg font-serif font-bold text-zinc-900 dark:text-zinc-100 print:text-black uppercase">
                 {currentDoc.bab4.title}
@@ -2953,8 +2831,37 @@ NIP / NIK.
             </p>
           </section>
 
-          {/* BAB V: KESIMPULAN, REKOMENDASI KONTRIBUSI, & MITIGASI RISIKO */}
-          <section id="section-bab5" className="mb-10">
+              {/* Bab 4 Navigation Footer */}
+              {naskahSection === "bab4" && (
+                <div className="flex items-center justify-between pt-8 mt-12 border-t border-zinc-200 dark:border-zinc-800 text-xs font-medium no-print">
+                  <button
+                    type="button"
+                    onClick={() => { setNaskahSection("bab3"); window.scrollTo({ top: 0, behavior: "smooth" }); }}
+                    className="px-3.5 py-2 rounded-lg border border-zinc-200 dark:border-zinc-800 hover:bg-zinc-100 dark:hover:bg-zinc-850 transition-colors flex items-center gap-1.5 cursor-pointer text-zinc-700 dark:text-zinc-300"
+                  >
+                    <ChevronLeft className="w-4 h-4" />
+                    <span>Bab III: Metodologi</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => { setNaskahSection("bab5"); window.scrollTo({ top: 0, behavior: "smooth" }); }}
+                    className="px-4 py-2 rounded-lg bg-zinc-900 hover:bg-black text-white dark:bg-zinc-100 dark:hover:bg-white dark:text-black font-semibold text-xs flex items-center gap-1.5 transition-colors cursor-pointer shadow-xs"
+                  >
+                    <span>Lanjut ke Bab V: Penutup</span>
+                    <ChevronRight className="w-4 h-4" />
+                  </button>
+                </div>
+              )}
+            </>
+          )}
+
+          {/* ========================================================================= */}
+          {/* BAB V: PENUTUP */}
+          {/* ========================================================================= */}
+          {(naskahSection === "all" || naskahSection === "bab5") && (
+            <>
+              {/* BAB V: KESIMPULAN, REKOMENDASI KONTRIBUSI, & MITIGASI RISIKO */}
+              <section id="section-bab5" className="mb-10">
             <div className="border-b border-zinc-200 dark:border-zinc-850 pb-2 mb-4 print:border-black">
               <h2 className="text-base sm:text-lg font-serif font-bold text-zinc-900 dark:text-zinc-100 print:text-black uppercase">
                 {currentDoc.bab5?.title || (currentDoc.category === "magang" ? "BAB V: PENUTUP, KONTRIBUSI, & MITIGASI RISIKO" : "BAB V: KESIMPULAN, REKOMENDASI KONTRIBUSI, & MITIGASI RISIKO")}
@@ -3025,7 +2932,36 @@ NIP / NIK.
             </div>
           </section>
 
-          {/* DAFTAR PUSTAKA (Standar APA 7th Edition / IEEE) */}
+              {/* Bab 5 Navigation Footer */}
+              {naskahSection === "bab5" && (
+                <div className="flex items-center justify-between pt-8 mt-12 border-t border-zinc-200 dark:border-zinc-800 text-xs font-medium no-print">
+                  <button
+                    type="button"
+                    onClick={() => { setNaskahSection("bab4"); window.scrollTo({ top: 0, behavior: "smooth" }); }}
+                    className="px-3.5 py-2 rounded-lg border border-zinc-200 dark:border-zinc-800 hover:bg-zinc-100 dark:hover:bg-zinc-850 transition-colors flex items-center gap-1.5 cursor-pointer text-zinc-700 dark:text-zinc-300"
+                  >
+                    <ChevronLeft className="w-4 h-4" />
+                    <span>Bab IV: Rencana Kerja</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => { setNaskahSection("backmatter"); window.scrollTo({ top: 0, behavior: "smooth" }); }}
+                    className="px-4 py-2 rounded-lg bg-zinc-900 hover:bg-black text-white dark:bg-zinc-100 dark:hover:bg-white dark:text-black font-semibold text-xs flex items-center gap-1.5 transition-colors cursor-pointer shadow-xs"
+                  >
+                    <span>Daftar Pustaka &amp; Lampiran</span>
+                    <ChevronRight className="w-4 h-4" />
+                  </button>
+                </div>
+              )}
+            </>
+          )}
+
+          {/* ========================================================================= */}
+          {/* PUSTAKA & LAMPIRAN */}
+          {/* ========================================================================= */}
+          {(naskahSection === "all" || naskahSection === "backmatter") && (
+            <>
+              {/* DAFTAR PUSTAKA (Standar APA 7th Edition / IEEE) */}
           {currentDoc.bibliography && currentDoc.bibliography.length > 0 && (
             <section id="section-pustaka" className="mb-10 pt-6 border-t border-zinc-200 dark:border-zinc-850 print:border-black">
               <div className="border-b border-zinc-200 dark:border-zinc-850 pb-2 mb-4 print:border-black flex items-center justify-between">
@@ -3259,7 +3195,30 @@ NIP / NIK.
                 </p>
               </div>
             </div>
-          </section>
+              </section>
+
+              {/* Back Matter Navigation Footer */}
+              {naskahSection === "backmatter" && (
+                <div className="flex items-center justify-between pt-8 mt-12 border-t border-zinc-200 dark:border-zinc-800 text-xs font-medium no-print">
+                  <button
+                    type="button"
+                    onClick={() => { setNaskahSection("bab5"); window.scrollTo({ top: 0, behavior: "smooth" }); }}
+                    className="px-3.5 py-2 rounded-lg border border-zinc-200 dark:border-zinc-800 hover:bg-zinc-100 dark:hover:bg-zinc-850 transition-colors flex items-center gap-1.5 cursor-pointer text-zinc-700 dark:text-zinc-300"
+                  >
+                    <ChevronLeft className="w-4 h-4" />
+                    <span>Bab V: Penutup</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => { setNaskahSection("all"); window.scrollTo({ top: 0, behavior: "smooth" }); }}
+                    className="px-4 py-2 rounded-lg bg-zinc-900 hover:bg-black text-white dark:bg-zinc-100 dark:hover:bg-white dark:text-black font-semibold text-xs transition-colors cursor-pointer"
+                  >
+                    <span>Tampilkan Semua Halaman (Utuh) ≡</span>
+                  </button>
+                </div>
+              )}
+            </>
+          )}
 
         </article>
       )}
@@ -3450,550 +3409,49 @@ NIP / NIK.
         </div>
       )}
 
-      {/* TAB 4: SLIDE PRESENTASI 16:9 */}
+      {/* TAB 4: SLIDE PRESENTASI 16:9 REDIRECTION CARD */}
       {activeTab === "slides" && (
-        <div className="bg-white dark:bg-zinc-950 p-6 rounded-2xl border border-zinc-200 dark:border-zinc-850 shadow-sm space-y-6">
-          {/* Header & Controls Bar */}
-          <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 pb-4 border-b border-zinc-200 dark:border-zinc-850">
-            <div>
-              <div className="flex items-center gap-2">
-                <Presentation className="w-5 h-5 text-sky-500" />
-                <h2 className="text-base sm:text-lg font-semibold text-zinc-900 dark:text-zinc-100">
-                  Slide Presentasi Sidang & Eksekutif (16:9)
-                </h2>
-                <span className="text-[10px] font-mono px-2 py-0.5 rounded-md bg-sky-100 dark:bg-sky-950/60 text-sky-700 dark:text-sky-300 font-semibold border border-sky-300 dark:border-sky-800">
-                  Widescreen 16:9
-                </span>
-              </div>
-              <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-1">
-                Visualisasi deck terstruktur berbasis standar OilUI & RyuxDesign dengan panel Diagram Alur Google Flow & Ilustrasi AI.
-              </p>
-            </div>
-
-            {/* Actions: View Mode Toggle & Direct PPTX Download */}
-            <div className="flex flex-wrap items-center gap-2.5">
-              {/* Visual Mode Toggle */}
-              <div className="flex items-center p-0.5 rounded-lg bg-zinc-100 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800">
-                <button
-                  type="button"
-                  onClick={() => setSlideVisualMode("google-flow")}
-                  className={`px-3 py-1.5 rounded-md text-xs font-medium transition-all cursor-pointer flex items-center gap-1.5 ${
-                    slideVisualMode === "google-flow"
-                      ? "bg-white dark:bg-zinc-800 text-sky-600 dark:text-sky-400 shadow-xs font-semibold"
-                      : "text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-200"
-                  }`}
-                >
-                  <Activity className="w-3.5 h-3.5" />
-                  <span>Google Flow</span>
-                </button>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setSlideVisualMode("ai-concept");
-                    if (!slideAiImageMap[activeSlideIndex]) {
-                      handleGenerateSlideAiVisual(activeSlideIndex);
-                    }
-                  }}
-                  className={`px-3 py-1.5 rounded-md text-xs font-medium transition-all cursor-pointer flex items-center gap-1.5 ${
-                    slideVisualMode === "ai-concept"
-                      ? "bg-white dark:bg-zinc-800 text-sky-600 dark:text-sky-400 shadow-xs font-semibold"
-                      : "text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-200"
-                  }`}
-                >
-                  <Sparkles className="w-3.5 h-3.5" />
-                  <span>Visual AI</span>
-                </button>
-              </div>
-
-              {/* Batch Generate All Slides Visuals */}
+        <div className="bg-white dark:bg-zinc-950 p-8 sm:p-12 rounded-2xl border border-zinc-200 dark:border-zinc-850 shadow-sm text-center space-y-4 max-w-xl mx-auto my-6 animate-in fade-in">
+          <div className="w-14 h-14 rounded-2xl bg-orange-500/10 text-orange-500 flex items-center justify-center mx-auto">
+            <Presentation className="w-7 h-7" />
+          </div>
+          <h2 className="text-lg font-bold text-zinc-900 dark:text-zinc-100">
+            Slide Presentasi Sidang (16:9 Eksekutif)
+          </h2>
+          <p className="text-xs text-zinc-500 dark:text-zinc-400 leading-relaxed max-w-md mx-auto">
+            Fitur presentasi telah dipindahkan ke studio mandiri dengan kanvas layar lebar 16:9 penuh, tema eksekutif, generator visual AI, editor butir materi, dan simulasi pengatur waktu latihan sidang.
+          </p>
+          <div className="pt-2 flex flex-wrap items-center justify-center gap-3">
+            {onOpenPresentationStudio ? (
               <button
                 type="button"
-                onClick={handleBatchGenerateAllSlideVisuals}
-                disabled={isBatchGeneratingSlides}
-                className="px-3 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 text-white text-xs font-semibold flex items-center gap-1.5 shadow-xs transition-colors cursor-pointer"
-                title="Generate ilustrasi visual AI untuk semua slide sekaligus"
+                onClick={onOpenPresentationStudio}
+                className="px-5 py-2.5 rounded-xl bg-orange-500 hover:bg-orange-600 text-white font-semibold text-xs inline-flex items-center gap-2 shadow-xs transition-all cursor-pointer"
               >
-                <Sparkles className={`w-3.5 h-3.5 ${isBatchGeneratingSlides ? "animate-spin" : ""}`} />
-                <span>{isBatchGeneratingSlides ? "Men-generate Semua..." : "✨ Visual AI Semua Slide"}</span>
+                <span>Buka Slide Studio Layar Lebar 16:9 ↗</span>
+                <ExternalLink className="w-3.5 h-3.5" />
               </button>
-
-              {/* Open Dedicated Standalone Presentation Studio */}
-              {onOpenPresentationStudio && (
-                <button
-                  type="button"
-                  onClick={onOpenPresentationStudio}
-                  className="px-3 py-1.5 rounded-lg bg-orange-500 hover:bg-orange-600 text-white text-xs font-semibold flex items-center gap-1.5 shadow-xs transition-colors cursor-pointer"
-                  title="Buka studio presentasi terpisah dengan layar lebar 16:9, pengatur waktu latihan, editor slide, dan tema kustom"
-                >
-                  <ExternalLink className="w-3.5 h-3.5" />
-                  <span>Buka Studio Layar Lebar ↗</span>
-                </button>
-              )}
-
-              {/* Direct Download PPTX Button */}
+            ) : (
               <button
                 type="button"
                 onClick={handleDownloadPptx}
                 disabled={isExportingPptx}
-                className="px-3.5 py-1.5 rounded-lg bg-sky-600 hover:bg-sky-500 disabled:opacity-50 text-white text-xs font-semibold flex items-center gap-2 shadow-xs transition-colors cursor-pointer"
+                className="px-5 py-2.5 rounded-xl bg-orange-500 hover:bg-orange-600 text-white font-semibold text-xs inline-flex items-center gap-2 shadow-xs transition-all cursor-pointer"
               >
-                {isExportingPptx ? (
-                  <RefreshCw className="w-3.5 h-3.5 animate-spin" />
-                ) : (
-                  <Download className="w-3.5 h-3.5" />
-                )}
-                <span>{isExportingPptx ? "Memproses PPTX..." : "Unduh .PPTX"}</span>
+                <span>{isExportingPptx ? "Memproses PPTX..." : "Unduh Slide PPTX (.pptx)"}</span>
+                <Download className="w-3.5 h-3.5" />
               </button>
-            </div>
-          </div>
-
-          {/* Slide Pills Navigation */}
-          <div className="flex items-center justify-between gap-2 overflow-x-auto pb-1">
-            <div className="flex items-center gap-1.5 overflow-x-auto py-1 text-xs">
-              {currentDoc.slides.map((s, idx) => (
-                <button
-                  key={idx}
-                  type="button"
-                  onClick={() => {
-                    setActiveSlideIndex(idx);
-                    if (slideVisualMode === "ai-concept" && !slideAiImageMap[idx]) {
-                      handleGenerateSlideAiVisual(idx);
-                    }
-                  }}
-                  className={`px-3 py-1.5 rounded-lg font-medium transition-all whitespace-nowrap cursor-pointer flex items-center gap-1.5 ${
-                    activeSlideIndex === idx
-                      ? "bg-zinc-900 text-white dark:bg-zinc-100 dark:text-zinc-900 font-semibold shadow-xs"
-                      : "bg-zinc-100 dark:bg-zinc-900 text-zinc-600 dark:text-zinc-400 hover:bg-zinc-200 dark:hover:bg-zinc-800"
-                  }`}
-                >
-                  <span className="font-mono text-[10px] opacity-75">{idx + 1}.</span>
-                  <span>{s.title.length > 20 ? s.title.slice(0, 18) + '...' : s.title}</span>
-                </button>
-              ))}
-            </div>
-
-            <div className="flex items-center gap-1.5 flex-shrink-0 text-xs">
-              <button
-                type="button"
-                disabled={activeSlideIndex === 0}
-                onClick={() => setActiveSlideIndex(prev => prev - 1)}
-                className="p-1.5 rounded-lg bg-zinc-100 dark:bg-zinc-900 hover:bg-zinc-200 dark:hover:bg-zinc-800 disabled:opacity-30 cursor-pointer text-zinc-800 dark:text-zinc-200 transition-colors"
-                title="Slide Sebelumnya"
-              >
-                <ChevronLeft className="w-4 h-4" />
-              </button>
-              <span className="text-zinc-500 dark:text-zinc-400 font-mono text-xs px-1">
-                {activeSlideIndex + 1} / {currentDoc.slides.length}
-              </span>
-              <button
-                type="button"
-                disabled={activeSlideIndex === currentDoc.slides.length - 1}
-                onClick={() => setActiveSlideIndex(prev => prev + 1)}
-                className="p-1.5 rounded-lg bg-zinc-100 dark:bg-zinc-900 hover:bg-zinc-200 dark:hover:bg-zinc-800 disabled:opacity-30 cursor-pointer text-zinc-800 dark:text-zinc-200 transition-colors"
-                title="Slide Berikutnya"
-              >
-                <ChevronRight className="w-4 h-4" />
-              </button>
-            </div>
-          </div>
-
-          {/* Active 16:9 Screen (2-Column Layout) */}
-          {currentDoc.slides[activeSlideIndex] && (
-            <div className="w-full rounded-2xl bg-zinc-950 text-white border border-zinc-800 p-6 sm:p-8 flex flex-col justify-between relative shadow-2xl overflow-hidden min-h-[500px]">
-              {/* Top Decorative Ambient Glow Bar */}
-              <div className="w-full h-1 bg-gradient-to-r from-sky-500 via-indigo-500 to-amber-400 absolute top-0 left-0" />
-
-              {/* Slide Content: 2-Column Responsive Grid */}
-              <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 items-stretch flex-1 my-2">
-                
-                {/* Column 1: Textual Arguments (55%) */}
-                <div className="lg:col-span-6 flex flex-col justify-between space-y-4">
-                  <div>
-                    <span className="text-[10px] font-mono uppercase tracking-wider text-sky-400 bg-sky-950/70 border border-sky-800/80 px-2.5 py-1 rounded-md inline-block">
-                      {currentDoc.slides[activeSlideIndex].kicker}
-                    </span>
-                    <h3 className="text-xl sm:text-2xl font-bold text-white mt-2.5 leading-snug tracking-tight">
-                      {currentDoc.slides[activeSlideIndex].title}
-                    </h3>
-                    <p className="text-xs sm:text-sm text-zinc-300 mt-1 leading-relaxed">
-                      {currentDoc.slides[activeSlideIndex].subtitle}
-                    </p>
-
-                    {/* Key Points */}
-                    <div className="mt-5 space-y-2.5">
-                      {currentDoc.slides[activeSlideIndex].keyPoints.map((pt, pIdx) => (
-                        <div
-                          key={pIdx}
-                          className="flex items-start gap-3 p-3 rounded-xl bg-zinc-900/80 border border-zinc-850 hover:border-zinc-750 transition-colors"
-                        >
-                          <span className="w-5 h-5 rounded-md bg-sky-950 text-sky-300 font-mono text-[11px] flex items-center justify-center font-bold flex-shrink-0 mt-0.5 border border-sky-800/80">
-                            {pIdx + 1}
-                          </span>
-                          <p className="text-xs sm:text-sm text-zinc-200 leading-relaxed font-normal">
-                            {pt}
-                          </p>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-
-                  {/* Micro Metadata Indicator */}
-                  <div className="pt-3 border-t border-zinc-850 flex items-center gap-3 text-[11px] text-zinc-400">
-                    <span className="flex items-center gap-1.5 text-sky-400 font-medium">
-                      <ShieldCheck className="w-3.5 h-3.5 text-sky-400" />
-                      Kepatuhan Akademik Terverifikasi
-                    </span>
-                    <span>&bull;</span>
-                    <span className="text-zinc-400 font-mono">Standar Dikti 2026</span>
-                  </div>
-                </div>
-
-                {/* Column 2: Contextual Visual Architecture Panel (45%) */}
-                <div className="lg:col-span-6 flex flex-col justify-between bg-zinc-900/60 rounded-xl border border-zinc-800/80 p-5 relative overflow-hidden">
-                  
-                  {/* MODE A: GOOGLE FLOW VECTOR DIAGRAM */}
-                  {slideVisualMode === "google-flow" && (
-                    <div className="h-full flex flex-col justify-between space-y-4">
-                      <div className="flex items-center justify-between pb-2.5 border-b border-zinc-800">
-                        <span className="text-[10px] font-mono uppercase tracking-wider text-zinc-400 flex items-center gap-1.5">
-                          <Activity className="w-3 h-3 text-sky-400" />
-                          Diagram Alur Google Flow & Metrik
-                        </span>
-                        <span className="text-[10px] font-mono text-zinc-400 px-2 py-0.5 rounded-md bg-zinc-800 border border-zinc-700">
-                          Panel Arsitektur
-                        </span>
-                      </div>
-
-                      {/* SLIDE 0: COVER / KELAYAKAN RISET */}
-                      {activeSlideIndex === 0 && (
-                        <div className="space-y-3.5 my-auto">
-                          <div className="p-3.5 rounded-xl bg-zinc-950/80 border border-zinc-800">
-                            <span className="text-[10px] font-mono text-zinc-400 block uppercase">
-                              Target Mitra & Penugasan
-                            </span>
-                            <h4 className="text-sm font-bold text-white mt-0.5">
-                              {currentDoc.targetEntity}
-                            </h4>
-                            <p className="text-xs text-sky-400 mt-0.5">
-                              Unit / Divisi: {currentDoc.targetDepartment}
-                            </p>
-                          </div>
-
-                          <div className="grid grid-cols-3 gap-2.5">
-                            <div className="p-3 rounded-lg bg-zinc-950/60 border border-zinc-800 text-center">
-                              <span className="text-lg font-bold text-sky-400 block font-mono">100%</span>
-                              <span className="text-[10px] text-zinc-400 font-medium">Standar Dikti</span>
-                            </div>
-                            <div className="p-3 rounded-lg bg-zinc-950/60 border border-zinc-800 text-center">
-                              <span className="text-lg font-bold text-amber-300 block font-mono">0%</span>
-                              <span className="text-[10px] text-zinc-400 font-medium">Bebas Plagiasi</span>
-                            </div>
-                            <div className="p-3 rounded-lg bg-zinc-950/60 border border-zinc-800 text-center">
-                              <span className="text-lg font-bold text-emerald-400 block font-mono">{currentDoc.durationMonths} Bln</span>
-                              <span className="text-[10px] text-zinc-400 font-medium">Linimasa Ketat</span>
-                            </div>
-                          </div>
-
-                          <div className="p-3 rounded-xl bg-sky-950/30 border border-sky-900/60 text-xs text-zinc-300 flex items-center gap-2">
-                            <Brain className="w-4 h-4 text-sky-400 flex-shrink-0" />
-                            <span>Arsitektur penelitian dirancang berbasis prinsip keterukuran saintifik.</span>
-                          </div>
-                        </div>
-                      )}
-
-                      {/* SLIDE 1: PROBLEM TREE / AKAR MASALAH */}
-                      {activeSlideIndex === 1 && (
-                        <div className="space-y-2.5 my-auto">
-                          {/* Step 1: Root Cause */}
-                          <div className="p-3 rounded-xl bg-zinc-950/80 border border-rose-900/40">
-                            <span className="text-[10px] font-mono text-rose-400 block uppercase font-bold">
-                              01. Akar Masalah (Root Cause)
-                            </span>
-                            <p className="text-xs text-zinc-300 mt-1">
-                              {currentDoc.bab1.latarBelakang[0] || "Inefisiensi pemrosesan manual dan keterbatasan sistem eksisting."}
-                            </p>
-                          </div>
-
-                          <div className="flex justify-center text-zinc-400 text-xs py-0.5">
-                            <ArrowRight className="w-4 h-4 rotate-90 text-zinc-400" />
-                          </div>
-
-                          {/* Step 2: Critical Gap */}
-                          <div className="p-3 rounded-xl bg-zinc-950/80 border border-amber-900/40">
-                            <span className="text-[10px] font-mono text-amber-400 block uppercase font-bold">
-                              02. Kesenjangan Masalah (The Gap)
-                            </span>
-                            <p className="text-xs text-zinc-300 mt-1">
-                              {currentDoc.bab1.latarBelakang[1] || "Belum tersedianya framework pipeline otomatisasi terstandarisasi."}
-                            </p>
-                          </div>
-
-                          <div className="flex justify-center text-zinc-400 text-xs py-0.5">
-                            <ArrowRight className="w-4 h-4 rotate-90 text-zinc-400" />
-                          </div>
-
-                          {/* Step 3: Proposed Solution */}
-                          <div className="p-3 rounded-xl bg-zinc-950/80 border border-sky-900/60">
-                            <span className="text-[10px] font-mono text-sky-400 block uppercase font-bold">
-                              03. Intervensi Solusi yang Diusulkan
-                            </span>
-                            <p className="text-xs text-zinc-300 mt-1">
-                              {currentDoc.bab1.tujuanUmum || "Membangun sistem pipeline terintegrasi dengan validasi empiris."}
-                            </p>
-                          </div>
-                        </div>
-                      )}
-
-                      {/* SLIDE 2: RUMUSAN MASALAH & DELIVERABLES */}
-                      {activeSlideIndex === 2 && (
-                        <div className="space-y-3.5 my-auto">
-                          <div className="p-3 rounded-xl bg-zinc-950/80 border border-zinc-800">
-                            <span className="text-[10px] font-mono text-amber-300 uppercase block font-semibold mb-1">
-                              Pertanyaan Penelitian Kunci
-                            </span>
-                            <div className="space-y-1.5 text-xs text-zinc-300">
-                              {currentDoc.bab1.rumusanMasalah.slice(0, 2).map((r, rIdx) => (
-                                <p key={rIdx} className="flex items-start gap-2">
-                                  <span className="text-amber-400 font-mono font-bold">?</span>
-                                  <span>{r}</span>
-                                </p>
-                              ))}
-                            </div>
-                          </div>
-
-                          <div className="flex justify-center text-zinc-400 text-xs">
-                            <span className="px-2 py-0.5 rounded-md bg-zinc-800 text-[10px] font-mono text-sky-400 border border-zinc-700">
-                              Target Capaian Terukur
-                            </span>
-                          </div>
-
-                          <div className="p-3 rounded-xl bg-zinc-950/80 border border-sky-900/60">
-                            <span className="text-[10px] font-mono text-sky-400 uppercase block font-semibold mb-1">
-                              Deliverables & Key Performance Indicators
-                            </span>
-                            <div className="space-y-1.5 text-xs text-zinc-300">
-                              {currentDoc.bab1.tujuanKhusus.slice(0, 2).map((t, tIdx) => (
-                                <p key={tIdx} className="flex items-start gap-2">
-                                  <Check className="w-3.5 h-3.5 text-emerald-400 flex-shrink-0 mt-0.5" />
-                                  <span>{t}</span>
-                                </p>
-                              ))}
-                            </div>
-                          </div>
-                        </div>
-                      )}
-
-                      {/* SLIDE 3: LANDASAN TEORI & PRISMA */}
-                      {activeSlideIndex === 3 && (
-                        <div className="space-y-2.5 my-auto">
-                          {currentDoc.bab2.landasanTeori.slice(0, 3).map((lt, ltIdx) => (
-                            <div key={ltIdx} className="p-3 rounded-xl bg-zinc-950/80 border border-zinc-800">
-                              <div className="flex items-center justify-between text-[10px] font-mono mb-1">
-                                <span className="text-sky-400 font-bold">PILLAR 0{ltIdx + 1}</span>
-                                <span className="text-amber-300">{ltIdx === 0 ? "Teori Inti" : "Rujukan Terapan"}</span>
-                              </div>
-                              <h5 className="text-xs font-bold text-white line-clamp-1">{lt.topic}</h5>
-                              <p className="text-[11px] text-zinc-400 mt-1 line-clamp-2">{lt.elaboration}</p>
-                              <span className="text-[10px] text-zinc-400 font-mono mt-1.5 block">
-                                Sitasi: {lt.citation}
-                              </span>
-                            </div>
-                          ))}
-                        </div>
-                      )}
-
-                      {/* SLIDE 4: METODOLOGI & PIPELINE (GOOGLE FLOW) */}
-                      {activeSlideIndex === 4 && (
-                        <div className="space-y-3 my-auto">
-                          <div className="grid grid-cols-2 gap-2.5">
-                            <div className="p-2.5 rounded-lg bg-zinc-950/80 border border-sky-800/80">
-                              <span className="text-[10px] font-mono text-sky-400 block font-bold">TAHAP 01</span>
-                              <span className="text-xs font-semibold text-white block mt-0.5">Observasi & Data</span>
-                              <span className="text-[10px] text-zinc-400">Ekstraksi baseline sistem</span>
-                            </div>
-                            <div className="p-2.5 rounded-lg bg-zinc-950/80 border border-sky-800/80">
-                              <span className="text-[10px] font-mono text-sky-400 block font-bold">TAHAP 02</span>
-                              <span className="text-xs font-semibold text-white block mt-0.5">Desain Pipeline</span>
-                              <span className="text-[10px] text-zinc-400">Arsitektur & integrasi</span>
-                            </div>
-                            <div className="p-2.5 rounded-lg bg-zinc-950/80 border border-amber-800/80">
-                              <span className="text-[10px] font-mono text-amber-300 block font-bold">TAHAP 03</span>
-                              <span className="text-xs font-semibold text-white block mt-0.5">Uji & Validasi</span>
-                              <span className="text-[10px] text-zinc-400">Benchmarking akurasi</span>
-                            </div>
-                            <div className="p-2.5 rounded-lg bg-zinc-950/80 border border-emerald-800/80">
-                              <span className="text-[10px] font-mono text-emerald-400 block font-bold">TAHAP 04</span>
-                              <span className="text-xs font-semibold text-white block mt-0.5">Diseminasi</span>
-                              <span className="text-[10px] text-zinc-400">Laporan naskah final</span>
-                            </div>
-                          </div>
-
-                          <div className="p-2.5 rounded-xl bg-zinc-950/80 border border-zinc-800">
-                            <span className="text-[10px] font-mono text-zinc-400 block uppercase mb-1">
-                              Spesifikasi Perangkat & Lingkungan:
-                            </span>
-                            <div className="flex flex-wrap gap-1.5">
-                              {currentDoc.bab3.perangkatTools.map((tool, tIdx) => (
-                                <span
-                                  key={tIdx}
-                                  className="px-2 py-0.5 rounded-md bg-zinc-800 border border-zinc-700 text-zinc-300 text-[10px] font-mono"
-                                >
-                                  {tool}
-                                </span>
-                              ))}
-                            </div>
-                          </div>
-                        </div>
-                      )}
-
-                      {/* SLIDE 5: ROADMAP MATRIKS & JADWAL */}
-                      {activeSlideIndex === 5 && (
-                        <div className="space-y-2.5 my-auto">
-                          {currentDoc.bab4.jadwalMatriks.slice(0, 4).map((j, jIdx) => (
-                            <div
-                              key={jIdx}
-                              className="p-2.5 rounded-xl bg-zinc-950/80 border border-zinc-800 flex items-center justify-between gap-3"
-                            >
-                              <div className="flex items-center gap-2.5">
-                                <span className="w-8 h-8 rounded-lg bg-sky-950 text-sky-400 font-mono text-xs font-bold flex items-center justify-center border border-sky-800 flex-shrink-0">
-                                  M{j.week}
-                                </span>
-                                <div>
-                                  <h6 className="text-xs font-bold text-white">{j.phase}</h6>
-                                  <p className="text-[11px] text-zinc-400">{j.activities[0]}</p>
-                                </div>
-                              </div>
-                              <span className="text-[10px] font-mono px-2 py-0.5 rounded-md bg-zinc-800 text-amber-300 border border-zinc-700 flex-shrink-0">
-                                {j.output}
-                              </span>
-                            </div>
-                          ))}
-                        </div>
-                      )}
-
-                      <div className="text-[10px] text-zinc-400 font-mono text-center pt-2 border-t border-zinc-800">
-                        Sinkronisasi otomatis dengan Bab Dokumen Studio
-                      </div>
-                    </div>
-                  )}
-
-                  {/* MODE B: AI VISUAL KONSEPTUAL */}
-                  {slideVisualMode === "ai-concept" && (
-                    <div className="h-full flex flex-col justify-between space-y-3">
-                      <div className="flex items-center justify-between pb-2 border-b border-zinc-800">
-                        <span className="text-[10px] font-mono uppercase tracking-wider text-sky-400 flex items-center gap-1.5">
-                          <Sparkles className="w-3 h-3 text-sky-400" />
-                          Visual AI Flow (Contextual Architecture)
-                        </span>
-                        <span className="text-[10px] font-mono text-zinc-400">
-                          {isGeneratingSlideVisual ? "Generating..." : "Siap"}
-                        </span>
-                      </div>
-
-                      {/* Image Stage Container */}
-                      <div className="w-full h-56 rounded-xl bg-zinc-950 border border-zinc-800 flex items-center justify-center relative overflow-hidden group">
-                        {isGeneratingSlideVisual ? (
-                          <div className="flex flex-col items-center gap-2 text-center p-4">
-                            <RefreshCw className="w-6 h-6 text-sky-400 animate-spin" />
-                            <p className="text-xs text-zinc-400 font-mono">
-                              Menghasilkan ilustrasi arsitektur visual via AI...
-                            </p>
-                          </div>
-                        ) : slideAiImageMap[activeSlideIndex] ? (
-                          // eslint-disable-next-line @next/next/no-img-element
-                          <img
-                            src={slideAiImageMap[activeSlideIndex]}
-                            alt="Visual Architecture"
-                            className="w-full h-full object-cover rounded-xl transition-transform duration-300 group-hover:scale-105"
-                          />
-                        ) : (
-                          <div className="flex flex-col items-center gap-2.5 text-center p-6">
-                            <ImageIcon className="w-8 h-8 text-zinc-600" />
-                            <p className="text-xs text-zinc-400">
-                              Visual AI belum digenerate untuk slide ini.
-                            </p>
-                            <button
-                              type="button"
-                              onClick={() => handleGenerateSlideAiVisual(activeSlideIndex, customSlidePrompt)}
-                              className="px-3 py-1.5 rounded-lg bg-sky-600 hover:bg-sky-500 text-white text-xs font-semibold flex items-center gap-1.5 cursor-pointer"
-                            >
-                              <Sparkles className="w-3.5 h-3.5" />
-                              <span>Buat Visual Sekarang</span>
-                            </button>
-                          </div>
-                        )}
-                      </div>
-
-                      {/* Prompt Customization Bar */}
-                      <div className="space-y-1.5">
-                        <div className="flex items-center gap-1.5">
-                          <input
-                            type="text"
-                            placeholder="Sesuaikan prompt visual AI (opsional)..."
-                            value={customSlidePrompt}
-                            onChange={(e) => setCustomSlidePrompt(e.target.value)}
-                            className="flex-1 px-3 py-1.5 rounded-lg bg-zinc-950 border border-zinc-800 text-white text-xs placeholder:text-zinc-600 focus:outline-hidden focus:border-sky-500"
-                          />
-                          <button
-                            type="button"
-                            onClick={() => handleGenerateSlideAiVisual(activeSlideIndex, customSlidePrompt)}
-                            disabled={isGeneratingSlideVisual}
-                            className="px-3 py-1.5 rounded-lg bg-zinc-800 hover:bg-zinc-700 disabled:opacity-50 text-white text-xs font-semibold flex items-center gap-1 cursor-pointer flex-shrink-0"
-                            title="Regenerate Gambar"
-                          >
-                            <RefreshCw className={`w-3.5 h-3.5 ${isGeneratingSlideVisual ? "animate-spin" : ""}`} />
-                            <span>Ubah</span>
-                          </button>
-                        </div>
-                        <p className="text-[10px] text-zinc-400 font-mono">
-                          Tip: Gambar otomatis disesuaikan dengan konteks judul riset & bab terkait.
-                        </p>
-                      </div>
-                    </div>
-                  )}
-
-                </div>
-              </div>
-
-              {/* Bottom Footer Info */}
-              <div className="pt-3 border-t border-zinc-850 flex items-center justify-between text-[11px] text-zinc-400 font-mono">
-                <span>{currentDoc.institution} &bull; {currentDoc.candidateName} (NIM: {currentDoc.candidateId})</span>
-                <span>Slide {activeSlideIndex + 1} / {currentDoc.slides.length}</span>
-              </div>
-            </div>
-          )}
-
-          {/* Speaker Notes Card */}
-          <div className="p-4 rounded-xl bg-zinc-50 dark:bg-zinc-900/60 border border-zinc-200 dark:border-zinc-800 space-y-2">
-            <div className="flex items-center justify-between">
-              <span className="text-xs font-semibold text-zinc-900 dark:text-zinc-100 flex items-center gap-1.5">
-                <Brain className="w-4 h-4 text-sky-500" />
-                Catatan Presenter & Naskah Narasi Sidang (Speaker Notes)
-              </span>
-              <button
-                type="button"
-                onClick={handleCopySpeakerNotes}
-                className="px-2.5 py-1 rounded-md text-[11px] font-medium text-zinc-600 dark:text-zinc-400 hover:bg-zinc-200 dark:hover:bg-zinc-800 transition-colors flex items-center gap-1 cursor-pointer"
-              >
-                {copiedNotes ? (
-                  <>
-                    <Check className="w-3.5 h-3.5 text-emerald-500" />
-                    <span className="text-emerald-500 font-semibold">Tersalin</span>
-                  </>
-                ) : (
-                  <>
-                    <Copy className="w-3.5 h-3.5" />
-                    <span>Salin Catatan</span>
-                  </>
-                )}
-              </button>
-            </div>
-            <p className="text-xs text-zinc-700 dark:text-zinc-300 italic leading-relaxed bg-white dark:bg-zinc-950 p-3 rounded-lg border border-zinc-200 dark:border-zinc-850">
-              "{currentDoc.slides[activeSlideIndex]?.speakerNotes}"
-            </p>
-            <p className="text-[11px] text-zinc-500 dark:text-zinc-400">
-              Gunakan panduan narasi di atas saat memaparkan slide ini kepada Dosen Pembimbing atau Dewan Penguji Sidang.
-            </p>
+            )}
+            <button
+              type="button"
+              onClick={() => {
+                setWorkspaceCategory("naskah");
+                setActiveTab("naskah");
+              }}
+              className="px-4 py-2.5 rounded-xl bg-zinc-100 hover:bg-zinc-200 dark:bg-zinc-800 dark:hover:bg-zinc-700 text-zinc-800 dark:text-zinc-200 font-semibold text-xs transition-all cursor-pointer"
+            >
+              Kembali ke Naskah
+            </button>
           </div>
         </div>
       )}
