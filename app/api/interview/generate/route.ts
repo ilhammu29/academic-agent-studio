@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { DiagnosticQuestion, ProposalCategory } from "@/types/studio";
 import { generateDiagnosticQuestions } from "@/lib/questions";
+import { callGeminiApi } from "@/lib/geminiApi";
 
 export async function POST(req: Request) {
   try {
@@ -97,34 +98,23 @@ Format JSON valid tanpa markdown (\`\`\`json):
 }
 `;
 
-        const geminiRes = await fetch(
-          `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash-lite:generateContent?key=${apiKey}`,
-          {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              contents: [{ parts: [{ text: prompt }] }],
-              generationConfig: {
-                temperature: 0.6,
-                maxOutputTokens: 2048,
-              }
-            })
-          }
-        );
+        const geminiResult = await callGeminiApi({
+          apiKey,
+          prompt,
+          temperature: 0.6,
+          maxOutputTokens: 2048,
+        });
 
-        if (geminiRes.ok) {
-          const gData = await geminiRes.json();
-          const rawText = gData?.candidates?.[0]?.content?.parts?.[0]?.text;
-          if (rawText) {
-            const cleanJson = rawText.replace(/```json/g, "").replace(/```/g, "").trim();
-            const parsed = JSON.parse(cleanJson);
-            if (parsed.questions && Array.isArray(parsed.questions) && parsed.questions.length > 0) {
-              return NextResponse.json({
-                success: true,
-                engine: "gemini-3.5-flash-lite",
-                questions: parsed.questions
-              });
-            }
+        if (geminiResult && geminiResult.text) {
+          const rawText = geminiResult.text;
+          const cleanJson = rawText.replace(/```json/g, "").replace(/```/g, "").trim();
+          const parsed = JSON.parse(cleanJson);
+          if (parsed.questions && Array.isArray(parsed.questions) && parsed.questions.length > 0) {
+            return NextResponse.json({
+              success: true,
+              engine: geminiResult.model,
+              questions: parsed.questions
+            });
           }
         }
       } catch (geminiError: any) {

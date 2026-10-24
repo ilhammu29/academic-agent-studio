@@ -13,7 +13,8 @@ import {
   PageNumber,
   Footer,
   Header,
-  convertInchesToTwip
+  convertInchesToTwip,
+  ImageRun
 } from "docx";
 import { ProposalDocument } from "@/types/studio";
 import { getSectionHeading, getSubSectionHeading } from "@/lib/academicNumbering";
@@ -32,6 +33,27 @@ import { getSectionHeading, getSubSectionHeading } from "@/lib/academicNumbering
 
 // Helper to convert centimeters to DXA (1 cm = 567 DXA)
 const cmToDxa = (cm: number) => Math.round(cm * 567);
+
+// Safe helper to convert base64 image data to Uint8Array for docx ImageRun
+function parseImageData(dataUrl?: string): Uint8Array | null {
+  if (!dataUrl) return null;
+  try {
+    const clean = dataUrl.includes(",") ? dataUrl.split(",")[1] : dataUrl;
+    if (typeof atob === "function") {
+      const binary = atob(clean);
+      const bytes = new Uint8Array(binary.length);
+      for (let i = 0; i < binary.length; i++) {
+        bytes[i] = binary.charCodeAt(i);
+      }
+      return bytes;
+    } else if (typeof Buffer !== "undefined") {
+      return Uint8Array.from(Buffer.from(clean, "base64"));
+    }
+  } catch (err) {
+    console.warn("Failed to parse image data for docx:", err);
+  }
+  return null;
+}
 
 export async function generateAcademicProposalDocx(doc: ProposalDocument): Promise<Blob> {
   const guideline = doc.campusGuideline;
@@ -199,6 +221,109 @@ export async function generateAcademicProposalDocx(doc: ProposalDocument): Promi
   };
 
   // Build the Document
+  const logoBytes = parseImageData(doc.campusLogoUrl);
+
+  const pengesahanSheet = doc.customSheets?.find(s => (s.id === "pengesahan" || s.type === "pengesahan"));
+  const pengesahanImgBytes = parseImageData(pengesahanSheet?.fileDataUrl);
+
+  const orisinalitasSheet = doc.customSheets?.find(s => (s.id === "orisinalitas" || s.type === "pernyataan_orisinalitas"));
+  const orisinalitasImgBytes = parseImageData(orisinalitasSheet?.fileDataUrl);
+
+  const extraSheets = (doc.customSheets || []).filter(
+    s => s.enabled !== false &&
+         s.type !== "pengesahan" &&
+         s.type !== "pernyataan_orisinalitas" &&
+         s.type !== "kata_pengantar" &&
+         s.type !== "abstrak"
+  );
+
+  const primarySigner1 = pengesahanSheet?.signers?.[0] || doc.approvalSheet?.primarySigners?.[0] || {
+    role: "Dosen Pembimbing Akademik Utama",
+    name: "Dr. Ir. Hendro Prabowo, M.T.",
+    idNumber: "NIP. 19780512 200312 1 002"
+  };
+  const primarySigner2 = pengesahanSheet?.signers?.[1] || doc.approvalSheet?.primarySigners?.[1] || {
+    role: doc.category === "magang" ? `Pembimbing Lapangan (${doc.targetEntity})` : "Dosen Pembimbing Pendamping",
+    name: "Ratna Kusuma Dewi, S.T., M.Sc.",
+    idNumber: doc.category === "magang" ? "NIK / NIP Mitra Industri 20210998" : "NIP. 19850914 201012 2 004"
+  };
+  const headSigner = pengesahanSheet?.signers?.[2] || doc.approvalSheet?.headSigner || {
+    role: `Ketua Program Studi ${doc.facultyMajor}`,
+    name: "Prof. Dr. Ir. Wahyu Wibowo, M.Sc.",
+    idNumber: "NIP. 19690325 199403 1 001"
+  };
+
+  const teoriCount = doc.bab2?.landasanTeori?.length || 13;
+  const pBab1 = 1;
+  const pBab2 = 8;
+  const pBab3 = pBab2 + Math.max(10, Math.ceil(teoriCount * 1.1));
+  const pBab4 = pBab3 + 12;
+  const pBab5 = pBab4 + 10;
+  const pDaftarPustaka = pBab5 + 5;
+  const pLampiran = pDaftarPustaka + 4;
+
+  const extraDocxSections = extraSheets.map((sheet) => {
+    const sheetImg = parseImageData(sheet.fileDataUrl);
+    const children: any[] = [
+      createHeading1(sheet.title.toUpperCase()),
+      new Paragraph({ spacing: { after: 200 } }),
+    ];
+
+    if (sheetImg) {
+      children.push(
+        new Paragraph({
+          alignment: AlignmentType.CENTER,
+          spacing: { before: 200, after: 200 },
+          children: [
+            new ImageRun({
+              type: "png",
+              data: sheetImg,
+              transformation: { width: 480, height: 640 },
+            }),
+          ],
+        })
+      );
+    }
+
+    if (sheet.content) {
+      sheet.content.split("\n\n").forEach((p) => {
+        if (p.trim()) children.push(createBodyParagraph(p.trim()));
+      });
+    }
+
+    if (sheet.signers && sheet.signers.length > 0) {
+      children.push(
+        new Paragraph({ spacing: { before: 400, after: 100 } }),
+        new Table({
+          width: { size: 100, type: WidthType.PERCENTAGE },
+          borders: {
+            top: noBorder, bottom: noBorder, left: noBorder, right: noBorder,
+            insideHorizontal: noBorder, insideVertical: noBorder,
+          },
+          rows: [
+            new TableRow({
+              children: sheet.signers.map((s) => (
+                new TableCell({
+                  width: { size: Math.floor(100 / sheet.signers!.length), type: WidthType.PERCENTAGE },
+                  children: [
+                    new Paragraph({ alignment: AlignmentType.CENTER, children: [new TextRun({ text: s.role, font: FONT_FAMILY, bold: true })] }),
+                    new Paragraph({ spacing: { before: 800 }, alignment: AlignmentType.CENTER, children: [new TextRun({ text: `( ${s.name} )`, font: FONT_FAMILY, underline: {} })] }),
+                    new Paragraph({ alignment: AlignmentType.CENTER, children: [new TextRun({ text: s.idNumber || "", font: FONT_FAMILY, size: 22 })] }),
+                  ],
+                })
+              )),
+            }),
+          ],
+        })
+      );
+    }
+
+    return {
+      properties: standardPageProperties,
+      children,
+    };
+  });
+
   const docxDocument = new Document({
     styles: {
       default: {
@@ -229,7 +354,7 @@ export async function generateAcademicProposalDocx(doc: ProposalDocument): Promi
           }),
           new Paragraph({
             alignment: AlignmentType.CENTER,
-            spacing: { after: 400 },
+            spacing: { after: 300 },
             children: [
               new TextRun({
                 text: doc.category === "magang" ? "PROGRAM MAGANG INDUSTRI & RISET TERAPAN" : "USULAN PENELITIAN SKRIPSI",
@@ -241,7 +366,7 @@ export async function generateAcademicProposalDocx(doc: ProposalDocument): Promi
           }),
           new Paragraph({
             alignment: AlignmentType.CENTER,
-            spacing: { before: 400, after: 400 },
+            spacing: { before: 300, after: 300 },
             children: [
               new TextRun({
                 text: doc.title.toUpperCase(),
@@ -251,9 +376,24 @@ export async function generateAcademicProposalDocx(doc: ProposalDocument): Promi
               }),
             ],
           }),
+          ...(logoBytes ? [
+            new Paragraph({
+              alignment: AlignmentType.CENTER,
+              spacing: { before: 400, after: 400 },
+              children: [
+                new ImageRun({
+                  type: "png",
+                  data: logoBytes,
+                  transformation: { width: 130, height: 130 },
+                }),
+              ],
+            }),
+          ] : [
+            new Paragraph({ spacing: { before: 600, after: 200 } }),
+          ]),
           new Paragraph({
             alignment: AlignmentType.CENTER,
-            spacing: { before: 800, after: 120 },
+            spacing: { before: 400, after: 120 },
             children: [
               new TextRun({
                 text: "Diajukan oleh:",
@@ -277,7 +417,7 @@ export async function generateAcademicProposalDocx(doc: ProposalDocument): Promi
           }),
           new Paragraph({
             alignment: AlignmentType.CENTER,
-            spacing: { after: 1000 },
+            spacing: { after: 800 },
             children: [
               new TextRun({
                 text: `NIM: ${doc.candidateId}`,
@@ -288,7 +428,7 @@ export async function generateAcademicProposalDocx(doc: ProposalDocument): Promi
           }),
           new Paragraph({
             alignment: AlignmentType.CENTER,
-            spacing: { before: 600, after: 80 },
+            spacing: { before: 400, after: 80 },
             children: [
               new TextRun({
                 text: doc.facultyMajor.toUpperCase(),
@@ -332,85 +472,99 @@ export async function generateAcademicProposalDocx(doc: ProposalDocument): Promi
         children: [
           createHeading1(doc.approvalSheet?.title || "LEMBAR PENGESAHAN PROPOSAL"),
           new Paragraph({ spacing: { after: 200 } }),
-          createBodyParagraph(`Judul Proposal: ${doc.title}`),
-          createBodyParagraph(`Nama Mahasiswa: ${doc.candidateName} (NIM: ${doc.candidateId})`),
-          createBodyParagraph(`Program Studi: ${doc.facultyMajor}`),
-          createBodyParagraph(`Instansi Tujuan: ${doc.targetEntity} (${doc.targetDepartment})`),
-          createBodyParagraph(`Waktu Pelaksanaan: ${doc.durationMonths} Bulan (${doc.bab4.jadwalMatriks.length * 4 || 16} Minggu Kerja Penuh)`),
-          new Paragraph({ spacing: { after: 300 } }),
-          new Paragraph({
-            alignment: AlignmentType.RIGHT,
-            spacing: { after: 300 },
-            children: [
-              new TextRun({
-                text: doc.approvalSheet?.approvalDate ? `Disahkan: ${doc.approvalSheet.approvalDate}` : `Disetujui pada tanggal: ${doc.generationDate}`,
-                font: FONT_FAMILY,
-                size: 24,
-              }),
-            ],
-          }),
-          new Paragraph({
-            alignment: AlignmentType.CENTER,
-            spacing: { after: 120 },
-            children: [
-              new TextRun({ text: "Menyetujui,", font: FONT_FAMILY, size: 24 }),
-            ],
-          }),
-          new Table({
-            width: { size: 100, type: WidthType.PERCENTAGE },
-            borders: {
-              top: noBorder, bottom: noBorder, left: noBorder, right: noBorder,
-              insideHorizontal: noBorder, insideVertical: noBorder,
-            },
-            rows: [
-              new TableRow({
-                children: [
-                  new TableCell({
-                    width: { size: 50, type: WidthType.PERCENTAGE },
-                    children: [
-                      new Paragraph({ alignment: AlignmentType.CENTER, children: [new TextRun({ text: doc.approvalSheet?.primarySigners?.[0]?.role || "Dosen Pembimbing Akademik,", font: FONT_FAMILY, bold: true })] }),
-                      new Paragraph({ spacing: { before: 800 }, alignment: AlignmentType.CENTER, children: [new TextRun({ text: `( ${doc.approvalSheet?.primarySigners?.[0]?.name || "Dr. Ir. Suharyanto, M.Sc."} )`, font: FONT_FAMILY, underline: {} })] }),
-                      new Paragraph({ alignment: AlignmentType.CENTER, children: [new TextRun({ text: doc.approvalSheet?.primarySigners?.[0]?.idNumber || "NIP. 19780512 200312 1 002", font: FONT_FAMILY })] }),
-                    ],
-                  }),
-                  new TableCell({
-                    width: { size: 50, type: WidthType.PERCENTAGE },
-                    children: [
-                      new Paragraph({ alignment: AlignmentType.CENTER, children: [new TextRun({ text: doc.approvalSheet?.primarySigners?.[1]?.role || (doc.category === "magang" ? "Pembimbing Lapangan / Mitra," : "Dosen Pembimbing Pendamping,"), font: FONT_FAMILY, bold: true })] }),
-                      new Paragraph({ spacing: { before: 800 }, alignment: AlignmentType.CENTER, children: [new TextRun({ text: `( ${doc.approvalSheet?.primarySigners?.[1]?.name || (doc.category === "magang" ? `Lead Mentor ${doc.targetEntity}` : "Dian Pratama, M.Kom.")} )`, font: FONT_FAMILY, underline: {} })] }),
-                      new Paragraph({ alignment: AlignmentType.CENTER, children: [new TextRun({ text: doc.approvalSheet?.primarySigners?.[1]?.idNumber || "NIP / NIK Mitra Terkait", font: FONT_FAMILY })] }),
-                    ],
-                  }),
-                ],
-              }),
-            ],
-          }),
-          new Paragraph({
-            alignment: AlignmentType.CENTER,
-            spacing: { before: 500, after: 80 },
-            children: [
-              new TextRun({ text: "Mengetahui,", font: FONT_FAMILY, size: 24 }),
-            ],
-          }),
-          new Paragraph({
-            alignment: AlignmentType.CENTER,
-            spacing: { after: 700 },
-            children: [
-              new TextRun({ text: doc.approvalSheet?.headSigner?.role || "Ketua Program Studi", font: FONT_FAMILY, bold: true, size: 24 }),
-            ],
-          }),
-          new Paragraph({
-            alignment: AlignmentType.CENTER,
-            children: [
-              new TextRun({ text: `( ${doc.approvalSheet?.headSigner?.name || "Prof. Dr. Ir. Budi Hartono, M.Sc."} )`, font: FONT_FAMILY, bold: true, underline: {}, size: 24 }),
-            ],
-          }),
-          new Paragraph({
-            alignment: AlignmentType.CENTER,
-            children: [
-              new TextRun({ text: doc.approvalSheet?.headSigner?.idNumber || "NIP. 19680315 199303 1 001", font: FONT_FAMILY, size: 22 }),
-            ],
-          }),
+          ...(pengesahanImgBytes ? [
+            new Paragraph({
+              alignment: AlignmentType.CENTER,
+              spacing: { before: 200, after: 200 },
+              children: [
+                new ImageRun({
+                  type: "png",
+                  data: pengesahanImgBytes,
+                  transformation: { width: 480, height: 640 },
+                }),
+              ],
+            }),
+          ] : [
+            createBodyParagraph(`Judul Proposal: ${doc.title}`),
+            createBodyParagraph(`Nama Mahasiswa: ${doc.candidateName} (NIM: ${doc.candidateId})`),
+            createBodyParagraph(`Program Studi: ${doc.facultyMajor}`),
+            createBodyParagraph(`Instansi Tujuan: ${doc.targetEntity} (${doc.targetDepartment})`),
+            createBodyParagraph(`Waktu Pelaksanaan: ${doc.durationMonths} Bulan (${doc.bab4.jadwalMatriks.length * 4 || 16} Minggu Kerja Penuh)`),
+            new Paragraph({ spacing: { after: 300 } }),
+            new Paragraph({
+              alignment: AlignmentType.RIGHT,
+              spacing: { after: 300 },
+              children: [
+                new TextRun({
+                  text: doc.approvalSheet?.approvalDate ? `Disahkan: ${doc.approvalSheet.approvalDate}` : `Disetujui pada tanggal: ${doc.generationDate}`,
+                  font: FONT_FAMILY,
+                  size: 24,
+                }),
+              ],
+            }),
+            new Paragraph({
+              alignment: AlignmentType.CENTER,
+              spacing: { after: 120 },
+              children: [
+                new TextRun({ text: "Menyetujui,", font: FONT_FAMILY, size: 24 }),
+              ],
+            }),
+            new Table({
+              width: { size: 100, type: WidthType.PERCENTAGE },
+              borders: {
+                top: noBorder, bottom: noBorder, left: noBorder, right: noBorder,
+                insideHorizontal: noBorder, insideVertical: noBorder,
+              },
+              rows: [
+                new TableRow({
+                  children: [
+                    new TableCell({
+                      width: { size: 50, type: WidthType.PERCENTAGE },
+                      children: [
+                        new Paragraph({ alignment: AlignmentType.CENTER, children: [new TextRun({ text: primarySigner1.role, font: FONT_FAMILY, bold: true })] }),
+                        new Paragraph({ spacing: { before: 800 }, alignment: AlignmentType.CENTER, children: [new TextRun({ text: `( ${primarySigner1.name} )`, font: FONT_FAMILY, underline: {} })] }),
+                        new Paragraph({ alignment: AlignmentType.CENTER, children: [new TextRun({ text: primarySigner1.idNumber, font: FONT_FAMILY })] }),
+                      ],
+                    }),
+                    new TableCell({
+                      width: { size: 50, type: WidthType.PERCENTAGE },
+                      children: [
+                        new Paragraph({ alignment: AlignmentType.CENTER, children: [new TextRun({ text: primarySigner2.role, font: FONT_FAMILY, bold: true })] }),
+                        new Paragraph({ spacing: { before: 800 }, alignment: AlignmentType.CENTER, children: [new TextRun({ text: `( ${primarySigner2.name} )`, font: FONT_FAMILY, underline: {} })] }),
+                        new Paragraph({ alignment: AlignmentType.CENTER, children: [new TextRun({ text: primarySigner2.idNumber, font: FONT_FAMILY })] }),
+                      ],
+                    }),
+                  ],
+                }),
+              ],
+            }),
+            new Paragraph({
+              alignment: AlignmentType.CENTER,
+              spacing: { before: 500, after: 80 },
+              children: [
+                new TextRun({ text: "Mengetahui,", font: FONT_FAMILY, size: 24 }),
+              ],
+            }),
+            new Paragraph({
+              alignment: AlignmentType.CENTER,
+              spacing: { after: 700 },
+              children: [
+                new TextRun({ text: headSigner.role, font: FONT_FAMILY, bold: true, size: 24 }),
+              ],
+            }),
+            new Paragraph({
+              alignment: AlignmentType.CENTER,
+              children: [
+                new TextRun({ text: `( ${headSigner.name} )`, font: FONT_FAMILY, bold: true, underline: {}, size: 24 }),
+              ],
+            }),
+            new Paragraph({
+              alignment: AlignmentType.CENTER,
+              children: [
+                new TextRun({ text: headSigner.idNumber, font: FONT_FAMILY, size: 22 }),
+              ],
+            }),
+          ]),
         ],
       },
 
@@ -422,46 +576,65 @@ export async function generateAcademicProposalDocx(doc: ProposalDocument): Promi
         children: [
           createHeading1("SURAT PERNYATAAN BEBAS PLAGIARISME & KEASLIAN KARYA"),
           new Paragraph({ spacing: { after: 240 } }),
-          createBodyParagraph("Yang bertanda tangan di bawah ini:"),
-          new Paragraph({
-            spacing: { after: 80, line: 360 },
-            indent: { left: cmToDxa(0.8) },
-            children: [
-              new TextRun({ text: "Nama\t\t: ", font: FONT_FAMILY, size: 24 }),
-              new TextRun({ text: doc.candidateName, bold: true, font: FONT_FAMILY, size: 24 }),
-            ],
-          }),
-          new Paragraph({
-            spacing: { after: 80, line: 360 },
-            indent: { left: cmToDxa(0.8) },
-            children: [
-              new TextRun({ text: "NIM\t\t: ", font: FONT_FAMILY, size: 24 }),
-              new TextRun({ text: doc.candidateId, font: FONT_FAMILY, size: 24 }),
-            ],
-          }),
-          new Paragraph({
-            spacing: { after: 80, line: 360 },
-            indent: { left: cmToDxa(0.8) },
-            children: [
-              new TextRun({ text: "Program Studi\t: ", font: FONT_FAMILY, size: 24 }),
-              new TextRun({ text: doc.facultyMajor, font: FONT_FAMILY, size: 24 }),
-            ],
-          }),
-          new Paragraph({
-            spacing: { after: 200, line: 360 },
-            indent: { left: cmToDxa(0.8) },
-            children: [
-              new TextRun({ text: "Perguruan Tinggi\t: ", font: FONT_FAMILY, size: 24 }),
-              new TextRun({ text: doc.institution, font: FONT_FAMILY, size: 24 }),
-            ],
-          }),
-          createBodyParagraph(`Menyatakan dengan sesungguhnya bahwa naskah usulan karya ilmiah yang berjudul "${doc.title}" adalah benar-benar hasil karya asli dan pemikiran mandiri saya, bukan merupakan hasil penjiplakan, fabrikasi data, maupun tindakan plagiarisme dari karya orang lain. Apabila di kemudian hari terbukti terdapat unsur penipuan atau plagiarisme, saya bersedia menerima sanksi akademik sesuai peraturan yang berlaku di ${doc.institution} dan hukum Republik Indonesia.`),
-          new Paragraph({ spacing: { before: 400, after: 100 }, alignment: AlignmentType.RIGHT, children: [new TextRun({ text: `${doc.institution.split(" ").slice(-1)[0] || "Kota"}, ${doc.generationDate}`, font: FONT_FAMILY, size: 24 })] }),
-          new Paragraph({ alignment: AlignmentType.RIGHT, spacing: { after: 600 }, children: [new TextRun({ text: "Yang membuat pernyataan,\n[Materai Rp 10.000]", font: FONT_FAMILY, size: 22 })] }),
-          new Paragraph({ alignment: AlignmentType.RIGHT, children: [new TextRun({ text: doc.candidateName, bold: true, underline: {}, font: FONT_FAMILY, size: 24 })] }),
-          new Paragraph({ alignment: AlignmentType.RIGHT, children: [new TextRun({ text: `NIM. ${doc.candidateId}`, font: FONT_FAMILY, size: 22 })] }),
+          ...(orisinalitasImgBytes ? [
+            new Paragraph({
+              alignment: AlignmentType.CENTER,
+              spacing: { before: 200, after: 200 },
+              children: [
+                new ImageRun({
+                  type: "png",
+                  data: orisinalitasImgBytes,
+                  transformation: { width: 480, height: 640 },
+                }),
+              ],
+            }),
+          ] : [
+            createBodyParagraph("Yang bertanda tangan di bawah ini:"),
+            new Paragraph({
+              spacing: { after: 80, line: 360 },
+              indent: { left: cmToDxa(0.8) },
+              children: [
+                new TextRun({ text: "Nama\t\t: ", font: FONT_FAMILY, size: 24 }),
+                new TextRun({ text: doc.candidateName, bold: true, font: FONT_FAMILY, size: 24 }),
+              ],
+            }),
+            new Paragraph({
+              spacing: { after: 80, line: 360 },
+              indent: { left: cmToDxa(0.8) },
+              children: [
+                new TextRun({ text: "NIM\t\t: ", font: FONT_FAMILY, size: 24 }),
+                new TextRun({ text: doc.candidateId, font: FONT_FAMILY, size: 24 }),
+              ],
+            }),
+            new Paragraph({
+              spacing: { after: 80, line: 360 },
+              indent: { left: cmToDxa(0.8) },
+              children: [
+                new TextRun({ text: "Program Studi\t: ", font: FONT_FAMILY, size: 24 }),
+                new TextRun({ text: doc.facultyMajor, font: FONT_FAMILY, size: 24 }),
+              ],
+            }),
+            new Paragraph({
+              spacing: { after: 200, line: 360 },
+              indent: { left: cmToDxa(0.8) },
+              children: [
+                new TextRun({ text: "Perguruan Tinggi\t: ", font: FONT_FAMILY, size: 24 }),
+                new TextRun({ text: doc.institution, font: FONT_FAMILY, size: 24 }),
+              ],
+            }),
+            createBodyParagraph(`Menyatakan dengan sesungguhnya bahwa naskah usulan karya ilmiah yang berjudul "${doc.title}" adalah benar-benar hasil karya asli dan pemikiran mandiri saya, bukan merupakan hasil penjiplakan, fabrikasi data, maupun tindakan plagiarisme dari karya orang lain. Apabila di kemudian hari terbukti terdapat unsur penipuan atau plagiarisme, saya bersedia menerima sanksi akademik sesuai peraturan yang berlaku di ${doc.institution} dan hukum Republik Indonesia.`),
+            new Paragraph({ spacing: { before: 400, after: 100 }, alignment: AlignmentType.RIGHT, children: [new TextRun({ text: `${doc.institution.split(" ").slice(-1)[0] || "Kota"}, ${doc.generationDate}`, font: FONT_FAMILY, size: 24 })] }),
+            new Paragraph({ alignment: AlignmentType.RIGHT, spacing: { after: 600 }, children: [new TextRun({ text: "Yang membuat pernyataan,\n[Materai Rp 10.000]", font: FONT_FAMILY, size: 22 })] }),
+            new Paragraph({ alignment: AlignmentType.RIGHT, children: [new TextRun({ text: doc.candidateName, bold: true, underline: {}, font: FONT_FAMILY, size: 24 })] }),
+            new Paragraph({ alignment: AlignmentType.RIGHT, children: [new TextRun({ text: `NIM. ${doc.candidateId}`, font: FONT_FAMILY, size: 22 })] }),
+          ]),
         ],
       },
+
+      // ==========================================
+      // SECTION 2B-EXTRA: LEMBAR KHUSUS & SCAN FORM KAMPUS
+      // ==========================================
+      ...extraDocxSections,
 
       // ==========================================
       // SECTION 2C: KATA PENGANTAR
@@ -547,17 +720,21 @@ export async function generateAcademicProposalDocx(doc: ProposalDocument): Promi
             { title: "HALAMAN JUDUL / COVER", page: "i" },
             { title: "LEMBAR PENGESAHAN", page: "ii" },
             { title: "LEMBAR PERNYATAAN BEBAS PLAGIARISME", page: "iii" },
-            { title: "KATA PENGANTAR", page: "iv" },
-            { title: "ABSTRAK / ABSTRACT", page: "v" },
-            { title: "DAFTAR ISI", page: "vi" },
-            { title: "DAFTAR GAMBAR & TABEL", page: "vii" },
-            { title: "BAB I PENDAHULUAN", page: "1" },
-            { title: "BAB II TINJAUAN PUSTAKA / LANDASAN TEORI", page: "8" },
-            { title: "BAB III METODOLOGI PENELITIAN / PELAKSANAAN", page: "26" },
-            { title: "BAB IV JADWAL KEGIATAN & RENCANA ANGGARAN", page: "39" },
-            { title: "BAB V KESIMPULAN & REKOMENDASI", page: "46" },
-            { title: "DAFTAR PUSTAKA", page: "50" },
-            { title: "LAMPIRAN-LAMPIRAN", page: "55" },
+            ...extraSheets.map((s, idx) => ({
+              title: s.title.toUpperCase(),
+              page: ["iv", "v", "vi", "vii", "viii", "ix"][idx] || "iv",
+            })),
+            { title: "KATA PENGANTAR", page: ["iv", "v", "vi", "vii", "viii", "ix"][extraSheets.length] || "iv" },
+            { title: "ABSTRAK / ABSTRACT", page: ["v", "vi", "vii", "viii", "ix", "x"][extraSheets.length] || "v" },
+            { title: "DAFTAR ISI", page: ["vi", "vii", "viii", "ix", "x", "xi"][extraSheets.length] || "vi" },
+            { title: "DAFTAR GAMBAR & TABEL", page: ["vii", "viii", "ix", "x", "xi", "xii"][extraSheets.length] || "vii" },
+            { title: "BAB I PENDAHULUAN", page: `${pBab1}` },
+            { title: "BAB II TINJAUAN PUSTAKA / LANDASAN TEORI", page: `${pBab2}` },
+            { title: "BAB III METODOLOGI PENELITIAN / PELAKSANAAN", page: `${pBab3}` },
+            { title: "BAB IV JADWAL KEGIATAN & RENCANA ANGGARAN", page: `${pBab4}` },
+            { title: "BAB V KESIMPULAN & REKOMENDASI", page: `${pBab5}` },
+            { title: "DAFTAR PUSTAKA", page: `${pDaftarPustaka}` },
+            { title: "LAMPIRAN-LAMPIRAN", page: `${pLampiran}` },
           ].map((entry) =>
             new Paragraph({
               spacing: { after: 100, line: 360 },
@@ -683,6 +860,38 @@ export async function generateAcademicProposalDocx(doc: ProposalDocument): Promi
               ],
             }),
           ]),
+          ...(doc.documentFigures?.filter(f => f.chapterPlacement === 2 || f.chapterKey === "bab2") || []).flatMap(fig => {
+            const figImg = parseImageData(fig.imageDataUrl || fig.imageUrl);
+            const items: any[] = [
+              createHeading3(`${fig.figureNumber} ${fig.title}`),
+            ];
+            if (figImg) {
+              items.push(
+                new Paragraph({
+                  alignment: AlignmentType.CENTER,
+                  spacing: { before: 140, after: 100 },
+                  children: [
+                    new ImageRun({
+                      type: "png",
+                      data: figImg,
+                      transformation: { width: 450, height: 260 },
+                    }),
+                  ],
+                })
+              );
+            }
+            items.push(
+              new Paragraph({
+                alignment: AlignmentType.CENTER,
+                spacing: { after: 180 },
+                children: [
+                  new TextRun({ text: `${fig.figureNumber} ${fig.caption || fig.title}`, font: FONT_FAMILY, size: 22, bold: true }),
+                  new TextRun({ text: ` (Sumber: ${fig.sourceText || fig.source || "Peneliti, 2026"})`, font: FONT_FAMILY, size: 20, italics: true }),
+                ],
+              })
+            );
+            return items;
+          }),
         ],
       },
 
@@ -714,6 +923,39 @@ export async function generateAcademicProposalDocx(doc: ProposalDocument): Promi
 
           createHeading2(getSectionHeading(3, 3, "Rencana Capaian Kompetensi", hs)),
           ...doc.bab3.rencanaKompetensi.map((c) => createBulletItem(c)),
+
+          ...(doc.documentFigures?.filter(f => f.chapterPlacement === 3 || f.chapterKey === "bab3") || []).flatMap(fig => {
+            const figImg = parseImageData(fig.imageDataUrl || fig.imageUrl);
+            const items: any[] = [
+              createHeading3(`${fig.figureNumber} ${fig.title}`),
+            ];
+            if (figImg) {
+              items.push(
+                new Paragraph({
+                  alignment: AlignmentType.CENTER,
+                  spacing: { before: 140, after: 100 },
+                  children: [
+                    new ImageRun({
+                      type: "png",
+                      data: figImg,
+                      transformation: { width: 450, height: 260 },
+                    }),
+                  ],
+                })
+              );
+            }
+            items.push(
+              new Paragraph({
+                alignment: AlignmentType.CENTER,
+                spacing: { after: 180 },
+                children: [
+                  new TextRun({ text: `${fig.figureNumber} ${fig.caption || fig.title}`, font: FONT_FAMILY, size: 22, bold: true }),
+                  new TextRun({ text: ` (Sumber: ${fig.sourceText || fig.source || "Peneliti, 2026"})`, font: FONT_FAMILY, size: 20, italics: true }),
+                ],
+              })
+            );
+            return items;
+          }),
         ],
       },
 

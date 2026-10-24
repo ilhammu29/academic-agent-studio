@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { callGeminiApi } from "@/lib/geminiApi";
 
 export async function POST(req: Request) {
   try {
@@ -134,24 +135,15 @@ Tugas Anda:
 `;
         }
 
-        const geminiRes = await fetch(
-          `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash-lite:generateContent?key=${apiKey}`,
-          {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              contents: [{ parts: [{ text: `${systemPrompt}\n\n${promptContent}` }] }],
-              generationConfig: {
-                temperature: 0.7,
-                maxOutputTokens: 2500,
-              },
-            }),
-          }
-        );
+        const geminiResult = await callGeminiApi({
+          apiKey,
+          prompt: `${systemPrompt}\n\n${promptContent}`,
+          temperature: 0.7,
+          maxOutputTokens: 2500,
+        });
 
-        if (geminiRes.ok) {
-          const data = await geminiRes.json();
-          const replyText = data?.candidates?.[0]?.content?.parts?.[0]?.text || "";
+        if (geminiResult && geminiResult.text) {
+          const replyText = geminiResult.text;
           
           // Extract card if present
           let cardData = null;
@@ -169,7 +161,7 @@ Tugas Anda:
 
           return NextResponse.json({
             success: true,
-            engine: "gemini-3.5-flash-lite",
+            engine: geminiResult.model,
             reply: cleanReply,
             card: cardData
           });

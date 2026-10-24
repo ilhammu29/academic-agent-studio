@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { CampusGuideline } from "@/types/studio";
+import { callGeminiApi } from "@/lib/geminiApi";
 
 export async function POST(req: Request) {
   try {
@@ -69,37 +70,25 @@ PANDUAN LOGIKA EKSTRAKSI:
 - Wajib kembalikan HANYA string JSON murni (valid JSON) tanpa backtick markdown dan tanpa teks pembuka.
 `;
 
-        const geminiRes = await fetch(
-          `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash-lite:generateContent?key=${apiKey}`,
-          {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              contents: [{ parts: [{ text: prompt }] }],
-              generationConfig: {
-                temperature: 0.2,
-                maxOutputTokens: 2048,
-                responseMimeType: "application/json"
-              }
-            })
-          }
-        );
+        const geminiResult = await callGeminiApi({
+          apiKey,
+          prompt,
+          temperature: 0.2,
+          maxOutputTokens: 2048,
+        });
 
-        if (geminiRes.ok) {
-          const geminiData = await geminiRes.json();
-          const rawText = geminiData.candidates?.[0]?.content?.parts?.[0]?.text;
-          if (rawText) {
-            try {
-              const cleanJson = rawText.replace(/```json/gi, "").replace(/```/g, "").trim();
-              const parsed: CampusGuideline = JSON.parse(cleanJson);
-              return NextResponse.json({
-                success: true,
-                engine: "gemini-3.5-flash-lite",
-                guideline: parsed
-              });
-            } catch (pErr) {
-              console.warn("Gemini JSON parse fallback:", pErr);
-            }
+        if (geminiResult && geminiResult.text) {
+          const rawText = geminiResult.text;
+          try {
+            const cleanJson = rawText.replace(/```json/gi, "").replace(/```/g, "").trim();
+            const parsed: CampusGuideline = JSON.parse(cleanJson);
+            return NextResponse.json({
+              success: true,
+              engine: geminiResult.model,
+              guideline: parsed
+            });
+          } catch (pErr) {
+            console.warn("Gemini JSON parse fallback:", pErr);
           }
         }
       } catch (geminiErr) {

@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { TitleRecommendation } from "@/lib/titleGenerator";
 import { ProposalCategory } from "@/types/studio";
+import { callGeminiApi } from "@/lib/geminiApi";
 
 interface SimplePaper {
   title: string;
@@ -146,37 +147,25 @@ Keluarkan *hanya* format JSON valid:
 `;
         }
 
-        // Use active Gemini 3.5 Flash Lite or Flash Latest
-        const geminiRes = await fetch(
-          `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash-lite:generateContent?key=${apiKey}`,
-          {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              contents: [{ parts: [{ text: prompt }] }],
-              generationConfig: {
-                temperature: 0.6,
-                maxOutputTokens: 2048,
-              }
-            })
-          }
-        );
+        const geminiResult = await callGeminiApi({
+          apiKey,
+          prompt,
+          temperature: 0.6,
+          maxOutputTokens: 2048,
+        });
 
-        if (geminiRes.ok) {
-          const gData = await geminiRes.json();
-          const rawText = gData?.candidates?.[0]?.content?.parts?.[0]?.text;
-          if (rawText) {
-            const cleanJson = rawText.replace(/```json/g, "").replace(/```/g, "").trim();
-            const parsed = JSON.parse(cleanJson);
-            if (parsed.recommendations && Array.isArray(parsed.recommendations) && parsed.recommendations.length > 0) {
-              return NextResponse.json({
-                success: true,
-                engine: "gemini-3.5-flash-lite",
-                mode,
-                recommendations: parsed.recommendations,
-                papersCount: papers.length
-              });
-            }
+        if (geminiResult && geminiResult.text) {
+          const rawText = geminiResult.text;
+          const cleanJson = rawText.replace(/```json/g, "").replace(/```/g, "").trim();
+          const parsed = JSON.parse(cleanJson);
+          if (parsed.recommendations && Array.isArray(parsed.recommendations) && parsed.recommendations.length > 0) {
+            return NextResponse.json({
+              success: true,
+              engine: geminiResult.model,
+              mode,
+              recommendations: parsed.recommendations,
+              papersCount: papers.length
+            });
           }
         }
       } catch (geminiError: any) {

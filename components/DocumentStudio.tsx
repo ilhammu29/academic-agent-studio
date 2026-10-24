@@ -1666,60 +1666,63 @@ NIP / NIK.
                   </p>
 
                   {/* Signatures Grid */}
-                  <div className="grid grid-cols-2 gap-8 text-center pt-6">
-                    {currentDoc.approvalSheet?.primarySigners ? (
-                      currentDoc.approvalSheet.primarySigners.map((signer, sIdx) => (
-                        <div key={sIdx}>
+                  {(() => {
+                    const pengesahanSheet = currentDoc.customSheets?.find(s => s.type === "pengesahan" || s.id === "sheet-pengesahan");
+                    const activeSigners = (pengesahanSheet?.signers && pengesahanSheet.signers.length > 0)
+                      ? pengesahanSheet.signers.slice(0, 2)
+                      : (currentDoc.approvalSheet?.primarySigners && currentDoc.approvalSheet.primarySigners.length > 0)
+                        ? currentDoc.approvalSheet.primarySigners
+                        : [
+                            { role: "Dosen Pembimbing Akademik Utama", name: "Dr. Ir. Hendro Prabowo, M.T.", idNumber: "NIP. 19780512 200312 1 002" },
+                            { role: currentDoc.category === "magang" ? `Pembimbing Lapangan (${currentDoc.targetEntity})` : "Dosen Pembimbing Pendamping", name: "Ratna Kusuma Dewi, S.T., M.Sc.", idNumber: currentDoc.category === "magang" ? "NIK / NIP Mitra 20210998" : "NIP. 19850914 201012 2 004" }
+                          ];
+
+                    const headSigner = (pengesahanSheet?.signers && pengesahanSheet.signers.length > 2)
+                      ? pengesahanSheet.signers[2]
+                      : currentDoc.approvalSheet?.headSigner
+                        ? currentDoc.approvalSheet.headSigner
+                        : {
+                            role: `Ketua Program Studi ${currentDoc.facultyMajor}`,
+                            name: "Prof. Dr. Ir. Wahyu Wibowo, M.Sc.",
+                            idNumber: "NIP. 19690325 199403 1 001"
+                          };
+
+                    return (
+                      <>
+                        <div className="grid grid-cols-2 gap-8 text-center pt-6">
+                          {activeSigners.map((signer, sIdx) => (
+                            <div key={sIdx}>
+                              <p className="text-zinc-600 dark:text-zinc-400 print:text-black mb-16 leading-tight">
+                                Menyetujui,<br /><strong className="text-zinc-800 dark:text-zinc-200">{signer.role}</strong>
+                              </p>
+                              <p className="font-semibold text-zinc-900 dark:text-zinc-200 print:text-black underline underline-offset-4">
+                                {signer.name}
+                              </p>
+                              <p className="text-zinc-500 font-mono text-[11px] print:text-gray-600 mt-0.5">
+                                {signer.idNumber}
+                              </p>
+                            </div>
+                          ))}
+                        </div>
+
+                        {/* Ketua Program Studi */}
+                        <div className="mt-10 text-center">
                           <p className="text-zinc-600 dark:text-zinc-400 print:text-black mb-16 leading-tight">
-                            Menyetujui,<br /><strong className="text-zinc-800 dark:text-zinc-200">{signer.role}</strong>
+                            Mengetahui,<br />
+                            <strong className="text-zinc-800 dark:text-zinc-200">
+                              {headSigner.role}
+                            </strong>
                           </p>
                           <p className="font-semibold text-zinc-900 dark:text-zinc-200 print:text-black underline underline-offset-4">
-                            {signer.name}
+                            {headSigner.name}
                           </p>
                           <p className="text-zinc-500 font-mono text-[11px] print:text-gray-600 mt-0.5">
-                            {signer.idNumber}
+                            {headSigner.idNumber}
                           </p>
-                        </div>
-                      ))
-                    ) : (
-                      <>
-                        <div>
-                          <p className="text-zinc-600 dark:text-zinc-400 print:text-black mb-16 leading-tight">
-                            Menyetujui,<br /><strong className="text-zinc-800 dark:text-zinc-200">Dosen Pembimbing Akademik</strong>
-                          </p>
-                          <p className="font-semibold text-zinc-900 dark:text-zinc-200 print:text-black underline underline-offset-4">
-                            (Nama Dosen Pembimbing, M.Kom / Ph.D)
-                          </p>
-                          <p className="text-zinc-500 font-mono text-[11px] print:text-gray-600">NIP. 198501012010121001</p>
-                        </div>
-                        <div>
-                          <p className="text-zinc-600 dark:text-zinc-400 print:text-black mb-16 leading-tight">
-                            Menyetujui,<br /><strong className="text-zinc-800 dark:text-zinc-200">Pembimbing Lapangan / Mentor Industri</strong>
-                          </p>
-                          <p className="font-semibold text-zinc-900 dark:text-zinc-200 print:text-black underline underline-offset-4">
-                            (Nama Mentor Lapangan / PIC Mitra)
-                          </p>
-                          <p className="text-zinc-500 font-mono text-[11px] print:text-gray-600">NIK / NIP. 20210998</p>
                         </div>
                       </>
-                    )}
-                  </div>
-
-                  {/* Ketua Program Studi */}
-                  <div className="mt-10 text-center">
-                    <p className="text-zinc-600 dark:text-zinc-400 print:text-black mb-16 leading-tight">
-                      Mengetahui,<br />
-                      <strong className="text-zinc-800 dark:text-zinc-200">
-                        {currentDoc.approvalSheet?.headSigner?.role || "Ketua Program Studi"}
-                      </strong>
-                    </p>
-                    <p className="font-semibold text-zinc-900 dark:text-zinc-200 print:text-black underline underline-offset-4">
-                      {currentDoc.approvalSheet?.headSigner?.name || "(Nama Ketua Program Studi, Dr. Eng.)"}
-                    </p>
-                    <p className="text-zinc-500 font-mono text-[11px] print:text-gray-600 mt-0.5">
-                      {currentDoc.approvalSheet?.headSigner?.idNumber || "NIP. 197805122003121002"}
-                    </p>
-                  </div>
+                    );
+                  })()}
                 </div>
               );
             })()}
@@ -1817,7 +1820,73 @@ NIP / NIK.
           </section>
 
           {/* ========================================================================= */}
-          {/* BAGIAN 4: KATA PENGANTAR (Halaman iv) */}
+          {/* BAGIAN 3B: LEMBAR KHUSUS KAMPUS / BERITA ACARA / UPLOAD SCAN */}
+          {/* ========================================================================= */}
+          {((currentDoc.customSheets || []).filter(
+            s => s.enabled !== false &&
+                 s.type !== "pengesahan" &&
+                 s.type !== "pernyataan_orisinalitas" &&
+                 s.type !== "kata_pengantar" &&
+                 s.type !== "abstrak"
+          )).map((sheet, sIdx) => {
+            const romanPages = ["iv", "v", "vi", "vii", "viii", "ix"];
+            return (
+              <section
+                id={`section-custom-${sheet.id}`}
+                key={sheet.id}
+                className="relative pb-12 mb-12 border-b-2 border-zinc-200 dark:border-zinc-850 print:border-black font-serif text-xs sm:text-sm"
+              >
+                <div className="flex items-center justify-between mb-4 border-b border-zinc-200 dark:border-zinc-850 pb-2 print:border-black">
+                  <div className="text-center w-full">
+                    <span className="text-[10px] font-mono uppercase tracking-widest text-zinc-500 block mb-1">
+                      DOKUMEN LAMPIRAN RESMI KAMPUS
+                    </span>
+                    <h2 className="text-base sm:text-lg font-bold text-zinc-900 dark:text-zinc-100 uppercase tracking-wide print:text-black">
+                      {sheet.title}
+                    </h2>
+                  </div>
+                </div>
+
+                {sheet.fileDataUrl && (
+                  <div className="my-6 text-center">
+                    <img
+                      src={sheet.fileDataUrl}
+                      alt={sheet.title}
+                      className="max-h-[650px] w-auto mx-auto rounded-lg border border-zinc-300 dark:border-zinc-700 shadow-sm print:max-h-full print:border-none"
+                    />
+                  </div>
+                )}
+
+                {sheet.content && (
+                  <div className="space-y-4 max-w-2xl mx-auto text-justify leading-relaxed whitespace-pre-line">
+                    <p>{sheet.content}</p>
+                  </div>
+                )}
+
+                {sheet.signers && sheet.signers.length > 0 && (
+                  <div className="mt-10 pt-6 border-t border-zinc-200 dark:border-zinc-800 grid grid-cols-2 gap-8 text-center max-w-xl mx-auto">
+                    {sheet.signers.map((signer, idx) => (
+                      <div key={idx} className="space-y-1">
+                        <p className="text-zinc-500 text-[11px]">{signer.role}</p>
+                        <div className="h-16" />
+                        <p className="font-semibold underline underline-offset-4 text-zinc-900 dark:text-zinc-100 print:text-black">
+                          {signer.name}
+                        </p>
+                        <p className="font-mono text-[11px] text-zinc-500">{signer.idNumber}</p>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                <div className="mt-10 text-center font-serif text-xs text-zinc-400">
+                  {romanPages[sIdx] || "iv"}
+                </div>
+              </section>
+            );
+          })}
+
+          {/* ========================================================================= */}
+          {/* BAGIAN 4: KATA PENGANTAR (Halaman Formal) */}
           {/* ========================================================================= */}
           <section id="section-pengantar" className="relative pb-12 mb-12 border-b-2 border-zinc-200 dark:border-zinc-850 print:border-black font-serif text-xs sm:text-sm">
             <div className="flex items-center justify-between mb-4 border-b border-zinc-200 dark:border-zinc-850 pb-2 print:border-black">
@@ -1894,7 +1963,7 @@ NIP / NIK.
                 {currentDoc.executiveSummary || `Usulan penelitian ini dirancang untuk mengatasi permasalahan mendasar pada objek studi ${currentDoc.targetEntity}. Pendekatan yang diusulkan mengintegrasikan landasan teoretis terdepan dengan metodologi terukur demi mencapai efisiensi dan validitas ilmiah yang tinggi.`}
               </p>
               <p className="indent-6">
-                Metodologi pelaksanaan mencakup tahapan identifikasi kebutuhan, perancangan arsitektur pemecahan masalah, validasi empiris, serta evaluasi berbasis metrik kinerja terstandar. Diharapkan luaran dari kegiatan ini mampu memberikan kontribusi aplikatif berupa prototipe kerja dan pedoman operasional bagi ${currentDoc.targetEntity}, serta memperkaya literatur ilmiah di lingkungan ${currentDoc.institution}.
+                Metodologi pelaksanaan mencakup tahapan identifikasi kebutuhan, perancangan arsitektur pemecahan masalah, validasi empiris, serta evaluasi berbasis metrik kinerja terstandar. Diharapkan luaran dari kegiatan ini mampu memberikan kontribusi aplikatif berupa prototipe kerja dan pedoman operasional bagi {currentDoc.targetEntity}, serta memperkaya literatur ilmiah di lingkungan {currentDoc.institution}.
               </p>
 
               <div className="pt-2 font-sans text-xs">
@@ -1940,184 +2009,243 @@ NIP / NIK.
             </div>
 
             <div className="max-w-2xl mx-auto space-y-1.5 font-sans text-xs leading-normal">
-              {/* Preliminary Entries */}
-              {[
+            {(() => {
+              const extraSheets = (currentDoc.customSheets || []).filter(
+                s => s.enabled !== false &&
+                     s.type !== "pengesahan" &&
+                     s.type !== "pernyataan_orisinalitas" &&
+                     s.type !== "kata_pengantar" &&
+                     s.type !== "abstrak"
+              );
+
+              const latarLen = currentDoc.bab1?.latarBelakang?.length || 3;
+              const teoriLen = currentDoc.bab2?.landasanTeori?.length || 13;
+              const jadwalLen = currentDoc.bab4?.jadwalMatriks?.length || 8;
+              const bibLen = currentDoc.bibliography?.length || 10;
+
+              const p1_latar = 1;
+              const p1_rumusan = 1 + Math.max(1, Math.ceil(latarLen * 0.7));
+              const p1_batasan = p1_rumusan + 1;
+              const p1_tujuan = p1_batasan + 1;
+              const p1_manfaat = p1_tujuan + 1;
+
+              const p2_start = p1_manfaat + 1;
+              const p2_teori = p2_start;
+              const teoriPages = Math.max(3, Math.ceil(teoriLen * 0.9));
+              const p2_sintesis = p2_teori + teoriPages;
+              const p2_kerangka = p2_sintesis + 2;
+              const p2_hipotesis = p2_kerangka + 1;
+
+              const p3_start = p2_hipotesis + 1;
+              const p3_desain = p3_start;
+              const p3_populasi = p3_desain + 2;
+              const p3_definisi = p3_populasi + 2;
+              const p3_instrumen = p3_definisi + 2;
+              const p3_protokol = p3_instrumen + 2;
+
+              const p4_start = p3_protokol + 2;
+              const p4_jadwal = p4_start;
+              const p4_biaya = p4_jadwal + Math.max(1, Math.ceil(jadwalLen * 0.25));
+              const p4_luaran = p4_biaya + 2;
+
+              const p5_start = p4_luaran + 2;
+              const p5_kesimpulan = p5_start;
+              const p5_saran = p5_kesimpulan + 2;
+
+              const p_pustaka = p5_saran + 2;
+              const p_lampiran = p_pustaka + Math.max(1, Math.ceil(bibLen * 0.15));
+
+              const preliminaryItems = [
                 { title: "HALAMAN JUDUL / COVER", page: "i", anchor: "section-cover", isBold: true },
                 { title: "LEMBAR PENGESAHAN", page: "ii", anchor: "section-pengesahan", isBold: true },
                 { title: "LEMBAR PERNYATAAN BEBAS PLAGIARISME", page: "iii", anchor: "section-orisinalitas", isBold: true },
-                { title: "KATA PENGANTAR", page: "iv", anchor: "section-pengantar", isBold: true },
-                { title: "ABSTRAK", page: "v", anchor: "section-abstrak", isBold: true },
-                { title: "ABSTRACT", page: "vi", anchor: "section-abstrak", isBold: true },
-                { title: "DAFTAR ISI", page: "vii", anchor: "section-daftar-isi", isBold: true },
-                { title: "DAFTAR GAMBAR", page: "viii", anchor: "section-daftar-gambar", isBold: true },
-                { title: "DAFTAR TABEL", page: "ix", anchor: "section-daftar-tabel", isBold: true },
-                { title: "RINGKASAN EKSEKUTIF", page: "x", anchor: "section-ringkasan", isBold: true },
-              ].map((item, idx) => (
-                <div key={idx} className="flex items-baseline justify-between hover:text-indigo-600 dark:hover:text-indigo-400 cursor-pointer group" onClick={() => scrollToSection(item.anchor)}>
-                  <span className={`${item.isBold ? "font-semibold text-zinc-900 dark:text-zinc-100" : "text-zinc-700 dark:text-zinc-300"} group-hover:underline`}>{item.title}</span>
-                  <span className="flex-1 mx-2 border-b border-dotted border-zinc-300 dark:border-zinc-700" />
-                  <span className="font-mono text-zinc-500 font-medium">{item.page}</span>
-                </div>
-              ))}
+                ...extraSheets.map((s, idx) => ({
+                  title: s.title.toUpperCase(),
+                  page: ["iv", "v", "vi", "vii", "viii", "ix"][idx] || "iv",
+                  anchor: `section-custom-${s.id}`,
+                  isBold: true
+                })),
+                { title: "KATA PENGANTAR", page: ["iv", "v", "vi", "vii", "viii", "ix", "x"][extraSheets.length] || "iv", anchor: "section-pengantar", isBold: true },
+                { title: "ABSTRAK", page: ["v", "vi", "vii", "viii", "ix", "x", "xi"][extraSheets.length] || "v", anchor: "section-abstrak", isBold: true },
+                { title: "ABSTRACT", page: ["vi", "vii", "viii", "ix", "x", "xi", "xii"][extraSheets.length] || "vi", anchor: "section-abstrak", isBold: true },
+                { title: "DAFTAR ISI", page: ["vii", "viii", "ix", "x", "xi", "xii", "xiii"][extraSheets.length] || "vii", anchor: "section-daftar-isi", isBold: true },
+                { title: "DAFTAR GAMBAR", page: ["viii", "ix", "x", "xi", "xii", "xiii", "xiv"][extraSheets.length] || "viii", anchor: "section-daftar-gambar", isBold: true },
+                { title: "DAFTAR TABEL", page: ["ix", "x", "xi", "xii", "xiii", "xiv", "xv"][extraSheets.length] || "ix", anchor: "section-daftar-tabel", isBold: true },
+                { title: "RINGKASAN EKSEKUTIF", page: ["x", "xi", "xii", "xiii", "xiv", "xv", "xvi"][extraSheets.length] || "x", anchor: "section-ringkasan", isBold: true },
+              ];
 
-              <div className="pt-2" />
+              return (
+                <div className="max-w-2xl mx-auto space-y-1.5 font-sans text-xs leading-normal">
+                  {/* Preliminary Entries */}
+                  {preliminaryItems.map((item, idx) => (
+                    <div key={idx} className="flex items-baseline justify-between hover:text-indigo-600 dark:hover:text-indigo-400 cursor-pointer group" onClick={() => scrollToSection(item.anchor)}>
+                      <span className={`${item.isBold ? "font-semibold text-zinc-900 dark:text-zinc-100" : "text-zinc-700 dark:text-zinc-300"} group-hover:underline`}>{item.title}</span>
+                      <span className="flex-1 mx-2 border-b border-dotted border-zinc-300 dark:border-zinc-700" />
+                      <span className="font-mono text-zinc-500 font-medium">{item.page}</span>
+                    </div>
+                  ))}
 
-              {/* BAB I */}
-              <div className="flex items-baseline justify-between font-semibold text-zinc-900 dark:text-zinc-100 pt-2 cursor-pointer hover:text-indigo-600" onClick={() => scrollToSection("section-bab1")}>
-                <span>BAB I PENDAHULUAN</span>
-                <span className="flex-1 mx-2 border-b border-dotted border-zinc-300 dark:border-zinc-700" />
-                <span className="font-mono text-zinc-700 dark:text-zinc-300">1</span>
-              </div>
-              <div className="pl-4 space-y-1 text-zinc-600 dark:text-zinc-400">
-                <div className="flex items-baseline justify-between cursor-pointer hover:text-indigo-600" onClick={() => scrollToSection("section-bab1")}>
-                  <span>{getSectionHeading(1, 0, "Latar Belakang Masalah", currentDoc.campusGuideline?.headingStyle)}</span>
-                  <span className="flex-1 mx-2 border-b border-dotted border-zinc-300 dark:border-zinc-800" />
-                  <span className="font-mono">1</span>
-                </div>
-                <div className="flex items-baseline justify-between cursor-pointer hover:text-indigo-600" onClick={() => scrollToSection("section-bab1")}>
-                  <span>{getSectionHeading(1, 1, "Rumusan Masalah", currentDoc.campusGuideline?.headingStyle)}</span>
-                  <span className="flex-1 mx-2 border-b border-dotted border-zinc-300 dark:border-zinc-800" />
-                  <span className="font-mono">4</span>
-                </div>
-                <div className="flex items-baseline justify-between cursor-pointer hover:text-indigo-600" onClick={() => scrollToSection("section-bab1")}>
-                  <span>{getSectionHeading(1, 2, "Batasan Masalah", currentDoc.campusGuideline?.headingStyle)}</span>
-                  <span className="flex-1 mx-2 border-b border-dotted border-zinc-300 dark:border-zinc-800" />
-                  <span className="font-mono">5</span>
-                </div>
-                <div className="flex items-baseline justify-between cursor-pointer hover:text-indigo-600" onClick={() => scrollToSection("section-bab1")}>
-                  <span>{getSectionHeading(1, 3, "Tujuan Kegiatan / Riset", currentDoc.campusGuideline?.headingStyle)}</span>
-                  <span className="flex-1 mx-2 border-b border-dotted border-zinc-300 dark:border-zinc-800" />
-                  <span className="font-mono">6</span>
-                </div>
-                <div className="flex items-baseline justify-between cursor-pointer hover:text-indigo-600" onClick={() => scrollToSection("section-bab1")}>
-                  <span>{getSectionHeading(1, 4, "Manfaat Kegiatan (Mahasiswa, Mitra, Akademik)", currentDoc.campusGuideline?.headingStyle)}</span>
-                  <span className="flex-1 mx-2 border-b border-dotted border-zinc-300 dark:border-zinc-800" />
-                  <span className="font-mono">7</span>
-                </div>
-              </div>
+                  <div className="pt-2" />
 
-              {/* BAB II */}
-              <div className="flex items-baseline justify-between font-semibold text-zinc-900 dark:text-zinc-100 pt-2 cursor-pointer hover:text-indigo-600" onClick={() => scrollToSection("section-bab2")}>
-                <span>BAB II TINJAUAN PUSTAKA / LANDASAN TEORI</span>
-                <span className="flex-1 mx-2 border-b border-dotted border-zinc-300 dark:border-zinc-700" />
-                <span className="font-mono text-zinc-700 dark:text-zinc-300">8</span>
-              </div>
-              <div className="pl-4 space-y-1 text-zinc-600 dark:text-zinc-400">
-                <div className="flex items-baseline justify-between cursor-pointer hover:text-indigo-600" onClick={() => scrollToSection("section-bab2")}>
-                  <span>{getSectionHeading(2, 0, `Landasan Teori Ilmiah (${currentDoc.bab2.landasanTeori?.length || 13} Teori Otoritatif)`, currentDoc.campusGuideline?.headingStyle)}</span>
-                  <span className="flex-1 mx-2 border-b border-dotted border-zinc-300 dark:border-zinc-800" />
-                  <span className="font-mono">8</span>
-                </div>
-                <div className="flex items-baseline justify-between cursor-pointer hover:text-indigo-600" onClick={() => scrollToSection("section-bab2")}>
-                  <span>{getSectionHeading(2, 1, "Matriks Sintesis Keaslian Penelitian (PRISMA 2020)", currentDoc.campusGuideline?.headingStyle)}</span>
-                  <span className="flex-1 mx-2 border-b border-dotted border-zinc-300 dark:border-zinc-800" />
-                  <span className="font-mono">18</span>
-                </div>
-                <div className="flex items-baseline justify-between cursor-pointer hover:text-indigo-600" onClick={() => scrollToSection("section-bab2")}>
-                  <span>{getSectionHeading(2, 2, "Kerangka Konsep & Alur Berpikir", currentDoc.campusGuideline?.headingStyle)}</span>
-                  <span className="flex-1 mx-2 border-b border-dotted border-zinc-300 dark:border-zinc-800" />
-                  <span className="font-mono">22</span>
-                </div>
-                <div className="flex items-baseline justify-between cursor-pointer hover:text-indigo-600" onClick={() => scrollToSection("section-bab2")}>
-                  <span>{getSectionHeading(2, 3, "Hipotesis Penelitian / Ekspektasi Capaian", currentDoc.campusGuideline?.headingStyle)}</span>
-                  <span className="flex-1 mx-2 border-b border-dotted border-zinc-300 dark:border-zinc-800" />
-                  <span className="font-mono">24</span>
-                </div>
-              </div>
+                  {/* BAB I */}
+                  <div className="flex items-baseline justify-between font-semibold text-zinc-900 dark:text-zinc-100 pt-2 cursor-pointer hover:text-indigo-600" onClick={() => scrollToSection("section-bab1")}>
+                    <span>BAB I PENDAHULUAN</span>
+                    <span className="flex-1 mx-2 border-b border-dotted border-zinc-300 dark:border-zinc-700" />
+                    <span className="font-mono text-zinc-700 dark:text-zinc-300">{p1_latar}</span>
+                  </div>
+                  <div className="pl-4 space-y-1 text-zinc-600 dark:text-zinc-400">
+                    <div className="flex items-baseline justify-between cursor-pointer hover:text-indigo-600" onClick={() => scrollToSection("section-bab1")}>
+                      <span>{getSectionHeading(1, 0, "Latar Belakang Masalah", currentDoc.campusGuideline?.headingStyle)}</span>
+                      <span className="flex-1 mx-2 border-b border-dotted border-zinc-300 dark:border-zinc-800" />
+                      <span className="font-mono">{p1_latar}</span>
+                    </div>
+                    <div className="flex items-baseline justify-between cursor-pointer hover:text-indigo-600" onClick={() => scrollToSection("section-bab1")}>
+                      <span>{getSectionHeading(1, 1, "Rumusan Masalah", currentDoc.campusGuideline?.headingStyle)}</span>
+                      <span className="flex-1 mx-2 border-b border-dotted border-zinc-300 dark:border-zinc-800" />
+                      <span className="font-mono">{p1_rumusan}</span>
+                    </div>
+                    <div className="flex items-baseline justify-between cursor-pointer hover:text-indigo-600" onClick={() => scrollToSection("section-bab1")}>
+                      <span>{getSectionHeading(1, 2, "Batasan Masalah", currentDoc.campusGuideline?.headingStyle)}</span>
+                      <span className="flex-1 mx-2 border-b border-dotted border-zinc-300 dark:border-zinc-800" />
+                      <span className="font-mono">{p1_batasan}</span>
+                    </div>
+                    <div className="flex items-baseline justify-between cursor-pointer hover:text-indigo-600" onClick={() => scrollToSection("section-bab1")}>
+                      <span>{getSectionHeading(1, 3, "Tujuan Kegiatan / Riset", currentDoc.campusGuideline?.headingStyle)}</span>
+                      <span className="flex-1 mx-2 border-b border-dotted border-zinc-300 dark:border-zinc-800" />
+                      <span className="font-mono">{p1_tujuan}</span>
+                    </div>
+                    <div className="flex items-baseline justify-between cursor-pointer hover:text-indigo-600" onClick={() => scrollToSection("section-bab1")}>
+                      <span>{getSectionHeading(1, 4, "Manfaat Kegiatan (Mahasiswa, Mitra, Akademik)", currentDoc.campusGuideline?.headingStyle)}</span>
+                      <span className="flex-1 mx-2 border-b border-dotted border-zinc-300 dark:border-zinc-800" />
+                      <span className="font-mono">{p1_manfaat}</span>
+                    </div>
+                  </div>
 
-              {/* BAB III */}
-              <div className="flex items-baseline justify-between font-semibold text-zinc-900 dark:text-zinc-100 pt-2 cursor-pointer hover:text-indigo-600" onClick={() => scrollToSection("section-bab3")}>
-                <span>BAB III METODOLOGI PENELITIAN / PELAKSANAAN</span>
-                <span className="flex-1 mx-2 border-b border-dotted border-zinc-300 dark:border-zinc-700" />
-                <span className="font-mono text-zinc-700 dark:text-zinc-300">26</span>
-              </div>
-              <div className="pl-4 space-y-1 text-zinc-600 dark:text-zinc-400">
-                <div className="flex items-baseline justify-between cursor-pointer hover:text-indigo-600" onClick={() => scrollToSection("section-bab3")}>
-                  <span>{getSectionHeading(3, 0, "Desain Penelitian & Bagan Alir Pelaksanaan", currentDoc.campusGuideline?.headingStyle)}</span>
-                  <span className="flex-1 mx-2 border-b border-dotted border-zinc-300 dark:border-zinc-800" />
-                  <span className="font-mono">26</span>
-                </div>
-                <div className="flex items-baseline justify-between cursor-pointer hover:text-indigo-600" onClick={() => scrollToSection("section-bab3")}>
-                  <span>{getSectionHeading(3, 1, "Populasi, Sampel, & Subjek Penelitian / WBS", currentDoc.campusGuideline?.headingStyle)}</span>
-                  <span className="flex-1 mx-2 border-b border-dotted border-zinc-300 dark:border-zinc-800" />
-                  <span className="font-mono">30</span>
-                </div>
-                <div className="flex items-baseline justify-between cursor-pointer hover:text-indigo-600" onClick={() => scrollToSection("section-bab3")}>
-                  <span>{getSectionHeading(3, 2, "Definisi Operasional Variabel (Tabel 3 Garis Terbuka)", currentDoc.campusGuideline?.headingStyle)}</span>
-                  <span className="flex-1 mx-2 border-b border-dotted border-zinc-300 dark:border-zinc-800" />
-                  <span className="font-mono">32</span>
-                </div>
-                <div className="flex items-baseline justify-between cursor-pointer hover:text-indigo-600" onClick={() => scrollToSection("section-bab3")}>
-                  <span>{getSectionHeading(3, 3, "Instrumen Penelitian, Kalibrasi, & Perangkat Kerja", currentDoc.campusGuideline?.headingStyle)}</span>
-                  <span className="flex-1 mx-2 border-b border-dotted border-zinc-300 dark:border-zinc-800" />
-                  <span className="font-mono">35</span>
-                </div>
-                <div className="flex items-baseline justify-between cursor-pointer hover:text-indigo-600" onClick={() => scrollToSection("section-bab3")}>
-                  <span>{getSectionHeading(3, 4, "Protokol Etika Penelitian / SOP Industri", currentDoc.campusGuideline?.headingStyle)}</span>
-                  <span className="flex-1 mx-2 border-b border-dotted border-zinc-300 dark:border-zinc-800" />
-                  <span className="font-mono">37</span>
-                </div>
-              </div>
+                  {/* BAB II */}
+                  <div className="flex items-baseline justify-between font-semibold text-zinc-900 dark:text-zinc-100 pt-2 cursor-pointer hover:text-indigo-600" onClick={() => scrollToSection("section-bab2")}>
+                    <span>BAB II TINJAUAN PUSTAKA / LANDASAN TEORI</span>
+                    <span className="flex-1 mx-2 border-b border-dotted border-zinc-300 dark:border-zinc-700" />
+                    <span className="font-mono text-zinc-700 dark:text-zinc-300">{p2_start}</span>
+                  </div>
+                  <div className="pl-4 space-y-1 text-zinc-600 dark:text-zinc-400">
+                    <div className="flex items-baseline justify-between cursor-pointer hover:text-indigo-600" onClick={() => scrollToSection("section-bab2")}>
+                      <span>{getSectionHeading(2, 0, `Landasan Teori Ilmiah (${currentDoc.bab2.landasanTeori?.length || 13} Teori Otoritatif)`, currentDoc.campusGuideline?.headingStyle)}</span>
+                      <span className="flex-1 mx-2 border-b border-dotted border-zinc-300 dark:border-zinc-800" />
+                      <span className="font-mono">{p2_teori}</span>
+                    </div>
+                    <div className="flex items-baseline justify-between cursor-pointer hover:text-indigo-600" onClick={() => scrollToSection("section-bab2")}>
+                      <span>{getSectionHeading(2, 1, "Matriks Sintesis Keaslian Penelitian (PRISMA 2020)", currentDoc.campusGuideline?.headingStyle)}</span>
+                      <span className="flex-1 mx-2 border-b border-dotted border-zinc-300 dark:border-zinc-800" />
+                      <span className="font-mono">{p2_sintesis}</span>
+                    </div>
+                    <div className="flex items-baseline justify-between cursor-pointer hover:text-indigo-600" onClick={() => scrollToSection("section-bab2")}>
+                      <span>{getSectionHeading(2, 2, "Kerangka Konsep & Alur Berpikir", currentDoc.campusGuideline?.headingStyle)}</span>
+                      <span className="flex-1 mx-2 border-b border-dotted border-zinc-300 dark:border-zinc-800" />
+                      <span className="font-mono">{p2_kerangka}</span>
+                    </div>
+                    <div className="flex items-baseline justify-between cursor-pointer hover:text-indigo-600" onClick={() => scrollToSection("section-bab2")}>
+                      <span>{getSectionHeading(2, 3, "Hipotesis Penelitian / Ekspektasi Capaian", currentDoc.campusGuideline?.headingStyle)}</span>
+                      <span className="flex-1 mx-2 border-b border-dotted border-zinc-300 dark:border-zinc-800" />
+                      <span className="font-mono">{p2_hipotesis}</span>
+                    </div>
+                  </div>
 
-              {/* BAB IV */}
-              <div className="flex items-baseline justify-between font-semibold text-zinc-900 dark:text-zinc-100 pt-2 cursor-pointer hover:text-indigo-600" onClick={() => scrollToSection("section-bab4")}>
-                <span>BAB IV JADWAL KEGIATAN &amp; ALOKASI ANGGARAN</span>
-                <span className="flex-1 mx-2 border-b border-dotted border-zinc-300 dark:border-zinc-700" />
-                <span className="font-mono text-zinc-700 dark:text-zinc-300">39</span>
-              </div>
-              <div className="pl-4 space-y-1 text-zinc-600 dark:text-zinc-400">
-                <div className="flex items-baseline justify-between cursor-pointer hover:text-indigo-600" onClick={() => scrollToSection("section-bab4")}>
-                  <span>{getSectionHeading(4, 0, "Matriks Jadwal Pelaksanaan (Gantt Chart 16 Minggu)", currentDoc.campusGuideline?.headingStyle)}</span>
-                  <span className="flex-1 mx-2 border-b border-dotted border-zinc-300 dark:border-zinc-800" />
-                  <span className="font-mono">39</span>
-                </div>
-                <div className="flex items-baseline justify-between cursor-pointer hover:text-indigo-600" onClick={() => scrollToSection("section-bab4")}>
-                  <span>{getSectionHeading(4, 1, "Rencana Anggaran Biaya (RAB)", currentDoc.campusGuideline?.headingStyle)}</span>
-                  <span className="flex-1 mx-2 border-b border-dotted border-zinc-300 dark:border-zinc-800" />
-                  <span className="font-mono">42</span>
-                </div>
-                <div className="flex items-baseline justify-between cursor-pointer hover:text-indigo-600" onClick={() => scrollToSection("section-bab4")}>
-                  <span>{getSectionHeading(4, 2, "Rencana Diseminasi & Publikasi Ilmiah", currentDoc.campusGuideline?.headingStyle)}</span>
-                  <span className="flex-1 mx-2 border-b border-dotted border-zinc-300 dark:border-zinc-800" />
-                  <span className="font-mono">44</span>
-                </div>
-              </div>
+                  {/* BAB III */}
+                  <div className="flex items-baseline justify-between font-semibold text-zinc-900 dark:text-zinc-100 pt-2 cursor-pointer hover:text-indigo-600" onClick={() => scrollToSection("section-bab3")}>
+                    <span>BAB III METODOLOGI PENELITIAN / PELAKSANAAN</span>
+                    <span className="flex-1 mx-2 border-b border-dotted border-zinc-300 dark:border-zinc-700" />
+                    <span className="font-mono text-zinc-700 dark:text-zinc-300">{p3_start}</span>
+                  </div>
+                  <div className="pl-4 space-y-1 text-zinc-600 dark:text-zinc-400">
+                    <div className="flex items-baseline justify-between cursor-pointer hover:text-indigo-600" onClick={() => scrollToSection("section-bab3")}>
+                      <span>{getSectionHeading(3, 0, "Desain Penelitian & Bagan Alir Pelaksanaan", currentDoc.campusGuideline?.headingStyle)}</span>
+                      <span className="flex-1 mx-2 border-b border-dotted border-zinc-300 dark:border-zinc-800" />
+                      <span className="font-mono">{p3_desain}</span>
+                    </div>
+                    <div className="flex items-baseline justify-between cursor-pointer hover:text-indigo-600" onClick={() => scrollToSection("section-bab3")}>
+                      <span>{getSectionHeading(3, 1, "Populasi, Sampel, & Subjek Penelitian / WBS", currentDoc.campusGuideline?.headingStyle)}</span>
+                      <span className="flex-1 mx-2 border-b border-dotted border-zinc-300 dark:border-zinc-800" />
+                      <span className="font-mono">{p3_populasi}</span>
+                    </div>
+                    <div className="flex items-baseline justify-between cursor-pointer hover:text-indigo-600" onClick={() => scrollToSection("section-bab3")}>
+                      <span>{getSectionHeading(3, 2, "Definisi Operasional Variabel (Tabel 3 Garis Terbuka)", currentDoc.campusGuideline?.headingStyle)}</span>
+                      <span className="flex-1 mx-2 border-b border-dotted border-zinc-300 dark:border-zinc-800" />
+                      <span className="font-mono">{p3_definisi}</span>
+                    </div>
+                    <div className="flex items-baseline justify-between cursor-pointer hover:text-indigo-600" onClick={() => scrollToSection("section-bab3")}>
+                      <span>{getSectionHeading(3, 3, "Instrumen Penelitian, Kalibrasi, & Perangkat Kerja", currentDoc.campusGuideline?.headingStyle)}</span>
+                      <span className="flex-1 mx-2 border-b border-dotted border-zinc-300 dark:border-zinc-800" />
+                      <span className="font-mono">{p3_instrumen}</span>
+                    </div>
+                    <div className="flex items-baseline justify-between cursor-pointer hover:text-indigo-600" onClick={() => scrollToSection("section-bab3")}>
+                      <span>{getSectionHeading(3, 4, "Protokol Etika Penelitian / SOP Industri", currentDoc.campusGuideline?.headingStyle)}</span>
+                      <span className="flex-1 mx-2 border-b border-dotted border-zinc-300 dark:border-zinc-800" />
+                      <span className="font-mono">{p3_protokol}</span>
+                    </div>
+                  </div>
 
-              {/* BAB V */}
-              <div className="flex items-baseline justify-between font-semibold text-zinc-900 dark:text-zinc-100 pt-2 cursor-pointer hover:text-indigo-600" onClick={() => scrollToSection("section-bab5")}>
-                <span>BAB V KESIMPULAN, KONTRIBUSI, &amp; MITIGASI RISIKO</span>
-                <span className="flex-1 mx-2 border-b border-dotted border-zinc-300 dark:border-zinc-700" />
-                <span className="font-mono text-zinc-700 dark:text-zinc-300">46</span>
-              </div>
+                  {/* BAB IV */}
+                  <div className="flex items-baseline justify-between font-semibold text-zinc-900 dark:text-zinc-100 pt-2 cursor-pointer hover:text-indigo-600" onClick={() => scrollToSection("section-bab4")}>
+                    <span>BAB IV JADWAL KEGIATAN &amp; ALOKASI ANGGARAN</span>
+                    <span className="flex-1 mx-2 border-b border-dotted border-zinc-300 dark:border-zinc-700" />
+                    <span className="font-mono text-zinc-700 dark:text-zinc-300">{p4_start}</span>
+                  </div>
+                  <div className="pl-4 space-y-1 text-zinc-600 dark:text-zinc-400">
+                    <div className="flex items-baseline justify-between cursor-pointer hover:text-indigo-600" onClick={() => scrollToSection("section-bab4")}>
+                      <span>{getSectionHeading(4, 0, "Matriks Jadwal Pelaksanaan (Gantt Chart 16 Minggu)", currentDoc.campusGuideline?.headingStyle)}</span>
+                      <span className="flex-1 mx-2 border-b border-dotted border-zinc-300 dark:border-zinc-800" />
+                      <span className="font-mono">{p4_jadwal}</span>
+                    </div>
+                    <div className="flex items-baseline justify-between cursor-pointer hover:text-indigo-600" onClick={() => scrollToSection("section-bab4")}>
+                      <span>{getSectionHeading(4, 1, "Rencana Anggaran Biaya (RAB)", currentDoc.campusGuideline?.headingStyle)}</span>
+                      <span className="flex-1 mx-2 border-b border-dotted border-zinc-300 dark:border-zinc-800" />
+                      <span className="font-mono">{p4_biaya}</span>
+                    </div>
+                    <div className="flex items-baseline justify-between cursor-pointer hover:text-indigo-600" onClick={() => scrollToSection("section-bab4")}>
+                      <span>{getSectionHeading(4, 2, "Rencana Diseminasi & Publikasi Ilmiah", currentDoc.campusGuideline?.headingStyle)}</span>
+                      <span className="flex-1 mx-2 border-b border-dotted border-zinc-300 dark:border-zinc-800" />
+                      <span className="font-mono">{p4_luaran}</span>
+                    </div>
+                  </div>
 
-              {/* DAFTAR PUSTAKA & LAMPIRAN */}
-              <div className="flex items-baseline justify-between font-semibold text-zinc-900 dark:text-zinc-100 pt-2 cursor-pointer hover:text-indigo-600" onClick={() => scrollToSection("section-pustaka")}>
-                <span>DAFTAR PUSTAKA ({citationStyle === "apa" ? "STANDAR APA 7TH" : "STANDAR IEEE"})</span>
-                <span className="flex-1 mx-2 border-b border-dotted border-zinc-300 dark:border-zinc-700" />
-                <span className="font-mono text-zinc-700 dark:text-zinc-300">50</span>
-              </div>
-              <div className="flex items-baseline justify-between font-semibold text-zinc-900 dark:text-zinc-100 pt-2 cursor-pointer hover:text-indigo-600" onClick={() => scrollToSection("section-lampiran")}>
-                <span>LAMPIRAN-LAMPIRAN AKADEMIK</span>
-                <span className="flex-1 mx-2 border-b border-dotted border-zinc-300 dark:border-zinc-700" />
-                <span className="font-mono text-zinc-700 dark:text-zinc-300">55</span>
-              </div>
-              <div className="pl-4 space-y-1 text-zinc-600 dark:text-zinc-400">
-                <div className="flex items-baseline justify-between cursor-pointer hover:text-indigo-600" onClick={() => scrollToSection("section-lampiran")}>
-                  <span>Lampiran A: Pedoman Wawancara &amp; Instrumen Riset</span>
-                  <span className="flex-1 mx-2 border-b border-dotted border-zinc-300 dark:border-zinc-800" />
-                  <span className="font-mono">55</span>
+                  {/* BAB V */}
+                  <div className="flex items-baseline justify-between font-semibold text-zinc-900 dark:text-zinc-100 pt-2 cursor-pointer hover:text-indigo-600" onClick={() => scrollToSection("section-bab5")}>
+                    <span>BAB V KESIMPULAN, KONTRIBUSI, &amp; MITIGASI RISIKO</span>
+                    <span className="flex-1 mx-2 border-b border-dotted border-zinc-300 dark:border-zinc-700" />
+                    <span className="font-mono text-zinc-700 dark:text-zinc-300">{p5_start}</span>
+                  </div>
+
+                  {/* DAFTAR PUSTAKA & LAMPIRAN */}
+                  <div className="flex items-baseline justify-between font-semibold text-zinc-900 dark:text-zinc-100 pt-2 cursor-pointer hover:text-indigo-600" onClick={() => scrollToSection("section-pustaka")}>
+                    <span>DAFTAR PUSTAKA ({citationStyle === "apa" ? "STANDAR APA 7TH" : "STANDAR IEEE"})</span>
+                    <span className="flex-1 mx-2 border-b border-dotted border-zinc-300 dark:border-zinc-700" />
+                    <span className="font-mono text-zinc-700 dark:text-zinc-300">{p_pustaka}</span>
+                  </div>
+                  <div className="flex items-baseline justify-between font-semibold text-zinc-900 dark:text-zinc-100 pt-2 cursor-pointer hover:text-indigo-600" onClick={() => scrollToSection("section-lampiran")}>
+                    <span>LAMPIRAN-LAMPIRAN AKADEMIK</span>
+                    <span className="flex-1 mx-2 border-b border-dotted border-zinc-300 dark:border-zinc-700" />
+                    <span className="font-mono text-zinc-700 dark:text-zinc-300">{p_lampiran}</span>
+                  </div>
+                  <div className="pl-4 space-y-1 text-zinc-600 dark:text-zinc-400">
+                    <div className="flex items-baseline justify-between cursor-pointer hover:text-indigo-600" onClick={() => scrollToSection("section-lampiran")}>
+                      <span>Lampiran A: Pedoman Wawancara &amp; Instrumen Riset</span>
+                      <span className="flex-1 mx-2 border-b border-dotted border-zinc-300 dark:border-zinc-800" />
+                      <span className="font-mono">{p_lampiran}</span>
+                    </div>
+                    <div className="flex items-baseline justify-between cursor-pointer hover:text-indigo-600" onClick={() => scrollToSection("section-lampiran")}>
+                      <span>Lampiran B: Matriks Logbook Aktivitas Harian &amp; Bukti Capaian</span>
+                      <span className="flex-1 mx-2 border-b border-dotted border-zinc-300 dark:border-zinc-800" />
+                      <span className="font-mono">{p_lampiran + 3}</span>
+                    </div>
+                    <div className="flex items-baseline justify-between cursor-pointer hover:text-indigo-600" onClick={() => scrollToSection("section-lampiran")}>
+                      <span>Lampiran C: Berita Acara Bimbingan / Ujian Kolokium</span>
+                      <span className="flex-1 mx-2 border-b border-dotted border-zinc-300 dark:border-zinc-800" />
+                      <span className="font-mono">{p_lampiran + 6}</span>
+                    </div>
+                  </div>
                 </div>
-                <div className="flex items-baseline justify-between cursor-pointer hover:text-indigo-600" onClick={() => scrollToSection("section-lampiran")}>
-                  <span>Lampiran B: Matriks Logbook Aktivitas Harian &amp; Bukti Capaian</span>
-                  <span className="flex-1 mx-2 border-b border-dotted border-zinc-300 dark:border-zinc-800" />
-                  <span className="font-mono">58</span>
-                </div>
-                <div className="flex items-baseline justify-between cursor-pointer hover:text-indigo-600" onClick={() => scrollToSection("section-lampiran")}>
-                  <span>Lampiran C: Berita Acara Bimbingan / Ujian Kolokium</span>
-                  <span className="flex-1 mx-2 border-b border-dotted border-zinc-300 dark:border-zinc-800" />
-                  <span className="font-mono">62</span>
-                </div>
-              </div>
+              );
+            })()}
             </div>
 
             <div className="mt-10 text-center font-serif text-xs text-zinc-400">

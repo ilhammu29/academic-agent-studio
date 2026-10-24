@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { buildGeneratedDocument } from "@/lib/agentEngine";
 import { ProposalCategory, ProposalDocument } from "@/types/studio";
+import { callGeminiApi } from "@/lib/geminiApi";
 
 export async function POST(req: Request) {
   try {
@@ -12,32 +13,18 @@ export async function POST(req: Request) {
     // 0. Direct Prompt Completion Mode (Academic Copilot, Defense Q&A Evaluator, Chat Assistants)
     if (body.prompt && typeof body.prompt === "string" && !body.title && !body.answers) {
       if (apiKey) {
-        try {
-          const geminiRes = await fetch(
-            `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash-lite:generateContent?key=${apiKey}`,
-            {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({
-                contents: [{ parts: [{ text: body.prompt }] }],
-                generationConfig: {
-                  temperature: 0.7,
-                  maxOutputTokens: 2500,
-                },
-              }),
-            }
-          );
-          if (geminiRes.ok) {
-            const data = await geminiRes.json();
-            const replyText = data?.candidates?.[0]?.content?.parts?.[0]?.text || "";
-            return NextResponse.json({
-              success: true,
-              engine: "gemini-3.5-flash-lite",
-              text: replyText
-            });
-          }
-        } catch (err: any) {
-          console.warn("Direct prompt completion failed:", err?.message);
+        const result = await callGeminiApi({
+          apiKey,
+          prompt: body.prompt,
+          temperature: 0.7,
+          maxOutputTokens: 3000
+        });
+        if (result && result.text) {
+          return NextResponse.json({
+            success: true,
+            engine: result.model,
+            text: result.text
+          });
         }
       }
       return NextResponse.json({
@@ -327,24 +314,15 @@ PANDUAN SOP & STANDAR AKADEMIK WAJIB:
 Format output HARUS berupa JSON murni tanpa pembuka/penutup markdown (\`\`\`json ... \`\`\`).
 `;
 
-        const geminiRes = await fetch(
-          `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash-lite:generateContent?key=${apiKey}`,
-          {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              contents: [{ parts: [{ text: prompt }] }],
-              generationConfig: {
-                temperature: 0.6,
-                maxOutputTokens: 8192,
-              },
-            }),
-          }
-        );
+        const geminiResult = await callGeminiApi({
+          apiKey,
+          prompt,
+          temperature: 0.6,
+          maxOutputTokens: 8192
+        });
 
-        if (geminiRes.ok) {
-          const data = await geminiRes.json();
-          const rawText = data?.candidates?.[0]?.content?.parts?.[0]?.text || "{}";
+        if (geminiResult && geminiResult.text) {
+          const rawText = geminiResult.text;
           const cleanedText = rawText.replace(/```json/g, "").replace(/```/g, "").trim();
           try {
             const parsedDoc: ProposalDocument = JSON.parse(cleanedText);
@@ -366,7 +344,7 @@ Format output HARUS berupa JSON murni tanpa pembuka/penutup markdown (\`\`\`json
 
               return NextResponse.json({ 
                 success: true, 
-                engine: "gemini-3.5-flash-lite",
+                engine: geminiResult.model,
                 doc: parsedDoc 
               });
             }

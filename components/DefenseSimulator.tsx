@@ -72,10 +72,73 @@ export default function DefenseSimulator({ doc }: DefenseSimulatorProps) {
   const [isEvaluating, setIsEvaluating] = useState<boolean>(false);
   const [isListening, setIsListening] = useState<boolean>(false);
   const [isPlayingAudio, setIsPlayingAudio] = useState<boolean>(false);
+  const [isGeneratingQuestions, setIsGeneratingQuestions] = useState<boolean>(false);
 
   const recognitionRef = useRef<any>(null);
 
   const activeExchange = exchanges.find((e) => e.id === activeQuestionId) || exchanges[0];
+
+  const handleGenerateNewQuestions = async () => {
+    setIsGeneratingQuestions(true);
+    try {
+      const prompt = `Anda adalah dewan penguji sidang seminar proposal / skripsi yang sangat kritis dan otoritatif.
+Konteks Usulan Mahasiswa:
+- Judul: "${doc.title}"
+- Kategori: "${doc.category}"
+- Instansi/Lokus: "${doc.targetEntity}"
+- Rumusan Masalah: "${doc.bab1?.rumusanMasalah?.[0] || 'Tantangan operasional'}"
+- Metode: "${doc.bab3?.metodePelaksanaan || 'Metodologi terstruktur'}"
+
+Buatlah 2 pertanyaan penguji baru yang tajam dan menantang (1 fokus metodologi/teknis, 1 fokus novelty/validasi empiris).
+Format output HARUS JSON murni tanpa markdown:
+[
+  {
+    "examinerName": "Dr. Ir. Hendro Prabowo, M.T.",
+    "examinerRole": "Penguji 3 — Validasi Empiris & Arsitektur Sistem",
+    "examinerAvatar": "👨‍🏫",
+    "question": "...",
+    "contextGap": "..."
+  },
+  {
+    "examinerName": "Prof. Dr. Ir. Wahyu Wibowo, M.Sc.",
+    "examinerRole": "Penguji 4 — Kelayakan Ilmiah & Generalisasi Hasil",
+    "examinerAvatar": "🧑‍🔬",
+    "question": "...",
+    "contextGap": "..."
+  }
+]`;
+
+      const res = await fetch('/api/gemini', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ prompt }),
+      });
+
+      const json = await res.json();
+      if (json.success && json.text) {
+        const clean = json.text.replace(/```json/g, '').replace(/```/g, '').trim();
+        const parsed = JSON.parse(clean);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          const newExchanges: DefenseExchange[] = parsed.map((item: any, idx: number) => ({
+            id: `q-ai-${Date.now()}-${idx}`,
+            examinerName: item.examinerName || 'Dosen Penguji Ahli',
+            examinerRole: item.examinerRole || 'Penguji Bidang Keilmuan',
+            examinerAvatar: item.examinerAvatar || '👨‍🏫',
+            question: item.question,
+            contextGap: item.contextGap || 'Menguji ketajaman argumentasi kandidat.',
+          }));
+          setExchanges((prev) => [...prev, ...newExchanges]);
+          setActiveQuestionId(newExchanges[0].id);
+          setCurrentInput('');
+          return;
+        }
+      }
+    } catch (err) {
+      console.warn('Failed to generate AI defense questions:', err);
+    } finally {
+      setIsGeneratingQuestions(false);
+    }
+  };
 
   // Speech Recognition Setup
   useEffect(() => {
@@ -254,9 +317,17 @@ Format dalam JSON:
         </div>
 
         <div className="flex items-center gap-2">
-          <span className="text-xs font-mono text-zinc-500 dark:text-zinc-400">Kesiapan:</span>
+          <button
+            type="button"
+            onClick={handleGenerateNewQuestions}
+            disabled={isGeneratingQuestions}
+            className="px-3 py-1.5 rounded-lg bg-zinc-900 hover:bg-black text-white dark:bg-zinc-100 dark:hover:bg-white dark:text-black font-semibold text-xs transition-all flex items-center gap-1.5 cursor-pointer disabled:opacity-50 shadow-xs"
+          >
+            <Sparkles className={`w-3.5 h-3.5 ${isGeneratingQuestions ? 'animate-spin' : ''}`} />
+            <span>{isGeneratingQuestions ? 'Menyusun Pertanyaan...' : '+ Tambah Pertanyaan AI'}</span>
+          </button>
           <span className="text-xs font-mono font-bold text-zinc-900 dark:text-zinc-100 bg-zinc-100 dark:bg-zinc-900 px-2.5 py-1 rounded-lg border border-zinc-200 dark:border-zinc-800">
-            {exchanges.filter((e) => e.score).length} / {exchanges.length} Pertanyaan Teruji
+            {exchanges.filter((e) => e.score).length} / {exchanges.length} Teruji
           </span>
         </div>
       </div>

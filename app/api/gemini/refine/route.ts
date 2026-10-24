@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { callGeminiApi } from "@/lib/geminiApi";
 
 /**
  * Intelligent Academic Proposal Section Refiner
@@ -45,32 +46,20 @@ Ketentuan:
 3. Langsung berikan hasil teks naskah revisi secara utuh tanpa kalimat pembuka/penutup seperti "Berikut hasil revisi:".
 `;
 
-        const geminiRes = await fetch(
-          `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash-lite:generateContent?key=${apiKey}`,
-          {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              contents: [{ parts: [{ text: prompt }] }],
-              generationConfig: {
-                temperature: 0.6,
-                maxOutputTokens: 2048,
-              },
-            }),
-          }
-        );
+        const geminiResult = await callGeminiApi({
+          apiKey,
+          prompt,
+          temperature: 0.6,
+          maxOutputTokens: 2048,
+        });
 
-        if (geminiRes.ok) {
-          const data = await geminiRes.json();
-          const revised = data?.candidates?.[0]?.content?.parts?.[0]?.text;
-          if (revised && revised.trim().length > 10) {
-            return NextResponse.json({
-              success: true,
-              revisedContent: revised.trim(),
-              engine: "gemini-3.5-flash-lite",
-              message: "Naskah berhasil disempurnakan menggunakan Gemini AI."
-            });
-          }
+        if (geminiResult && geminiResult.text && geminiResult.text.trim().length > 10) {
+          return NextResponse.json({
+            success: true,
+            revisedContent: geminiResult.text.trim(),
+            engine: geminiResult.model,
+            message: "Naskah berhasil disempurnakan menggunakan Gemini AI."
+          });
         }
       } catch (geminiError: any) {
         console.warn("Gemini API call failed, activating Intelligent Academic Refiner fallback:", geminiError?.message);
