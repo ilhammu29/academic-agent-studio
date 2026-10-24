@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { ProposalDocument, ProposalCategory, ReportType, CampusGuideline } from "@/types/studio";
-import { buildGeneratedDocument } from "@/lib/agentEngine";
+import { buildDenseAcademicDocument, planDocumentOutline } from "@/lib/longDocumentGenerator";
 
 export async function POST(req: Request) {
   try {
@@ -24,12 +24,30 @@ export async function POST(req: Request) {
       campusLogoUrl
     } = body;
 
-    // 1. If Gemini API key is available, generate deeply customized authentic document
+    // 1. Build dense, resilient baseline document first
+    const baseDoc = buildDenseAcademicDocument(
+      title,
+      category as ProposalCategory,
+      answers,
+      candidateName,
+      candidateId,
+      institution,
+      facultyMajor,
+      targetEntity,
+      campusGuideline,
+      reportType
+    );
+
+    if (campusLogoUrl) {
+      baseDoc.campusLogoUrl = campusLogoUrl;
+    }
+
+    // 2. If Gemini API key is available, synthesize custom AI content on top of dense structure
     if (apiKey) {
       try {
         const prompt = `
 Bertindaklah sebagai Dewan Guru Besar & Tim Reviewer Akademik Universitas Nasional (Standar Dikti).
-Tugas Anda adalah menyusun NASKAH PROPOSAL / LAPORAN AKADEMIK AUTENTIK, MENDALAM, DAN KOMPREHENSIF (Bukan template dummy).
+Tugas Anda adalah menyusun NASKAH PROPOSAL / LAPORAN AKADEMIK AUTENTIK, MENDALAM, DAN KOMPREHENSIF.
 
 Identitas Penugasan:
 - Judul: "${title}"
@@ -43,15 +61,15 @@ Identitas Penugasan:
 ${JSON.stringify(answers, null, 2)}
 
 ATURAN STRUKTUR AKADEMIK WAJIB:
-1. RUMPUN ILMU: Wajib 100% konsisten dengan bidang judul (Kesehatan/Gizi/Medis, Pendidikan, Hukum, Bisnis/Akuntansi, atau Teknik/IT). Dilarang memasukkan istilah di luar rumpun ilmu judul!
-2. BAB I: PENDAHULUAN harus memiliki 4-6 paragraf latar belakang yang menguraikan fenomena makro, kesenjangan empiris, urgensi lokus ${targetEntity}, dan solusi. Rumusan masalah minimal 3 butir terukur.
-3. BAB II: LANDASAN TEORETIS harus memiliki TEPAT ${theoryCount} TEORI/KERANGKA yang mencantumkan nama konsep spesifik, mekanisme kerja, dan sitasi formal penulis & tahun.
-4. DAFTAR PUSTAKA (BIBLIOGRAPHY): Setiap teori pada Bab II WAJIB memiliki entri pustaka lengkap yang sinkron (Penulis, Tahun, Judul Artikel/Buku, Nama Jurnal/Penerbit, Volume, DOI/URL).
+1. RUMPUN ILMU: Wajib 100% konsisten dengan bidang judul (Kesehatan/Gizi/Medis, Pendidikan, Hukum, Bisnis/Akuntansi, atau Teknik/IT).
+2. BAB I: PENDAHULUAN harus memiliki 5-8 paragraf latar belakang mendalam (fenomena makro, kesenjangan empiris, urgensi lokus ${targetEntity}, dan solusi terstandar). Rumusan masalah minimal 3 butir terukur.
+3. BAB II: LANDASAN TEORETIS harus memiliki TEPAT ${theoryCount} TEORI/KERANGKA dengan uraian komprehensif mekanisme kerja, dan sitasi formal penulis & tahun.
+4. DAFTAR PUSTAKA: Setiap teori pada Bab II WAJIB memiliki entri pustaka lengkap yang sinkron.
 5. BAB III: METODOLOGI harus mencantumkan tahapan operasional sistematis, batasan sampel/populasi atau lingkup kerja, alat/instrumen, serta definisi operasional.
-6. BAB IV & BAB V: Matriks linimasa mingguan dengan target capaian konkret, rencana anggaran biaya (RAB), kesimpulan usulan, serta matriks mitigasi risiko.
-7. HALAMAN AWAL (PRELIMINARY): Susun Kata Pengantar formal (preface) dan Abstrak dwibahasa (abstractId & abstractEn).
+6. BAB IV & V: Matriks linimasa mingguan, rencana anggaran biaya (RAB), kesimpulan usulan, serta matriks mitigasi risiko.
+7. HALAMAN AWAL: Susun Kata Pengantar formal dan Abstrak dwibahasa (abstractId & abstractEn).
 
-OUTPUT WAJIB: Balas HANYA dengan objek JSON valid tanpa markdown fence berikut:
+OUTPUT WAJIB: Balas HANYA dengan objek JSON valid tanpa markdown fence:
 {
   "id": "PROP-GEN-${Date.now().toString(36).toUpperCase()}",
   "title": "${title}",
@@ -87,7 +105,6 @@ OUTPUT WAJIB: Balas HANYA dengan objek JSON valid tanpa markdown fence berikut:
     "visiMisi": ["Visi: ...", "Misi: ..."],
     "strukturOrganisasi": "...",
     "landasanTeori": [
-      // Hasilkan tepat ${theoryCount} objek teori
       { "topic": "Nama Teori 1", "elaboration": "Penjelasan mekanisme dan relevansi...", "citation": "(Penulis, Tahun)" }
     ],
     "conceptualFramework": "Alur kerangka konseptual..."
@@ -123,16 +140,10 @@ OUTPUT WAJIB: Balas HANYA dengan objek JSON valid tanpa markdown fence berikut:
     "sustainabilityPlan": "Rencana keberlanjutan..."
   },
   "bibliography": [
-    // Array rujukan yang sinkron dengan seluruh teori di atas
     { "id": 1, "author": "...", "year": "...", "title": "...", "source": "...", "doiUrl": "..." }
   ],
   "slides": [
-    { "slideNumber": 1, "kicker": "COVER EKSEKUTIF", "title": "${title}", "subtitle": "${institution}", "keyPoints": ["..."], "speakerNotes": "..." },
-    { "slideNumber": 2, "kicker": "LATAR BELAKANG", "title": "Urgensi Masalah", "subtitle": "Problem Gap", "keyPoints": ["..."], "speakerNotes": "..." },
-    { "slideNumber": 3, "kicker": "RUMUSAN MASALAH", "title": "Fokus & Target", "subtitle": "Deliverables", "keyPoints": ["..."], "speakerNotes": "..." },
-    { "slideNumber": 4, "kicker": "LANDASAN TEORI", "title": "Sintesis Pustaka", "subtitle": "State-of-The-Art", "keyPoints": ["..."], "speakerNotes": "..." },
-    { "slideNumber": 5, "kicker": "METODOLOGI", "title": "Pipeline Kerja", "subtitle": "Google Flow Architecture", "keyPoints": ["..."], "speakerNotes": "..." },
-    { "slideNumber": 6, "kicker": "ROADMAP", "title": "Linimasa & Capaian", "subtitle": "Jadwal", "keyPoints": ["..."], "speakerNotes": "..." }
+    { "slideNumber": 1, "kicker": "COVER EKSEKUTIF", "title": "${title}", "subtitle": "${institution}", "keyPoints": ["..."], "speakerNotes": "..." }
   ]
 }
 `;
@@ -157,129 +168,82 @@ OUTPUT WAJIB: Balas HANYA dengan objek JSON valid tanpa markdown fence berikut:
           const geminiData = await geminiRes.json();
           const rawText = geminiData?.candidates?.[0]?.content?.parts?.[0]?.text;
           if (rawText) {
-            const parsedDoc: ProposalDocument = JSON.parse(rawText);
-            
-            // Enrich with campus guidelines & logos
-            if (campusGuideline) {
-              parsedDoc.campusGuideline = campusGuideline;
-            }
-            if (campusLogoUrl) {
-              parsedDoc.campusLogoUrl = campusLogoUrl;
-            }
+            const parsedDoc: Partial<ProposalDocument> = JSON.parse(rawText);
 
-            // Ensure preliminary options default
-            parsedDoc.preliminaryOptions = {
-              includeToC: true,
-              includeListOfFigures: true,
-              includeListOfTables: true,
-              includePreface: true,
-              includeAbstract: true
+            // Merge parsed AI output on top of the dense baseline
+            const mergedDoc: ProposalDocument = {
+              ...baseDoc,
+              ...parsedDoc,
+              id: parsedDoc.id || baseDoc.id,
+              title: parsedDoc.title || baseDoc.title,
+              preface: parsedDoc.preface || baseDoc.preface,
+              abstractId: parsedDoc.abstractId || baseDoc.abstractId,
+              abstractEn: parsedDoc.abstractEn || baseDoc.abstractEn,
+              executiveSummary: parsedDoc.executiveSummary || baseDoc.executiveSummary,
+              bab1: {
+                ...baseDoc.bab1,
+                ...(parsedDoc.bab1 || {}),
+                latarBelakang: (parsedDoc.bab1?.latarBelakang && parsedDoc.bab1.latarBelakang.length >= 4) 
+                  ? parsedDoc.bab1.latarBelakang 
+                  : baseDoc.bab1.latarBelakang
+              },
+              bab2: {
+                ...baseDoc.bab2,
+                ...(parsedDoc.bab2 || {}),
+                landasanTeori: (parsedDoc.bab2?.landasanTeori && parsedDoc.bab2.landasanTeori.length >= 4)
+                  ? parsedDoc.bab2.landasanTeori
+                  : baseDoc.bab2.landasanTeori,
+                researchGapMatrix: baseDoc.bab2?.researchGapMatrix
+              },
+              bab3: {
+                ...baseDoc.bab3,
+                ...(parsedDoc.bab3 || {}),
+                operationalDefinitions: baseDoc.bab3?.operationalDefinitions
+              },
+              bab4: {
+                ...baseDoc.bab4,
+                ...(parsedDoc.bab4 || {})
+              },
+              bab5: {
+                title: parsedDoc.bab5?.title || baseDoc.bab5?.title || "BAB V: KESIMPULAN & MITIGASI RISIKO",
+                kesimpulanUsulan: parsedDoc.bab5?.kesimpulanUsulan || baseDoc.bab5?.kesimpulanUsulan || [],
+                kontribusiPraktis: parsedDoc.bab5?.kontribusiPraktis || baseDoc.bab5?.kontribusiPraktis || [],
+                mitigasiRisiko: (parsedDoc.bab5?.mitigasiRisiko && parsedDoc.bab5.mitigasiRisiko.length > 0)
+                  ? parsedDoc.bab5.mitigasiRisiko
+                  : (baseDoc.bab5?.mitigasiRisiko || []),
+                sustainabilityPlan: parsedDoc.bab5?.sustainabilityPlan || baseDoc.bab5?.sustainabilityPlan
+              },
+              bibliography: (parsedDoc.bibliography && parsedDoc.bibliography.length >= 4)
+                ? parsedDoc.bibliography
+                : baseDoc.bibliography,
+              slides: (parsedDoc.slides && parsedDoc.slides.length > 0)
+                ? parsedDoc.slides
+                : baseDoc.slides,
+              customSheets: baseDoc.customSheets,
+              preliminaryOptions: baseDoc.preliminaryOptions,
+              campusGuideline: campusGuideline || baseDoc.campusGuideline,
+              campusLogoUrl: campusLogoUrl || baseDoc.campusLogoUrl
             };
-
-            // Ensure default custom sheets are populated
-            parsedDoc.customSheets = [
-              {
-                id: "sheet-pengesahan",
-                type: "pengesahan",
-                title: "Lembar Pengesahan Naskah",
-                pagePosition: 2,
-                enabled: true,
-                signers: [
-                  { role: "Dosen Pembimbing I", name: "Dr. Ir. Hendro Prabowo, M.T.", idNumber: "197805122003121002" },
-                  { role: "Dosen Pembimbing II / Mentor Industri", name: "Ratna Kusuma Dewi, S.T., M.Sc.", idNumber: "198509142010122004" }
-                ]
-              },
-              {
-                id: "sheet-orisinalitas",
-                type: "pernyataan_orisinalitas",
-                title: "Lembar Pernyataan Orisinalitas & Integritas Ilmiah",
-                pagePosition: 3,
-                enabled: true,
-                content: `Dengan ini saya menyatakan dengan sesungguhnya bahwa naskah usulan ${reportType} ini adalah karya saya sendiri, tidak terdapat karya atau pendapat yang pernah ditulis atau diterbitkan oleh orang lain, kecuali yang secara tertulis diacu dalam naskah ini dan disebutkan dalam daftar pustaka.`
-              },
-              {
-                id: "sheet-berita-acara",
-                type: "berita_acara",
-                title: "Lembar Berita Acara Bimbingan & Sidang Proposal",
-                pagePosition: 4,
-                enabled: false,
-                content: `Telah dilaksanakan evaluasi dan pertahanan usulan naskah proposal pada tanggal ${new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })} dengan hasil direkomendasikan untuk pelaksanaan.`
-              }
-            ];
 
             return NextResponse.json({
               success: true,
-              document: parsedDoc,
+              document: mergedDoc,
               approximatePageCount: targetDepthPages || 45,
-              engine: "gemini-2.5-flash"
+              engine: "gemini-2.5-flash-dense-hybrid"
             });
           }
         }
       } catch (err: any) {
-        console.warn("Gemini generation failed, using intelligent local engine:", err?.message);
+        console.warn("Gemini generation failed, using intelligent dense engine:", err?.message);
       }
     }
 
-    // 2. Intelligent local fallback if Gemini key is missing or failed
-    const fallbackDoc = buildGeneratedDocument(
-      title,
-      category,
-      answers,
-      candidateName,
-      candidateId,
-      institution,
-      facultyMajor,
-      targetEntity
-    );
-
-    if (campusGuideline) {
-      fallbackDoc.campusGuideline = campusGuideline;
-    }
-    if (campusLogoUrl) {
-      fallbackDoc.campusLogoUrl = campusLogoUrl;
-    }
-
-    fallbackDoc.reportType = reportType;
-    fallbackDoc.targetDepthPages = targetDepthPages;
-    fallbackDoc.preface = `Puji syukur kami panjatkan ke hadirat Tuhan Yang Maha Esa atas limpahan rahmat dan karunia-Nya sehingga naskah usulan ${reportType.toUpperCase()} berjudul "${title}" ini dapat diselesaikan dengan baik sesuai standar akademik. Naskah ini disusun untuk memenuhi salah satu syarat kelulusan kurikulum di ${institution}.`;
-    fallbackDoc.abstractId = `Naskah usulan ini membahas perumusan sistematis pemecahan masalah "${title}" pada lokus ${targetEntity}. Melalui kerangka kerja berbasis bukti dan penerapan instrumen tervalidasi, usulan ini dirancang untuk menghasilkan kontribusi terukur baik secara metodologis maupun aplikatif bagi instansi mitra dan perguruan tinggi.`;
-    fallbackDoc.abstractEn = `This proposal outlines a structured methodological framework addressing "${title}" situated at ${targetEntity}. Through evidence-based practices and validated academic instruments, this research establishes measurable outputs contributing to both industry partners and higher education curriculum standards.`;
-
-    fallbackDoc.preliminaryOptions = {
-      includeToC: true,
-      includeListOfFigures: true,
-      includeListOfTables: true,
-      includePreface: true,
-      includeAbstract: true
-    };
-
-    fallbackDoc.customSheets = [
-      {
-        id: "sheet-pengesahan",
-        type: "pengesahan",
-        title: "Lembar Pengesahan Naskah",
-        pagePosition: 2,
-        enabled: true,
-        signers: [
-          { role: "Dosen Pembimbing I", name: "Dr. Ir. Hendro Prabowo, M.T.", idNumber: "197805122003121002" },
-          { role: "Dosen Pembimbing II / Mentor Industri", name: "Ratna Kusuma Dewi, S.T., M.Sc.", idNumber: "198509142010122004" }
-        ]
-      },
-      {
-        id: "sheet-orisinalitas",
-        type: "pernyataan_orisinalitas",
-        title: "Lembar Pernyataan Orisinalitas & Bebas Plagiarisme",
-        pagePosition: 3,
-        enabled: true,
-        content: `Dengan ini saya menyatakan bahwa usulan naskah ini merupakan karya orisinal saya sendiri, bebas dari unsur plagiarisme, dan seluruh kutipan telah dicantumkan sumbernya secara benar dalam Daftar Pustaka.`
-      }
-    ];
-
+    // 3. Resilient Full Dense Academic Document Return
     return NextResponse.json({
       success: true,
-      document: fallbackDoc,
-      approximatePageCount: targetDepthPages || 30,
-      engine: "academic-heuristic-engine"
+      document: baseDoc,
+      approximatePageCount: targetDepthPages || 40,
+      engine: "academic-dense-engine"
     });
 
   } catch (error: any) {

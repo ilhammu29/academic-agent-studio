@@ -395,6 +395,7 @@ export default function Home() {
           <AgentExecutionMonitor
             title={title}
             category={category}
+            reportType={reportType}
             answers={answers}
             targetEntity={targetEntity}
             candidateName={candidateName}

@@ -63,7 +63,10 @@ test('DOCX Exporter generates valid binary Blob with A4 and academic formatting'
     bibliography: [
       { id: 1, author: 'Blanz, V., & Vetter, T.', year: '1999', title: 'A morphable model for the synthesis of 3D faces', source: 'ACM SIGGRAPH', doiUrl: '10.1145/311535.311556' }
     ],
-    slides: []
+    slides: [],
+    auditLog: [
+      { rule: 'Standar Bab Dikti', status: 'VERIFIED', details: 'Struktur lengkap', thinkingMode: 'First Principles' }
+    ]
   };
 
   const blob = await generateAcademicProposalDocx(sampleDoc);

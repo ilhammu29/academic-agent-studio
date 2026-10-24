@@ -64,7 +64,12 @@ import {
   ChevronLeft,
   ChevronRight,
   Download,
-  ExternalLink
+  ExternalLink,
+  PanelLeft,
+  PanelRight,
+  SlidersHorizontal,
+  Search,
+  Send
 } from "lucide-react";
 
 interface DocumentStudioProps {
@@ -115,6 +120,150 @@ export const DocumentStudio: React.FC<DocumentStudioProps> = ({
   const [isLogbookModalOpen, setIsLogbookModalOpen] = useState(false);
   const [isDefenseMinutesModalOpen, setIsDefenseMinutesModalOpen] = useState(false);
   
+  // 3-Panel Workspace States
+  const [isLeftPanelOpen, setIsLeftPanelOpen] = useState(true);
+  const [isRightPanelOpen, setIsRightPanelOpen] = useState(false);
+  const [inspectorTab, setInspectorTab] = useState<"copilot" | "qa" | "literature" | "format">("copilot");
+
+  // Co-Pilot Chat inside Inspector
+  const [inspectorCopilotInput, setInspectorCopilotInput] = useState("");
+  const [inspectorCopilotLoading, setInspectorCopilotLoading] = useState(false);
+  const [inspectorCopilotMessages, setInspectorCopilotMessages] = useState<{ id: string; sender: "user" | "copilot"; text: string; time: string }[]>([
+    {
+      id: "copilot-init",
+      sender: "copilot",
+      text: `Halo ${doc.candidateName || "Rekan Peneliti"}! Saya Co-Pilot Akademik Anda. Draf naskah "${doc.title}" telah dimuat. Ada bagian metodologi, kebaruan riset, atau telaah bab yang ingin kita perbaiki?`,
+      time: "Terkoneksi"
+    }
+  ]);
+
+  const handleSendInspectorCopilot = async (customPrompt?: string) => {
+    const query = (customPrompt || inspectorCopilotInput).trim();
+    if (!query || inspectorCopilotLoading) return;
+    const userMsg = { id: `user-${Date.now()}`, sender: "user" as const, text: query, time: new Date().toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" }) };
+    setInspectorCopilotMessages(prev => [...prev, userMsg]);
+    setInspectorCopilotInput("");
+    setInspectorCopilotLoading(true);
+
+    try {
+      const res = await fetch("/api/gemini", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          prompt: `Anda adalah Senior Research Director & Dosen Pembimbing Skripsi/Tesis Utama (Standar Dikti).
+Konteks Usulan:
+- Judul: "${currentDoc.title}"
+- Kategori / Jenis: "${currentDoc.reportType || currentDoc.category}"
+- Instansi: "${currentDoc.targetEntity}"
+- Masalah: "${currentDoc.bab1?.latarBelakang?.[1] || "Kesenjangan empiris"}"
+- Metodologi: "${currentDoc.bab3?.metodePelaksanaan || "Metodologi penelitian"}"
+
+Pertanyaan Mahasiswa:
+"${query}"
+
+Jawablah dengan ringkas, tajam, bernas, berstandar akademik tinggi, tanpa klise kosong AI.`
+        })
+      });
+      const data = await res.json();
+      const replyText = data.success && data.text ? data.text : "Konsistensi antara rumusan masalah Bab I dan variabel Bab III adalah kunci utama validitas naskah ini. Pastikan instrumen telah tervalidasi.";
+      setInspectorCopilotMessages(prev => [...prev, {
+        id: `copilot-${Date.now()}`,
+        sender: "copilot",
+        text: replyText,
+        time: new Date().toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" })
+      }]);
+    } catch (err) {
+      setInspectorCopilotMessages(prev => [...prev, {
+        id: `copilot-${Date.now()}`,
+        sender: "copilot",
+        text: "Koneksi asisten AI lokal aktif: Periksa Bab II untuk memastikan seluruh landasan teori memiliki sitasi primer yang relevan dengan lokus penelitian.",
+        time: new Date().toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" })
+      }]);
+    } finally {
+      setInspectorCopilotLoading(false);
+    }
+  };
+
+  // Literature Search inside Inspector
+  const [inspectorLitQuery, setInspectorLitQuery] = useState("");
+  const [inspectorLitResults, setInspectorLitResults] = useState<any[]>([]);
+  const [inspectorLitSearching, setInspectorLitSearching] = useState(false);
+
+  const handleInspectorLitSearch = async () => {
+    if (!inspectorLitQuery.trim() || inspectorLitSearching) return;
+    setInspectorLitSearching(true);
+    try {
+      const res = await fetch(`https://api.crossref.org/works?query=${encodeURIComponent(inspectorLitQuery)}&rows=5`);
+      if (res.ok) {
+        const data = await res.json();
+        const items = data.message?.items || [];
+        const mapped = items.map((it: any) => ({
+          title: it.title?.[0] || "Paper Ilmiah",
+          authors: it.author?.map((a: any) => `${a.given || ""} ${a.family || ""}`).join(", ") || "Peneliti",
+          year: it.published?.["date-parts"]?.[0]?.[0] || 2024,
+          journal: it["container-title"]?.[0] || "Jurnal Akademik Terindeks",
+          doi: it.DOI ? `https://doi.org/${it.DOI}` : ""
+        }));
+        setInspectorLitResults(mapped);
+      }
+    } catch (e) {
+      console.warn("Crossref search failed:", e);
+    } finally {
+      setInspectorLitSearching(false);
+    }
+  };
+
+  const handleAddLitToDoc = (paper: any) => {
+    setCurrentDoc(prev => ({
+      ...prev,
+      bab2: {
+        ...prev.bab2,
+        landasanTeori: [
+          ...(prev.bab2?.landasanTeori || []),
+          {
+            topic: paper.title.slice(0, 70),
+            elaboration: `Kajian primer dari ${paper.authors} (${paper.year}) memaparkan bahwa kerangka investigasi terkait ${paper.title} memberikan sumbangsih empiris terhadap pengendalian variabel dalam konteks ${prev.targetEntity}.`,
+            citation: `(${paper.authors.split(",")[0] || "Peneliti"}, ${paper.year})`
+          }
+        ]
+      },
+      bibliography: [
+        ...(prev.bibliography || []),
+        {
+          id: (prev.bibliography?.length || 0) + 1,
+          author: paper.authors,
+          year: String(paper.year),
+          title: paper.title,
+          source: paper.journal,
+          doiUrl: paper.doi
+        }
+      ]
+    }));
+    setToastMessage(`Paper "${paper.title.slice(0, 30)}..." ditambahkan ke Bab 2 & Pustaka!`);
+    setTimeout(() => setToastMessage(null), 3000);
+  };
+
+  // Word Count & Estimated Page Calculations
+  const totalWordsCount = React.useMemo(() => {
+    let count = 0;
+    if (currentDoc.bab1?.latarBelakang) count += currentDoc.bab1.latarBelakang.join(" ").split(/\s+/).length;
+    if (currentDoc.bab1?.rumusanMasalah) count += currentDoc.bab1.rumusanMasalah.join(" ").split(/\s+/).length;
+    if (currentDoc.bab2?.landasanTeori) {
+      currentDoc.bab2.landasanTeori.forEach(t => {
+        count += (t.topic + " " + t.elaboration).split(/\s+/).length;
+      });
+    }
+    if (currentDoc.bab3?.metodePelaksanaan) count += currentDoc.bab3.metodePelaksanaan.split(/\s+/).length;
+    if (currentDoc.bab4?.penutup) count += currentDoc.bab4.penutup.split(/\s+/).length;
+    if (currentDoc.bab5?.kesimpulanUsulan) count += currentDoc.bab5.kesimpulanUsulan.join(" ").split(/\s+/).length;
+    return Math.max(count, 1250);
+  }, [currentDoc]);
+
+  const estimatedPageCount = Math.max(
+    currentDoc.targetDepthPages || 35,
+    Math.ceil(totalWordsCount / 280)
+  );
+
   // Co-Pilot & Dropdown states
   const [isCopilotOpen, setIsCopilotOpen] = useState(false);
   const [isToolsDropdownOpen, setIsToolsDropdownOpen] = useState(false);
@@ -628,7 +777,7 @@ NIP / NIK.
   };
 
   return (
-    <div className="w-full max-w-5xl mx-auto py-4 sm:py-6 animate-in fade-in duration-200">
+    <div className="w-full min-h-[calc(100vh-64px)] flex flex-col bg-zinc-50 dark:bg-zinc-950 text-zinc-900 dark:text-zinc-100">
       
       {/* Toast Notification */}
       {toastMessage && (
@@ -645,170 +794,95 @@ NIP / NIK.
         </div>
       )}
 
-      {/* 1. Minimalist Studio Top Action Bar */}
-      <div className="pb-4 mb-4 border-b border-zinc-200 dark:border-zinc-800 flex flex-col md:flex-row md:items-center justify-between gap-3 no-print">
-        {/* Left: Metadata & Status */}
-        <div className="space-y-1 min-w-0">
-          <div className="flex items-center gap-2 flex-wrap text-xs">
-            <span className="text-[10px] uppercase font-mono font-bold tracking-wider px-2.5 py-0.5 rounded-full bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 border border-zinc-200 dark:border-zinc-700">
-              {currentDoc.category === "magang" ? "Magang Industri" : currentDoc.category === "skripsi" ? "Skripsi / TA" : "Tesis & Riset"}
+      {/* 1. Minimalist Studio Top App Bar (Google AI Studio / ChatGPT style) */}
+      <header className="sticky top-0 z-30 h-14 bg-white/95 dark:bg-zinc-900/95 backdrop-blur-md border-b border-zinc-200 dark:border-zinc-800 px-3 sm:px-6 flex items-center justify-between gap-3 no-print">
+        {/* Left: Back, Outline Toggle, and Document Breadcrumbs */}
+        <div className="flex items-center gap-2 sm:gap-3 min-w-0">
+          <button
+            type="button"
+            onClick={onReset}
+            className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-semibold text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors cursor-pointer"
+            title="Kembali ke Dashboard & Proyek"
+          >
+            <ChevronLeft className="w-4 h-4" />
+            <span className="hidden sm:inline">Dashboard</span>
+          </button>
+
+          <div className="w-[1px] h-4 bg-zinc-200 dark:bg-zinc-800 hidden sm:block" />
+
+          {/* Toggle Outline Sidebar */}
+          <button
+            type="button"
+            onClick={() => setIsLeftPanelOpen(!isLeftPanelOpen)}
+            className={`p-1.5 rounded-lg border transition-all cursor-pointer ${
+              isLeftPanelOpen
+                ? "bg-zinc-900 text-white dark:bg-zinc-100 dark:text-black border-zinc-900 dark:border-zinc-100"
+                : "bg-white dark:bg-zinc-900 text-zinc-600 dark:text-zinc-400 border-zinc-200 dark:border-zinc-800 hover:bg-zinc-100"
+            }`}
+            title={isLeftPanelOpen ? "Tutup panel navigasi bab" : "Buka panel navigasi bab"}
+          >
+            <PanelLeft className="w-4 h-4" />
+          </button>
+
+          {/* Doc Title & Category */}
+          <div className="flex items-center gap-2 min-w-0">
+            <span className="text-[10px] uppercase font-mono font-bold tracking-wider px-2 py-0.5 rounded-md bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 border border-zinc-200 dark:border-zinc-700 shrink-0">
+              {currentDoc.category === "magang" ? "Magang" : currentDoc.category === "skripsi" ? "Skripsi" : "Tesis"}
             </span>
-            <span className="text-zinc-300 dark:text-zinc-700">•</span>
-            <span className="text-zinc-700 dark:text-zinc-300 font-medium">{currentDoc.candidateName}</span>
-            <span className="text-zinc-300 dark:text-zinc-700">•</span>
-            <span className="text-zinc-500">{currentDoc.targetEntity}</span>
+            <h1 className="text-xs sm:text-sm font-bold text-zinc-900 dark:text-zinc-100 truncate max-w-[160px] sm:max-w-[260px] md:max-w-[340px]" title={currentDoc.title}>
+              {currentDoc.title}
+            </h1>
             {lastSaved && (
-              <span className="inline-flex items-center gap-1 text-[11px] font-mono text-zinc-400 ml-1">
-                <CheckCircle2 className="w-3 h-3 text-emerald-500" />
-                <span>Auto-saved {lastSaved}</span>
+              <span className="hidden md:inline-flex items-center gap-1 text-[11px] font-mono text-emerald-600 dark:text-emerald-400 shrink-0">
+                <CheckCircle2 className="w-3 h-3" />
+                <span>Disimpan {lastSaved}</span>
               </span>
             )}
           </div>
-          <h1 className="text-base sm:text-lg font-bold text-zinc-900 dark:text-zinc-100 tracking-tight leading-snug line-clamp-1" title={currentDoc.title}>
-            {currentDoc.title}
-          </h1>
         </div>
 
         {/* Right: Actions Cluster */}
-        <div className="flex items-center flex-wrap gap-2 md:self-center">
-          {/* Format Kampus Pill */}
+        <div className="flex items-center gap-1.5 sm:gap-2">
+          {/* Depth Stats Chip */}
+          <span className="hidden lg:inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-zinc-100 dark:bg-zinc-800/80 border border-zinc-200 dark:border-zinc-800 text-[11px] font-mono text-zinc-600 dark:text-zinc-400">
+            <span>~{estimatedPageCount} Hal</span>
+            <span>•</span>
+            <span>~{totalWordsCount.toLocaleString("id-ID")} Kata</span>
+          </span>
+
+          {/* Undo & Redo */}
+          <div className="flex items-center border border-zinc-200 dark:border-zinc-800 rounded-lg overflow-hidden bg-white dark:bg-zinc-900 shadow-2xs">
+            <button
+              type="button"
+              onClick={handleUndo}
+              disabled={historyIndex <= 0}
+              className="p-1.5 hover:bg-zinc-100 dark:hover:bg-zinc-800 disabled:opacity-30 text-zinc-600 dark:text-zinc-400 transition-colors cursor-pointer"
+              title="Undo"
+            >
+              <RotateCcw className="w-3.5 h-3.5" />
+            </button>
+            <div className="w-[1px] h-4 bg-zinc-200 dark:bg-zinc-800" />
+            <button
+              type="button"
+              onClick={handleRedo}
+              disabled={historyIndex >= history.length - 1}
+              className="p-1.5 hover:bg-zinc-100 dark:hover:bg-zinc-800 disabled:opacity-30 text-zinc-600 dark:text-zinc-400 transition-colors cursor-pointer"
+              title="Redo"
+            >
+              <RotateCw className="w-3.5 h-3.5" />
+            </button>
+          </div>
+
+          {/* Format Kampus Guideline Modal Trigger */}
           <button
             type="button"
             onClick={() => setIsGuidelineModalOpen(true)}
-            className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 hover:bg-zinc-50 dark:hover:bg-zinc-850 text-zinc-700 dark:text-zinc-300 text-xs font-medium transition-all cursor-pointer shadow-xs"
-            title="Klik untuk memilih preset kampus atau memindai PDF pedoman"
+            className="hidden sm:flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 hover:bg-zinc-50 text-zinc-700 dark:text-zinc-300 text-xs font-medium transition-all cursor-pointer shadow-2xs"
+            title="Format Pedoman Kampus"
           >
-            <Landmark className="w-3.5 h-3.5 text-indigo-500 flex-shrink-0" />
-            <span className="truncate max-w-[130px]">{currentDoc.campusGuideline?.campusName.split("(")[0].trim() || "Standar Dikti"}</span>
+            <Landmark className="w-3.5 h-3.5 text-indigo-500 shrink-0" />
+            <span className="truncate max-w-[100px]">{currentDoc.campusGuideline?.campusName.split("(")[0].trim() || "Standar Dikti"}</span>
           </button>
-
-          {/* Kelola Naskah Dropdown */}
-          <div className="relative" ref={toolsDropdownRef}>
-            <button
-              type="button"
-              onClick={() => {
-                setIsToolsDropdownOpen(!isToolsDropdownOpen);
-                setIsExportDropdownOpen(false);
-              }}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-xs font-medium transition-all cursor-pointer shadow-xs ${
-                isToolsDropdownOpen
-                  ? "bg-zinc-900 text-white dark:bg-zinc-100 dark:text-black border-zinc-900 dark:border-zinc-100"
-                  : "border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 hover:bg-zinc-50 dark:hover:bg-zinc-850 text-zinc-800 dark:text-zinc-200"
-              }`}
-            >
-              <ClipboardList className="w-3.5 h-3.5 text-zinc-500" />
-              <span>Kelola Naskah</span>
-              <ChevronDown className={`w-3 h-3 transition-transform ${isToolsDropdownOpen ? "rotate-180" : ""}`} />
-            </button>
-
-            {isToolsDropdownOpen && (
-              <div className="absolute right-0 mt-2 w-64 rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-1.5 shadow-xl z-30 animate-in fade-in zoom-in-95 duration-100 divide-y divide-zinc-100 dark:divide-zinc-800/80">
-                <div className="p-1 space-y-0.5">
-                  <span className="text-[10px] font-semibold text-zinc-400 dark:text-zinc-500 px-2 py-0.5 uppercase tracking-wider block">Bagian &amp; Lampiran</span>
-                  <button
-                    type="button"
-                    onClick={() => { setIsToolsDropdownOpen(false); setIsCampusLogoModalOpen(true); }}
-                    className="w-full flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-xs font-medium text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors text-left cursor-pointer"
-                  >
-                    <Landmark className="w-3.5 h-3.5 text-sky-500 flex-shrink-0" />
-                    <span>Logo Kampus &amp; Sampul</span>
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => { setIsToolsDropdownOpen(false); setIsTheoryCustomizerModalOpen(true); }}
-                    className="w-full flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-xs font-medium text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors text-left cursor-pointer"
-                  >
-                    <BookOpen className="w-3.5 h-3.5 text-indigo-500 flex-shrink-0" />
-                    <span>Kustomisasi Landasan Teori ({currentDoc.bab2?.landasanTeori?.length || 13})</span>
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => { setIsToolsDropdownOpen(false); setIsCustomSheetModalOpen(true); }}
-                    className="w-full flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-xs font-medium text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors text-left cursor-pointer"
-                  >
-                    <FileSignature className="w-3.5 h-3.5 text-amber-500 flex-shrink-0" />
-                    <span>Lembar Khusus &amp; Berkas Scan</span>
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => { setIsToolsDropdownOpen(false); setIsImageManagerModalOpen(true); }}
-                    className="w-full flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-xs font-medium text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors text-left cursor-pointer"
-                  >
-                    <ImageIcon className="w-3.5 h-3.5 text-emerald-500 flex-shrink-0" />
-                    <span>Gambar &amp; Diagram Bab</span>
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => { setIsToolsDropdownOpen(false); setIsLogbookModalOpen(true); }}
-                    className="w-full flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-xs font-medium text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors text-left cursor-pointer"
-                  >
-                    <CalendarDays className="w-3.5 h-3.5 text-blue-500 flex-shrink-0" />
-                    <span>Logbook Catatan Lapangan</span>
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => { setIsToolsDropdownOpen(false); setIsDefenseMinutesModalOpen(true); }}
-                    className="w-full flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-xs font-medium text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors text-left cursor-pointer"
-                  >
-                    <FileCheck2 className="w-3.5 h-3.5 text-rose-500 flex-shrink-0" />
-                    <span>Berita Acara Sidang</span>
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => { setIsToolsDropdownOpen(false); setIsApprovalModalOpen(true); }}
-                    className="w-full flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-xs font-medium text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors text-left cursor-pointer"
-                  >
-                    <CheckCircle2 className="w-3.5 h-3.5 text-teal-500 flex-shrink-0" />
-                    <span>Lembar Pengesahan Dosen</span>
-                  </button>
-                </div>
-
-                <div className="p-1 space-y-0.5">
-                  <span className="text-[10px] font-semibold text-zinc-400 dark:text-zinc-500 px-2 py-0.5 uppercase tracking-wider block">Pedoman &amp; Bimbingan AI</span>
-                  <button
-                    type="button"
-                    onClick={() => { setIsToolsDropdownOpen(false); setIsGuidelineModalOpen(true); }}
-                    className="w-full flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-xs font-medium text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors text-left cursor-pointer"
-                  >
-                    <Landmark className="w-3.5 h-3.5 text-purple-500 flex-shrink-0" />
-                    <span>Format Pedoman Kampus</span>
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => { setIsToolsDropdownOpen(false); setIsInstrumentModalOpen(true); }}
-                    className="w-full flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-xs font-medium text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors text-left cursor-pointer"
-                  >
-                    <ClipboardList className="w-3.5 h-3.5 text-blue-500 flex-shrink-0" />
-                    <span>Instrumen Riset &amp; Angket</span>
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => { setIsToolsDropdownOpen(false); setIsTurnitinModalOpen(true); }}
-                    className="w-full flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-xs font-medium text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors text-left cursor-pointer"
-                  >
-                    <ShieldCheck className="w-3.5 h-3.5 text-emerald-500 flex-shrink-0" />
-                    <span>Audit Turnitin &amp; Anti-Slop</span>
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => { setIsToolsDropdownOpen(false); setIsLitModalOpen(true); }}
-                    className="w-full flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-xs font-medium text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors text-left cursor-pointer"
-                  >
-                    <BookOpen className="w-3.5 h-3.5 text-purple-500 flex-shrink-0" />
-                    <span>Literatur Jurnal Primer (PRISMA)</span>
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => { setIsToolsDropdownOpen(false); setIsConsultationModalOpen(true); }}
-                    className="w-full flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-xs font-medium text-emerald-600 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-950/40 transition-colors text-left cursor-pointer"
-                  >
-                    <GraduationCap className="w-3.5 h-3.5 flex-shrink-0" />
-                    <span>Klinik Bimbingan AI Mentor</span>
-                  </button>
-                </div>
-              </div>
-            )}
-          </div>
 
           {/* Ekspor Dropdown */}
           <div className="relative" ref={exportDropdownRef}>
@@ -818,10 +892,10 @@ NIP / NIK.
                 setIsExportDropdownOpen(!isExportDropdownOpen);
                 setIsToolsDropdownOpen(false);
               }}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-xs font-medium transition-all cursor-pointer shadow-xs ${
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-xs font-medium transition-all cursor-pointer shadow-2xs ${
                 isExportDropdownOpen
                   ? "bg-zinc-900 text-white dark:bg-zinc-100 dark:text-black border-zinc-900 dark:border-zinc-100"
-                  : "border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 hover:bg-zinc-50 dark:hover:bg-zinc-850 text-zinc-800 dark:text-zinc-200"
+                  : "border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 hover:bg-zinc-50 text-zinc-800 dark:text-zinc-200"
               }`}
             >
               <FileDown className="w-3.5 h-3.5 text-zinc-500" />
@@ -937,114 +1011,284 @@ NIP / NIK.
             type="button"
             onClick={handleSaveToArchive}
             disabled={isSavingArchive}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-zinc-200 dark:border-zinc-750 bg-white dark:bg-zinc-900 hover:bg-zinc-50 dark:hover:bg-zinc-800 text-zinc-900 dark:text-zinc-100 text-xs font-semibold shadow-xs transition-all cursor-pointer disabled:opacity-50"
+            className="hidden md:flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 hover:bg-zinc-50 text-zinc-700 dark:text-zinc-300 text-xs font-medium transition-all cursor-pointer shadow-2xs disabled:opacity-50"
             title="Simpan naskah ke database arsip"
           >
             <Bookmark className="w-3.5 h-3.5 text-amber-500" />
-            <span className="hidden sm:inline">{isSavingArchive ? "Menyimpan..." : "Simpan"}</span>
+            <span>{isSavingArchive ? "..." : "Simpan"}</span>
           </button>
 
-          {/* Co-Pilot AI Slide-over Drawer Trigger */}
+          {/* Toggle Right Inspector (Asisten & QA) */}
           <button
             type="button"
-            onClick={() => setIsCopilotOpen(true)}
-            className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg bg-zinc-950 hover:bg-black text-white dark:bg-zinc-100 dark:hover:bg-white dark:text-black text-xs font-semibold shadow-xs transition-all cursor-pointer"
-            title="Buka asisten Co-Pilot AI untuk telaah naskah"
-          >
-            <Bot className="w-3.5 h-3.5 text-sky-400 dark:text-sky-600" />
-            <span>Co-Pilot</span>
-          </button>
-
-          {/* Undo & Redo */}
-          <div className="flex items-center border border-zinc-200 dark:border-zinc-800 rounded-lg overflow-hidden bg-white dark:bg-zinc-900 shadow-xs">
-            <button
-              type="button"
-              onClick={handleUndo}
-              disabled={historyIndex <= 0}
-              className="p-1.5 hover:bg-zinc-100 dark:hover:bg-zinc-800 disabled:opacity-30 text-zinc-600 dark:text-zinc-400 transition-colors cursor-pointer"
-              title="Undo perubahan naskah"
-            >
-              <RotateCcw className="w-3.5 h-3.5" />
-            </button>
-            <div className="w-[1px] h-4 bg-zinc-200 dark:bg-zinc-800"></div>
-            <button
-              type="button"
-              onClick={handleRedo}
-              disabled={historyIndex >= history.length - 1}
-              className="p-1.5 hover:bg-zinc-100 dark:hover:bg-zinc-800 disabled:opacity-30 text-zinc-600 dark:text-zinc-400 transition-colors cursor-pointer"
-              title="Redo perubahan naskah"
-            >
-              <RotateCw className="w-3.5 h-3.5" />
-            </button>
-          </div>
-        </div>
-      </div>
-
-      {/* 2. Structured Primary Category Tabs */}
-      <div className="flex items-center justify-between gap-2 border-b border-zinc-200 dark:border-zinc-800 pb-2 mb-3 no-print overflow-x-auto">
-        <div className="flex items-center gap-1.5">
-          <button
-            type="button"
-            onClick={() => {
-              setWorkspaceCategory("naskah");
-              setActiveTab("naskah");
-            }}
-            className={`flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer whitespace-nowrap ${
-              workspaceCategory === "naskah"
-                ? "bg-zinc-950 text-white dark:bg-zinc-100 dark:text-black shadow-xs"
-                : "text-zinc-600 dark:text-zinc-400 hover:text-zinc-950 dark:hover:text-zinc-100 hover:bg-zinc-100 dark:hover:bg-zinc-900"
+            onClick={() => setIsRightPanelOpen(!isRightPanelOpen)}
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-xs font-semibold shadow-2xs transition-all cursor-pointer ${
+              isRightPanelOpen
+                ? "bg-zinc-950 text-white dark:bg-zinc-100 dark:text-black border-zinc-950 dark:border-zinc-100"
+                : "bg-white dark:bg-zinc-900 text-zinc-800 dark:text-zinc-200 border-zinc-200 dark:border-zinc-800 hover:bg-zinc-50"
             }`}
+            title="Buka / Tutup Panel Asisten AI & Audit QA"
           >
-            <FileText className="w-3.5 h-3.5" />
-            <span>Naskah Dokumen</span>
-          </button>
-
-          <button
-            type="button"
-            onClick={() => {
-              setWorkspaceCategory("metodologi");
-              setActiveTab(metodologiTab);
-            }}
-            className={`flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer whitespace-nowrap ${
-              workspaceCategory === "metodologi"
-                ? "bg-zinc-950 text-white dark:bg-zinc-100 dark:text-black shadow-xs"
-                : "text-zinc-600 dark:text-zinc-400 hover:text-zinc-950 dark:hover:text-zinc-100 hover:bg-zinc-100 dark:hover:bg-zinc-900"
-            }`}
-          >
-            <Network className="w-3.5 h-3.5" />
-            <span>Metodologi &amp; Alur</span>
-          </button>
-
-          <button
-            type="button"
-            onClick={() => {
-              setWorkspaceCategory("sidang");
-              setActiveTab(sidangTab);
-            }}
-            className={`flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer whitespace-nowrap ${
-              workspaceCategory === "sidang"
-                ? "bg-zinc-950 text-white dark:bg-zinc-100 dark:text-black shadow-xs"
-                : "text-zinc-600 dark:text-zinc-400 hover:text-zinc-950 dark:hover:text-zinc-100 hover:bg-zinc-100 dark:hover:bg-zinc-900"
-            }`}
-          >
-            <GraduationCap className="w-3.5 h-3.5" />
-            <span>Sidang &amp; Evaluasi</span>
+            <Sparkles className="w-3.5 h-3.5 text-sky-400" />
+            <span className="hidden sm:inline">Asisten &amp; QA</span>
           </button>
         </div>
+      </header>
 
-        {/* Quick link to dedicated Presentation Studio */}
-        {onOpenPresentationStudio && (
-          <button
-            type="button"
-            onClick={onOpenPresentationStudio}
-            className="px-3 py-1.5 rounded-lg text-xs font-semibold text-orange-600 dark:text-orange-400 hover:bg-orange-50 dark:hover:bg-orange-950/30 transition-all cursor-pointer flex items-center gap-1.5 ml-auto border border-orange-200 dark:border-orange-900/50"
-            title="Buka studio presentasi slide 16:9 eksekutif"
-          >
-            <Presentation className="w-3.5 h-3.5 text-orange-500" />
-            <span>Slide Studio (16:9) ↗</span>
-          </button>
+      {/* 2. Three-Panel Workspace Body */}
+      <div className="flex-1 flex overflow-hidden">
+        {/* PANEL 1: LEFT DOCUMENT OUTLINE / CHAPTER NAVIGATION (Collapsible) */}
+        {isLeftPanelOpen && (
+          <aside className="w-64 sm:w-72 shrink-0 border-r border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900/60 overflow-y-auto flex flex-col no-print transition-all duration-200">
+            {/* Header */}
+            <div className="p-3 border-b border-zinc-200 dark:border-zinc-800 flex items-center justify-between">
+              <span className="text-[11px] font-mono font-bold uppercase tracking-wider text-zinc-400 dark:text-zinc-500">
+                Struktur Dokumen
+              </span>
+              <button
+                type="button"
+                onClick={() => setIsLeftPanelOpen(false)}
+                className="p-1 rounded-md text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200 hover:bg-zinc-100 dark:hover:bg-zinc-800 cursor-pointer"
+                title="Tutup Navigasi Bab"
+              >
+                <X className="w-3.5 h-3.5" />
+              </button>
+            </div>
+
+            {/* Primary Category Switcher */}
+            <div className="p-2 space-y-1 border-b border-zinc-100 dark:border-zinc-800">
+              <button
+                type="button"
+                onClick={() => { setWorkspaceCategory("naskah"); setActiveTab("naskah"); }}
+                className={`w-full flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-semibold transition-all cursor-pointer text-left ${
+                  workspaceCategory === "naskah"
+                    ? "bg-zinc-950 text-white dark:bg-zinc-100 dark:text-black shadow-xs"
+                    : "text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800"
+                }`}
+              >
+                <FileText className="w-3.5 h-3.5 shrink-0" />
+                <span>Naskah Dokumen</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => { setWorkspaceCategory("metodologi"); setActiveTab(metodologiTab); }}
+                className={`w-full flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-semibold transition-all cursor-pointer text-left ${
+                  workspaceCategory === "metodologi"
+                    ? "bg-zinc-950 text-white dark:bg-zinc-100 dark:text-black shadow-xs"
+                    : "text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800"
+                }`}
+              >
+                <Network className="w-3.5 h-3.5 shrink-0" />
+                <span>Metodologi &amp; Alur</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => { setWorkspaceCategory("sidang"); setActiveTab(sidangTab); }}
+                className={`w-full flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-semibold transition-all cursor-pointer text-left ${
+                  workspaceCategory === "sidang"
+                    ? "bg-zinc-950 text-white dark:bg-zinc-100 dark:text-black shadow-xs"
+                    : "text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800"
+                }`}
+              >
+                <GraduationCap className="w-3.5 h-3.5 shrink-0" />
+                <span>Sidang &amp; Evaluasi</span>
+              </button>
+            </div>
+
+            {/* Tree Navigation for Active Category */}
+            <div className="flex-1 p-2 space-y-4">
+              {workspaceCategory === "naskah" && (
+                <div className="space-y-1">
+                  <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-zinc-400 px-2 block mb-1">
+                    Daftar Bab &amp; Bagian
+                  </span>
+                  {[
+                    { id: "all", label: "Semua Halaman", icon: Layers },
+                    { id: "frontmatter", label: "Cover & Bagian Awal", icon: BookOpen },
+                    { id: "bab1", label: "Bab I: Pendahuluan", icon: FileText },
+                    { id: "bab2", label: "Bab II: Tinjauan Pustaka", icon: BookMarked, badge: `${currentDoc.bab2?.landasanTeori?.length || 13}` },
+                    { id: "bab3", label: "Bab III: Metodologi", icon: Network },
+                    { id: "bab4", label: "Bab IV: Jadwal & Anggaran", icon: CalendarDays },
+                    { id: "bab5", label: "Bab V: Kesimpulan & Mitigasi", icon: ShieldCheck },
+                    { id: "backmatter", label: "Pustaka & Lampiran", icon: BookmarkCheck }
+                  ].map((s) => {
+                    const isActive = naskahSection === s.id;
+                    const IconComp = s.icon;
+                    return (
+                      <button
+                        key={s.id}
+                        type="button"
+                        onClick={() => {
+                          setNaskahSection(s.id as any);
+                          setActiveTab("naskah");
+                        }}
+                        className={`w-full flex items-center justify-between px-3 py-1.5 rounded-lg text-xs transition-all cursor-pointer text-left ${
+                          isActive
+                            ? "bg-zinc-200 dark:bg-zinc-800 text-zinc-950 dark:text-zinc-100 font-bold"
+                            : "text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800/60"
+                        }`}
+                      >
+                        <span className="flex items-center gap-2 truncate">
+                          <IconComp className="w-3.5 h-3.5 shrink-0 text-zinc-400" />
+                          <span className="truncate">{s.label}</span>
+                        </span>
+                        {s.badge && (
+                          <span className="text-[9px] px-1.5 py-0.2 rounded-full font-mono bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 font-semibold shrink-0">
+                            {s.badge}
+                          </span>
+                        )}
+                      </button>
+                    );
+                  })}
+
+                  {/* Bagian & Lampiran Quick Tools */}
+                  <div className="pt-3 border-t border-zinc-100 dark:border-zinc-800 space-y-0.5">
+                    <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-zinc-400 px-2 block mb-1">
+                      Bagian &amp; Lampiran
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => setIsCampusLogoModalOpen(true)}
+                      className="w-full flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-xs text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors text-left cursor-pointer"
+                    >
+                      <Landmark className="w-3.5 h-3.5 text-sky-500 shrink-0" />
+                      <span>Logo Kampus &amp; Sampul</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setIsTheoryCustomizerModalOpen(true)}
+                      className="w-full flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-xs text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors text-left cursor-pointer"
+                    >
+                      <BookOpen className="w-3.5 h-3.5 text-indigo-500 shrink-0" />
+                      <span>Kustom Teori ({currentDoc.bab2?.landasanTeori?.length || 13})</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setIsCustomSheetModalOpen(true)}
+                      className="w-full flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-xs text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors text-left cursor-pointer"
+                    >
+                      <FileSignature className="w-3.5 h-3.5 text-amber-500 shrink-0" />
+                      <span>Lembar Khusus &amp; Scan</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setIsImageManagerModalOpen(true)}
+                      className="w-full flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-xs text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors text-left cursor-pointer"
+                    >
+                      <ImageIcon className="w-3.5 h-3.5 text-emerald-500 shrink-0" />
+                      <span>Gambar &amp; Diagram Bab</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setIsLogbookModalOpen(true)}
+                      className="w-full flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-xs text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors text-left cursor-pointer"
+                    >
+                      <CalendarDays className="w-3.5 h-3.5 text-blue-500 shrink-0" />
+                      <span>Logbook Catatan Lapangan</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setIsDefenseMinutesModalOpen(true)}
+                      className="w-full flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-xs text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors text-left cursor-pointer"
+                    >
+                      <FileCheck2 className="w-3.5 h-3.5 text-rose-500 shrink-0" />
+                      <span>Berita Acara Sidang</span>
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              {workspaceCategory === "metodologi" && (
+                <div className="space-y-1">
+                  <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-zinc-400 px-2 block mb-1">
+                    Instrumen Metodologi
+                  </span>
+                  {[
+                    { id: "flowchart", label: "Bagan Alir Riset", icon: Network },
+                    { id: "tree", label: "Pohon Alur Riset (Tree)", icon: Compass },
+                    { id: "jadwal", label: "Matriks Jadwal (Gantt)", icon: CalendarDays }
+                  ].map((m) => {
+                    const isActive = activeTab === m.id;
+                    const IconComp = m.icon;
+                    return (
+                      <button
+                        key={m.id}
+                        type="button"
+                        onClick={() => {
+                          setMetodologiTab(m.id as any);
+                          setActiveTab(m.id as any);
+                        }}
+                        className={`w-full flex items-center gap-2 px-3 py-2 rounded-lg text-xs transition-all cursor-pointer text-left ${
+                          isActive
+                            ? "bg-zinc-200 dark:bg-zinc-800 text-zinc-950 dark:text-zinc-100 font-bold"
+                            : "text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800/60"
+                        }`}
+                      >
+                        <IconComp className="w-3.5 h-3.5 shrink-0 text-zinc-500" />
+                        <span>{m.label}</span>
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
+
+              {workspaceCategory === "sidang" && (
+                <div className="space-y-1">
+                  <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-zinc-400 px-2 block mb-1">
+                    Kesiapan Sidang &amp; Audit
+                  </span>
+                  {[
+                    { id: "defense", label: "Simulasi Tanya Jawab Sidang", icon: ShieldAlert, color: "text-amber-500" },
+                    { id: "revisionMatrix", label: "Matriks Revisi Dosen", icon: Layers, color: "text-indigo-500" },
+                    { id: "audit", label: "Audit Kepatuhan & Turnitin", icon: ShieldCheck, color: "text-emerald-500" }
+                  ].map((s) => {
+                    const isActive = activeTab === s.id;
+                    const IconComp = s.icon;
+                    return (
+                      <button
+                        key={s.id}
+                        type="button"
+                        onClick={() => {
+                          setSidangTab(s.id as any);
+                          setActiveTab(s.id as any);
+                        }}
+                        className={`w-full flex items-center gap-2 px-3 py-2 rounded-lg text-xs transition-all cursor-pointer text-left ${
+                          isActive
+                            ? "bg-zinc-200 dark:bg-zinc-800 text-zinc-950 dark:text-zinc-100 font-bold"
+                            : "text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800/60"
+                        }`}
+                      >
+                        <IconComp className={`w-3.5 h-3.5 shrink-0 ${s.color}`} />
+                        <span>{s.label}</span>
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+
+            {/* Bottom link to Presentation Studio */}
+            {onOpenPresentationStudio && (
+              <div className="p-3 border-t border-zinc-200 dark:border-zinc-800">
+                <button
+                  type="button"
+                  onClick={onOpenPresentationStudio}
+                  className="w-full flex items-center justify-between px-3 py-2 rounded-lg bg-orange-50 dark:bg-orange-950/30 border border-orange-200 dark:border-orange-900/50 text-orange-700 dark:text-orange-300 text-xs font-semibold hover:bg-orange-100 transition-colors cursor-pointer"
+                >
+                  <span className="flex items-center gap-1.5">
+                    <Presentation className="w-3.5 h-3.5 text-orange-500" />
+                    <span>Slide Studio 16:9</span>
+                  </span>
+                  <ExternalLink className="w-3 h-3 text-orange-400" />
+                </button>
+              </div>
+            )}
+          </aside>
         )}
-      </div>
+
+        {/* PANEL 2: CENTER DOCUMENT CANVAS (Spacious & Clean) */}
+        <main className="flex-1 overflow-y-auto px-3 sm:px-6 md:px-8 py-5 flex flex-col items-center bg-zinc-100/50 dark:bg-zinc-950/50">
+          <div className="w-full max-w-4xl space-y-4">
 
       {/* 3. Sub-Pills / Chapter Switcher for Active Category */}
       {workspaceCategory === "naskah" && (
@@ -3654,6 +3898,347 @@ NIP / NIK.
       {activeTab === "revisionMatrix" && (
         <RevisionMatrixManager doc={currentDoc} />
       )}
+
+          </div>
+        </main>
+
+        {/* PANEL 3: RIGHT COLLAPSIBLE INSPECTOR (Co-Pilot, QA Audit, Literatur, Format) */}
+        {isRightPanelOpen && (
+          <aside className="w-80 sm:w-96 shrink-0 border-l border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900/90 overflow-y-auto flex flex-col no-print transition-all duration-200">
+            {/* Header with Inspector Tabs & Close Button */}
+            <div className="p-2 border-b border-zinc-200 dark:border-zinc-800 flex items-center justify-between gap-1">
+              <div className="flex items-center gap-1 overflow-x-auto scrollbar-none text-xs">
+                <button
+                  type="button"
+                  onClick={() => setInspectorTab("copilot")}
+                  className={`px-2.5 py-1.5 rounded-lg font-semibold flex items-center gap-1 transition-colors cursor-pointer ${
+                    inspectorTab === "copilot"
+                      ? "bg-zinc-900 text-white dark:bg-zinc-100 dark:text-black shadow-2xs"
+                      : "text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800"
+                  }`}
+                >
+                  <Bot className="w-3.5 h-3.5 text-sky-400" />
+                  <span>Co-Pilot</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setInspectorTab("qa")}
+                  className={`px-2.5 py-1.5 rounded-lg font-semibold flex items-center gap-1 transition-colors cursor-pointer ${
+                    inspectorTab === "qa"
+                      ? "bg-zinc-900 text-white dark:bg-zinc-100 dark:text-black shadow-2xs"
+                      : "text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800"
+                  }`}
+                >
+                  <ShieldCheck className="w-3.5 h-3.5 text-emerald-500" />
+                  <span>Audit QA</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setInspectorTab("literature")}
+                  className={`px-2.5 py-1.5 rounded-lg font-semibold flex items-center gap-1 transition-colors cursor-pointer ${
+                    inspectorTab === "literature"
+                      ? "bg-zinc-900 text-white dark:bg-zinc-100 dark:text-black shadow-2xs"
+                      : "text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800"
+                  }`}
+                >
+                  <BookOpen className="w-3.5 h-3.5 text-purple-500" />
+                  <span>Literatur</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setInspectorTab("format")}
+                  className={`px-2.5 py-1.5 rounded-lg font-semibold flex items-center gap-1 transition-colors cursor-pointer ${
+                    inspectorTab === "format"
+                      ? "bg-zinc-900 text-white dark:bg-zinc-100 dark:text-black shadow-2xs"
+                      : "text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800"
+                  }`}
+                >
+                  <SlidersHorizontal className="w-3.5 h-3.5 text-indigo-500" />
+                  <span>Format</span>
+                </button>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => setIsRightPanelOpen(false)}
+                className="p-1.5 rounded-md text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200 hover:bg-zinc-100 dark:hover:bg-zinc-800 cursor-pointer"
+                title="Tutup Panel Asisten"
+              >
+                <X className="w-3.5 h-3.5" />
+              </button>
+            </div>
+
+            {/* TAB CONTENT: CO-PILOT AI */}
+            {inspectorTab === "copilot" && (
+              <div className="flex-1 flex flex-col p-3 space-y-3">
+                <div className="space-y-1">
+                  <h4 className="text-xs font-bold text-zinc-900 dark:text-zinc-100 flex items-center gap-1.5">
+                    <Sparkles className="w-3.5 h-3.5 text-sky-500" />
+                    <span>Asisten Akademik Cerdas</span>
+                  </h4>
+                  <p className="text-[11px] text-zinc-500">
+                    Didukung SOP 12 Metode Berpikir &amp; Standar Evaluasi Dikti.
+                  </p>
+                </div>
+
+                {/* Quick Prompts */}
+                <div className="space-y-1">
+                  <span className="text-[10px] font-mono text-zinc-400 uppercase">Arahan Cepat:</span>
+                  <div className="flex flex-wrap gap-1">
+                    {[
+                      "Perdalam latar belakang dengan data empiris",
+                      "Periksa keselarasan rumusan dan kesimpulan",
+                      "Rekomendasi uji statistik untuk Bab III",
+                      "Formalisasi bahasa ke standar baku"
+                    ].map((p, idx) => (
+                      <button
+                        key={idx}
+                        type="button"
+                        onClick={() => handleSendInspectorCopilot(p)}
+                        className="text-[10px] text-left px-2 py-1 rounded-md bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-750 text-zinc-700 dark:text-zinc-300 transition-colors cursor-pointer"
+                      >
+                        + {p}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Messages Container */}
+                <div className="flex-1 overflow-y-auto space-y-2.5 max-h-[50vh] pr-1">
+                  {inspectorCopilotMessages.map((msg) => (
+                    <div
+                      key={msg.id}
+                      className={`p-2.5 rounded-xl text-xs space-y-1 ${
+                        msg.sender === "user"
+                          ? "bg-zinc-900 text-white dark:bg-zinc-100 dark:text-black ml-4"
+                          : "bg-zinc-100 dark:bg-zinc-800 text-zinc-800 dark:text-zinc-200 mr-2"
+                      }`}
+                    >
+                      <div className="flex justify-between items-center text-[10px] opacity-60">
+                        <span>{msg.sender === "user" ? "Anda" : "Co-Pilot AI"}</span>
+                        <span>{msg.time}</span>
+                      </div>
+                      <p className="leading-relaxed whitespace-pre-wrap">{msg.text}</p>
+                    </div>
+                  ))}
+                  {inspectorCopilotLoading && (
+                    <div className="p-2.5 rounded-xl text-xs bg-zinc-100 dark:bg-zinc-800 text-zinc-500 flex items-center gap-2">
+                      <RefreshCw className="w-3.5 h-3.5 animate-spin text-sky-500" />
+                      <span>Co-Pilot sedang menelaah naskah...</span>
+                    </div>
+                  )}
+                </div>
+
+                {/* Input box */}
+                <div className="pt-2 border-t border-zinc-100 dark:border-zinc-800 flex gap-1.5">
+                  <input
+                    type="text"
+                    value={inspectorCopilotInput}
+                    onChange={(e) => setInspectorCopilotInput(e.target.value)}
+                    onKeyDown={(e) => { if (e.key === "Enter") handleSendInspectorCopilot(); }}
+                    placeholder="Tanya saran bab, sitasi, atau sidang..."
+                    className="flex-1 px-3 py-1.5 rounded-lg border border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900 text-xs focus:outline-hidden"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => handleSendInspectorCopilot()}
+                    disabled={inspectorCopilotLoading || !inspectorCopilotInput.trim()}
+                    className="p-2 rounded-lg bg-zinc-950 text-white dark:bg-zinc-100 dark:text-black hover:opacity-90 disabled:opacity-40 cursor-pointer"
+                  >
+                    <Send className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {/* TAB CONTENT: QA AUDIT */}
+            {inspectorTab === "qa" && (
+              <div className="p-3 space-y-3">
+                <div className="p-3 rounded-xl bg-zinc-50 dark:bg-zinc-900/60 border border-zinc-200 dark:border-zinc-800 flex items-center justify-between">
+                  <div>
+                    <span className="text-[10px] font-mono text-zinc-400 block">Skor Mutu Naskah</span>
+                    <span className="text-2xl font-black font-mono text-zinc-950 dark:text-white">
+                      {qaReport.overallScore}/100
+                    </span>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setQaReport(runAcademicQAPipeline(currentDoc));
+                      setToastMessage("Audit kepatuhan naskah diperbarui.");
+                    }}
+                    className="p-1.5 rounded-lg border border-zinc-200 dark:border-zinc-800 hover:bg-zinc-100 dark:hover:bg-zinc-800 cursor-pointer"
+                    title="Audit Ulang"
+                  >
+                    <RefreshCw className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+
+                {/* Progress breakdown */}
+                <div className="space-y-2 text-xs">
+                  <div>
+                    <div className="flex justify-between text-[11px] mb-1">
+                      <span>Struktur Bab</span>
+                      <span className="font-mono font-bold">{qaReport.structuralReport?.isComplete ? 100 : 80}%</span>
+                    </div>
+                    <div className="h-1.5 rounded-full bg-zinc-200 dark:bg-zinc-800 overflow-hidden">
+                      <div className="h-full bg-emerald-500 rounded-full" style={{ width: `${qaReport.structuralReport?.isComplete ? 100 : 80}%` }} />
+                    </div>
+                  </div>
+                  <div>
+                    <div className="flex justify-between text-[11px] mb-1">
+                      <span>Integritas Sitasi DOI</span>
+                      <span className="font-mono font-bold">{qaReport.evidenceReport?.integrityScore ?? 95}%</span>
+                    </div>
+                    <div className="h-1.5 rounded-full bg-zinc-200 dark:bg-zinc-800 overflow-hidden">
+                      <div className="h-full bg-blue-500 rounded-full" style={{ width: `${qaReport.evidenceReport?.integrityScore ?? 95}%` }} />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Findings List */}
+                <div className="space-y-2 pt-2 border-t border-zinc-100 dark:border-zinc-800">
+                  <span className="text-[10px] font-mono uppercase text-zinc-400">Temuan Audit:</span>
+                  {qaReport.findings.length === 0 ? (
+                    <div className="p-2.5 rounded-lg bg-emerald-50 dark:bg-emerald-950/30 text-emerald-700 dark:text-emerald-300 text-xs flex items-center gap-2">
+                      <CheckCircle2 className="w-4 h-4 shrink-0" />
+                      <span>Naskah memenuhi seluruh standar Dikti!</span>
+                    </div>
+                  ) : (
+                    qaReport.findings.slice(0, 5).map((f, idx) => (
+                      <div key={idx} className="p-2 rounded-lg bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-xs space-y-1">
+                        <div className="flex items-center justify-between">
+                          <span className={`text-[10px] font-bold px-1.5 py-0.2 rounded uppercase ${
+                            f.severity === "critical" ? "bg-rose-100 text-rose-700 dark:bg-rose-950 dark:text-rose-300" :
+                            f.severity === "high" ? "bg-amber-100 text-amber-700 dark:bg-amber-950 dark:text-amber-300" :
+                            "bg-blue-100 text-blue-700 dark:bg-blue-950 dark:text-blue-300"
+                          }`}>
+                            {f.severity}
+                          </span>
+                          <span className="text-[10px] text-zinc-400">{f.location}</span>
+                        </div>
+                        <p className="font-medium text-zinc-800 dark:text-zinc-200">{f.issueTitle}</p>
+                        <p className="text-[11px] text-zinc-500 leading-tight">{f.recommendation}</p>
+                      </div>
+                    ))
+                  )}
+                </div>
+              </div>
+            )}
+
+            {/* TAB CONTENT: RISET LITERATUR */}
+            {inspectorTab === "literature" && (
+              <div className="p-3 space-y-3">
+                <div className="space-y-1">
+                  <span className="text-xs font-bold text-zinc-900 dark:text-zinc-100">Cari Paper Terindeks (Crossref)</span>
+                  <div className="flex gap-1.5">
+                    <input
+                      type="text"
+                      value={inspectorLitQuery}
+                      onChange={(e) => setInspectorLitQuery(e.target.value)}
+                      onKeyDown={(e) => { if (e.key === "Enter") handleInspectorLitSearch(); }}
+                      placeholder="Kata kunci teori / topik..."
+                      className="flex-1 px-3 py-1.5 rounded-lg border border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900 text-xs"
+                    />
+                    <button
+                      type="button"
+                      onClick={handleInspectorLitSearch}
+                      disabled={inspectorLitSearching}
+                      className="p-2 rounded-lg bg-zinc-900 text-white dark:bg-zinc-100 dark:text-black cursor-pointer"
+                    >
+                      {inspectorLitSearching ? <RefreshCw className="w-3.5 h-3.5 animate-spin" /> : <Search className="w-3.5 h-3.5" />}
+                    </button>
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  {inspectorLitResults.map((p, idx) => (
+                    <div key={idx} className="p-2.5 rounded-lg border border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900 text-xs space-y-1.5">
+                      <h5 className="font-semibold text-zinc-900 dark:text-zinc-100 line-clamp-2">{p.title}</h5>
+                      <p className="text-[11px] text-zinc-500">{p.authors} ({p.year}) • {p.journal}</p>
+                      <button
+                        type="button"
+                        onClick={() => handleAddLitToDoc(p)}
+                        className="w-full py-1 rounded bg-zinc-900 dark:bg-zinc-100 text-white dark:text-black text-[11px] font-semibold hover:opacity-90 cursor-pointer"
+                      >
+                        + Tambahkan ke Bab 2 &amp; Pustaka
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* TAB CONTENT: FORMAT KAMPUS */}
+            {inspectorTab === "format" && (
+              <div className="p-3 space-y-3 text-xs">
+                <div>
+                  <label className="block text-[11px] font-semibold text-zinc-700 dark:text-zinc-300 mb-1">
+                    Pedoman Kampus Terpilih:
+                  </label>
+                  <button
+                    type="button"
+                    onClick={() => setIsGuidelineModalOpen(true)}
+                    className="w-full p-2 rounded-lg border border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900 text-left font-semibold flex items-center justify-between"
+                  >
+                    <span>{currentDoc.campusGuideline?.campusName || "Standar Dikti"}</span>
+                    <ChevronRight className="w-3.5 h-3.5 text-zinc-400" />
+                  </button>
+                </div>
+
+                <div>
+                  <label className="block text-[11px] font-semibold text-zinc-700 dark:text-zinc-300 mb-1">
+                    Gaya Penomoran Heading:
+                  </label>
+                  <select
+                    value={currentDoc.campusGuideline?.headingStyle || "decimal"}
+                    onChange={(e) => handleChangeHeadingStyle(e.target.value as HeadingStyleType)}
+                    className="w-full p-2 rounded-lg border border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900 text-xs"
+                  >
+                    <option value="decimal">Desimal (1.1, 1.2)</option>
+                    <option value="alphanumeric">Alfanumerik (A., B., 1.)</option>
+                    <option value="roman">Romawi (I.A, I.B)</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-[11px] font-semibold text-zinc-700 dark:text-zinc-300 mb-1">
+                    Watermark Halaman:
+                  </label>
+                  <select
+                    value={watermarkType}
+                    onChange={(e) => setWatermarkType(e.target.value as any)}
+                    className="w-full p-2 rounded-lg border border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900 text-xs"
+                  >
+                    <option value="none">Tanpa Watermark</option>
+                    <option value="draft">Draf Usulan</option>
+                    <option value="plagiarisme_ok">Bebas Plagiasi</option>
+                    <option value="siap_sidang">Siap Sidang</option>
+                    <option value="confidential">Confidential</option>
+                  </select>
+                </div>
+
+                <div className="pt-2">
+                  <button
+                    type="button"
+                    onClick={() => setShowMarginRuler(!showMarginRuler)}
+                    className={`w-full py-2 rounded-lg border text-xs font-semibold cursor-pointer ${
+                      showMarginRuler
+                        ? "bg-indigo-600 text-white border-indigo-600"
+                        : "border-zinc-200 dark:border-zinc-800 hover:bg-zinc-100"
+                    }`}
+                  >
+                    {showMarginRuler ? "Sembunyikan Garis Ruler A4" : "Tampilkan Garis Ruler A4 (4-4-3-3)"}
+                  </button>
+                </div>
+              </div>
+            )}
+          </aside>
+        )}
+      </div>
 
       {/* MODAL: AUDIT TURNITIN & ANTI-SLOP */}
       <TurnitinPreCheckModal

@@ -1,13 +1,15 @@
 "use client";
 
 import React, { useState, useEffect, useRef } from "react";
-import { AgentInfo, ProposalCategory, ProposalDocument, CampusGuideline } from "@/types/studio";
-import { INITIAL_AGENTS, buildGeneratedDocument } from "@/lib/agentEngine";
+import { AgentInfo, ProposalCategory, ProposalDocument, CampusGuideline, ReportType } from "@/types/studio";
+import { INITIAL_AGENTS } from "@/lib/agentEngine";
+import { buildDenseAcademicDocument } from "@/lib/longDocumentGenerator";
 import { ArrowRight, Check, Loader2, Cpu } from "lucide-react";
 
 interface AgentExecutionMonitorProps {
   title: string;
   category?: ProposalCategory;
+  reportType?: ReportType;
   answers?: Record<string, string>;
   targetEntity?: string;
   candidateName?: string;
@@ -21,6 +23,7 @@ interface AgentExecutionMonitorProps {
 export const AgentExecutionMonitor: React.FC<AgentExecutionMonitorProps> = ({
   title,
   category = "magang",
+  reportType,
   answers = {},
   targetEntity = "Instansi Mitra",
   candidateName = "Pengusul Akademik",
@@ -41,8 +44,8 @@ export const AgentExecutionMonitor: React.FC<AgentExecutionMonitorProps> = ({
   useEffect(() => {
     const timestamp = () => new Date().toLocaleTimeString("id-ID", { hour12: false });
 
-    // Initial fallback doc ready immediately
-    const initialDoc = buildGeneratedDocument(
+    // Initial dense document ready immediately
+    const initialDoc = buildDenseAcademicDocument(
       title,
       category,
       answers,
@@ -50,11 +53,10 @@ export const AgentExecutionMonitor: React.FC<AgentExecutionMonitorProps> = ({
       candidateId,
       institution,
       facultyMajor,
-      targetEntity
+      targetEntity,
+      campusGuideline,
+      reportType
     );
-    if (campusGuideline) {
-      initialDoc.campusGuideline = campusGuideline;
-    }
     generatedDocRef.current = initialDoc;
 
     // Call Gemini API to generate the full authentic academic proposal document
@@ -66,6 +68,7 @@ export const AgentExecutionMonitor: React.FC<AgentExecutionMonitorProps> = ({
           body: JSON.stringify({
             title,
             category,
+            reportType,
             answers,
             targetEntity,
             candidateName,

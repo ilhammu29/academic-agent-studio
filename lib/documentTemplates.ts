@@ -14,6 +14,8 @@
 import type { AcademicDocumentType } from './academicRuleEngine.ts';
 import type { ProposalCategory, ReportType } from '../types/studio.ts';
 
+export type { AcademicDocumentType };
+
 export interface DocumentSectionConfig {
   key: string;
   title: string;
