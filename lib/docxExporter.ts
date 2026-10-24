@@ -16,8 +16,8 @@ import {
   convertInchesToTwip,
   ImageRun
 } from "docx";
-import { ProposalDocument } from "@/types/studio";
-import { getSectionHeading, getSubSectionHeading } from "@/lib/academicNumbering";
+import type { ProposalDocument } from "../types/studio.ts";
+import { getSectionHeading, getSubSectionHeading } from "./academicNumbering.ts";
 
 /**
  * Academic Indonesian Proposal .DOCX Exporter
