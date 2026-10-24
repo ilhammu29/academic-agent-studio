@@ -795,20 +795,20 @@ NIP / NIK.
       )}
 
       {/* 1. Minimalist Studio Top App Bar (Google AI Studio / ChatGPT style) */}
-      <header className="sticky top-0 z-30 h-14 bg-white/95 dark:bg-zinc-900/95 backdrop-blur-md border-b border-zinc-200 dark:border-zinc-800 px-3 sm:px-6 flex items-center justify-between gap-3 no-print">
+      <header className="sticky top-0 z-30 h-14 bg-white/95 dark:bg-[#0B101A]/95 backdrop-blur-md border-b border-[#E2E8F0] dark:border-[#253149] px-3 sm:px-6 flex items-center justify-between gap-3 no-print">
         {/* Left: Back, Outline Toggle, and Document Breadcrumbs */}
         <div className="flex items-center gap-2 sm:gap-3 min-w-0">
           <button
             type="button"
             onClick={onReset}
-            className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-semibold text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors cursor-pointer"
+            className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-semibold text-[#475569] dark:text-[#A4B1C7] hover:text-[#0F172A] dark:hover:text-[#F3F6FC] hover:bg-[#F1F5F9] dark:hover:bg-[#172033] transition-colors cursor-pointer"
             title="Kembali ke Dashboard & Proyek"
           >
             <ChevronLeft className="w-4 h-4" />
             <span className="hidden sm:inline">Dashboard</span>
           </button>
 
-          <div className="w-[1px] h-4 bg-zinc-200 dark:bg-zinc-800 hidden sm:block" />
+          <div className="w-[1px] h-4 bg-[#E2E8F0] dark:bg-[#253149] hidden sm:block" />
 
           {/* Toggle Outline Sidebar */}
           <button
@@ -816,8 +816,8 @@ NIP / NIK.
             onClick={() => setIsLeftPanelOpen(!isLeftPanelOpen)}
             className={`p-1.5 rounded-lg border transition-all cursor-pointer ${
               isLeftPanelOpen
-                ? "bg-zinc-900 text-white dark:bg-zinc-100 dark:text-black border-zinc-900 dark:border-zinc-100"
-                : "bg-white dark:bg-zinc-900 text-zinc-600 dark:text-zinc-400 border-zinc-200 dark:border-zinc-800 hover:bg-zinc-100"
+                ? "bg-[#0F172A] text-white dark:bg-[#172033] dark:text-[#7C9CFF] border-[#0F172A] dark:border-[#7C9CFF]/40 shadow-xs"
+                : "bg-white dark:bg-[#111827] text-[#475569] dark:text-[#A4B1C7] border-[#E2E8F0] dark:border-[#253149] hover:bg-[#F1F5F9] dark:hover:bg-[#172033]"
             }`}
             title={isLeftPanelOpen ? "Tutup panel navigasi bab" : "Buka panel navigasi bab"}
           >
@@ -826,14 +826,14 @@ NIP / NIK.
 
           {/* Doc Title & Category */}
           <div className="flex items-center gap-2 min-w-0">
-            <span className="text-[10px] uppercase font-mono font-bold tracking-wider px-2 py-0.5 rounded-md bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 border border-zinc-200 dark:border-zinc-700 shrink-0">
+            <span className="text-[10px] uppercase font-mono font-bold tracking-wider px-2 py-0.5 rounded-md bg-[#F1F5F9] dark:bg-[#172033] text-[#0F172A] dark:text-[#7C9CFF] border border-[#E2E8F0] dark:border-[#253149] shrink-0">
               {currentDoc.category === "magang" ? "Magang" : currentDoc.category === "skripsi" ? "Skripsi" : "Tesis"}
             </span>
-            <h1 className="text-xs sm:text-sm font-bold text-zinc-900 dark:text-zinc-100 truncate max-w-[160px] sm:max-w-[260px] md:max-w-[340px]" title={currentDoc.title}>
+            <h1 className="text-xs sm:text-sm font-bold text-[#0F172A] dark:text-[#F3F6FC] truncate max-w-[160px] sm:max-w-[260px] md:max-w-[340px]" title={currentDoc.title}>
               {currentDoc.title}
             </h1>
             {lastSaved && (
-              <span className="hidden md:inline-flex items-center gap-1 text-[11px] font-mono text-emerald-600 dark:text-emerald-400 shrink-0">
+              <span className="hidden md:inline-flex items-center gap-1 text-[11px] font-mono text-[#34D399] shrink-0">
                 <CheckCircle2 className="w-3 h-3" />
                 <span>Disimpan {lastSaved}</span>
               </span>
@@ -844,29 +844,29 @@ NIP / NIK.
         {/* Right: Actions Cluster */}
         <div className="flex items-center gap-1.5 sm:gap-2">
           {/* Depth Stats Chip */}
-          <span className="hidden lg:inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-zinc-100 dark:bg-zinc-800/80 border border-zinc-200 dark:border-zinc-800 text-[11px] font-mono text-zinc-600 dark:text-zinc-400">
+          <span className="hidden lg:inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-[#F1F5F9] dark:bg-[#172033] border border-[#E2E8F0] dark:border-[#253149] text-[11px] font-mono text-[#475569] dark:text-[#A4B1C7]">
             <span>~{estimatedPageCount} Hal</span>
             <span>•</span>
             <span>~{totalWordsCount.toLocaleString("id-ID")} Kata</span>
           </span>
 
           {/* Undo & Redo */}
-          <div className="flex items-center border border-zinc-200 dark:border-zinc-800 rounded-lg overflow-hidden bg-white dark:bg-zinc-900 shadow-2xs">
+          <div className="flex items-center border border-[#E2E8F0] dark:border-[#253149] rounded-lg overflow-hidden bg-white dark:bg-[#111827] shadow-2xs">
             <button
               type="button"
               onClick={handleUndo}
               disabled={historyIndex <= 0}
-              className="p-1.5 hover:bg-zinc-100 dark:hover:bg-zinc-800 disabled:opacity-30 text-zinc-600 dark:text-zinc-400 transition-colors cursor-pointer"
+              className="p-1.5 hover:bg-[#F1F5F9] dark:hover:bg-[#172033] disabled:opacity-30 text-[#475569] dark:text-[#A4B1C7] transition-colors cursor-pointer"
               title="Undo"
             >
               <RotateCcw className="w-3.5 h-3.5" />
             </button>
-            <div className="w-[1px] h-4 bg-zinc-200 dark:bg-zinc-800" />
+            <div className="w-[1px] h-4 bg-[#E2E8F0] dark:bg-[#253149]" />
             <button
               type="button"
               onClick={handleRedo}
               disabled={historyIndex >= history.length - 1}
-              className="p-1.5 hover:bg-zinc-100 dark:hover:bg-zinc-800 disabled:opacity-30 text-zinc-600 dark:text-zinc-400 transition-colors cursor-pointer"
+              className="p-1.5 hover:bg-[#F1F5F9] dark:hover:bg-[#172033] disabled:opacity-30 text-[#475569] dark:text-[#A4B1C7] transition-colors cursor-pointer"
               title="Redo"
             >
               <RotateCw className="w-3.5 h-3.5" />
@@ -877,10 +877,10 @@ NIP / NIK.
           <button
             type="button"
             onClick={() => setIsGuidelineModalOpen(true)}
-            className="hidden sm:flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 hover:bg-zinc-50 text-zinc-700 dark:text-zinc-300 text-xs font-medium transition-all cursor-pointer shadow-2xs"
+            className="hidden sm:flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border border-[#E2E8F0] dark:border-[#253149] bg-white dark:bg-[#111827] hover:bg-[#F1F5F9] dark:hover:bg-[#172033] text-[#0F172A] dark:text-[#F3F6FC] text-xs font-medium transition-all cursor-pointer shadow-2xs"
             title="Format Pedoman Kampus"
           >
-            <Landmark className="w-3.5 h-3.5 text-indigo-500 shrink-0" />
+            <Landmark className="w-3.5 h-3.5 text-[#7C9CFF] shrink-0" />
             <span className="truncate max-w-[100px]">{currentDoc.campusGuideline?.campusName.split("(")[0].trim() || "Standar Dikti"}</span>
           </button>
 
@@ -894,29 +894,29 @@ NIP / NIK.
               }}
               className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-xs font-medium transition-all cursor-pointer shadow-2xs ${
                 isExportDropdownOpen
-                  ? "bg-zinc-900 text-white dark:bg-zinc-100 dark:text-black border-zinc-900 dark:border-zinc-100"
-                  : "border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 hover:bg-zinc-50 text-zinc-800 dark:text-zinc-200"
+                  ? "bg-[#0F172A] text-white dark:bg-[#172033] dark:text-[#7C9CFF] border-[#0F172A] dark:border-[#7C9CFF]/40"
+                  : "border-[#E2E8F0] dark:border-[#253149] bg-white dark:bg-[#111827] hover:bg-[#F1F5F9] dark:hover:bg-[#172033] text-[#0F172A] dark:text-[#F3F6FC]"
               }`}
             >
-              <FileDown className="w-3.5 h-3.5 text-zinc-500" />
+              <FileDown className="w-3.5 h-3.5 text-[#7C9CFF]" />
               <span>Ekspor</span>
               <ChevronDown className={`w-3 h-3 transition-transform ${isExportDropdownOpen ? "rotate-180" : ""}`} />
             </button>
 
             {isExportDropdownOpen && (
-              <div className="absolute right-0 mt-2 w-60 rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-1.5 shadow-xl z-30 animate-in fade-in zoom-in-95 duration-100">
+              <div className="absolute right-0 mt-2 w-60 rounded-xl border border-[#E2E8F0] dark:border-[#253149] bg-white dark:bg-[#111827] p-1.5 shadow-xl z-30 animate-in fade-in zoom-in-95 duration-100">
                 <button
                   type="button"
                   onClick={() => { setIsExportDropdownOpen(false); handleDownloadDocx(); }}
                   disabled={isExportingDocx}
-                  className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-medium text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors text-left cursor-pointer"
+                  className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-medium text-[#0F172A] dark:text-[#F3F6FC] hover:bg-[#F1F5F9] dark:hover:bg-[#172033] transition-colors text-left cursor-pointer"
                 >
-                  <FileDown className="w-4 h-4 text-blue-500 flex-shrink-0" />
+                  <FileDown className="w-4 h-4 text-[#7C9CFF] flex-shrink-0" />
                   <div>
-                    <p className="font-semibold text-zinc-900 dark:text-zinc-100">
+                    <p className="font-semibold text-[#0F172A] dark:text-[#F3F6FC]">
                       {isExportingDocx ? "Menyusun Word..." : "Dokumen Word (.docx)"}
                     </p>
-                    <p className="text-[10px] text-zinc-500">Standar nomor halaman &amp; margin kampus</p>
+                    <p className="text-[10px] text-[#475569] dark:text-[#A4B1C7]">Standar nomor halaman &amp; margin kampus</p>
                   </div>
                 </button>
 
@@ -924,14 +924,14 @@ NIP / NIK.
                   type="button"
                   onClick={() => { setIsExportDropdownOpen(false); handleDownloadPptx(); }}
                   disabled={isExportingPptx}
-                  className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-medium text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors text-left cursor-pointer"
+                  className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-medium text-[#0F172A] dark:text-[#F3F6FC] hover:bg-[#F1F5F9] dark:hover:bg-[#172033] transition-colors text-left cursor-pointer"
                 >
-                  <Presentation className="w-4 h-4 text-orange-500 flex-shrink-0" />
+                  <Presentation className="w-4 h-4 text-[#FBBF24] flex-shrink-0" />
                   <div>
-                    <p className="font-semibold text-zinc-900 dark:text-zinc-100">
+                    <p className="font-semibold text-[#0F172A] dark:text-[#F3F6FC]">
                       {isExportingPptx ? "Menyusun Slide..." : "Slide Sidang (.pptx)"}
                     </p>
-                    <p className="text-[10px] text-zinc-500">Format eksekutif 16:9 siap presentasi</p>
+                    <p className="text-[10px] text-[#475569] dark:text-[#A4B1C7]">Format eksekutif 16:9 siap presentasi</p>
                   </div>
                 </button>
 
@@ -939,67 +939,67 @@ NIP / NIK.
                   <button
                     type="button"
                     onClick={() => { setIsExportDropdownOpen(false); onOpenPresentationStudio(); }}
-                    className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-medium text-orange-600 dark:text-orange-400 hover:bg-orange-50 dark:hover:bg-orange-950/40 transition-colors text-left cursor-pointer"
+                    className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-medium text-[#7C9CFF] hover:bg-[#7C9CFF]/10 transition-colors text-left cursor-pointer"
                   >
-                    <ExternalLink className="w-4 h-4 text-orange-500 flex-shrink-0" />
+                    <ExternalLink className="w-4 h-4 text-[#7C9CFF] flex-shrink-0" />
                     <div>
-                      <p className="font-semibold text-zinc-900 dark:text-zinc-100">
+                      <p className="font-semibold text-[#0F172A] dark:text-[#F3F6FC]">
                         Buka Slide Studio Terpisah ↗
                       </p>
-                      <p className="text-[10px] text-zinc-500">Visual AI &amp; latihan simulasi sidang</p>
+                      <p className="text-[10px] text-[#475569] dark:text-[#A4B1C7]">Visual AI &amp; latihan simulasi sidang</p>
                     </div>
                   </button>
                 )}
 
-                <div className="my-1 border-t border-zinc-200 dark:border-zinc-800"></div>
+                <div className="my-1 border-t border-[#E2E8F0] dark:border-[#253149]"></div>
 
                 <button
                   type="button"
                   onClick={() => { setIsExportDropdownOpen(false); handleExportBibTeX(); }}
-                  className="w-full flex items-center gap-2.5 px-3 py-1.5 rounded-lg text-xs font-medium text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors text-left cursor-pointer"
+                  className="w-full flex items-center gap-2.5 px-3 py-1.5 rounded-lg text-xs font-medium text-[#0F172A] dark:text-[#F3F6FC] hover:bg-[#F1F5F9] dark:hover:bg-[#172033] transition-colors text-left cursor-pointer"
                 >
-                  <BookMarked className="w-4 h-4 text-zinc-400 flex-shrink-0" />
+                  <BookMarked className="w-4 h-4 text-[#475569] dark:text-[#A4B1C7] flex-shrink-0" />
                   <div>
-                    <p className="font-semibold text-zinc-900 dark:text-zinc-100">Kutipan BibTeX (.bib)</p>
-                    <p className="text-[10px] text-zinc-500">Untuk Mendeley &amp; Zotero</p>
+                    <p className="font-semibold text-[#0F172A] dark:text-[#F3F6FC]">Kutipan BibTeX (.bib)</p>
+                    <p className="text-[10px] text-[#475569] dark:text-[#A4B1C7]">Untuk Mendeley &amp; Zotero</p>
                   </div>
                 </button>
 
                 <button
                   type="button"
                   onClick={() => { setIsExportDropdownOpen(false); handleExportRIS(); }}
-                  className="w-full flex items-center gap-2.5 px-3 py-1.5 rounded-lg text-xs font-medium text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors text-left cursor-pointer"
+                  className="w-full flex items-center gap-2.5 px-3 py-1.5 rounded-lg text-xs font-medium text-[#0F172A] dark:text-[#F3F6FC] hover:bg-[#F1F5F9] dark:hover:bg-[#172033] transition-colors text-left cursor-pointer"
                 >
-                  <BookmarkCheck className="w-4 h-4 text-zinc-400 flex-shrink-0" />
+                  <BookmarkCheck className="w-4 h-4 text-[#475569] dark:text-[#A4B1C7] flex-shrink-0" />
                   <div>
-                    <p className="font-semibold text-zinc-900 dark:text-zinc-100">Kutipan RIS (.ris)</p>
-                    <p className="text-[10px] text-zinc-500">Untuk EndNote &amp; RefWorks</p>
+                    <p className="font-semibold text-[#0F172A] dark:text-[#F3F6FC]">Kutipan RIS (.ris)</p>
+                    <p className="text-[10px] text-[#475569] dark:text-[#A4B1C7]">Untuk EndNote &amp; RefWorks</p>
                   </div>
                 </button>
 
-                <div className="my-1 border-t border-zinc-200 dark:border-zinc-800"></div>
+                <div className="my-1 border-t border-[#E2E8F0] dark:border-[#253149]"></div>
 
                 <button
                   type="button"
                   onClick={() => { setIsExportDropdownOpen(false); handleCopy(); }}
-                  className="w-full flex items-center gap-2.5 px-3 py-1.5 rounded-lg text-xs font-medium text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors text-left cursor-pointer"
+                  className="w-full flex items-center gap-2.5 px-3 py-1.5 rounded-lg text-xs font-medium text-[#0F172A] dark:text-[#F3F6FC] hover:bg-[#F1F5F9] dark:hover:bg-[#172033] transition-colors text-left cursor-pointer"
                 >
-                  <Copy className="w-4 h-4 text-zinc-400 flex-shrink-0" />
+                  <Copy className="w-4 h-4 text-[#475569] dark:text-[#A4B1C7] flex-shrink-0" />
                   <div>
-                    <p className="font-semibold text-zinc-900 dark:text-zinc-100">{copied ? "Tersalin ke Clipboard" : "Salin Markdown (.md)"}</p>
-                    <p className="text-[10px] text-zinc-500">Naskah lengkap format Markdown</p>
+                    <p className="font-semibold text-[#0F172A] dark:text-[#F3F6FC]">{copied ? "Tersalin ke Clipboard" : "Salin Markdown (.md)"}</p>
+                    <p className="text-[10px] text-[#475569] dark:text-[#A4B1C7]">Naskah lengkap format Markdown</p>
                   </div>
                 </button>
 
                 <button
                   type="button"
                   onClick={() => { setIsExportDropdownOpen(false); handlePrint(); }}
-                  className="w-full flex items-center gap-2.5 px-3 py-1.5 rounded-lg text-xs font-medium text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors text-left cursor-pointer"
+                  className="w-full flex items-center gap-2.5 px-3 py-1.5 rounded-lg text-xs font-medium text-[#0F172A] dark:text-[#F3F6FC] hover:bg-[#F1F5F9] dark:hover:bg-[#172033] transition-colors text-left cursor-pointer"
                 >
-                  <Printer className="w-4 h-4 text-zinc-400 flex-shrink-0" />
+                  <Printer className="w-4 h-4 text-[#475569] dark:text-[#A4B1C7] flex-shrink-0" />
                   <div>
-                    <p className="font-semibold text-zinc-900 dark:text-zinc-100">Cetak Dokumen / PDF</p>
-                    <p className="text-[10px] text-zinc-500">Tata letak cetak A4 langsung</p>
+                    <p className="font-semibold text-[#0F172A] dark:text-[#F3F6FC]">Cetak Dokumen / PDF</p>
+                    <p className="text-[10px] text-[#475569] dark:text-[#A4B1C7]">Tata letak cetak A4 langsung</p>
                   </div>
                 </button>
               </div>
@@ -1011,10 +1011,10 @@ NIP / NIK.
             type="button"
             onClick={handleSaveToArchive}
             disabled={isSavingArchive}
-            className="hidden md:flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 hover:bg-zinc-50 text-zinc-700 dark:text-zinc-300 text-xs font-medium transition-all cursor-pointer shadow-2xs disabled:opacity-50"
+            className="hidden md:flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border border-[#E2E8F0] dark:border-[#253149] bg-white dark:bg-[#111827] hover:bg-[#F1F5F9] dark:hover:bg-[#172033] text-[#0F172A] dark:text-[#F3F6FC] text-xs font-medium transition-all cursor-pointer shadow-2xs disabled:opacity-50"
             title="Simpan naskah ke database arsip"
           >
-            <Bookmark className="w-3.5 h-3.5 text-amber-500" />
+            <Bookmark className="w-3.5 h-3.5 text-[#FBBF24]" />
             <span>{isSavingArchive ? "..." : "Simpan"}</span>
           </button>
 
@@ -1024,12 +1024,12 @@ NIP / NIK.
             onClick={() => setIsRightPanelOpen(!isRightPanelOpen)}
             className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-xs font-semibold shadow-2xs transition-all cursor-pointer ${
               isRightPanelOpen
-                ? "bg-zinc-950 text-white dark:bg-zinc-100 dark:text-black border-zinc-950 dark:border-zinc-100"
-                : "bg-white dark:bg-zinc-900 text-zinc-800 dark:text-zinc-200 border-zinc-200 dark:border-zinc-800 hover:bg-zinc-50"
+                ? "bg-[#0F172A] text-white dark:bg-[#172033] dark:text-[#7C9CFF] border-[#0F172A] dark:border-[#7C9CFF]/40"
+                : "bg-white dark:bg-[#111827] text-[#0F172A] dark:text-[#F3F6FC] border-[#E2E8F0] dark:border-[#253149] hover:bg-[#F1F5F9] dark:hover:bg-[#172033]"
             }`}
             title="Buka / Tutup Panel Asisten AI & Audit QA"
           >
-            <Sparkles className="w-3.5 h-3.5 text-sky-400" />
+            <Sparkles className="w-3.5 h-3.5 text-[#7C9CFF]" />
             <span className="hidden sm:inline">Asisten &amp; QA</span>
           </button>
         </div>
@@ -1039,16 +1039,16 @@ NIP / NIK.
       <div className="flex-1 flex overflow-hidden">
         {/* PANEL 1: LEFT DOCUMENT OUTLINE / CHAPTER NAVIGATION (Collapsible) */}
         {isLeftPanelOpen && (
-          <aside className="w-64 sm:w-72 shrink-0 border-r border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900/60 overflow-y-auto flex flex-col no-print transition-all duration-200">
+          <aside className="w-64 sm:w-72 shrink-0 border-r border-[#E2E8F0] dark:border-[#253149] bg-white dark:bg-[#0B101A] overflow-y-auto flex flex-col no-print transition-all duration-200">
             {/* Header */}
-            <div className="p-3 border-b border-zinc-200 dark:border-zinc-800 flex items-center justify-between">
-              <span className="text-[11px] font-mono font-bold uppercase tracking-wider text-zinc-400 dark:text-zinc-500">
+            <div className="p-3 border-b border-[#E2E8F0] dark:border-[#253149] flex items-center justify-between">
+              <span className="text-[11px] font-mono font-bold uppercase tracking-wider text-[#475569] dark:text-[#A4B1C7]">
                 Struktur Dokumen
               </span>
               <button
                 type="button"
                 onClick={() => setIsLeftPanelOpen(false)}
-                className="p-1 rounded-md text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200 hover:bg-zinc-100 dark:hover:bg-zinc-800 cursor-pointer"
+                className="p-1 rounded-md text-[#475569] dark:text-[#A4B1C7] hover:text-[#0F172A] dark:hover:text-[#F3F6FC] hover:bg-[#F1F5F9] dark:hover:bg-[#172033] cursor-pointer"
                 title="Tutup Navigasi Bab"
               >
                 <X className="w-3.5 h-3.5" />
@@ -1056,14 +1056,14 @@ NIP / NIK.
             </div>
 
             {/* Primary Category Switcher */}
-            <div className="p-2 space-y-1 border-b border-zinc-100 dark:border-zinc-800">
+            <div className="p-2 space-y-1 border-b border-[#E2E8F0] dark:border-[#253149]">
               <button
                 type="button"
                 onClick={() => { setWorkspaceCategory("naskah"); setActiveTab("naskah"); }}
                 className={`w-full flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-semibold transition-all cursor-pointer text-left ${
                   workspaceCategory === "naskah"
-                    ? "bg-zinc-950 text-white dark:bg-zinc-100 dark:text-black shadow-xs"
-                    : "text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800"
+                    ? "bg-[#0F172A] text-white dark:bg-[#172033] dark:text-[#7C9CFF] shadow-xs"
+                    : "text-[#475569] dark:text-[#A4B1C7] hover:bg-[#F1F5F9] dark:hover:bg-[#172033]"
                 }`}
               >
                 <FileText className="w-3.5 h-3.5 shrink-0" />
@@ -1074,8 +1074,8 @@ NIP / NIK.
                 onClick={() => { setWorkspaceCategory("metodologi"); setActiveTab(metodologiTab); }}
                 className={`w-full flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-semibold transition-all cursor-pointer text-left ${
                   workspaceCategory === "metodologi"
-                    ? "bg-zinc-950 text-white dark:bg-zinc-100 dark:text-black shadow-xs"
-                    : "text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800"
+                    ? "bg-[#0F172A] text-white dark:bg-[#172033] dark:text-[#7C9CFF] shadow-xs"
+                    : "text-[#475569] dark:text-[#A4B1C7] hover:bg-[#F1F5F9] dark:hover:bg-[#172033]"
                 }`}
               >
                 <Network className="w-3.5 h-3.5 shrink-0" />
@@ -1086,8 +1086,8 @@ NIP / NIK.
                 onClick={() => { setWorkspaceCategory("sidang"); setActiveTab(sidangTab); }}
                 className={`w-full flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-semibold transition-all cursor-pointer text-left ${
                   workspaceCategory === "sidang"
-                    ? "bg-zinc-950 text-white dark:bg-zinc-100 dark:text-black shadow-xs"
-                    : "text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800"
+                    ? "bg-[#0F172A] text-white dark:bg-[#172033] dark:text-[#7C9CFF] shadow-xs"
+                    : "text-[#475569] dark:text-[#A4B1C7] hover:bg-[#F1F5F9] dark:hover:bg-[#172033]"
                 }`}
               >
                 <GraduationCap className="w-3.5 h-3.5 shrink-0" />
@@ -1099,7 +1099,7 @@ NIP / NIK.
             <div className="flex-1 p-2 space-y-4">
               {workspaceCategory === "naskah" && (
                 <div className="space-y-1">
-                  <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-zinc-400 px-2 block mb-1">
+                  <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-[#475569] dark:text-[#A4B1C7] px-2 block mb-1">
                     Daftar Bab &amp; Bagian
                   </span>
                   {[
@@ -1124,16 +1124,16 @@ NIP / NIK.
                         }}
                         className={`w-full flex items-center justify-between px-3 py-1.5 rounded-lg text-xs transition-all cursor-pointer text-left ${
                           isActive
-                            ? "bg-zinc-200 dark:bg-zinc-800 text-zinc-950 dark:text-zinc-100 font-bold"
-                            : "text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800/60"
+                            ? "bg-[#0F172A] text-white dark:bg-[#172033] dark:text-[#7C9CFF] font-bold shadow-xs"
+                            : "text-[#475569] dark:text-[#A4B1C7] hover:bg-[#F1F5F9] dark:hover:bg-[#172033]/60"
                         }`}
                       >
                         <span className="flex items-center gap-2 truncate">
-                          <IconComp className="w-3.5 h-3.5 shrink-0 text-zinc-400" />
+                          <IconComp className={`w-3.5 h-3.5 shrink-0 ${isActive ? 'text-[#7C9CFF]' : 'text-[#475569] dark:text-[#A4B1C7]'}`} />
                           <span className="truncate">{s.label}</span>
                         </span>
                         {s.badge && (
-                          <span className="text-[9px] px-1.5 py-0.2 rounded-full font-mono bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 font-semibold shrink-0">
+                          <span className="text-[9px] px-1.5 py-0.2 rounded-full font-mono bg-[#7C9CFF]/15 text-[#7C9CFF] font-semibold shrink-0">
                             {s.badge}
                           </span>
                         )}
@@ -1142,56 +1142,56 @@ NIP / NIK.
                   })}
 
                   {/* Bagian & Lampiran Quick Tools */}
-                  <div className="pt-3 border-t border-zinc-100 dark:border-zinc-800 space-y-0.5">
-                    <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-zinc-400 px-2 block mb-1">
+                  <div className="pt-3 border-t border-[#E2E8F0] dark:border-[#253149] space-y-0.5">
+                    <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-[#475569] dark:text-[#A4B1C7] px-2 block mb-1">
                       Bagian &amp; Lampiran
                     </span>
                     <button
                       type="button"
                       onClick={() => setIsCampusLogoModalOpen(true)}
-                      className="w-full flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-xs text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors text-left cursor-pointer"
+                      className="w-full flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-xs text-[#475569] dark:text-[#A4B1C7] hover:bg-[#F1F5F9] dark:hover:bg-[#172033] transition-colors text-left cursor-pointer"
                     >
-                      <Landmark className="w-3.5 h-3.5 text-sky-500 shrink-0" />
+                      <Landmark className="w-3.5 h-3.5 text-[#7C9CFF] shrink-0" />
                       <span>Logo Kampus &amp; Sampul</span>
                     </button>
                     <button
                       type="button"
                       onClick={() => setIsTheoryCustomizerModalOpen(true)}
-                      className="w-full flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-xs text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors text-left cursor-pointer"
+                      className="w-full flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-xs text-[#475569] dark:text-[#A4B1C7] hover:bg-[#F1F5F9] dark:hover:bg-[#172033] transition-colors text-left cursor-pointer"
                     >
-                      <BookOpen className="w-3.5 h-3.5 text-indigo-500 shrink-0" />
+                      <BookOpen className="w-3.5 h-3.5 text-[#9B8CFF] shrink-0" />
                       <span>Kustom Teori ({currentDoc.bab2?.landasanTeori?.length || 13})</span>
                     </button>
                     <button
                       type="button"
                       onClick={() => setIsCustomSheetModalOpen(true)}
-                      className="w-full flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-xs text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors text-left cursor-pointer"
+                      className="w-full flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-xs text-[#475569] dark:text-[#A4B1C7] hover:bg-[#F1F5F9] dark:hover:bg-[#172033] transition-colors text-left cursor-pointer"
                     >
-                      <FileSignature className="w-3.5 h-3.5 text-amber-500 shrink-0" />
+                      <FileSignature className="w-3.5 h-3.5 text-[#FBBF24] shrink-0" />
                       <span>Lembar Khusus &amp; Scan</span>
                     </button>
                     <button
                       type="button"
                       onClick={() => setIsImageManagerModalOpen(true)}
-                      className="w-full flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-xs text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors text-left cursor-pointer"
+                      className="w-full flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-xs text-[#475569] dark:text-[#A4B1C7] hover:bg-[#F1F5F9] dark:hover:bg-[#172033] transition-colors text-left cursor-pointer"
                     >
-                      <ImageIcon className="w-3.5 h-3.5 text-emerald-500 shrink-0" />
+                      <ImageIcon className="w-3.5 h-3.5 text-[#34D399] shrink-0" />
                       <span>Gambar &amp; Diagram Bab</span>
                     </button>
                     <button
                       type="button"
                       onClick={() => setIsLogbookModalOpen(true)}
-                      className="w-full flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-xs text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors text-left cursor-pointer"
+                      className="w-full flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-xs text-[#475569] dark:text-[#A4B1C7] hover:bg-[#F1F5F9] dark:hover:bg-[#172033] transition-colors text-left cursor-pointer"
                     >
-                      <CalendarDays className="w-3.5 h-3.5 text-blue-500 shrink-0" />
+                      <CalendarDays className="w-3.5 h-3.5 text-[#7C9CFF] shrink-0" />
                       <span>Logbook Catatan Lapangan</span>
                     </button>
                     <button
                       type="button"
                       onClick={() => setIsDefenseMinutesModalOpen(true)}
-                      className="w-full flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-xs text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors text-left cursor-pointer"
+                      className="w-full flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-xs text-[#475569] dark:text-[#A4B1C7] hover:bg-[#F1F5F9] dark:hover:bg-[#172033] transition-colors text-left cursor-pointer"
                     >
-                      <FileCheck2 className="w-3.5 h-3.5 text-rose-500 shrink-0" />
+                      <FileCheck2 className="w-3.5 h-3.5 text-[#FB7185] shrink-0" />
                       <span>Berita Acara Sidang</span>
                     </button>
                   </div>
@@ -1200,7 +1200,7 @@ NIP / NIK.
 
               {workspaceCategory === "metodologi" && (
                 <div className="space-y-1">
-                  <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-zinc-400 px-2 block mb-1">
+                  <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-[#475569] dark:text-[#A4B1C7] px-2 block mb-1">
                     Instrumen Metodologi
                   </span>
                   {[
@@ -1220,11 +1220,11 @@ NIP / NIK.
                         }}
                         className={`w-full flex items-center gap-2 px-3 py-2 rounded-lg text-xs transition-all cursor-pointer text-left ${
                           isActive
-                            ? "bg-zinc-200 dark:bg-zinc-800 text-zinc-950 dark:text-zinc-100 font-bold"
-                            : "text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800/60"
+                            ? "bg-[#0F172A] text-white dark:bg-[#172033] dark:text-[#7C9CFF] font-bold"
+                            : "text-[#475569] dark:text-[#A4B1C7] hover:bg-[#F1F5F9] dark:hover:bg-[#172033]/60"
                         }`}
                       >
-                        <IconComp className="w-3.5 h-3.5 shrink-0 text-zinc-500" />
+                        <IconComp className={`w-3.5 h-3.5 shrink-0 ${isActive ? 'text-[#7C9CFF]' : 'text-[#475569] dark:text-[#A4B1C7]'}`} />
                         <span>{m.label}</span>
                       </button>
                     );
@@ -1234,13 +1234,13 @@ NIP / NIK.
 
               {workspaceCategory === "sidang" && (
                 <div className="space-y-1">
-                  <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-zinc-400 px-2 block mb-1">
+                  <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-[#475569] dark:text-[#A4B1C7] px-2 block mb-1">
                     Kesiapan Sidang &amp; Audit
                   </span>
                   {[
-                    { id: "defense", label: "Simulasi Tanya Jawab Sidang", icon: ShieldAlert, color: "text-amber-500" },
-                    { id: "revisionMatrix", label: "Matriks Revisi Dosen", icon: Layers, color: "text-indigo-500" },
-                    { id: "audit", label: "Audit Kepatuhan & Turnitin", icon: ShieldCheck, color: "text-emerald-500" }
+                    { id: "defense", label: "Simulasi Tanya Jawab Sidang", icon: ShieldAlert, color: "text-[#FBBF24]" },
+                    { id: "revisionMatrix", label: "Matriks Revisi Dosen", icon: Layers, color: "text-[#9B8CFF]" },
+                    { id: "audit", label: "Audit Kepatuhan & Turnitin", icon: ShieldCheck, color: "text-[#34D399]" }
                   ].map((s) => {
                     const isActive = activeTab === s.id;
                     const IconComp = s.icon;
@@ -1254,8 +1254,8 @@ NIP / NIK.
                         }}
                         className={`w-full flex items-center gap-2 px-3 py-2 rounded-lg text-xs transition-all cursor-pointer text-left ${
                           isActive
-                            ? "bg-zinc-200 dark:bg-zinc-800 text-zinc-950 dark:text-zinc-100 font-bold"
-                            : "text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800/60"
+                            ? "bg-[#0F172A] text-white dark:bg-[#172033] dark:text-[#7C9CFF] font-bold"
+                            : "text-[#475569] dark:text-[#A4B1C7] hover:bg-[#F1F5F9] dark:hover:bg-[#172033]/60"
                         }`}
                       >
                         <IconComp className={`w-3.5 h-3.5 shrink-0 ${s.color}`} />
@@ -1269,17 +1269,17 @@ NIP / NIK.
 
             {/* Bottom link to Presentation Studio */}
             {onOpenPresentationStudio && (
-              <div className="p-3 border-t border-zinc-200 dark:border-zinc-800">
+              <div className="p-3 border-t border-[#E2E8F0] dark:border-[#253149]">
                 <button
                   type="button"
                   onClick={onOpenPresentationStudio}
-                  className="w-full flex items-center justify-between px-3 py-2 rounded-lg bg-orange-50 dark:bg-orange-950/30 border border-orange-200 dark:border-orange-900/50 text-orange-700 dark:text-orange-300 text-xs font-semibold hover:bg-orange-100 transition-colors cursor-pointer"
+                  className="w-full flex items-center justify-between px-3 py-2 rounded-lg bg-[#FBBF24]/10 border border-[#FBBF24]/30 text-[#FBBF24] text-xs font-semibold hover:bg-[#FBBF24]/20 transition-colors cursor-pointer"
                 >
                   <span className="flex items-center gap-1.5">
-                    <Presentation className="w-3.5 h-3.5 text-orange-500" />
+                    <Presentation className="w-3.5 h-3.5 text-[#FBBF24]" />
                     <span>Slide Studio 16:9</span>
                   </span>
-                  <ExternalLink className="w-3 h-3 text-orange-400" />
+                  <ExternalLink className="w-3 h-3 text-[#FBBF24]" />
                 </button>
               </div>
             )}
@@ -1287,7 +1287,7 @@ NIP / NIK.
         )}
 
         {/* PANEL 2: CENTER DOCUMENT CANVAS (Spacious & Clean) */}
-        <main className="flex-1 overflow-y-auto px-3 sm:px-6 md:px-8 py-5 flex flex-col items-center bg-zinc-100/50 dark:bg-zinc-950/50">
+        <main className="flex-1 overflow-y-auto px-3 sm:px-6 md:px-8 py-5 flex flex-col items-center bg-[#F8FAFC] dark:bg-[#080B12]">
           <div className="w-full max-w-4xl space-y-4">
 
       {/* 3. Sub-Pills / Chapter Switcher for Active Category */}
@@ -3904,20 +3904,20 @@ NIP / NIK.
 
         {/* PANEL 3: RIGHT COLLAPSIBLE INSPECTOR (Co-Pilot, QA Audit, Literatur, Format) */}
         {isRightPanelOpen && (
-          <aside className="w-80 sm:w-96 shrink-0 border-l border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900/90 overflow-y-auto flex flex-col no-print transition-all duration-200">
+          <aside className="w-80 sm:w-96 shrink-0 border-l border-[#E2E8F0] dark:border-[#253149] bg-white dark:bg-[#111827] overflow-y-auto flex flex-col no-print transition-all duration-200">
             {/* Header with Inspector Tabs & Close Button */}
-            <div className="p-2 border-b border-zinc-200 dark:border-zinc-800 flex items-center justify-between gap-1">
+            <div className="p-2 border-b border-[#E2E8F0] dark:border-[#253149] flex items-center justify-between gap-1">
               <div className="flex items-center gap-1 overflow-x-auto scrollbar-none text-xs">
                 <button
                   type="button"
                   onClick={() => setInspectorTab("copilot")}
                   className={`px-2.5 py-1.5 rounded-lg font-semibold flex items-center gap-1 transition-colors cursor-pointer ${
                     inspectorTab === "copilot"
-                      ? "bg-zinc-900 text-white dark:bg-zinc-100 dark:text-black shadow-2xs"
-                      : "text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800"
+                      ? "bg-[#0F172A] text-white dark:bg-[#172033] dark:text-[#7C9CFF] shadow-2xs"
+                      : "text-[#475569] dark:text-[#A4B1C7] hover:bg-[#F1F5F9] dark:hover:bg-[#172033]"
                   }`}
                 >
-                  <Bot className="w-3.5 h-3.5 text-sky-400" />
+                  <Bot className="w-3.5 h-3.5 text-[#7C9CFF]" />
                   <span>Co-Pilot</span>
                 </button>
 
@@ -3926,11 +3926,11 @@ NIP / NIK.
                   onClick={() => setInspectorTab("qa")}
                   className={`px-2.5 py-1.5 rounded-lg font-semibold flex items-center gap-1 transition-colors cursor-pointer ${
                     inspectorTab === "qa"
-                      ? "bg-zinc-900 text-white dark:bg-zinc-100 dark:text-black shadow-2xs"
-                      : "text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800"
+                      ? "bg-[#0F172A] text-white dark:bg-[#172033] dark:text-[#7C9CFF] shadow-2xs"
+                      : "text-[#475569] dark:text-[#A4B1C7] hover:bg-[#F1F5F9] dark:hover:bg-[#172033]"
                   }`}
                 >
-                  <ShieldCheck className="w-3.5 h-3.5 text-emerald-500" />
+                  <ShieldCheck className="w-3.5 h-3.5 text-[#34D399]" />
                   <span>Audit QA</span>
                 </button>
 
@@ -3939,11 +3939,11 @@ NIP / NIK.
                   onClick={() => setInspectorTab("literature")}
                   className={`px-2.5 py-1.5 rounded-lg font-semibold flex items-center gap-1 transition-colors cursor-pointer ${
                     inspectorTab === "literature"
-                      ? "bg-zinc-900 text-white dark:bg-zinc-100 dark:text-black shadow-2xs"
-                      : "text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800"
+                      ? "bg-[#0F172A] text-white dark:bg-[#172033] dark:text-[#7C9CFF] shadow-2xs"
+                      : "text-[#475569] dark:text-[#A4B1C7] hover:bg-[#F1F5F9] dark:hover:bg-[#172033]"
                   }`}
                 >
-                  <BookOpen className="w-3.5 h-3.5 text-purple-500" />
+                  <BookOpen className="w-3.5 h-3.5 text-[#9B8CFF]" />
                   <span>Literatur</span>
                 </button>
 
@@ -3952,11 +3952,11 @@ NIP / NIK.
                   onClick={() => setInspectorTab("format")}
                   className={`px-2.5 py-1.5 rounded-lg font-semibold flex items-center gap-1 transition-colors cursor-pointer ${
                     inspectorTab === "format"
-                      ? "bg-zinc-900 text-white dark:bg-zinc-100 dark:text-black shadow-2xs"
-                      : "text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800"
+                      ? "bg-[#0F172A] text-white dark:bg-[#172033] dark:text-[#7C9CFF] shadow-2xs"
+                      : "text-[#475569] dark:text-[#A4B1C7] hover:bg-[#F1F5F9] dark:hover:bg-[#172033]"
                   }`}
                 >
-                  <SlidersHorizontal className="w-3.5 h-3.5 text-indigo-500" />
+                  <SlidersHorizontal className="w-3.5 h-3.5 text-[#FBBF24]" />
                   <span>Format</span>
                 </button>
               </div>
@@ -3964,7 +3964,7 @@ NIP / NIK.
               <button
                 type="button"
                 onClick={() => setIsRightPanelOpen(false)}
-                className="p-1.5 rounded-md text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200 hover:bg-zinc-100 dark:hover:bg-zinc-800 cursor-pointer"
+                className="p-1.5 rounded-md text-[#475569] dark:text-[#A4B1C7] hover:text-[#0F172A] dark:hover:text-[#F3F6FC] hover:bg-[#F1F5F9] dark:hover:bg-[#172033] cursor-pointer"
                 title="Tutup Panel Asisten"
               >
                 <X className="w-3.5 h-3.5" />
@@ -3975,18 +3975,18 @@ NIP / NIK.
             {inspectorTab === "copilot" && (
               <div className="flex-1 flex flex-col p-3 space-y-3">
                 <div className="space-y-1">
-                  <h4 className="text-xs font-bold text-zinc-900 dark:text-zinc-100 flex items-center gap-1.5">
-                    <Sparkles className="w-3.5 h-3.5 text-sky-500" />
+                  <h4 className="text-xs font-bold text-[#0F172A] dark:text-[#F3F6FC] flex items-center gap-1.5">
+                    <Sparkles className="w-3.5 h-3.5 text-[#7C9CFF]" />
                     <span>Asisten Akademik Cerdas</span>
                   </h4>
-                  <p className="text-[11px] text-zinc-500">
+                  <p className="text-[11px] text-[#475569] dark:text-[#A4B1C7]">
                     Didukung SOP 12 Metode Berpikir &amp; Standar Evaluasi Dikti.
                   </p>
                 </div>
 
                 {/* Quick Prompts */}
                 <div className="space-y-1">
-                  <span className="text-[10px] font-mono text-zinc-400 uppercase">Arahan Cepat:</span>
+                  <span className="text-[10px] font-mono text-[#475569] dark:text-[#A4B1C7] uppercase">Arahan Cepat:</span>
                   <div className="flex flex-wrap gap-1">
                     {[
                       "Perdalam latar belakang dengan data empiris",
@@ -3998,7 +3998,7 @@ NIP / NIK.
                         key={idx}
                         type="button"
                         onClick={() => handleSendInspectorCopilot(p)}
-                        className="text-[10px] text-left px-2 py-1 rounded-md bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-750 text-zinc-700 dark:text-zinc-300 transition-colors cursor-pointer"
+                        className="text-[10px] text-left px-2 py-1 rounded-md bg-[#F1F5F9] dark:bg-[#172033] hover:bg-[#E2E8F0] dark:hover:bg-[#1C263A] text-[#0F172A] dark:text-[#F3F6FC] transition-colors cursor-pointer"
                       >
                         + {p}
                       </button>
@@ -4013,8 +4013,8 @@ NIP / NIK.
                       key={msg.id}
                       className={`p-2.5 rounded-xl text-xs space-y-1 ${
                         msg.sender === "user"
-                          ? "bg-zinc-900 text-white dark:bg-zinc-100 dark:text-black ml-4"
-                          : "bg-zinc-100 dark:bg-zinc-800 text-zinc-800 dark:text-zinc-200 mr-2"
+                          ? "bg-[#0F172A] text-white dark:bg-[#172033] dark:text-[#7C9CFF] ml-4"
+                          : "bg-[#F1F5F9] dark:bg-[#0B101A] border border-[#E2E8F0] dark:border-[#253149] text-[#0F172A] dark:text-[#F3F6FC] mr-2"
                       }`}
                     >
                       <div className="flex justify-between items-center text-[10px] opacity-60">
@@ -4025,22 +4025,22 @@ NIP / NIK.
                     </div>
                   ))}
                   {inspectorCopilotLoading && (
-                    <div className="p-2.5 rounded-xl text-xs bg-zinc-100 dark:bg-zinc-800 text-zinc-500 flex items-center gap-2">
-                      <RefreshCw className="w-3.5 h-3.5 animate-spin text-sky-500" />
+                    <div className="p-2.5 rounded-xl text-xs bg-[#F1F5F9] dark:bg-[#172033] text-[#475569] dark:text-[#A4B1C7] flex items-center gap-2">
+                      <RefreshCw className="w-3.5 h-3.5 animate-spin text-[#7C9CFF]" />
                       <span>Co-Pilot sedang menelaah naskah...</span>
                     </div>
                   )}
                 </div>
 
                 {/* Input box */}
-                <div className="pt-2 border-t border-zinc-100 dark:border-zinc-800 flex gap-1.5">
+                <div className="pt-2 border-t border-[#E2E8F0] dark:border-[#253149] flex gap-1.5">
                   <input
                     type="text"
                     value={inspectorCopilotInput}
                     onChange={(e) => setInspectorCopilotInput(e.target.value)}
                     onKeyDown={(e) => { if (e.key === "Enter") handleSendInspectorCopilot(); }}
                     placeholder="Tanya saran bab, sitasi, atau sidang..."
-                    className="flex-1 px-3 py-1.5 rounded-lg border border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900 text-xs focus:outline-hidden"
+                    className="flex-1 px-3 py-1.5 rounded-lg border border-[#E2E8F0] dark:border-[#253149] bg-[#F8FAFC] dark:bg-[#0B101A] text-xs text-[#0F172A] dark:text-[#F3F6FC] placeholder:text-[#475569] dark:placeholder:text-[#A4B1C7] focus:outline-hidden"
                   />
                   <button
                     type="button"

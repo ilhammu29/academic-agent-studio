@@ -178,44 +178,44 @@ export const AgentExecutionMonitor: React.FC<AgentExecutionMonitorProps> = ({
   };
 
   return (
-    <div className="max-w-4xl mx-auto py-8 sm:py-12 px-4 sm:px-6 w-full animate-in fade-in duration-300">
+    <div className="max-w-4xl mx-auto py-8 sm:py-12 px-4 sm:px-6 w-full animate-in fade-in duration-300 text-[#0F172A] dark:text-[#F3F6FC]">
       
       {/* 1. Header & Stage Pill */}
       <div className="mb-8">
         
         {/* Step Pill */}
-        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-zinc-100 dark:bg-zinc-900 border border-zinc-200/70 dark:border-zinc-800 text-xs font-medium text-zinc-700 dark:text-zinc-300 mb-3 shadow-2xs">
-          <Cpu className="w-3.5 h-3.5 text-zinc-800 dark:text-zinc-200" />
-          <span>Langkah 3 dari 4: Multi-Agent Orkestrasi</span>
+        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-md bg-[#F1F5F9] dark:bg-[#172033] border border-[#E2E8F0] dark:border-[#253149] text-xs font-medium text-[#0F172A] dark:text-[#7C9CFF] mb-3 shadow-2xs">
+          <Cpu className="w-3.5 h-3.5 text-[#7C9CFF]" />
+          <span>Langkah 3 dari 4: Orkestrasi Multi-Agent AI</span>
         </div>
 
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
-            <h2 className="text-2xl sm:text-3xl font-bold text-zinc-950 dark:text-white tracking-tight">
-              Penyusunan & Sintesis Akademik
+            <h2 className="text-2xl sm:text-3xl font-bold text-[#0F172A] dark:text-[#F3F6FC] tracking-tight">
+              Penyusunan &amp; Sintesis Akademik
             </h2>
-            <p className="text-xs sm:text-sm text-zinc-500 dark:text-zinc-400 mt-1 max-w-xl line-clamp-2">
-              Topik: <span className="font-semibold text-zinc-800 dark:text-zinc-200">"{title}"</span>
+            <p className="text-xs sm:text-sm text-[#475569] dark:text-[#A4B1C7] mt-1 max-w-xl line-clamp-2">
+              Topik: <span className="font-semibold text-[#0F172A] dark:text-[#F3F6FC]">"{title}"</span>
             </p>
           </div>
 
           <div className="flex items-center gap-2 text-xs font-mono">
             {isFinished ? (
-              <span className="flex items-center gap-1.5 text-emerald-600 dark:text-emerald-400 font-semibold px-3 py-1 rounded-full bg-emerald-50 dark:bg-emerald-950/40">
-                <Check className="w-4 h-4 text-emerald-500" /> Selesai 100%
+              <span className="flex items-center gap-1.5 text-[#34D399] font-semibold px-3 py-1 rounded-full bg-[#34D399]/15 border border-[#34D399]/30">
+                <Check className="w-4 h-4 text-[#34D399]" /> Selesai 100%
               </span>
             ) : (
-              <span className="flex items-center gap-2 text-zinc-600 dark:text-zinc-400 px-3 py-1 rounded-full bg-zinc-100 dark:bg-zinc-800">
-                <Loader2 className="w-3.5 h-3.5 animate-spin text-zinc-800 dark:text-zinc-200" /> Memproses {overallProgress}%
+              <span className="flex items-center gap-2 text-[#475569] dark:text-[#A4B1C7] px-3 py-1 rounded-full bg-[#F1F5F9] dark:bg-[#172033] border border-[#E2E8F0] dark:border-[#253149]">
+                <Loader2 className="w-3.5 h-3.5 animate-spin text-[#7C9CFF]" /> Memproses {overallProgress}%
               </span>
             )}
           </div>
         </div>
 
         {/* Minimal Progress Bar */}
-        <div className="w-full bg-zinc-200/80 dark:bg-zinc-800 h-1.5 rounded-full overflow-hidden mt-4">
+        <div className="w-full bg-[#E2E8F0] dark:bg-[#253149] h-1.5 rounded-full overflow-hidden mt-4">
           <div
-            className="h-full bg-zinc-900 dark:bg-zinc-100 transition-all duration-300 rounded-full"
+            className="h-full bg-[#7C9CFF] transition-all duration-300 rounded-full"
             style={{ width: `${overallProgress}%` }}
           />
         </div>
@@ -232,22 +232,22 @@ export const AgentExecutionMonitor: React.FC<AgentExecutionMonitorProps> = ({
               key={agent.id}
               className={`flex items-center justify-between p-4 rounded-2xl border transition-all ${
                 isDone 
-                  ? "bg-white dark:bg-zinc-900/80 border-zinc-200/80 dark:border-zinc-800/80 shadow-2xs" 
+                  ? "bg-white dark:bg-[#111827] border-[#E2E8F0] dark:border-[#253149] shadow-2xs" 
                   : isWorking
-                    ? "bg-zinc-50 dark:bg-zinc-900 border-zinc-300 dark:border-zinc-700 shadow-xs"
-                    : "bg-zinc-50/50 dark:bg-zinc-950/40 border-zinc-200/40 dark:border-zinc-900 opacity-60"
+                    ? "bg-[#F8FAFC] dark:bg-[#172033] border-[#7C9CFF]/60 shadow-xs"
+                    : "bg-[#F8FAFC]/50 dark:bg-[#0B101A]/40 border-[#E2E8F0]/40 dark:border-[#253149]/40 opacity-60"
               }`}
             >
               <div className="flex items-center gap-3.5">
                 <div className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-mono font-semibold ${
                   isDone 
-                    ? "bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400" 
+                    ? "bg-[#34D399]/15 text-[#34D399]" 
                     : isWorking 
-                      ? "bg-zinc-900 text-white dark:bg-zinc-100 dark:text-black" 
-                      : "bg-zinc-200 dark:bg-zinc-800 text-zinc-500"
+                      ? "bg-[#7C9CFF] text-[#080B12]" 
+                      : "bg-[#F1F5F9] dark:bg-[#172033] text-[#475569] dark:text-[#A4B1C7]"
                 }`}>
                   {isDone ? (
-                    <Check className="w-4 h-4 text-emerald-500" />
+                    <Check className="w-4 h-4 text-[#34D399]" />
                   ) : isWorking ? (
                     <Loader2 className="w-3.5 h-3.5 animate-spin" />
                   ) : (
@@ -256,16 +256,16 @@ export const AgentExecutionMonitor: React.FC<AgentExecutionMonitorProps> = ({
                 </div>
 
                 <div>
-                  <h3 className={`text-xs sm:text-sm font-semibold ${isDone || isWorking ? 'text-zinc-900 dark:text-zinc-100' : 'text-zinc-500'}`}>
+                  <h3 className={`text-xs sm:text-sm font-semibold ${isDone || isWorking ? 'text-[#0F172A] dark:text-[#F3F6FC]' : 'text-[#475569] dark:text-[#A4B1C7]'}`}>
                     {agent.name}
                   </h3>
-                  <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-0.5">
+                  <p className="text-xs text-[#475569] dark:text-[#A4B1C7] mt-0.5">
                     {agent.currentTask}
                   </p>
                 </div>
               </div>
 
-              <div className="text-xs font-mono text-zinc-500 px-3 py-1 rounded-full bg-zinc-100 dark:bg-zinc-800">
+              <div className="text-xs font-mono text-[#475569] dark:text-[#A4B1C7] px-3 py-1 rounded-full bg-[#F1F5F9] dark:bg-[#172033] border border-[#E2E8F0] dark:border-[#253149]">
                 {isDone ? "100%" : isWorking ? `${agent.progress}%` : "Antre"}
               </div>
             </div>
@@ -274,15 +274,15 @@ export const AgentExecutionMonitor: React.FC<AgentExecutionMonitorProps> = ({
       </div>
 
       {/* 3. Live Logs Console (Subtle minimal terminal) */}
-      <div className="border border-zinc-200/80 dark:border-zinc-800 rounded-2xl p-4 bg-white dark:bg-zinc-950 font-mono text-xs text-zinc-600 dark:text-zinc-400 space-y-1.5 mb-8 max-h-48 overflow-y-auto shadow-xs">
-        <div className="text-[10px] uppercase text-zinc-400 dark:text-zinc-500 font-semibold mb-2">
+      <div className="border border-[#E2E8F0] dark:border-[#253149] rounded-2xl p-4 bg-white dark:bg-[#0B101A] font-mono text-xs text-[#475569] dark:text-[#A4B1C7] space-y-1.5 mb-8 max-h-48 overflow-y-auto shadow-xs">
+        <div className="text-[10px] uppercase text-[#475569] dark:text-[#A4B1C7] font-semibold mb-2">
           Log Orkestrasi Real-Time:
         </div>
         {activeLogs.map((log, i) => (
           <div key={i} className="flex gap-2 text-[11px] leading-relaxed">
-            <span className="text-zinc-400 dark:text-zinc-600 select-none">[{log.time}]</span>
-            <span className="text-zinc-900 dark:text-zinc-200 font-medium">{log.agent}:</span>
-            <span className="text-zinc-600 dark:text-zinc-400">{log.text}</span>
+            <span className="text-[#475569] dark:text-[#A4B1C7] select-none">[{log.time}]</span>
+            <span className="text-[#0F172A] dark:text-[#F3F6FC] font-medium">{log.agent}:</span>
+            <span className="text-[#475569] dark:text-[#A4B1C7]">{log.text}</span>
           </div>
         ))}
       </div>
@@ -293,9 +293,9 @@ export const AgentExecutionMonitor: React.FC<AgentExecutionMonitorProps> = ({
           <button
             type="button"
             onClick={handleFinish}
-            className="w-full sm:w-auto px-6 py-3 rounded-full bg-[#18181B] hover:bg-black text-white dark:bg-zinc-100 dark:hover:bg-white dark:text-zinc-950 font-semibold text-xs transition-all flex items-center justify-center gap-2 cursor-pointer shadow-md group"
+            className="w-full sm:w-auto px-6 py-3 rounded-xl bg-[#7C9CFF] hover:bg-[#9B8CFF] text-[#080B12] font-semibold text-xs transition-all flex items-center justify-center gap-2 cursor-pointer shadow-md group"
           >
-            <span>Buka Dokumen Naskah & Slide Studio</span>
+            <span>Buka Dokumen Naskah &amp; Slide Studio</span>
             <ArrowRight className="w-4 h-4 stroke-[2.5] group-hover:translate-x-0.5 transition-transform" />
           </button>
         </div>

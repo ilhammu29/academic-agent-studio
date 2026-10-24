@@ -278,23 +278,26 @@ export const HeroInputView: React.FC<HeroInputViewProps> = ({
   };
 
   return (
-    <div className="flex-1 flex flex-col max-w-6xl mx-auto w-full px-4 sm:px-8 py-6 sm:py-8 animate-in fade-in duration-200">
+    <div className="flex-1 flex flex-col max-w-6xl mx-auto w-full px-4 sm:px-8 py-6 sm:py-8 animate-in fade-in duration-200 text-[#0F172A] dark:text-[#F3F6FC]">
       
       {/* ============================================================ */}
       {/* 1. TOP HEADER & BREADCRUMB CONTEXT                           */}
       {/* ============================================================ */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 mb-6 border-b border-zinc-200 dark:border-zinc-800">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 mb-6 border-b border-[#E2E8F0] dark:border-[#253149]">
         <div className="space-y-1">
-          <div className="flex items-center gap-2 text-xs text-zinc-500 dark:text-zinc-400">
-            <span className="font-semibold text-zinc-800 dark:text-zinc-200">OXID Academic Studio</span>
+          <div className="flex items-center gap-2 text-xs text-[#475569] dark:text-[#A4B1C7]">
+            <span className="font-semibold text-[#0F172A] dark:text-[#F3F6FC]">OXID Academic Studio</span>
             <span>/</span>
             <span className="capitalize">{activeMainTab === "dashboard" ? "Dashboard Kerja" : activeMainTab === "create" ? "Buat Usulan Baru" : "Eksplorasi Ide"}</span>
           </div>
-          <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-zinc-950 dark:text-white">
-            Workspace Penulisan Karya Ilmiah
+          <div className="text-xs font-medium text-[#7C9CFF]">
+            Selamat datang kembali, {candidateName || "Ilham Maulana"}
+          </div>
+          <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-[#0F172A] dark:text-[#F3F6FC]">
+            Workspace Riset &amp; Penulisan Akademik
           </h1>
-          <p className="text-xs text-zinc-600 dark:text-zinc-400">
-            Pusat penyusunan, validasi kepatuhan pedoman, dan orkestrasi naskah akademik terstandar.
+          <p className="text-xs text-[#475569] dark:text-[#A4B1C7]">
+            Pusat penyusunan, validasi kepatuhan institusi, dan orkestrasi naskah ilmiah terstandar.
           </p>
         </div>
 
@@ -304,10 +307,10 @@ export const HeroInputView: React.FC<HeroInputViewProps> = ({
             <button
               type="button"
               onClick={onOpenGuidelineModal}
-              className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 hover:border-zinc-400 text-xs text-zinc-700 dark:text-zinc-300 font-medium transition-all shadow-2xs cursor-pointer"
+              className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-white dark:bg-[#111827] border border-[#E2E8F0] dark:border-[#253149] hover:border-[#7C9CFF] text-xs text-[#0F172A] dark:text-[#F3F6FC] font-medium transition-all shadow-2xs cursor-pointer"
               title="Sesuaikan pedoman format institusi / kampus"
             >
-              <Landmark className="w-3.5 h-3.5 text-indigo-500" />
+              <Landmark className="w-3.5 h-3.5 text-[#7C9CFF]" />
               <span className="max-w-[150px] truncate">{activeCampusName || "Pedoman Kampus"}</span>
             </button>
           )}
@@ -316,10 +319,10 @@ export const HeroInputView: React.FC<HeroInputViewProps> = ({
             <button
               type="button"
               onClick={onOpenConsultation}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800 text-xs text-emerald-800 dark:text-emerald-300 font-medium hover:bg-emerald-100 transition-all shadow-2xs cursor-pointer"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#34D399]/10 border border-[#34D399]/30 text-xs text-[#34D399] font-medium hover:bg-[#34D399]/20 transition-all shadow-2xs cursor-pointer"
               title="Konsultasi interaktif dengan AI Mentor"
             >
-              <MessageSquare className="w-3.5 h-3.5 text-emerald-600" />
+              <MessageSquare className="w-3.5 h-3.5 text-[#34D399]" />
               <span className="hidden sm:inline">AI Mentor</span>
             </button>
           )}
@@ -329,20 +332,20 @@ export const HeroInputView: React.FC<HeroInputViewProps> = ({
       {/* ============================================================ */}
       {/* 2. PRIMARY WORKSPACE NAVIGATION TABS                         */}
       {/* ============================================================ */}
-      <div className="flex items-center gap-2 mb-6 border-b border-zinc-200 dark:border-zinc-800 pb-3">
+      <div className="flex items-center gap-2 mb-6 border-b border-[#E2E8F0] dark:border-[#253149] pb-3">
         <button
           type="button"
           onClick={() => setActiveMainTab("dashboard")}
           className={`flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
             activeMainTab === "dashboard"
-              ? "bg-zinc-950 text-white dark:bg-zinc-100 dark:text-black shadow-xs"
-              : "text-zinc-600 dark:text-zinc-400 hover:text-zinc-950 dark:hover:text-zinc-100 hover:bg-zinc-100 dark:hover:bg-zinc-900"
+              ? "bg-[#0F172A] text-white dark:bg-[#172033] dark:text-[#7C9CFF] border border-transparent dark:border-[#7C9CFF]/40 shadow-xs"
+              : "text-[#475569] dark:text-[#A4B1C7] hover:text-[#0F172A] dark:hover:text-[#F3F6FC] hover:bg-[#F1F5F9] dark:hover:bg-[#172033]"
           }`}
         >
           <FolderOpen className="w-3.5 h-3.5" />
           <span>Dashboard &amp; Proyek Terkini</span>
           {recentProjects.length > 0 && (
-            <span className="text-[10px] px-1.5 py-0.2 rounded-full font-mono bg-zinc-700 text-zinc-200 dark:bg-zinc-300 dark:text-zinc-800">
+            <span className="text-[10px] px-1.5 py-0.2 rounded-full font-mono bg-[#E2E8F0] text-[#0F172A] dark:bg-[#253149] dark:text-[#A4B1C7]">
               {recentProjects.length}
             </span>
           )}
@@ -353,8 +356,8 @@ export const HeroInputView: React.FC<HeroInputViewProps> = ({
           onClick={() => setActiveMainTab("create")}
           className={`flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
             activeMainTab === "create"
-              ? "bg-zinc-950 text-white dark:bg-zinc-100 dark:text-black shadow-xs"
-              : "text-zinc-600 dark:text-zinc-400 hover:text-zinc-950 dark:hover:text-zinc-100 hover:bg-zinc-100 dark:hover:bg-zinc-900"
+              ? "bg-[#0F172A] text-white dark:bg-[#172033] dark:text-[#7C9CFF] border border-transparent dark:border-[#7C9CFF]/40 shadow-xs"
+              : "text-[#475569] dark:text-[#A4B1C7] hover:text-[#0F172A] dark:hover:text-[#F3F6FC] hover:bg-[#F1F5F9] dark:hover:bg-[#172033]"
           }`}
         >
           <Plus className="w-3.5 h-3.5" />
@@ -369,210 +372,405 @@ export const HeroInputView: React.FC<HeroInputViewProps> = ({
           }}
           className={`flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
             activeMainTab === "recommender"
-              ? "bg-zinc-950 text-white dark:bg-zinc-100 dark:text-black shadow-xs"
-              : "text-zinc-600 dark:text-zinc-400 hover:text-zinc-950 dark:hover:text-zinc-100 hover:bg-zinc-100 dark:hover:bg-zinc-900"
+              ? "bg-[#0F172A] text-white dark:bg-[#172033] dark:text-[#7C9CFF] border border-transparent dark:border-[#7C9CFF]/40 shadow-xs"
+              : "text-[#475569] dark:text-[#A4B1C7] hover:text-[#0F172A] dark:hover:text-[#F3F6FC] hover:bg-[#F1F5F9] dark:hover:bg-[#172033]"
           }`}
         >
-          <Lightbulb className="w-3.5 h-3.5 text-amber-500" />
+          <Lightbulb className="w-3.5 h-3.5 text-[#FBBF24]" />
           <span>Generator Judul (AI &amp; Literatur)</span>
         </button>
       </div>
 
       {/* ============================================================ */}
-      {/* 3. TAB 1: DASHBOARD & PROYEK TERKINI                        */}
+      {/* 3. TAB 1: DASHBOARD & WORKSPACE UTAMA                        */}
       {/* ============================================================ */}
       {activeMainTab === "dashboard" && (
-        <div className="space-y-6">
+        <div className="space-y-8">
           
-          {/* A. ACTIVE WORK IN PROGRESS CARD (What am I working on?) */}
-          {activeDoc ? (
-            <div className="p-5 sm:p-6 rounded-2xl bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 shadow-sm">
-              <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
-                <div className="space-y-2 max-w-2xl">
-                  <div className="flex items-center gap-2 flex-wrap">
-                    <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-md text-[11px] font-semibold bg-emerald-100 text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800">
-                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                      Sedang Aktif Dikerjakan
-                    </span>
-                    <span className="text-[11px] font-mono px-2 py-0.5 rounded bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 uppercase">
-                      {activeDoc.category}
-                    </span>
-                    <span className="text-xs text-zinc-500">
-                      {activeDoc.candidateName} • {activeDoc.targetEntity}
-                    </span>
-                  </div>
-
-                  <h2 className="text-lg sm:text-xl font-bold text-zinc-950 dark:text-white leading-snug">
-                    {activeDoc.title}
-                  </h2>
-
-                  <p className="text-xs text-zinc-600 dark:text-zinc-400 line-clamp-2">
-                    {activeDoc.executiveSummary || "Naskah proposal telah disusun oleh Agen AI dengan struktur Bab I - V lengkap, matriks jadwal, dan tinjauan teori."}
-                  </p>
-
-                  <div className="pt-2 flex items-center gap-4 text-xs text-zinc-500">
-                    <span className="flex items-center gap-1">
-                      <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500" />
-                      Struktur Bab I - V Terisi
-                    </span>
-                    <span className="flex items-center gap-1">
-                      <ShieldCheck className="w-3.5 h-3.5 text-blue-500" />
-                      Siap Audit Kualitas QA
-                    </span>
-                  </div>
-                </div>
-
-                {/* Primary Action Button */}
-                <div className="flex flex-col gap-2 flex-shrink-0 sm:self-center">
-                  {onNavigateStage && (
-                    <button
-                      type="button"
-                      onClick={() => onNavigateStage("result")}
-                      className="px-5 py-2.5 rounded-xl bg-zinc-950 hover:bg-black text-white dark:bg-zinc-100 dark:hover:bg-white dark:text-black font-semibold text-xs transition-all shadow-sm flex items-center justify-center gap-2 cursor-pointer group"
-                    >
-                      <span>Buka Dokumen Studio</span>
-                      <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" />
-                    </button>
-                  )}
-
-                  {onNavigateStage && (
-                    <button
-                      type="button"
-                      onClick={() => onNavigateStage("slides")}
-                      className="px-4 py-2 rounded-xl bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 hover:bg-zinc-50 dark:hover:bg-zinc-850 text-zinc-800 dark:text-zinc-200 font-medium text-xs transition-all flex items-center justify-center gap-2 cursor-pointer"
-                    >
-                      <Presentation className="w-3.5 h-3.5 text-orange-500" />
-                      <span>Slide Sidang (PPTX)</span>
-                    </button>
-                  )}
-                </div>
-              </div>
-            </div>
-          ) : (
-            <div className="p-6 rounded-2xl bg-zinc-50 dark:bg-zinc-900/40 border border-dashed border-zinc-300 dark:border-zinc-800 text-center space-y-3">
-              <div className="w-10 h-10 rounded-xl bg-zinc-200 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 flex items-center justify-center mx-auto">
-                <FileText className="w-5 h-5" />
-              </div>
-              <h3 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">
-                Belum Ada Usulan yang Sedang Berjalan
-              </h3>
-              <p className="text-xs text-zinc-500 dark:text-zinc-400 max-w-md mx-auto">
-                Pilih jenis karya ilmiah dan mulai rumuskan judul penelitian Anda. Sistem memandu Anda langkah demi langkah.
-              </p>
-              <button
-                type="button"
-                onClick={() => setActiveMainTab("create")}
-                className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-zinc-950 text-white dark:bg-zinc-100 dark:text-black font-semibold text-xs shadow-xs cursor-pointer hover:opacity-90"
-              >
-                <Plus className="w-3.5 h-3.5" />
-                <span>Mulai Usulan Baru Sekarang</span>
-              </button>
-            </div>
-          )}
-
-          {/* B. RECENT PROJECTS LIST */}
-          <div className="space-y-3">
+          {/* A. AI COMMAND WORKSPACE (ChatGPT & Google AI Studio inspired) */}
+          <div className="p-5 sm:p-6 rounded-2xl bg-white dark:bg-[#111827] border border-[#E2E8F0] dark:border-[#253149] shadow-sm space-y-4">
             <div className="flex items-center justify-between">
-              <h3 className="text-sm font-bold text-zinc-900 dark:text-zinc-100 flex items-center gap-2">
-                <FolderOpen className="w-4 h-4 text-zinc-500" />
-                <span>Arsip Proyek &amp; Draf Terakhir</span>
-              </h3>
-              {onOpenDatabase && (
+              <label className="text-xs font-bold uppercase tracking-wider text-[#475569] dark:text-[#A4B1C7] flex items-center gap-2">
+                <Sparkles className="w-3.5 h-3.5 text-[#7C9CFF]" />
+                <span>Apa yang ingin Anda teliti atau susun hari ini?</span>
+              </label>
+              <span className="text-[11px] text-[#475569] dark:text-[#A4B1C7] hidden sm:inline">
+                Ketik topik, pilih tindakan, atau gunakan template
+              </span>
+            </div>
+
+            {/* Main Prompt Input Box */}
+            <div className="bg-[#F8FAFC] dark:bg-[#0B101A] border border-[#E2E8F0] dark:border-[#253149] rounded-xl p-3 flex items-center gap-2.5 focus-within:border-[#7C9CFF] focus-within:ring-2 focus-within:ring-[#7C9CFF]/20 transition-all">
+              <Search className="w-4 h-4 text-[#475569] dark:text-[#A4B1C7] shrink-0" />
+              <input
+                type="text"
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    e.preventDefault();
+                    if (title.trim()) handleSubmit();
+                  }
+                }}
+                placeholder="Ketikkan ide penelitian, rumusan masalah, atau topik (contoh: Implementasi RAG untuk pencarian akademik)..."
+                className="w-full bg-transparent border-none outline-none text-xs sm:text-sm text-[#0F172A] dark:text-[#F3F6FC] placeholder:text-[#475569] dark:placeholder:text-[#A4B1C7]"
+              />
+              {title && (
                 <button
                   type="button"
-                  onClick={onOpenDatabase}
-                  className="text-xs font-semibold text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 transition-colors cursor-pointer"
+                  onClick={() => setTitle("")}
+                  className="p-1 rounded-md text-[#475569] dark:text-[#A4B1C7] hover:text-[#0F172A] dark:hover:text-[#F3F6FC] cursor-pointer"
+                  title="Hapus teks"
                 >
-                  Lihat Semua Arsip →
+                  <X className="w-4 h-4" />
                 </button>
               )}
             </div>
 
-            {recentProjects.length > 0 ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                {recentProjects.map((p) => (
+            {/* Working Action Shortcuts (5 Quick Action Pills) */}
+            <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none flex-wrap">
+              <button
+                type="button"
+                onClick={() => {
+                  setActiveMainTab("create");
+                }}
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#F1F5F9] dark:bg-[#172033] hover:bg-[#E2E8F0] dark:hover:bg-[#1C263A] text-xs font-medium text-[#0F172A] dark:text-[#F3F6FC] border border-[#E2E8F0] dark:border-[#253149] transition-all cursor-pointer shadow-2xs"
+              >
+                <span>🚀 Buat Proyek Baru</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => {
+                  setActiveMainTab("recommender");
+                  setRecommenderTab("internet");
+                  handleFetchRecommendations(title.trim() || recommenderKeyword);
+                }}
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#F1F5F9] dark:bg-[#172033] hover:bg-[#E2E8F0] dark:hover:bg-[#1C263A] text-xs font-medium text-[#0F172A] dark:text-[#F3F6FC] border border-[#E2E8F0] dark:border-[#253149] transition-all cursor-pointer shadow-2xs"
+              >
+                <Search className="w-3.5 h-3.5 text-[#7C9CFF]" />
+                <span>Cari Literatur Primer</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => {
+                  setActiveMainTab("recommender");
+                  setRecommenderTab("ai");
+                  handleFetchRecommendations(title.trim() || recommenderKeyword);
+                }}
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#F1F5F9] dark:bg-[#172033] hover:bg-[#E2E8F0] dark:hover:bg-[#1C263A] text-xs font-medium text-[#0F172A] dark:text-[#F3F6FC] border border-[#E2E8F0] dark:border-[#253149] transition-all cursor-pointer shadow-2xs"
+              >
+                <Lightbulb className="w-3.5 h-3.5 text-[#FBBF24]" />
+                <span>Generator Judul AI</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => {
+                  if (activeDoc && onNavigateStage) {
+                    onNavigateStage("result");
+                  } else {
+                    alert("Silakan buka dokumen aktif atau buat usulan baru untuk menjalankan audit mutu QA & Turnitin.");
+                  }
+                }}
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#F1F5F9] dark:bg-[#172033] hover:bg-[#E2E8F0] dark:hover:bg-[#1C263A] text-xs font-medium text-[#0F172A] dark:text-[#F3F6FC] border border-[#E2E8F0] dark:border-[#253149] transition-all cursor-pointer shadow-2xs"
+              >
+                <ShieldCheck className="w-3.5 h-3.5 text-[#34D399]" />
+                <span>Audit Mutu &amp; Turnitin</span>
+              </button>
+
+              {onOpenGuidelineModal && (
+                <button
+                  type="button"
+                  onClick={onOpenGuidelineModal}
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#F1F5F9] dark:bg-[#172033] hover:bg-[#E2E8F0] dark:hover:bg-[#1C263A] text-xs font-medium text-[#0F172A] dark:text-[#F3F6FC] border border-[#E2E8F0] dark:border-[#253149] transition-all cursor-pointer shadow-2xs"
+                >
+                  <Landmark className="w-3.5 h-3.5 text-[#9B8CFF]" />
+                  <span>Format Pedoman Kampus</span>
+                </button>
+              )}
+            </div>
+
+            {/* Inspiration Chips & Submit Action */}
+            <div className="pt-2 flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-t border-[#E2E8F0] dark:border-[#253149]">
+              <div className="flex items-center gap-1.5 overflow-x-auto pb-1 scrollbar-none flex-wrap text-xs">
+                <span className="text-[11px] font-semibold text-[#475569] dark:text-[#A4B1C7] mr-1">
+                  Topik Populer:
+                </span>
+                {TOPIC_CHIPS.slice(0, 4).map((chip) => (
+                  <button
+                    key={chip.id}
+                    type="button"
+                    onClick={() => handleSelectChip(chip)}
+                    className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-[#F1F5F9] dark:bg-[#172033] hover:bg-[#E2E8F0] dark:hover:bg-[#1C263A] text-[11px] text-[#475569] dark:text-[#A4B1C7] hover:text-[#0F172A] dark:hover:text-[#F3F6FC] transition-colors cursor-pointer"
+                  >
+                    <span>{chip.label}</span>
+                  </button>
+                ))}
+              </div>
+
+              <button
+                type="button"
+                onClick={handleSubmit}
+                className="px-5 py-2.5 rounded-xl bg-[#7C9CFF] hover:bg-[#9B8CFF] text-[#080B12] font-semibold text-xs shadow-xs transition-all flex items-center justify-center gap-2 cursor-pointer group shrink-0"
+              >
+                <span>Mulai Analisis</span>
+                <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" />
+              </button>
+            </div>
+          </div>
+
+          {/* B. MULAI DARI SINI: COMPACT GRID OF SUPPORTED DOCUMENT TYPES */}
+          <div className="space-y-3">
+            <div className="flex items-center justify-between">
+              <div>
+                <h2 className="text-sm font-bold text-[#0F172A] dark:text-[#F3F6FC] flex items-center gap-2">
+                  <Layers className="w-4 h-4 text-[#7C9CFF]" />
+                  <span>Mulai dari Sini: Pilih Template Dokumen Akademik</span>
+                </h2>
+                <p className="text-xs text-[#475569] dark:text-[#A4B1C7] mt-0.5">
+                  Format bab, checklist administratif, dan alur sidang dikonfigurasi otomatis sesuai jenis dokumen.
+                </p>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3.5">
+              {Object.entries(ACADEMIC_TEMPLATES).map(([key, tpl]) => {
+                const isSelected = selectedTemplateKey === key;
+                return (
                   <div
-                    key={p.id}
-                    className="p-4 rounded-xl bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 hover:border-zinc-400 dark:hover:border-zinc-700 transition-all flex flex-col justify-between gap-3 shadow-2xs group"
+                    key={key}
+                    className={`p-4 rounded-xl border transition-all flex flex-col justify-between gap-3 shadow-2xs group ${
+                      isSelected
+                        ? "bg-white dark:bg-[#172033] border-[#7C9CFF] shadow-xs"
+                        : "bg-white dark:bg-[#111827] border-[#E2E8F0] dark:border-[#253149] hover:border-[#7C9CFF]/60"
+                    }`}
                   >
                     <div className="space-y-1.5">
                       <div className="flex items-center justify-between gap-2">
-                        <span className="text-[10px] font-mono px-2 py-0.5 rounded-md bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 uppercase font-semibold">
-                          {p.category}
+                        <span className="text-[10px] font-mono uppercase px-2 py-0.5 rounded-md font-semibold bg-[#F1F5F9] dark:bg-[#172033] text-[#475569] dark:text-[#A4B1C7] border border-[#E2E8F0] dark:border-[#253149]">
+                          {tpl.degreeLevel} • {tpl.category}
                         </span>
-                        <span className="text-[11px] text-zinc-400 flex items-center gap-1">
-                          <Clock className="w-3 h-3" />
-                          {new Date(p.updatedAt).toLocaleDateString("id-ID", { day: "numeric", month: "short", year: "numeric" })}
-                        </span>
+                        {tpl.isFinalReport && (
+                          <span className="text-[10px] font-semibold text-[#34D399]">Laporan Akhir</span>
+                        )}
                       </div>
-                      <h4 className="text-xs font-bold text-zinc-900 dark:text-zinc-100 line-clamp-2 leading-snug group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors">
-                        {p.title}
-                      </h4>
-                      {p.targetEntity && (
-                        <p className="text-[11px] text-zinc-500 flex items-center gap-1">
-                          <Building2 className="w-3 h-3 text-zinc-400" />
-                          <span>{p.targetEntity}</span>
-                        </p>
-                      )}
+                      <h3 className="text-xs font-bold text-[#0F172A] dark:text-[#F3F6FC] group-hover:text-[#7C9CFF] transition-colors leading-snug">
+                        {tpl.name}
+                      </h3>
+                      <p className="text-[11px] text-[#475569] dark:text-[#A4B1C7] line-clamp-2 leading-relaxed">
+                        {tpl.description}
+                      </p>
                     </div>
 
-                    <div className="flex items-center justify-between pt-2 border-t border-zinc-100 dark:border-zinc-800/80">
-                      <span className="text-[11px] text-zinc-500">
-                        {p.documentData ? "Naskah Siap" : "Draf Ide"}
+                    <div className="pt-2 border-t border-[#E2E8F0] dark:border-[#253149] flex items-center justify-between text-[11px]">
+                      <span className="text-[#475569] dark:text-[#A4B1C7] font-mono">
+                        {tpl.requiredChapters.length} Bab • ~{tpl.targetDepthPagesDefault} Hal
                       </span>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          handleSelectTemplate(key, tpl);
+                          setActiveMainTab("create");
+                        }}
+                        className="text-xs font-semibold text-[#7C9CFF] hover:text-[#9B8CFF] flex items-center gap-1 cursor-pointer"
+                      >
+                        <span>Pilih Template</span>
+                        <ChevronRight className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* C. 2-COLUMN SECTION: ACTIVE WORK IN PROGRESS & RECENT PROJECTS */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 pt-2">
+            
+            {/* COLUMN 1: ACTIVE PROJECT PROGRESS */}
+            <div className="space-y-3">
+              <h3 className="text-sm font-bold text-[#0F172A] dark:text-[#F3F6FC] flex items-center gap-2">
+                <FileText className="w-4 h-4 text-[#7C9CFF]" />
+                <span>Naskah Aktif Berjalan</span>
+              </h3>
+
+              {activeDoc ? (
+                <div className="p-5 rounded-2xl bg-white dark:bg-[#111827] border border-[#E2E8F0] dark:border-[#253149] shadow-sm flex flex-col justify-between gap-4">
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-md text-[11px] font-semibold bg-[#34D399]/15 text-[#34D399] border border-[#34D399]/30">
+                        <span className="w-1.5 h-1.5 rounded-full bg-[#34D399] animate-pulse" />
+                        Sedang Aktif Dikerjakan
+                      </span>
+                      <span className="text-[11px] font-mono px-2 py-0.5 rounded bg-[#F1F5F9] dark:bg-[#172033] text-[#475569] dark:text-[#A4B1C7] uppercase">
+                        {activeDoc.category}
+                      </span>
+                    </div>
+
+                    <h4 className="text-sm font-bold text-[#0F172A] dark:text-[#F3F6FC] leading-snug">
+                      {activeDoc.title}
+                    </h4>
+
+                    <p className="text-xs text-[#475569] dark:text-[#A4B1C7] line-clamp-2">
+                      {activeDoc.executiveSummary || "Naskah proposal telah disusun oleh Agen AI dengan struktur Bab I - V lengkap, matriks jadwal, dan tinjauan teori."}
+                    </p>
+
+                    <div className="pt-2 grid grid-cols-2 gap-2 text-xs text-[#475569] dark:text-[#A4B1C7]">
+                      <span className="flex items-center gap-1.5">
+                        <CheckCircle2 className="w-3.5 h-3.5 text-[#34D399]" />
+                        <span>Struktur Bab I - V Terisi</span>
+                      </span>
+                      <span className="flex items-center gap-1.5">
+                        <ShieldCheck className="w-3.5 h-3.5 text-[#7C9CFF]" />
+                        <span>Siap Audit Mutu QA</span>
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="pt-3 border-t border-[#E2E8F0] dark:border-[#253149] flex items-center justify-between gap-2">
+                    {onNavigateStage && (
+                      <button
+                        type="button"
+                        onClick={() => onNavigateStage("result")}
+                        className="px-4 py-2 rounded-xl bg-[#7C9CFF] hover:bg-[#9B8CFF] text-[#080B12] font-semibold text-xs transition-all shadow-xs flex items-center gap-1.5 cursor-pointer"
+                      >
+                        <span>Buka Dokumen Studio</span>
+                        <ArrowRight className="w-3.5 h-3.5" />
+                      </button>
+                    )}
+
+                    {onNavigateStage && (
+                      <button
+                        type="button"
+                        onClick={() => onNavigateStage("slides")}
+                        className="px-3.5 py-2 rounded-xl bg-[#F1F5F9] dark:bg-[#172033] hover:bg-[#E2E8F0] dark:hover:bg-[#1C263A] text-xs font-medium text-[#0F172A] dark:text-[#F3F6FC] border border-[#E2E8F0] dark:border-[#253149] transition-all flex items-center gap-1.5 cursor-pointer"
+                      >
+                        <Presentation className="w-3.5 h-3.5 text-[#FBBF24]" />
+                        <span>Slide PPTX</span>
+                      </button>
+                    )}
+                  </div>
+                </div>
+              ) : (
+                <div className="p-6 rounded-2xl bg-white dark:bg-[#111827] border border-dashed border-[#E2E8F0] dark:border-[#253149] text-center space-y-3">
+                  <div className="w-10 h-10 rounded-xl bg-[#F1F5F9] dark:bg-[#172033] text-[#475569] dark:text-[#A4B1C7] flex items-center justify-center mx-auto">
+                    <FileText className="w-5 h-5" />
+                  </div>
+                  <h4 className="text-xs font-semibold text-[#0F172A] dark:text-[#F3F6FC]">
+                    Belum Ada Naskah yang Aktif
+                  </h4>
+                  <p className="text-[11px] text-[#475569] dark:text-[#A4B1C7] max-w-xs mx-auto">
+                    Pilih salah satu template karya ilmiah di atas atau ketikkan ide usulan pada kolom AI Command.
+                  </p>
+                  <button
+                    type="button"
+                    onClick={() => setActiveMainTab("create")}
+                    className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-[#7C9CFF] text-[#080B12] font-semibold text-xs shadow-xs cursor-pointer hover:bg-[#9B8CFF]"
+                  >
+                    <Plus className="w-3.5 h-3.5" />
+                    <span>Mulai Usulan Baru</span>
+                  </button>
+                </div>
+              )}
+            </div>
+
+            {/* COLUMN 2: RECENT PROJECTS & ARCHIVE */}
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <h3 className="text-sm font-bold text-[#0F172A] dark:text-[#F3F6FC] flex items-center gap-2">
+                  <FolderOpen className="w-4 h-4 text-[#7C9CFF]" />
+                  <span>Arsip &amp; Draf Terakhir</span>
+                </h3>
+                {onOpenDatabase && (
+                  <button
+                    type="button"
+                    onClick={onOpenDatabase}
+                    className="text-xs font-semibold text-[#7C9CFF] hover:text-[#9B8CFF] transition-colors cursor-pointer"
+                  >
+                    Semua Arsip →
+                  </button>
+                )}
+              </div>
+
+              {recentProjects.length > 0 ? (
+                <div className="space-y-2.5">
+                  {recentProjects.slice(0, 3).map((p) => (
+                    <div
+                      key={p.id}
+                      className="p-3.5 rounded-xl bg-white dark:bg-[#111827] border border-[#E2E8F0] dark:border-[#253149] hover:border-[#7C9CFF]/60 transition-all flex items-center justify-between gap-3 shadow-2xs group"
+                    >
+                      <div className="space-y-1 min-w-0">
+                        <div className="flex items-center gap-2">
+                          <span className="text-[9px] font-mono px-1.5 py-0.5 rounded bg-[#F1F5F9] dark:bg-[#172033] text-[#475569] dark:text-[#A4B1C7] uppercase font-semibold">
+                            {p.category}
+                          </span>
+                          <span className="text-[10px] text-[#475569] dark:text-[#A4B1C7] flex items-center gap-1">
+                            <Clock className="w-2.5 h-2.5" />
+                            {new Date(p.updatedAt).toLocaleDateString("id-ID", { day: "numeric", month: "short" })}
+                          </span>
+                        </div>
+                        <h4 className="text-xs font-bold text-[#0F172A] dark:text-[#F3F6FC] truncate leading-snug group-hover:text-[#7C9CFF] transition-colors">
+                          {p.title}
+                        </h4>
+                        {p.targetEntity && (
+                          <p className="text-[10px] text-[#475569] dark:text-[#A4B1C7] truncate">
+                            {p.targetEntity}
+                          </p>
+                        )}
+                      </div>
+
                       {onLoadProject && (
                         <button
                           type="button"
                           onClick={() => onLoadProject(p)}
-                          className="px-3 py-1 rounded-lg bg-zinc-100 hover:bg-zinc-200 dark:bg-zinc-800 dark:hover:bg-zinc-750 text-zinc-900 dark:text-zinc-100 text-xs font-medium transition-colors cursor-pointer"
+                          className="px-3 py-1.5 rounded-lg bg-[#F1F5F9] hover:bg-[#E2E8F0] dark:bg-[#172033] dark:hover:bg-[#1C263A] text-[#0F172A] dark:text-[#F3F6FC] text-xs font-medium transition-colors cursor-pointer shrink-0"
                         >
-                          Lanjutkan Buka →
+                          Buka →
                         </button>
                       )}
                     </div>
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <div className="text-center py-6 text-xs text-zinc-400">
-                Belum ada berkas proyek tersimpan.
-              </div>
-            )}
+                  ))}
+                </div>
+              ) : (
+                <div className="p-6 rounded-2xl bg-white dark:bg-[#111827] border border-dashed border-[#E2E8F0] dark:border-[#253149] text-center text-xs text-[#475569] dark:text-[#A4B1C7]">
+                  Belum ada berkas proyek tersimpan di browser Anda.
+                </div>
+              )}
+            </div>
+
           </div>
 
-          {/* C. 5-STEP ACADEMIC WORKFLOW ROADMAP */}
-          <div className="p-5 rounded-2xl bg-zinc-50 dark:bg-zinc-900/30 border border-zinc-200 dark:border-zinc-800 space-y-3">
-            <h3 className="text-xs font-bold uppercase tracking-wider text-zinc-500 dark:text-zinc-400">
-              Alur Kerja Standar Akademik OXID
+          {/* D. 5-PHASE STANDAR AKADEMIK WORKFLOW FOOTER */}
+          <div className="p-4 rounded-xl bg-white dark:bg-[#111827] border border-[#E2E8F0] dark:border-[#253149] space-y-2.5">
+            <h3 className="text-xs font-bold uppercase tracking-wider text-[#475569] dark:text-[#A4B1C7]">
+              Standar Alur Kerja Akademik OXID
             </h3>
-            <div className="grid grid-cols-1 sm:grid-cols-5 gap-3 text-xs">
-              <div className="p-3 rounded-xl bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 space-y-1">
-                <span className="font-mono text-zinc-400 font-bold">01.</span>
-                <p className="font-semibold text-zinc-900 dark:text-zinc-100">Topik &amp; Pedoman</p>
-                <p className="text-[11px] text-zinc-500">Pilih jenis karya dan format institusi</p>
+            <div className="grid grid-cols-2 sm:grid-cols-5 gap-2.5 text-xs">
+              <div className="p-2.5 rounded-lg bg-[#F8FAFC] dark:bg-[#0B101A] border border-[#E2E8F0] dark:border-[#253149] space-y-0.5">
+                <span className="font-mono text-[#7C9CFF] font-bold text-[11px]">01. Topik &amp; Pedoman</span>
+                <p className="text-[10px] text-[#475569] dark:text-[#A4B1C7]">Format bab &amp; pedoman kampus</p>
               </div>
-              <div className="p-3 rounded-xl bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 space-y-1">
-                <span className="font-mono text-zinc-400 font-bold">02.</span>
-                <p className="font-semibold text-zinc-900 dark:text-zinc-100">Wawancara Lapangan</p>
-                <p className="text-[11px] text-zinc-500">Eksplorasi masalah &amp; temuan empiris</p>
+              <div className="p-2.5 rounded-lg bg-[#F8FAFC] dark:bg-[#0B101A] border border-[#E2E8F0] dark:border-[#253149] space-y-0.5">
+                <span className="font-mono text-[#7C9CFF] font-bold text-[11px]">02. Wawancara Empiris</span>
+                <p className="text-[10px] text-[#475569] dark:text-[#A4B1C7]">Data lapangan &amp; rumusan masalah</p>
               </div>
-              <div className="p-3 rounded-xl bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 space-y-1">
-                <span className="font-mono text-zinc-400 font-bold">03.</span>
-                <p className="font-semibold text-zinc-900 dark:text-zinc-100">Orkestrasi Naskah</p>
-                <p className="text-[11px] text-zinc-500">Penyusunan Bab I - V &amp; Daftar Pustaka</p>
+              <div className="p-2.5 rounded-lg bg-[#F8FAFC] dark:bg-[#0B101A] border border-[#E2E8F0] dark:border-[#253149] space-y-0.5">
+                <span className="font-mono text-[#7C9CFF] font-bold text-[11px]">03. Orkestrasi Naskah</span>
+                <p className="text-[10px] text-[#475569] dark:text-[#A4B1C7]">Bab I - V padat &amp; kepustakaan</p>
               </div>
-              <div className="p-3 rounded-xl bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 space-y-1">
-                <span className="font-mono text-zinc-400 font-bold">04.</span>
-                <p className="font-semibold text-zinc-900 dark:text-zinc-100">7-Phase QA Audit</p>
-                <p className="text-[11px] text-zinc-500">Verifikasi sitasi, konsistensi &amp; plagiasi</p>
+              <div className="p-2.5 rounded-lg bg-[#F8FAFC] dark:bg-[#0B101A] border border-[#E2E8F0] dark:border-[#253149] space-y-0.5">
+                <span className="font-mono text-[#7C9CFF] font-bold text-[11px]">04. 7-Phase QA Audit</span>
+                <p className="text-[10px] text-[#475569] dark:text-[#A4B1C7]">Verifikasi sitasi &amp; Turnitin</p>
               </div>
-              <div className="p-3 rounded-xl bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 space-y-1">
-                <span className="font-mono text-zinc-400 font-bold">05.</span>
-                <p className="font-semibold text-zinc-900 dark:text-zinc-100">Ekspor &amp; Sidang</p>
-                <p className="text-[11px] text-zinc-500">Unduh DOCX, PPTX 16:9 &amp; BibTeX</p>
+              <div className="p-2.5 rounded-lg bg-[#F8FAFC] dark:bg-[#0B101A] border border-[#E2E8F0] dark:border-[#253149] space-y-0.5 col-span-2 sm:col-span-1">
+                <span className="font-mono text-[#7C9CFF] font-bold text-[11px]">05. Ekspor &amp; Sidang</span>
+                <p className="text-[10px] text-[#475569] dark:text-[#A4B1C7]">DOCX, PPTX 16:9 &amp; BibTeX</p>
               </div>
             </div>
           </div>
+
         </div>
       )}
 
@@ -586,11 +784,11 @@ export const HeroInputView: React.FC<HeroInputViewProps> = ({
           <div className="space-y-3">
             <div className="flex items-center justify-between">
               <div>
-                <h2 className="text-sm font-bold text-zinc-900 dark:text-zinc-100 flex items-center gap-2">
-                  <span className="w-5 h-5 rounded-full bg-zinc-900 text-white dark:bg-zinc-100 dark:text-black flex items-center justify-center text-[10px] font-mono">1</span>
+                <h2 className="text-sm font-bold text-[#0F172A] dark:text-[#F3F6FC] flex items-center gap-2">
+                  <span className="w-5 h-5 rounded-full bg-[#7C9CFF] text-[#080B12] flex items-center justify-center text-[10px] font-mono font-bold">1</span>
                   <span>Pilih Jenis Karya Ilmiah</span>
                 </h2>
-                <p className="text-xs text-zinc-500 mt-0.5">
+                <p className="text-xs text-[#475569] dark:text-[#A4B1C7] mt-0.5">
                   Format bab, checklist administratif, dan alur sidang akan disesuaikan secara otomatis.
                 </p>
               </div>
@@ -606,30 +804,30 @@ export const HeroInputView: React.FC<HeroInputViewProps> = ({
                     onClick={() => handleSelectTemplate(key, tpl)}
                     className={`p-3.5 rounded-xl border text-left transition-all cursor-pointer flex flex-col justify-between gap-2 shadow-2xs ${
                       isSelected
-                        ? "bg-zinc-950 text-white dark:bg-zinc-100 dark:text-black border-zinc-950 dark:border-white shadow-xs"
-                        : "bg-white dark:bg-zinc-900 text-zinc-800 dark:text-zinc-200 border-zinc-200 dark:border-zinc-800 hover:border-zinc-400 dark:hover:border-zinc-700"
+                        ? "bg-white dark:bg-[#172033] text-[#0F172A] dark:text-[#F3F6FC] border-[#7C9CFF] shadow-xs"
+                        : "bg-white dark:bg-[#111827] text-[#0F172A] dark:text-[#F3F6FC] border-[#E2E8F0] dark:border-[#253149] hover:border-[#7C9CFF]/60"
                     }`}
                   >
                     <div>
                       <div className="flex items-center justify-between gap-2 mb-1.5">
                         <span className={`text-[10px] font-mono uppercase px-2 py-0.5 rounded font-semibold ${
-                          isSelected ? "bg-zinc-800 text-zinc-200 dark:bg-zinc-200 dark:text-zinc-800" : "bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400"
+                          isSelected ? "bg-[#7C9CFF]/20 text-[#7C9CFF]" : "bg-[#F1F5F9] dark:bg-[#172033] text-[#475569] dark:text-[#A4B1C7]"
                         }`}>
                           {tpl.degreeLevel} • {tpl.category}
                         </span>
                         {tpl.isFinalReport && (
-                          <span className="text-[10px] font-semibold text-emerald-400">Laporan Akhir</span>
+                          <span className="text-[10px] font-semibold text-[#34D399]">Laporan Akhir</span>
                         )}
                       </div>
                       <h3 className="text-xs font-bold leading-snug">
                         {tpl.name}
                       </h3>
-                      <p className={`text-[11px] mt-1 line-clamp-2 ${isSelected ? "text-zinc-300 dark:text-zinc-700" : "text-zinc-500"}`}>
+                      <p className={`text-[11px] mt-1 line-clamp-2 ${isSelected ? "text-[#475569] dark:text-[#A4B1C7]" : "text-[#475569] dark:text-[#A4B1C7]"}`}>
                         {tpl.description}
                       </p>
                     </div>
 
-                    <div className="flex items-center justify-between pt-1 border-t border-zinc-200/20 text-[10px]">
+                    <div className="flex items-center justify-between pt-1 border-t border-[#E2E8F0] dark:border-[#253149] text-[10px] text-[#475569] dark:text-[#A4B1C7]">
                       <span>{tpl.requiredChapters.length} Bab Wajib</span>
                       <span>Target ~{tpl.targetDepthPagesDefault} Hal</span>
                     </div>
@@ -641,26 +839,26 @@ export const HeroInputView: React.FC<HeroInputViewProps> = ({
 
           {/* STEP 2: Rumuskan Topik & Judul Usulan */}
           <div className="space-y-3">
-            <h2 className="text-sm font-bold text-zinc-900 dark:text-zinc-100 flex items-center gap-2">
-              <span className="w-5 h-5 rounded-full bg-zinc-900 text-white dark:bg-zinc-100 dark:text-black flex items-center justify-center text-[10px] font-mono">2</span>
+            <h2 className="text-sm font-bold text-[#0F172A] dark:text-[#F3F6FC] flex items-center gap-2">
+              <span className="w-5 h-5 rounded-full bg-[#7C9CFF] text-[#080B12] flex items-center justify-center text-[10px] font-mono font-bold">2</span>
               <span>Rumusan Judul &amp; Topik Penelitian</span>
             </h2>
 
             {/* Input Capsule with Search Action */}
-            <div className="bg-white dark:bg-zinc-900 border border-zinc-300 dark:border-zinc-800 rounded-2xl p-2 pl-4 pr-2 flex items-center gap-2.5 shadow-sm focus-within:border-zinc-500 focus-within:ring-2 focus-within:ring-zinc-200/60 dark:focus-within:ring-zinc-800 transition-all">
+            <div className="bg-white dark:bg-[#111827] border border-[#E2E8F0] dark:border-[#253149] rounded-2xl p-2 pl-4 pr-2 flex items-center gap-2.5 shadow-sm focus-within:border-[#7C9CFF] focus-within:ring-2 focus-within:ring-[#7C9CFF]/20 transition-all">
               <input
                 type="text"
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
                 placeholder="Tuliskan judul usulan atau ketik topik (contoh: implementasi deep learning, optimasi rantai pasok)..."
-                className="w-full bg-transparent border-none outline-none text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-400 text-sm py-2 text-left"
+                className="w-full bg-transparent border-none outline-none text-[#0F172A] dark:text-[#F3F6FC] placeholder:text-[#475569] dark:placeholder:text-[#A4B1C7] text-sm py-2 text-left"
               />
 
               {title && (
                 <button
                   type="button"
                   onClick={() => setTitle("")}
-                  className="p-1 rounded-md text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200 transition-colors cursor-pointer"
+                  className="p-1 rounded-md text-[#475569] dark:text-[#A4B1C7] hover:text-[#0F172A] dark:hover:text-[#F3F6FC] transition-colors cursor-pointer"
                   title="Hapus teks"
                 >
                   <X className="w-4 h-4" />
@@ -673,16 +871,16 @@ export const HeroInputView: React.FC<HeroInputViewProps> = ({
                   setActiveMainTab("recommender");
                   handleFetchRecommendations(title.trim() || recommenderKeyword);
                 }}
-                className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-zinc-100 hover:bg-zinc-200 dark:bg-zinc-800 dark:hover:bg-zinc-750 text-zinc-800 dark:text-zinc-200 font-medium text-xs transition-colors flex-shrink-0 cursor-pointer shadow-2xs"
+                className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#F1F5F9] hover:bg-[#E2E8F0] dark:bg-[#172033] dark:hover:bg-[#1C263A] text-[#0F172A] dark:text-[#F3F6FC] font-medium text-xs transition-colors flex-shrink-0 cursor-pointer shadow-2xs"
               >
-                <Lightbulb className="w-3.5 h-3.5 text-amber-500" />
+                <Lightbulb className="w-3.5 h-3.5 text-[#FBBF24]" />
                 <span>Cari Ide Judul</span>
               </button>
             </div>
 
             {/* Quick Inspiration Chips */}
             <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none flex-wrap">
-              <span className="text-[11px] font-semibold text-zinc-400 flex items-center gap-1">
+              <span className="text-[11px] font-semibold text-[#475569] dark:text-[#A4B1C7] flex items-center gap-1">
                 Inspirasi Topik:
               </span>
               {TOPIC_CHIPS.map((chip) => {
@@ -694,8 +892,8 @@ export const HeroInputView: React.FC<HeroInputViewProps> = ({
                     onClick={() => handleSelectChip(chip)}
                     className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-medium whitespace-nowrap transition-all cursor-pointer ${
                       isSelected
-                        ? "bg-zinc-900 text-white dark:bg-zinc-100 dark:text-black font-semibold"
-                        : "bg-white dark:bg-zinc-900 text-zinc-700 dark:text-zinc-300 border border-zinc-200 dark:border-zinc-800 hover:bg-zinc-50"
+                        ? "bg-[#7C9CFF] text-[#080B12] font-semibold"
+                        : "bg-white dark:bg-[#111827] text-[#0F172A] dark:text-[#F3F6FC] border border-[#E2E8F0] dark:border-[#253149] hover:border-[#7C9CFF]/60"
                     }`}
                   >
                     <span>{chip.label}</span>
@@ -707,14 +905,14 @@ export const HeroInputView: React.FC<HeroInputViewProps> = ({
 
           {/* STEP 3: Parameter Pelaksanaan & Data Pengusul */}
           <div className="space-y-3">
-            <h2 className="text-sm font-bold text-zinc-900 dark:text-zinc-100 flex items-center gap-2">
-              <span className="w-5 h-5 rounded-full bg-zinc-900 text-white dark:bg-zinc-100 dark:text-black flex items-center justify-center text-[10px] font-mono">3</span>
+            <h2 className="text-sm font-bold text-[#0F172A] dark:text-[#F3F6FC] flex items-center gap-2">
+              <span className="w-5 h-5 rounded-full bg-[#7C9CFF] text-[#080B12] flex items-center justify-center text-[10px] font-mono font-bold">3</span>
               <span>Identitas Pengusul &amp; Tempat Pelaksanaan</span>
             </h2>
 
-            <div className="p-4 rounded-xl bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
+            <div className="p-4 rounded-xl bg-white dark:bg-[#111827] border border-[#E2E8F0] dark:border-[#253149] grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
               <div>
-                <label className="text-[11px] font-semibold text-zinc-700 dark:text-zinc-300 block mb-1">
+                <label className="text-[11px] font-semibold text-[#0F172A] dark:text-[#F3F6FC] block mb-1">
                   Nama Mahasiswa / Peneliti
                 </label>
                 <input
@@ -722,12 +920,12 @@ export const HeroInputView: React.FC<HeroInputViewProps> = ({
                   value={candidateName}
                   onChange={(e) => setCandidateName(e.target.value)}
                   placeholder="Nama Lengkap"
-                  className="w-full bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-lg px-3 py-1.5 text-zinc-900 dark:text-zinc-100 text-xs focus:outline-none focus:border-zinc-400"
+                  className="w-full bg-[#F8FAFC] dark:bg-[#0B101A] border border-[#E2E8F0] dark:border-[#253149] rounded-lg px-3 py-1.5 text-[#0F172A] dark:text-[#F3F6FC] text-xs focus:outline-none focus:border-[#7C9CFF]"
                 />
               </div>
 
               <div>
-                <label className="text-[11px] font-semibold text-zinc-700 dark:text-zinc-300 block mb-1">
+                <label className="text-[11px] font-semibold text-[#0F172A] dark:text-[#F3F6FC] block mb-1">
                   Instansi Mitra / Tempat Penelitian
                 </label>
                 <input
@@ -735,18 +933,18 @@ export const HeroInputView: React.FC<HeroInputViewProps> = ({
                   value={targetEntity}
                   onChange={(e) => setTargetEntity(e.target.value)}
                   placeholder="Contoh: PT Telkom / Lab Robotika"
-                  className="w-full bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-lg px-3 py-1.5 text-zinc-900 dark:text-zinc-100 text-xs focus:outline-none focus:border-zinc-400"
+                  className="w-full bg-[#F8FAFC] dark:bg-[#0B101A] border border-[#E2E8F0] dark:border-[#253149] rounded-lg px-3 py-1.5 text-[#0F172A] dark:text-[#F3F6FC] text-xs focus:outline-none focus:border-[#7C9CFF]"
                 />
               </div>
 
               <div>
-                <label className="text-[11px] font-semibold text-zinc-700 dark:text-zinc-300 block mb-1">
+                <label className="text-[11px] font-semibold text-[#0F172A] dark:text-[#F3F6FC] block mb-1">
                   Rencana Durasi Kegiatan
                 </label>
                 <select
                   value={durationMonths}
                   onChange={(e) => setDurationMonths(Number(e.target.value))}
-                  className="w-full bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-lg px-3 py-1.5 text-zinc-900 dark:text-zinc-100 text-xs focus:outline-none focus:border-zinc-400"
+                  className="w-full bg-[#F8FAFC] dark:bg-[#0B101A] border border-[#E2E8F0] dark:border-[#253149] rounded-lg px-3 py-1.5 text-[#0F172A] dark:text-[#F3F6FC] text-xs focus:outline-none focus:border-[#7C9CFF]"
                 >
                   <option value={1}>1 Bulan (4 Minggu)</option>
                   <option value={3}>3 Bulan (12 Minggu - PKL)</option>
@@ -758,15 +956,15 @@ export const HeroInputView: React.FC<HeroInputViewProps> = ({
           </div>
 
           {/* PRIMARY SUBMIT CTA BAR */}
-          <div className="pt-4 flex flex-col sm:flex-row items-center justify-between gap-4 border-t border-zinc-200 dark:border-zinc-800">
-            <div className="text-xs text-zinc-500">
-              Langkah selanjutnya: <span className="font-semibold text-zinc-800 dark:text-zinc-200">Wawancara Diagnostik Lapangan</span> untuk membedah data empiris dan rumusan masalah.
+          <div className="pt-4 flex flex-col sm:flex-row items-center justify-between gap-4 border-t border-[#E2E8F0] dark:border-[#253149]">
+            <div className="text-xs text-[#475569] dark:text-[#A4B1C7]">
+              Langkah selanjutnya: <span className="font-semibold text-[#0F172A] dark:text-[#F3F6FC]">Wawancara Diagnostik Lapangan</span> untuk membedah data empiris dan rumusan masalah.
             </div>
 
             <button
               type="button"
               onClick={handleSubmit}
-              className="w-full sm:w-auto px-6 py-3 rounded-xl bg-zinc-950 hover:bg-black text-white dark:bg-zinc-100 dark:hover:bg-white dark:text-black font-semibold text-xs transition-all shadow-sm flex items-center justify-center gap-2 cursor-pointer group"
+              className="w-full sm:w-auto px-6 py-3 rounded-xl bg-[#7C9CFF] hover:bg-[#9B8CFF] text-[#080B12] font-semibold text-xs transition-all shadow-sm flex items-center justify-center gap-2 cursor-pointer group"
             >
               <span>Lanjut ke Wawancara Diagnostik</span>
               <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
@@ -780,8 +978,8 @@ export const HeroInputView: React.FC<HeroInputViewProps> = ({
       {/* ============================================================ */}
       {activeMainTab === "recommender" && (
         <div className="space-y-6">
-          <div className="p-4 rounded-xl bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 space-y-3">
-            <h2 className="text-sm font-bold text-zinc-900 dark:text-zinc-100">
+          <div className="p-4 rounded-xl bg-white dark:bg-[#111827] border border-[#E2E8F0] dark:border-[#253149] space-y-3">
+            <h2 className="text-sm font-bold text-[#0F172A] dark:text-[#F3F6FC]">
               Cari Ide Judul Berbasis Penalaran AI &amp; Jurnal Internasional
             </h2>
             <div className="flex items-center gap-2">
@@ -796,13 +994,13 @@ export const HeroInputView: React.FC<HeroInputViewProps> = ({
                   }
                 }}
                 placeholder="Ketik kata kunci topik (contoh: obesitas, transformer, blockchain)..."
-                className="w-full bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-lg px-3 py-2 text-xs focus:outline-none focus:border-zinc-400"
+                className="w-full bg-[#F8FAFC] dark:bg-[#0B101A] border border-[#E2E8F0] dark:border-[#253149] rounded-lg px-3 py-2 text-xs text-[#0F172A] dark:text-[#F3F6FC] placeholder:text-[#475569] dark:placeholder:text-[#A4B1C7] focus:outline-none focus:border-[#7C9CFF]"
               />
               <button
                 type="button"
                 onClick={() => handleFetchRecommendations(recommenderKeyword)}
                 disabled={isLoadingAi || isLoadingInternet}
-                className="px-4 py-2 rounded-lg bg-zinc-950 text-white dark:bg-zinc-100 dark:text-black text-xs font-semibold cursor-pointer disabled:opacity-50 flex items-center gap-1.5 flex-shrink-0"
+                className="px-4 py-2 rounded-lg bg-[#7C9CFF] hover:bg-[#9B8CFF] text-[#080B12] text-xs font-semibold cursor-pointer disabled:opacity-50 flex items-center gap-1.5 flex-shrink-0"
               >
                 {isLoadingAi || isLoadingInternet ? (
                   <RefreshCw className="w-3.5 h-3.5 animate-spin" />
@@ -814,14 +1012,14 @@ export const HeroInputView: React.FC<HeroInputViewProps> = ({
             </div>
 
             {/* Sub-tabs AI vs Literature */}
-            <div className="flex items-center gap-2 pt-2 border-t border-zinc-100 dark:border-zinc-800">
+            <div className="flex items-center gap-2 pt-2 border-t border-[#E2E8F0] dark:border-[#253149]">
               <button
                 type="button"
                 onClick={() => setRecommenderTab("ai")}
-                className={`px-3 py-1 rounded-md text-xs font-semibold cursor-pointer ${
+                className={`px-3 py-1 rounded-md text-xs font-semibold cursor-pointer transition-colors ${
                   recommenderTab === "ai"
-                    ? "bg-zinc-900 text-white dark:bg-zinc-100 dark:text-black"
-                    : "text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-100"
+                    ? "bg-[#7C9CFF] text-[#080B12]"
+                    : "text-[#475569] dark:text-[#A4B1C7] hover:text-[#0F172A] dark:hover:text-[#F3F6FC]"
                 }`}
               >
                 1. Rekomendasi AI Penalaran ({aiRecs.length})
@@ -829,10 +1027,10 @@ export const HeroInputView: React.FC<HeroInputViewProps> = ({
               <button
                 type="button"
                 onClick={() => setRecommenderTab("internet")}
-                className={`px-3 py-1 rounded-md text-xs font-semibold cursor-pointer ${
+                className={`px-3 py-1 rounded-md text-xs font-semibold cursor-pointer transition-colors ${
                   recommenderTab === "internet"
-                    ? "bg-zinc-900 text-white dark:bg-zinc-100 dark:text-black"
-                    : "text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-100"
+                    ? "bg-[#7C9CFF] text-[#080B12]"
+                    : "text-[#475569] dark:text-[#A4B1C7] hover:text-[#0F172A] dark:hover:text-[#F3F6FC]"
                 }`}
               >
                 2. Rujukan Literatur Primer ({internetRecs.length})
@@ -845,32 +1043,32 @@ export const HeroInputView: React.FC<HeroInputViewProps> = ({
             {recommenderTab === "ai" && (
               <div className="space-y-3">
                 {isLoadingAi ? (
-                  <div className="text-center py-8 text-xs text-zinc-500">
-                    <RefreshCw className="w-4 h-4 animate-spin mx-auto mb-2" />
+                  <div className="text-center py-8 text-xs text-[#475569] dark:text-[#A4B1C7]">
+                    <RefreshCw className="w-4 h-4 animate-spin mx-auto mb-2 text-[#7C9CFF]" />
                     <span>Sedang merumuskan judul akademik berbasis penalaran AI...</span>
                   </div>
                 ) : aiRecs.length > 0 ? (
                   aiRecs.map((rec) => (
                     <div
                       key={rec.id}
-                      className="p-4 rounded-xl bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 space-y-2 hover:border-zinc-400 transition-colors"
+                      className="p-4 rounded-xl bg-white dark:bg-[#111827] border border-[#E2E8F0] dark:border-[#253149] space-y-2 hover:border-[#7C9CFF]/60 transition-colors shadow-2xs"
                     >
                       <div className="flex items-center justify-between gap-2">
-                        <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 uppercase font-semibold">
+                        <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-[#F1F5F9] dark:bg-[#172033] text-[#475569] dark:text-[#A4B1C7] uppercase font-semibold">
                           {rec.category} • {rec.durationMonths} Bulan
                         </span>
-                        <span className="text-xs text-zinc-500 font-medium">{rec.entity}</span>
+                        <span className="text-xs text-[#475569] dark:text-[#A4B1C7] font-medium">{rec.entity}</span>
                       </div>
-                      <h4 className="text-sm font-bold text-zinc-900 dark:text-zinc-100 leading-snug">
+                      <h4 className="text-sm font-bold text-[#0F172A] dark:text-[#F3F6FC] leading-snug">
                         {rec.title}
                       </h4>
                       {rec.referenceJournal && (
-                        <p className="text-xs text-zinc-600 dark:text-zinc-400">
+                        <p className="text-xs text-[#475569] dark:text-[#A4B1C7]">
                           {rec.referenceJournal}
                         </p>
                       )}
                       {rec.researchGap && (
-                        <div className="p-2 rounded bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-900 text-[11px] text-amber-800 dark:text-amber-300">
+                        <div className="p-2 rounded bg-[#FBBF24]/10 border border-[#FBBF24]/30 text-[11px] text-[#FBBF24]">
                           <strong>Research Gap:</strong> {rec.researchGap}
                         </div>
                       )}
@@ -878,16 +1076,16 @@ export const HeroInputView: React.FC<HeroInputViewProps> = ({
                         <button
                           type="button"
                           onClick={() => handleApplyTitle(rec)}
-                          className="px-3.5 py-1.5 rounded-lg bg-zinc-950 text-white dark:bg-zinc-100 dark:text-black text-xs font-semibold hover:opacity-90 transition-opacity cursor-pointer flex items-center gap-1.5"
+                          className="px-3.5 py-1.5 rounded-lg bg-[#7C9CFF] hover:bg-[#9B8CFF] text-[#080B12] text-xs font-semibold transition-opacity cursor-pointer flex items-center gap-1.5"
                         >
-                          <Check className="w-3.5 h-3.5" />
+                          <Check className="w-3.5 h-3.5 stroke-[2.5]" />
                           <span>Gunakan Judul Ini</span>
                         </button>
                       </div>
                     </div>
                   ))
                 ) : (
-                  <div className="text-center py-8 text-xs text-zinc-500">
+                  <div className="text-center py-8 text-xs text-[#475569] dark:text-[#A4B1C7]">
                     Ketikkan topik di atas untuk menampilkan usulan judul.
                   </div>
                 )}
@@ -897,34 +1095,34 @@ export const HeroInputView: React.FC<HeroInputViewProps> = ({
             {recommenderTab === "internet" && (
               <div className="space-y-3">
                 {isLoadingInternet ? (
-                  <div className="text-center py-8 text-xs text-zinc-500">
-                    <RefreshCw className="w-4 h-4 animate-spin mx-auto mb-2" />
+                  <div className="text-center py-8 text-xs text-[#475569] dark:text-[#A4B1C7]">
+                    <RefreshCw className="w-4 h-4 animate-spin mx-auto mb-2 text-[#7C9CFF]" />
                     <span>Sedang mencari publikasi ilmiah di Crossref &amp; OpenAlex...</span>
                   </div>
                 ) : internetRecs.length > 0 ? (
                   internetRecs.map((rec) => (
                     <div
                       key={rec.id}
-                      className="p-4 rounded-xl bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 space-y-2 hover:border-zinc-400 transition-colors"
+                      className="p-4 rounded-xl bg-white dark:bg-[#111827] border border-[#E2E8F0] dark:border-[#253149] space-y-2 hover:border-[#7C9CFF]/60 transition-colors shadow-2xs"
                     >
                       <div className="flex items-center justify-between gap-2">
-                        <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-blue-50 dark:bg-blue-950/50 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-800 uppercase font-semibold">
+                        <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-[#7C9CFF]/15 text-[#7C9CFF] border border-[#7C9CFF]/30 uppercase font-semibold">
                           Jurnal Primer
                         </span>
                         {(rec as any).doiUrl && (
-                          <span className="text-[11px] font-mono text-zinc-500">{(rec as any).doiUrl}</span>
+                          <span className="text-[11px] font-mono text-[#475569] dark:text-[#A4B1C7]">{(rec as any).doiUrl}</span>
                         )}
                       </div>
-                      <h4 className="text-sm font-bold text-zinc-900 dark:text-zinc-100 leading-snug">
+                      <h4 className="text-sm font-bold text-[#0F172A] dark:text-[#F3F6FC] leading-snug">
                         {rec.title}
                       </h4>
                       {rec.referenceJournal && (
-                        <p className="text-xs text-zinc-600 dark:text-zinc-400">
+                        <p className="text-xs text-[#475569] dark:text-[#A4B1C7]">
                           {rec.referenceJournal}
                         </p>
                       )}
                       {(rec as any).sourceCitation && (
-                        <p className="text-[11px] text-zinc-500 italic">
+                        <p className="text-[11px] text-[#475569] dark:text-[#A4B1C7] italic">
                           Sumber: {(rec as any).sourceCitation}
                         </p>
                       )}
@@ -932,16 +1130,16 @@ export const HeroInputView: React.FC<HeroInputViewProps> = ({
                         <button
                           type="button"
                           onClick={() => handleApplyTitle(rec)}
-                          className="px-3.5 py-1.5 rounded-lg bg-zinc-950 text-white dark:bg-zinc-100 dark:text-black text-xs font-semibold hover:opacity-90 transition-opacity cursor-pointer flex items-center gap-1.5"
+                          className="px-3.5 py-1.5 rounded-lg bg-[#7C9CFF] hover:bg-[#9B8CFF] text-[#080B12] text-xs font-semibold transition-opacity cursor-pointer flex items-center gap-1.5"
                         >
-                          <Check className="w-3.5 h-3.5" />
+                          <Check className="w-3.5 h-3.5 stroke-[2.5]" />
                           <span>Gunakan Judul Ini</span>
                         </button>
                       </div>
                     </div>
                   ))
                 ) : (
-                  <div className="text-center py-8 text-xs text-zinc-500">
+                  <div className="text-center py-8 text-xs text-[#475569] dark:text-[#A4B1C7]">
                     Ketikkan topik di atas untuk mencari artikel jurnal primer.
                   </div>
                 )}

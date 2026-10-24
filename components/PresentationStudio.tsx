@@ -313,7 +313,7 @@ export const PresentationStudio: React.FC<PresentationStudioProps> = ({
       )}
 
       {/* TOP COMMAND TOOLBAR (Hidden in fullscreen unless hovered) */}
-      <div className={`bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-2xl p-4 shadow-sm flex flex-col lg:flex-row lg:items-center justify-between gap-4 ${isFullscreen ? "opacity-90 hover:opacity-100 transition-opacity" : ""}`}>
+      <div className={`bg-white dark:bg-[#111827] border border-[#E2E8F0] dark:border-[#253149] rounded-2xl p-4 shadow-sm flex flex-col lg:flex-row lg:items-center justify-between gap-4 ${isFullscreen ? "opacity-90 hover:opacity-100 transition-opacity" : ""}`}>
         
         {/* Left: Branding & Breadcrumbs */}
         <div className="flex items-center gap-3">
@@ -321,29 +321,29 @@ export const PresentationStudio: React.FC<PresentationStudioProps> = ({
             <button
               type="button"
               onClick={onBackToDocument}
-              className="px-3 py-1.5 rounded-lg border border-zinc-200 dark:border-zinc-800 hover:bg-zinc-100 dark:hover:bg-zinc-900 text-xs font-semibold flex items-center gap-1.5 cursor-pointer transition-colors text-zinc-700 dark:text-zinc-300"
+              className="px-3 py-1.5 rounded-lg border border-[#E2E8F0] dark:border-[#253149] hover:bg-[#F1F5F9] dark:hover:bg-[#172033] text-xs font-semibold flex items-center gap-1.5 cursor-pointer transition-colors text-[#0F172A] dark:text-[#F3F6FC]"
               title="Kembali ke Dokumen Naskah"
             >
-              <FileText className="w-3.5 h-3.5" />
+              <FileText className="w-3.5 h-3.5 text-[#7C9CFF]" />
               <span>Naskah Studio</span>
             </button>
           )}
 
-          <div className="h-6 w-px bg-zinc-200 dark:border-zinc-800 hidden sm:block" />
+          <div className="h-6 w-px bg-[#E2E8F0] dark:bg-[#253149] hidden sm:block" />
 
           <div>
             <div className="flex items-center gap-2">
-              <div className="w-7 h-7 rounded-lg bg-sky-500/10 border border-sky-500/20 flex items-center justify-center text-sky-500">
+              <div className="w-7 h-7 rounded-lg bg-[#7C9CFF]/15 border border-[#7C9CFF]/30 flex items-center justify-center text-[#7C9CFF]">
                 <Presentation className="w-4 h-4" />
               </div>
-              <h1 className="text-sm sm:text-base font-bold text-zinc-900 dark:text-zinc-100">
+              <h1 className="text-sm sm:text-base font-bold text-[#0F172A] dark:text-[#F3F6FC]">
                 Slide Studio Eksekutif (16:9)
               </h1>
-              <span className="px-2 py-0.5 rounded-md bg-sky-100 dark:bg-sky-950/60 text-sky-700 dark:text-sky-300 font-mono text-[10px] font-semibold">
+              <span className="px-2 py-0.5 rounded-md bg-[#7C9CFF]/15 text-[#7C9CFF] font-mono text-[10px] font-semibold">
                 {currentDoc.slides.length} Slide
               </span>
             </div>
-            <p className="text-[11px] text-zinc-500 dark:text-zinc-400 truncate max-w-md sm:max-w-xl">
+            <p className="text-[11px] text-[#475569] dark:text-[#A4B1C7] truncate max-w-md sm:max-w-xl">
               {currentDoc.title}
             </p>
           </div>

@@ -314,37 +314,37 @@ Tolong bedah masalah ini dan rumuskan judul proposal akademik yang tajam dan tid
   const activeCandidate = candidateTitles.find((c) => c.id === selectedTitleId) || candidateTitles[0];
 
   return (
-    <div className="flex-1 flex flex-col w-full h-[calc(100vh-64px)] max-h-[calc(100vh-64px)] overflow-hidden bg-white dark:bg-[#09090B] text-zinc-900 dark:text-zinc-100">
+    <div className="flex-1 flex flex-col w-full h-[calc(100vh-64px)] max-h-[calc(100vh-64px)] overflow-hidden bg-[#F8FAFC] dark:bg-[#080B12] text-[#0F172A] dark:text-[#F3F6FC]">
       
       {/* ============================================================ */}
       {/* 1. TOP HEADER NAVIGATION BAR                                  */}
       {/* ============================================================ */}
-      <div className="px-6 py-3.5 border-b border-zinc-200 dark:border-zinc-800 bg-zinc-50/80 dark:bg-zinc-950/80 flex items-center justify-between flex-shrink-0 z-20">
+      <div className="px-6 py-3.5 border-b border-[#E2E8F0] dark:border-[#253149] bg-white/95 dark:bg-[#0B101A]/95 flex items-center justify-between flex-shrink-0 z-20">
         <div className="flex items-center gap-3">
           <button
             type="button"
             onClick={onBackToHero}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 hover:bg-zinc-100 dark:hover:bg-zinc-850 text-xs font-semibold text-zinc-700 dark:text-zinc-300 transition-colors cursor-pointer shadow-2xs"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-[#E2E8F0] dark:border-[#253149] bg-white dark:bg-[#111827] hover:bg-[#F1F5F9] dark:hover:bg-[#172033] text-xs font-semibold text-[#0F172A] dark:text-[#F3F6FC] transition-colors cursor-pointer shadow-2xs"
             title="Kembali ke halaman utama pembuatan proposal"
           >
-            <ArrowLeft className="w-3.5 h-3.5" />
+            <ArrowLeft className="w-3.5 h-3.5 text-[#7C9CFF]" />
             <span>Beranda Usulan</span>
           </button>
 
-          <div className="h-4 w-[1px] bg-zinc-200 dark:border-zinc-800" />
+          <div className="h-4 w-[1px] bg-[#E2E8F0] dark:bg-[#253149]" />
 
           <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-lg bg-emerald-100 dark:bg-emerald-950/60 border border-emerald-300 dark:border-emerald-800 flex items-center justify-center text-emerald-700 dark:text-emerald-400">
+            <div className="w-8 h-8 rounded-lg bg-[#34D399]/15 border border-[#34D399]/30 flex items-center justify-center text-[#34D399]">
               <GraduationCap className="w-4 h-4" />
             </div>
             <div>
-              <h1 className="text-xs sm:text-sm font-bold text-zinc-950 dark:text-zinc-50 flex items-center gap-2">
-                <span>Klinik Bimbingan & Konsultasi Ide</span>
-                <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800 font-semibold">
+              <h1 className="text-xs sm:text-sm font-bold text-[#0F172A] dark:text-[#F3F6FC] flex items-center gap-2">
+                <span>Klinik Bimbingan &amp; Konsultasi Ide</span>
+                <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-[#34D399]/15 text-[#34D399] border border-[#34D399]/30 font-semibold">
                   AI MENTOR AKTIF
                 </span>
               </h1>
-              <p className="text-[11px] text-zinc-500 dark:text-zinc-400">
+              <p className="text-[11px] text-[#475569] dark:text-[#A4B1C7]">
                 Eksplorasi masalah lapangan, validasi kelayakan, dan penajaman judul proposal
               </p>
             </div>
@@ -357,7 +357,7 @@ Tolong bedah masalah ini dan rumuskan judul proposal akademik yang tajam dan tid
             <button
               type="button"
               onClick={() => handleApplyCandidate(activeCandidate)}
-              className="px-4 py-2 rounded-xl bg-zinc-950 hover:bg-black dark:bg-zinc-100 dark:hover:bg-white text-white dark:text-zinc-950 text-xs font-semibold transition-all cursor-pointer shadow-sm flex items-center gap-2"
+              className="px-4 py-2 rounded-xl bg-[#7C9CFF] hover:bg-[#9B8CFF] text-[#080B12] text-xs font-semibold transition-all cursor-pointer shadow-sm flex items-center gap-2"
               title="Gunakan judul yang terpilih dari bimbingan dan mulai penyusunan naskah proposal"
             >
               <span>Gunakan Judul Terpilih ke Usulan</span>
@@ -375,7 +375,7 @@ Tolong bedah masalah ini dan rumuskan judul proposal akademik yang tajam dan tid
         {/* ============================================================ */}
         {/* LEFT COLUMN (Chatbot Thread ~ 7 cols / 58%)                  */}
         {/* ============================================================ */}
-        <div className="lg:col-span-7 flex flex-col h-full border-r border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 overflow-hidden">
+        <div className="lg:col-span-7 flex flex-col h-full border-r border-[#E2E8F0] dark:border-[#253149] bg-white dark:bg-[#0B101A] overflow-hidden">
           
           {/* Chat Messages Scrollable Stream */}
           <div className="flex-1 p-4 sm:p-6 overflow-y-auto space-y-4">

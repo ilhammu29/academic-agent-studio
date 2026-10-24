@@ -139,19 +139,19 @@ export default function AppShell({
   ];
 
   return (
-    <div className="min-h-screen w-full bg-[#F9F9F8] dark:bg-[#000000] text-zinc-900 dark:text-zinc-100 font-sans antialiased flex flex-col transition-colors duration-200">
+    <div className="min-h-screen w-full bg-[#F8FAFC] dark:bg-[#080B12] text-[#0F172A] dark:text-[#F3F6FC] font-sans antialiased flex flex-col transition-colors duration-200">
       
       {/* ============================================================ */}
       {/* 1. SLIM ICON-ONLY SIDEBAR RAIL (w-16 / 72px) - OXID BRAND     */}
       {/* ============================================================ */}
-      <aside className="hidden md:flex w-16 lg:w-[72px] h-screen fixed left-0 top-0 bottom-0 bg-[#F9F9F8] dark:bg-[#000000] border-r border-zinc-200 dark:border-zinc-800 flex-col items-center justify-between py-5 z-40 transition-colors duration-200 select-none">
+      <aside className="hidden md:flex w-16 lg:w-[72px] h-screen fixed left-0 top-0 bottom-0 bg-white dark:bg-[#0B101A] border-r border-[#E2E8F0] dark:border-[#253149] flex-col items-center justify-between py-5 z-40 transition-colors duration-200 select-none">
         
-        {/* Top: Brand Logo Mark "OXID" (No generic star symbol) */}
+        {/* Top: Brand Logo Mark "OXID" (Retained structure & typography) */}
         <div className="flex flex-col items-center">
           <button
             onClick={() => onNavigateStage('input')}
             title="OXID Academic Studio — Beranda"
-            className="w-10 h-10 rounded-xl bg-zinc-950 dark:bg-zinc-100 text-white dark:text-zinc-950 flex flex-col items-center justify-center font-bold tracking-tight hover:opacity-90 active:scale-95 transition-all cursor-pointer shadow-xs group"
+            className="w-10 h-10 rounded-xl bg-[#0F172A] dark:bg-[#172033] border border-[#E2E8F0] dark:border-[#253149] text-white dark:text-[#7C9CFF] flex flex-col items-center justify-center font-bold tracking-tight hover:border-[#7C9CFF]/60 active:scale-95 transition-all cursor-pointer shadow-xs group"
           >
             <span className="font-mono font-black text-[11px] tracking-tight">OXID</span>
           </button>
@@ -168,19 +168,19 @@ export default function AppShell({
                 onClick={item.onClick}
                 className={`relative w-11 h-11 rounded-xl flex items-center justify-center transition-all cursor-pointer group ${
                   isActive
-                    ? 'text-white dark:text-black bg-zinc-950 dark:bg-zinc-100 shadow-xs'
-                    : 'text-zinc-600 dark:text-zinc-400 hover:text-zinc-950 dark:hover:text-zinc-100 hover:bg-zinc-200/70 dark:hover:bg-zinc-900'
+                    ? 'text-[#0F172A] dark:text-[#F3F6FC] bg-[#F1F5F9] dark:bg-[#172033] border border-[#E2E8F0] dark:border-[#7C9CFF]/40 shadow-xs'
+                    : 'text-[#475569] dark:text-[#A4B1C7] hover:text-[#0F172A] dark:hover:text-[#F3F6FC] hover:bg-[#F1F5F9] dark:hover:bg-[#172033]/60'
                 }`}
               >
                 {/* Active Indicator Bar on Left */}
                 {isActive && (
-                  <span className="absolute -left-2 top-3 bottom-3 w-1 bg-zinc-950 dark:bg-zinc-100 rounded-r-full" />
+                  <span className="absolute -left-2 top-2.5 bottom-2.5 w-1 bg-[#7C9CFF] rounded-r-full" />
                 )}
                 
-                <Icon className="w-4 h-4 stroke-[2]" />
+                <Icon className={`w-4 h-4 stroke-[2] ${isActive ? 'text-[#7C9CFF]' : ''}`} />
 
                 {/* Floating Tooltip to the right */}
-                <div className="absolute left-16 px-2.5 py-1.5 rounded-lg bg-zinc-900 dark:bg-zinc-800 text-white text-[11px] font-medium whitespace-nowrap opacity-0 pointer-events-none group-hover:opacity-100 transition-opacity shadow-xl z-50 flex items-center gap-1.5">
+                <div className="absolute left-16 px-2.5 py-1.5 rounded-lg bg-[#0F172A] dark:bg-[#1C263A] border border-transparent dark:border-[#253149] text-white dark:text-[#F3F6FC] text-[11px] font-medium whitespace-nowrap opacity-0 pointer-events-none group-hover:opacity-100 transition-opacity shadow-xl z-50 flex items-center gap-1.5">
                   <span>{item.label}</span>
                 </div>
               </button>
@@ -195,28 +195,28 @@ export default function AppShell({
           <button
             onClick={toggleTheme}
             title={theme === 'dark' ? 'Beralih ke Mode Terang (Light)' : 'Beralih ke Mode Gelap (Dark)'}
-            className="relative w-10 h-10 rounded-xl text-zinc-600 dark:text-zinc-400 hover:text-zinc-950 dark:hover:text-zinc-100 hover:bg-zinc-200/70 dark:hover:bg-zinc-900 flex items-center justify-center transition-all cursor-pointer group"
+            className="relative w-10 h-10 rounded-xl text-[#475569] dark:text-[#A4B1C7] hover:text-[#0F172A] dark:hover:text-[#F3F6FC] hover:bg-[#F1F5F9] dark:hover:bg-[#172033] flex items-center justify-center transition-all cursor-pointer group"
           >
             {theme === 'dark' ? (
-              <Sun className="w-4 h-4 text-zinc-300 group-hover:text-white transition-colors" />
+              <Sun className="w-4 h-4 text-[#A4B1C7] group-hover:text-[#7C9CFF] transition-colors" />
             ) : (
-              <Moon className="w-4 h-4 text-zinc-700 group-hover:text-zinc-950 transition-colors" />
+              <Moon className="w-4 h-4 text-[#475569] group-hover:text-[#0F172A] transition-colors" />
             )}
-            <div className="absolute left-16 px-2.5 py-1 rounded-lg bg-zinc-900 dark:bg-zinc-800 text-white text-[11px] font-medium whitespace-nowrap opacity-0 pointer-events-none group-hover:opacity-100 transition-opacity shadow-xl z-50">
+            <div className="absolute left-16 px-2.5 py-1 rounded-lg bg-[#0F172A] dark:bg-[#1C263A] border border-transparent dark:border-[#253149] text-white dark:text-[#F3F6FC] text-[11px] font-medium whitespace-nowrap opacity-0 pointer-events-none group-hover:opacity-100 transition-opacity shadow-xl z-50">
               {theme === 'dark' ? 'Mode Terang' : 'Mode Gelap'}
             </div>
           </button>
 
-          {/* User Profile Avatar with Initials "IM" */}
+          {/* User Profile Avatar with Initials */}
           <button
             onClick={onOpenAuth}
             title={`${currentUser.name || 'Ilham Maulana'} (${currentUser.role || 'Mahasiswa'})`}
-            className="relative w-9 h-9 rounded-full bg-[#18181B] dark:bg-zinc-100 text-white dark:text-zinc-950 font-bold text-xs flex items-center justify-center cursor-pointer shadow-xs hover:scale-105 active:scale-95 transition-transform group"
+            className="relative w-9 h-9 rounded-full bg-[#0F172A] dark:bg-[#172033] border border-[#E2E8F0] dark:border-[#253149] text-white dark:text-[#7C9CFF] font-bold text-xs flex items-center justify-center cursor-pointer shadow-xs hover:border-[#7C9CFF] hover:scale-105 active:scale-95 transition-all group"
           >
             <span>{userInitials}</span>
-            <div className="absolute left-16 px-2.5 py-1.5 rounded-lg bg-zinc-900 dark:bg-zinc-800 text-white text-[11px] font-medium whitespace-nowrap opacity-0 pointer-events-none group-hover:opacity-100 transition-opacity shadow-xl z-50 flex items-center gap-1.5">
+            <div className="absolute left-16 px-2.5 py-1.5 rounded-lg bg-[#0F172A] dark:bg-[#1C263A] border border-transparent dark:border-[#253149] text-white dark:text-[#F3F6FC] text-[11px] font-medium whitespace-nowrap opacity-0 pointer-events-none group-hover:opacity-100 transition-opacity shadow-xl z-50 flex items-center gap-1.5">
               <span>{currentUser.name || 'Ilham Maulana'}</span>
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+              <span className="w-1.5 h-1.5 rounded-full bg-[#34D399]" />
             </div>
           </button>
         </div>
@@ -225,12 +225,12 @@ export default function AppShell({
       {/* ============================================================ */}
       {/* 2. MINIMALIST TOP HEADER                                      */}
       {/* ============================================================ */}
-      <header className="fixed top-0 right-0 left-0 md:left-16 lg:left-[72px] h-16 bg-[#F9F9F8]/95 dark:bg-[#000000]/95 backdrop-blur-md px-4 sm:px-8 flex items-center justify-between z-30 transition-colors duration-200 border-b border-zinc-200/50 dark:border-zinc-850">
+      <header className="fixed top-0 right-0 left-0 md:left-16 lg:left-[72px] h-16 bg-white/95 dark:bg-[#0B101A]/95 backdrop-blur-md px-4 sm:px-8 flex items-center justify-between z-30 transition-colors duration-200 border-b border-[#E2E8F0] dark:border-[#253149]">
         
         {/* Left: Quick Search Capsule "🔍 Cari sesuatu..." */}
         <div className="relative flex-1 max-w-xs sm:max-w-sm">
           <div className="relative flex items-center">
-            <Search className="w-3.5 h-3.5 text-zinc-500 dark:text-zinc-400 absolute left-3.5 pointer-events-none" />
+            <Search className="w-3.5 h-3.5 text-[#475569] dark:text-[#A4B1C7] absolute left-3.5 pointer-events-none" />
             <input
               type="text"
               value={searchQuery}
@@ -241,46 +241,46 @@ export default function AppShell({
               onFocus={() => setShowSearchDropdown(true)}
               onBlur={() => setTimeout(() => setShowSearchDropdown(false), 200)}
               placeholder="Cari sesuatu di OXID..."
-              className="w-full h-9 rounded-full bg-[#EFEFED] dark:bg-zinc-900 text-xs text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-500 dark:placeholder:text-zinc-400 pl-9 pr-4 border border-transparent focus:border-zinc-300 dark:focus:border-zinc-700 focus:bg-white dark:focus:bg-zinc-900 outline-none transition-all shadow-2xs"
+              className="w-full h-9 rounded-full bg-[#F1F5F9] dark:bg-[#111827] text-xs text-[#0F172A] dark:text-[#F3F6FC] placeholder:text-[#475569] dark:placeholder:text-[#A4B1C7] pl-9 pr-4 border border-[#E2E8F0] dark:border-[#253149] focus:border-[#7C9CFF] dark:focus:border-[#7C9CFF] focus:bg-white dark:focus:bg-[#172033] outline-none transition-all shadow-xs"
             />
           </div>
 
           {/* Quick Command & Search Dropdown */}
           {showSearchDropdown && (
-            <div className="absolute top-11 left-0 w-80 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl shadow-xl p-2 z-50 text-xs animate-in fade-in duration-100">
-              <div className="text-[10px] uppercase font-semibold text-zinc-400 px-2 py-1">
+            <div className="absolute top-11 left-0 w-80 bg-white dark:bg-[#111827] border border-[#E2E8F0] dark:border-[#253149] rounded-xl shadow-xl p-2 z-50 text-xs animate-in fade-in duration-100">
+              <div className="text-[10px] uppercase font-semibold text-[#475569] dark:text-[#A4B1C7] px-2 py-1">
                 Aksi Cepat & Navigasi OXID
               </div>
               <button
                 onMouseDown={() => onNavigateStage('input')}
-                className="w-full text-left px-2.5 py-1.5 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 flex items-center gap-2 text-zinc-700 dark:text-zinc-300 cursor-pointer"
+                className="w-full text-left px-2.5 py-1.5 rounded-lg hover:bg-[#F1F5F9] dark:hover:bg-[#172033] flex items-center gap-2 text-[#0F172A] dark:text-[#F3F6FC] cursor-pointer"
               >
-                <Home className="w-3.5 h-3.5" />
+                <Home className="w-3.5 h-3.5 text-[#7C9CFF]" />
                 <span>Buat Usulan Baru</span>
               </button>
               <button
                 onMouseDown={() => {
                   if (onOpenConsultation) onOpenConsultation();
                 }}
-                className="w-full text-left px-2.5 py-1.5 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 flex items-center gap-2 text-zinc-700 dark:text-zinc-300 cursor-pointer"
+                className="w-full text-left px-2.5 py-1.5 rounded-lg hover:bg-[#F1F5F9] dark:hover:bg-[#172033] flex items-center gap-2 text-[#0F172A] dark:text-[#F3F6FC] cursor-pointer"
               >
-                <MessageSquare className="w-3.5 h-3.5" />
+                <MessageSquare className="w-3.5 h-3.5 text-[#9B8CFF]" />
                 <span>Klinik Bimbingan & Konsultasi Ide</span>
               </button>
               <button
                 onMouseDown={onOpenDatabase}
-                className="w-full text-left px-2.5 py-1.5 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 flex items-center gap-2 text-zinc-700 dark:text-zinc-300 cursor-pointer"
+                className="w-full text-left px-2.5 py-1.5 rounded-lg hover:bg-[#F1F5F9] dark:hover:bg-[#172033] flex items-center gap-2 text-[#0F172A] dark:text-[#F3F6FC] cursor-pointer"
               >
-                <Folder className="w-3.5 h-3.5" />
+                <Folder className="w-3.5 h-3.5 text-[#34D399]" />
                 <span>Buka Arsip & Database Proyek</span>
               </button>
               <button
                 onMouseDown={() => {
                   if (onOpenGuidelines) onOpenGuidelines();
                 }}
-                className="w-full text-left px-2.5 py-1.5 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 flex items-center gap-2 text-zinc-700 dark:text-zinc-300 cursor-pointer"
+                className="w-full text-left px-2.5 py-1.5 rounded-lg hover:bg-[#F1F5F9] dark:hover:bg-[#172033] flex items-center gap-2 text-[#0F172A] dark:text-[#F3F6FC] cursor-pointer"
               >
-                <Settings className="w-3.5 h-3.5" />
+                <Settings className="w-3.5 h-3.5 text-[#FBBF24]" />
                 <span>Pindai Format Kampus (Scan AI)</span>
               </button>
             </div>
@@ -290,7 +290,7 @@ export default function AppShell({
         {/* Right: New Proposal Button, Theme Switcher, 12 Thinking Modes Bell, User Profile Badge */}
         <div className="flex items-center gap-2 sm:gap-3">
           
-          {/* New Proposal / Sesi Baru CTA Button (Like ChatGPT / Claude) */}
+          {/* New Proposal / Sesi Baru CTA Button */}
           <button
             type="button"
             onClick={() => {
@@ -298,26 +298,26 @@ export default function AppShell({
                 onResetSession();
               }
             }}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-zinc-950 text-white dark:bg-zinc-100 dark:text-black hover:opacity-90 text-xs font-semibold shadow-xs transition-all cursor-pointer"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#7C9CFF] text-[#080B12] hover:bg-[#9B8CFF] text-xs font-semibold shadow-xs transition-all cursor-pointer"
             title="Mulai usulan proposal baru tanpa me-refresh browser"
           >
-            <Plus className="w-3.5 h-3.5" />
+            <Plus className="w-3.5 h-3.5 stroke-[2.5]" />
             <span className="hidden sm:inline">Usulan Baru</span>
           </button>
 
           {/* Theme Selector Button */}
           <button
             onClick={toggleTheme}
-            className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg hover:bg-zinc-200/70 dark:hover:bg-zinc-800 text-xs font-medium text-zinc-800 dark:text-zinc-200 transition-colors cursor-pointer"
+            className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg hover:bg-[#F1F5F9] dark:hover:bg-[#172033] border border-transparent hover:border-[#E2E8F0] dark:hover:border-[#253149] text-xs font-medium text-[#0F172A] dark:text-[#F3F6FC] transition-colors cursor-pointer"
             title={theme === 'dark' ? 'Ganti ke Mode Terang' : 'Ganti ke Mode Gelap'}
           >
             {theme === 'dark' ? (
-              <Moon className="w-3.5 h-3.5 text-zinc-300" />
+              <Moon className="w-3.5 h-3.5 text-[#7C9CFF]" />
             ) : (
-              <Sun className="w-3.5 h-3.5 text-zinc-700" />
+              <Sun className="w-3.5 h-3.5 text-[#FBBF24]" />
             )}
             <span className="capitalize">{theme === 'dark' ? 'Dark' : 'Light'}</span>
-            <ChevronDown className="w-3 h-3 text-zinc-400" />
+            <ChevronDown className="w-3 h-3 text-[#A4B1C7]" />
           </button>
 
           {/* 12 Thinking Modes Notification Bell */}
@@ -326,7 +326,7 @@ export default function AppShell({
               if (onOpenTwelveModes) onOpenTwelveModes();
             }}
             title="12 Metode Berpikir Ilmiah"
-            className="p-2 rounded-lg text-zinc-700 dark:text-zinc-400 hover:text-zinc-950 dark:hover:text-white hover:bg-zinc-200/70 dark:hover:bg-zinc-800 transition-colors cursor-pointer"
+            className="p-2 rounded-lg text-[#475569] dark:text-[#A4B1C7] hover:text-[#0F172A] dark:hover:text-[#F3F6FC] hover:bg-[#F1F5F9] dark:hover:bg-[#172033] transition-colors cursor-pointer"
           >
             <Bell className="w-4 h-4 stroke-[1.85]" />
           </button>
@@ -335,7 +335,7 @@ export default function AppShell({
           <button
             onClick={onOpenAuth}
             title={`${currentUser.name || 'Ilham Maulana'} (${currentUser.role || 'Mahasiswa'})`}
-            className="w-8 h-8 rounded-lg bg-[#18181B] dark:bg-zinc-100 text-white dark:text-zinc-950 font-bold text-xs flex items-center justify-center cursor-pointer shadow-xs hover:scale-105 active:scale-95 transition-transform"
+            className="w-8 h-8 rounded-lg bg-[#0F172A] dark:bg-[#172033] border border-[#E2E8F0] dark:border-[#253149] text-white dark:text-[#7C9CFF] font-bold text-xs flex items-center justify-center cursor-pointer shadow-xs hover:border-[#7C9CFF] hover:scale-105 active:scale-95 transition-transform"
           >
             {userInitials}
           </button>
@@ -343,7 +343,7 @@ export default function AppShell({
           {/* Mobile Menu Toggle Button */}
           <button
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            className="md:hidden p-2 rounded-lg text-zinc-700 dark:text-zinc-400 hover:text-zinc-950 dark:hover:text-white hover:bg-zinc-200/70 dark:hover:bg-zinc-800 transition-colors"
+            className="md:hidden p-2 rounded-lg text-[#475569] dark:text-[#A4B1C7] hover:text-[#0F172A] dark:hover:text-[#F3F6FC] hover:bg-[#F1F5F9] dark:hover:bg-[#172033] transition-colors"
           >
             {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
           </button>
@@ -354,8 +354,8 @@ export default function AppShell({
       {/* 3. MOBILE SLIDE-OUT MENU DRAWER                              */}
       {/* ============================================================ */}
       {mobileMenuOpen && (
-        <div className="md:hidden fixed inset-x-0 top-16 bg-white dark:bg-[#09090b] border-b border-zinc-200 dark:border-zinc-800 p-4 z-40 space-y-2 animate-in fade-in slide-in-from-top-2 duration-150 shadow-2xl">
-          <div className="text-[10px] uppercase font-semibold text-zinc-500 dark:text-zinc-400 px-3">
+        <div className="md:hidden fixed inset-x-0 top-16 bg-white dark:bg-[#0B101A] border-b border-[#E2E8F0] dark:border-[#253149] p-4 z-40 space-y-2 animate-in fade-in slide-in-from-top-2 duration-150 shadow-2xl">
+          <div className="text-[10px] uppercase font-semibold text-[#475569] dark:text-[#A4B1C7] px-3">
             Menu Navigasi OXID
           </div>
           {navMenuItems.map((item) => {
@@ -369,8 +369,8 @@ export default function AppShell({
                 }}
                 className={`w-full px-3.5 py-2.5 rounded-xl flex items-center gap-3 text-xs transition-colors text-left ${
                   item.isActive 
-                    ? 'bg-zinc-950 text-white dark:bg-zinc-100 dark:text-black font-semibold' 
-                    : 'text-zinc-700 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-900'
+                    ? 'bg-[#F1F5F9] text-[#0F172A] dark:bg-[#172033] dark:text-[#7C9CFF] font-semibold border border-[#E2E8F0] dark:border-[#253149]' 
+                    : 'text-[#475569] dark:text-[#A4B1C7] hover:bg-[#F1F5F9] dark:hover:bg-[#172033]'
                 }`}
               >
                 <Icon className="w-4 h-4" />
@@ -379,13 +379,13 @@ export default function AppShell({
             );
           })}
           
-          <div className="pt-3 mt-2 border-t border-zinc-200 dark:border-zinc-900 flex items-center justify-between px-2 text-xs">
+          <div className="pt-3 mt-2 border-t border-[#E2E8F0] dark:border-[#253149] flex items-center justify-between px-2 text-xs">
             <button
               onClick={() => {
                 onResetSession();
                 setMobileMenuOpen(false);
               }}
-              className="text-red-500 hover:underline flex items-center gap-1.5 text-xs cursor-pointer"
+              className="text-[#FB7185] hover:underline flex items-center gap-1.5 text-xs cursor-pointer"
             >
               <RotateCcw className="w-3.5 h-3.5" />
               <span>Reset Sesi</span>

@@ -165,12 +165,12 @@ export const DiagnosticInterview: React.FC<DiagnosticInterviewProps> = ({
   }, [answers, category, reportType]);
 
   return (
-    <div className="max-w-4xl mx-auto py-8 sm:py-12 px-4 sm:px-6 w-full animate-in fade-in duration-300">
+    <div className="max-w-4xl mx-auto py-8 sm:py-12 px-4 sm:px-6 w-full animate-in fade-in duration-300 text-[#0F172A] dark:text-[#F3F6FC]">
       
       {/* Toast Notification */}
       {toastMessage && (
-        <div className="fixed top-20 right-6 z-50 bg-zinc-900 border border-zinc-700 text-zinc-100 px-4 py-2.5 rounded-xl shadow-xl text-xs flex items-center gap-2 animate-in slide-in-from-top duration-200">
-          <Sparkles className="w-3.5 h-3.5 text-zinc-300" />
+        <div className="fixed top-20 right-6 z-50 bg-[#0F172A] dark:bg-[#1C263A] border border-[#253149] text-white dark:text-[#F3F6FC] px-4 py-2.5 rounded-xl shadow-xl text-xs flex items-center gap-2 animate-in slide-in-from-top duration-200">
+          <Sparkles className="w-3.5 h-3.5 text-[#7C9CFF]" />
           <span>{toastMessage}</span>
         </div>
       )}
@@ -179,18 +179,18 @@ export const DiagnosticInterview: React.FC<DiagnosticInterviewProps> = ({
       <div className="mb-8">
         
         {/* Step Badge */}
-        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-md bg-zinc-100 dark:bg-zinc-900 border border-zinc-200/70 dark:border-zinc-800 text-xs font-medium text-zinc-700 dark:text-zinc-300 mb-3 shadow-2xs">
-          <Layers className="w-3.5 h-3.5 text-zinc-800 dark:text-zinc-200" />
+        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-md bg-[#F1F5F9] dark:bg-[#172033] border border-[#E2E8F0] dark:border-[#253149] text-xs font-medium text-[#0F172A] dark:text-[#7C9CFF] mb-3 shadow-2xs">
+          <Layers className="w-3.5 h-3.5 text-[#7C9CFF]" />
           <span>Langkah 2 dari 4: Wawancara Diagnostik Lapangan</span>
         </div>
 
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
-            <h2 className="text-2xl sm:text-3xl font-bold text-zinc-950 dark:text-white tracking-tight">
-              Wawancara Eksplorasi & Penajaman Konteks
+            <h2 className="text-2xl sm:text-3xl font-bold text-[#0F172A] dark:text-[#F3F6FC] tracking-tight">
+              Wawancara Eksplorasi &amp; Penajaman Konteks
             </h2>
-            <p className="text-xs sm:text-sm text-zinc-500 dark:text-zinc-400 mt-1 max-w-xl line-clamp-2">
-              Topik: <span className="font-semibold text-zinc-800 dark:text-zinc-200">"{title}"</span>
+            <p className="text-xs sm:text-sm text-[#475569] dark:text-[#A4B1C7] mt-1 max-w-xl line-clamp-2">
+              Topik: <span className="font-semibold text-[#0F172A] dark:text-[#F3F6FC]">"{title}"</span>
             </p>
           </div>
 
@@ -199,22 +199,22 @@ export const DiagnosticInterview: React.FC<DiagnosticInterviewProps> = ({
             type="button"
             onClick={handleAutoGenerateAIAnswers}
             disabled={isGeneratingAll}
-            className="self-start sm:self-auto py-2 px-4 rounded-lg border border-zinc-200/90 dark:border-zinc-800 bg-white dark:bg-zinc-900 hover:bg-zinc-50 dark:hover:bg-zinc-800 text-zinc-900 dark:text-zinc-100 text-xs font-medium transition-all flex items-center gap-2 cursor-pointer flex-shrink-0 disabled:opacity-50 shadow-xs hover:border-zinc-300"
+            className="self-start sm:self-auto py-2 px-4 rounded-xl border border-[#E2E8F0] dark:border-[#253149] bg-white dark:bg-[#172033] hover:bg-[#F1F5F9] dark:hover:bg-[#1C263A] text-[#0F172A] dark:text-[#F3F6FC] text-xs font-medium transition-all flex items-center gap-2 cursor-pointer flex-shrink-0 disabled:opacity-50 shadow-xs hover:border-[#7C9CFF]"
           >
             {isGeneratingAll ? (
-              <Loader2 className="w-3.5 h-3.5 animate-spin text-zinc-500" />
+              <Loader2 className="w-3.5 h-3.5 animate-spin text-[#7C9CFF]" />
             ) : (
-              <Sparkles className="w-3.5 h-3.5 text-zinc-600 dark:text-zinc-400" />
+              <Sparkles className="w-3.5 h-3.5 text-[#7C9CFF]" />
             )}
             <span>{isGeneratingAll ? "Menyusun Jawaban..." : "Auto-Generate Jawaban (AI)"}</span>
           </button>
         </div>
 
         {/* Purpose Explainer Banner */}
-        <div className="mt-4 p-3.5 rounded-xl border border-zinc-200 dark:border-zinc-850 bg-zinc-50/70 dark:bg-zinc-900/40 text-xs text-zinc-600 dark:text-zinc-400 leading-relaxed flex items-start gap-3">
-          <Sparkles className="w-4 h-4 text-zinc-700 dark:text-zinc-300 shrink-0 mt-0.5" />
+        <div className="mt-4 p-3.5 rounded-xl border border-[#E2E8F0] dark:border-[#253149] bg-white dark:bg-[#111827] text-xs text-[#475569] dark:text-[#A4B1C7] leading-relaxed flex items-start gap-3">
+          <Sparkles className="w-4 h-4 text-[#7C9CFF] shrink-0 mt-0.5" />
           <div>
-            <p className="font-medium text-zinc-800 dark:text-zinc-200 mb-0.5">
+            <p className="font-medium text-[#0F172A] dark:text-[#F3F6FC] mb-0.5">
               Fungsi Wawancara Diagnostik:
             </p>
             <p>
@@ -225,13 +225,13 @@ export const DiagnosticInterview: React.FC<DiagnosticInterviewProps> = ({
 
         {/* Minimal Progress Bar */}
         <div className="flex items-center gap-3 pt-5">
-          <div className="flex-1 bg-zinc-200/80 dark:bg-zinc-800 h-1.5 rounded-md overflow-hidden">
+          <div className="flex-1 bg-[#E2E8F0] dark:bg-[#253149] h-1.5 rounded-md overflow-hidden">
             <div
-              className="h-full bg-zinc-900 dark:bg-zinc-100 transition-all duration-300 rounded-md"
+              className="h-full bg-[#7C9CFF] transition-all duration-300 rounded-md"
               style={{ width: `${progressPercent}%` }}
             />
           </div>
-          <span className="text-xs text-zinc-500 dark:text-zinc-400 font-mono">
+          <span className="text-xs text-[#475569] dark:text-[#A4B1C7] font-mono">
             {answeredCount}/{questions.length} Terisi ({progressPercent}%)
           </span>
         </div>
@@ -247,20 +247,20 @@ export const DiagnosticInterview: React.FC<DiagnosticInterviewProps> = ({
           return (
             <div
               key={q.id}
-              className="bg-white dark:bg-zinc-900/80 border border-zinc-200/80 dark:border-zinc-800/80 rounded-2xl p-5 sm:p-6 transition-all hover:border-zinc-300 dark:hover:border-zinc-700 shadow-xs"
+              className="bg-white dark:bg-[#111827] border border-[#E2E8F0] dark:border-[#253149] rounded-2xl p-5 sm:p-6 transition-all hover:border-[#7C9CFF]/60 shadow-xs"
             >
               {/* Question Header & Action Row */}
               <div className="flex items-start justify-between gap-4 mb-3">
                 <div className="flex items-start gap-3">
-                  <span className="w-6 h-6 rounded-full bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-300 text-xs font-mono font-semibold flex items-center justify-center flex-shrink-0 mt-0.5">
+                  <span className="w-6 h-6 rounded-full bg-[#F1F5F9] dark:bg-[#172033] text-[#0F172A] dark:text-[#7C9CFF] text-xs font-mono font-semibold flex items-center justify-center flex-shrink-0 mt-0.5">
                     {idx + 1}
                   </span>
                   <div>
-                    <h3 className="text-sm sm:text-base font-semibold text-zinc-900 dark:text-zinc-100 leading-snug">
+                    <h3 className="text-sm sm:text-base font-semibold text-[#0F172A] dark:text-[#F3F6FC] leading-snug">
                       {q.question}
                     </h3>
-                    <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-1">
-                      {q.contextHint} &bull; <span className="font-medium text-zinc-700 dark:text-zinc-300">{q.thinkingModeApplied}</span>
+                    <p className="text-xs text-[#475569] dark:text-[#A4B1C7] mt-1">
+                      {q.contextHint} &bull; <span className="font-medium text-[#0F172A] dark:text-[#F3F6FC]">{q.thinkingModeApplied}</span>
                     </p>
                   </div>
                 </div>
@@ -273,18 +273,18 @@ export const DiagnosticInterview: React.FC<DiagnosticInterviewProps> = ({
                     title={isListening ? "Hentikan rekaman suara" : "Diktekan jawaban lewat suara"}
                     className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs transition-colors cursor-pointer ${
                       isListening
-                        ? "bg-red-500 text-white animate-pulse"
-                        : "bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 text-zinc-600 dark:text-zinc-400"
+                        ? "bg-[#FB7185] text-white animate-pulse"
+                        : "bg-[#F1F5F9] dark:bg-[#172033] hover:bg-[#E2E8F0] dark:hover:bg-[#1C263A] text-[#475569] dark:text-[#A4B1C7]"
                     }`}
                   >
-                    {isListening ? <MicOff className="w-3.5 h-3.5" /> : <Mic className="w-3.5 h-3.5 text-zinc-500" />}
+                    {isListening ? <MicOff className="w-3.5 h-3.5" /> : <Mic className="w-3.5 h-3.5 text-[#475569] dark:text-[#A4B1C7]" />}
                     <span className="hidden sm:inline text-[11px] font-medium">
                       {isListening ? "Merekam..." : "Dikte"}
                     </span>
                   </button>
 
                   {isAnswered && (
-                    <span className="flex items-center gap-1 text-xs text-emerald-600 dark:text-emerald-400 font-medium px-2 py-1 rounded-full bg-emerald-50 dark:bg-emerald-950/40">
+                    <span className="flex items-center gap-1 text-xs text-[#34D399] font-medium px-2 py-1 rounded-full bg-[#34D399]/15 border border-[#34D399]/30">
                       <Check className="w-3.5 h-3.5" /> Siap
                     </span>
                   )}
@@ -297,18 +297,18 @@ export const DiagnosticInterview: React.FC<DiagnosticInterviewProps> = ({
                 value={currentVal}
                 onChange={(e) => handleAnswerChange(q.field, e.target.value)}
                 placeholder={q.placeholder}
-                className="w-full bg-zinc-50/70 dark:bg-zinc-950/60 border border-zinc-200/90 dark:border-zinc-800 rounded-xl p-3.5 text-xs sm:text-sm text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-400 dark:placeholder:text-zinc-600 focus:outline-none focus:border-zinc-400 dark:focus:border-zinc-600 focus:bg-white dark:focus:bg-zinc-900 transition-all leading-relaxed"
+                className="w-full bg-[#F8FAFC] dark:bg-[#0B101A] border border-[#E2E8F0] dark:border-[#253149] rounded-xl p-3.5 text-xs sm:text-sm text-[#0F172A] dark:text-[#F3F6FC] placeholder:text-[#475569] dark:placeholder:text-[#A4B1C7] focus:outline-none focus:border-[#7C9CFF] focus:bg-white dark:focus:bg-[#111827] transition-all leading-relaxed"
               />
 
               {/* Suggestion Quick Fill Link */}
-              <div className="flex items-center justify-between text-xs text-zinc-500 dark:text-zinc-400 gap-4 mt-2">
+              <div className="flex items-center justify-between text-xs text-[#475569] dark:text-[#A4B1C7] gap-4 mt-2">
                 <span className="truncate">
-                  Saran: <span className="text-zinc-700 dark:text-zinc-300 font-medium">{q.aiSuggestion.slice(0, 80)}...</span>
+                  Saran: <span className="text-[#0F172A] dark:text-[#F3F6FC] font-medium">{q.aiSuggestion.slice(0, 80)}...</span>
                 </span>
                 <button
                   type="button"
                   onClick={() => handleApplySingleSuggestion(q)}
-                  className="text-zinc-900 dark:text-zinc-100 hover:underline text-xs flex-shrink-0 cursor-pointer font-semibold whitespace-nowrap"
+                  className="text-[#7C9CFF] hover:text-[#9B8CFF] hover:underline text-xs flex-shrink-0 cursor-pointer font-semibold whitespace-nowrap"
                 >
                   Gunakan Saran
                 </button>
@@ -319,46 +319,46 @@ export const DiagnosticInterview: React.FC<DiagnosticInterviewProps> = ({
       </div>
 
       {/* 2.5 Real-Time Academic Quality Gate Indicator */}
-      <div className="mt-8 p-4 rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900/60 shadow-xs space-y-3">
+      <div className="mt-8 p-4 rounded-xl border border-[#E2E8F0] dark:border-[#253149] bg-white dark:bg-[#111827] shadow-xs space-y-3">
         <div className="flex items-center justify-between text-xs">
           <div className="flex items-center gap-2">
-            <ShieldCheck className="w-4 h-4 text-emerald-500" />
-            <span className="font-bold text-zinc-900 dark:text-zinc-100">
+            <ShieldCheck className="w-4 h-4 text-[#34D399]" />
+            <span className="font-bold text-[#0F172A] dark:text-[#F3F6FC]">
               Validasi Kesiapan Data &amp; Metodologi
             </span>
           </div>
-          <span className="font-mono font-bold text-zinc-700 dark:text-zinc-300">
+          <span className="font-mono font-bold text-[#7C9CFF]">
             {completeness.completenessPercentage}% Lengkap
           </span>
         </div>
 
         {completeness.missingItems.length > 0 ? (
-          <div className="space-y-1.5 pt-2 border-t border-zinc-100 dark:border-zinc-800 text-xs">
-            <p className="text-[11px] text-amber-700 dark:text-amber-400 font-medium flex items-center gap-1.5">
+          <div className="space-y-1.5 pt-2 border-t border-[#E2E8F0] dark:border-[#253149] text-xs">
+            <p className="text-[11px] text-[#FBBF24] font-medium flex items-center gap-1.5">
               <AlertCircle className="w-3.5 h-3.5" />
               <span>{completeness.criticalMissingCount > 0 ? "Terdapat variabel kritis yang belum diuraikan:" : "Rekomendasi penajaman jawaban:"}</span>
             </p>
-            <ul className="space-y-1 text-[11px] text-zinc-600 dark:text-zinc-400 pl-5 list-disc">
+            <ul className="space-y-1 text-[11px] text-[#475569] dark:text-[#A4B1C7] pl-5 list-disc">
               {completeness.missingItems.slice(0, 3).map((item, i) => (
                 <li key={i}>
-                  <strong className="text-zinc-800 dark:text-zinc-200">{item.variableName}:</strong> {item.remediationAdvice}
+                  <strong className="text-[#0F172A] dark:text-[#F3F6FC]">{item.variableName}:</strong> {item.remediationAdvice}
                 </li>
               ))}
             </ul>
           </div>
         ) : (
-          <p className="text-[11px] text-emerald-600 dark:text-emerald-400 font-medium pt-1 border-t border-zinc-100 dark:border-zinc-800">
+          <p className="text-[11px] text-[#34D399] font-medium pt-1 border-t border-[#E2E8F0] dark:border-[#253149]">
             ✓ Seluruh variabel penelitian telah terpenuhi. Dokumen siap diorkestrasi oleh Agen AI secara mendalam.
           </p>
         )}
       </div>
 
       {/* 3. Bottom Action Navigation */}
-      <div className="mt-10 pt-6 border-t border-zinc-200/80 dark:border-zinc-800 flex items-center justify-between gap-4">
+      <div className="mt-10 pt-6 border-t border-[#E2E8F0] dark:border-[#253149] flex items-center justify-between gap-4">
         <button
           type="button"
           onClick={onBack}
-          className="px-5 py-2.5 rounded-full border border-zinc-200/90 dark:border-zinc-800 text-zinc-700 dark:text-zinc-300 hover:text-black dark:hover:text-white hover:bg-zinc-100 dark:hover:bg-zinc-800 text-xs font-medium flex items-center gap-2 transition-colors cursor-pointer shadow-xs"
+          className="px-5 py-2.5 rounded-xl border border-[#E2E8F0] dark:border-[#253149] text-[#475569] dark:text-[#A4B1C7] hover:text-[#0F172A] dark:hover:text-[#F3F6FC] hover:bg-[#F1F5F9] dark:hover:bg-[#172033] text-xs font-medium flex items-center gap-2 transition-colors cursor-pointer shadow-xs"
         >
           <ArrowLeft className="w-4 h-4" />
           <span>Kembali ke Beranda</span>
@@ -369,7 +369,7 @@ export const DiagnosticInterview: React.FC<DiagnosticInterviewProps> = ({
           onClick={onSubmit}
           disabled={!isAllAnswered}
           title={!isAllAnswered ? "Lengkapi seluruh pertanyaan sebelum melanjutkan" : "Jalankan Orkestrasi Multi-Agent"}
-          className="px-6 py-2.5 rounded-full bg-[#18181B] hover:bg-black text-white dark:bg-zinc-100 dark:hover:bg-white dark:text-zinc-950 font-semibold text-xs transition-all flex items-center gap-2 disabled:opacity-40 disabled:pointer-events-none cursor-pointer shadow-md group"
+          className="px-6 py-2.5 rounded-xl bg-[#7C9CFF] hover:bg-[#9B8CFF] text-[#080B12] font-semibold text-xs transition-all flex items-center gap-2 disabled:opacity-40 disabled:pointer-events-none cursor-pointer shadow-md group"
         >
           <span>Jalankan Multi-Agent AI</span>
           <ArrowRight className="w-4 h-4 stroke-[2.5] group-hover:translate-x-0.5 transition-transform" />
