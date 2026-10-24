@@ -26,6 +26,7 @@ import { generateAcademicProposalPptx } from "@/lib/pptxExporter";
 import { generateBibTeX, generateRIS, downloadCitationFile } from "@/lib/bibtexExporter";
 import { saveProjectRecord, SavedProjectRecord, getStoredUser } from "@/lib/supabase";
 import { runAcademicQAPipeline, QAPipelineReport, QAFinding } from "@/lib/academicQAPipeline.ts";
+import { stripDoubleAsterisks, sanitizeAcademicText } from "@/lib/textSanitizer";
 import { 
   FileText, 
   Network, 
@@ -86,7 +87,7 @@ export const DocumentStudio: React.FC<DocumentStudioProps> = ({
   onReset,
   onOpenPresentationStudio
 }) => {
-  const [currentDoc, setCurrentDoc] = useState<ProposalDocument>(doc);
+  const [currentDoc, setCurrentDoc] = useState<ProposalDocument>(() => sanitizeAcademicText(doc));
   const [activeTab, setActiveTab] = useState<"naskah" | "flowchart" | "tree" | "jadwal" | "slides" | "audit" | "defense" | "revisionMatrix">("naskah");
   const [workspaceCategory, setWorkspaceCategory] = useState<"naskah" | "metodologi" | "sidang" | "kualitas">("naskah");
   const [naskahSection, setNaskahSection] = useState<"all" | "frontmatter" | "bab1" | "bab2" | "bab3" | "bab4" | "bab5" | "backmatter">("all");
@@ -430,8 +431,9 @@ Jawablah dengan ringkas, tajam, bernas, berstandar akademik tinggi, tanpa klise 
   };
 
   useEffect(() => {
-    setCurrentDoc(doc);
-    setHistory([doc]);
+    const cleanDoc = sanitizeAcademicText(doc);
+    setCurrentDoc(cleanDoc);
+    setHistory([cleanDoc]);
     setHistoryIndex(0);
   }, [doc]);
 
@@ -536,35 +538,36 @@ Jawablah dengan ringkas, tajam, bernas, berstandar akademik tinggi, tanpa klise 
 
   const applyRefinedContent = (finalText: string) => {
     if (!refineKey) return;
+    const cleanText = stripDoubleAsterisks(finalText);
     setCurrentDoc(prev => {
       const updated = { ...prev };
       if (refineKey === "executiveSummary") {
-        updated.executiveSummary = finalText;
+        updated.executiveSummary = cleanText;
       } else if (refineKey === "bab1.latarBelakang") {
-        const paras = finalText.split("\n\n").map((p: string) => p.trim()).filter(Boolean);
-        updated.bab1 = { ...updated.bab1, latarBelakang: paras.length > 0 ? paras : [finalText] };
+        const paras = cleanText.split("\n\n").map((p: string) => p.trim()).filter(Boolean);
+        updated.bab1 = { ...updated.bab1, latarBelakang: paras.length > 0 ? paras : [cleanText] };
       } else if (refineKey === "bab1.rumusanMasalah") {
-        const items = finalText.split("\n").map((l: string) => l.replace(/^[\d\.\-\*\•\s]+/, "").trim()).filter(Boolean);
-        updated.bab1 = { ...updated.bab1, rumusanMasalah: items.length > 0 ? items : [finalText] };
+        const items = cleanText.split("\n").map((l: string) => l.replace(/^[\d\.\-\*\•\s]+/, "").trim()).filter(Boolean);
+        updated.bab1 = { ...updated.bab1, rumusanMasalah: items.length > 0 ? items : [cleanText] };
       } else if (refineKey === "bab1.batasanMasalah") {
-        const items = finalText.split("\n").map((l: string) => l.replace(/^[\d\.\-\*\•\s]+/, "").trim()).filter(Boolean);
-        updated.bab1 = { ...updated.bab1, batasanMasalah: items.length > 0 ? items : [finalText] };
+        const items = cleanText.split("\n").map((l: string) => l.replace(/^[\d\.\-\*\•\s]+/, "").trim()).filter(Boolean);
+        updated.bab1 = { ...updated.bab1, batasanMasalah: items.length > 0 ? items : [cleanText] };
       } else if (refineKey === "bab1.tujuanUmum") {
-        updated.bab1 = { ...updated.bab1, tujuanUmum: finalText };
+        updated.bab1 = { ...updated.bab1, tujuanUmum: cleanText };
       } else if (refineKey === "bab2.profilInstansi") {
-        updated.bab2 = { ...updated.bab2, profilInstansi: finalText };
+        updated.bab2 = { ...updated.bab2, profilInstansi: cleanText };
       } else if (refineKey === "bab2.conceptualFramework") {
-        updated.bab2 = { ...updated.bab2, conceptualFramework: finalText };
+        updated.bab2 = { ...updated.bab2, conceptualFramework: cleanText };
       } else if (refineKey === "bab3.metodePelaksanaan") {
-        updated.bab3 = { ...updated.bab3, metodePelaksanaan: finalText };
+        updated.bab3 = { ...updated.bab3, metodePelaksanaan: cleanText };
       } else if (refineKey === "bab3.populationSample") {
-        updated.bab3 = { ...updated.bab3, populationSample: finalText };
+        updated.bab3 = { ...updated.bab3, populationSample: cleanText };
       } else if (refineKey === "bab3.ethicalConsiderations") {
-        updated.bab3 = { ...updated.bab3, ethicalConsiderations: finalText };
+        updated.bab3 = { ...updated.bab3, ethicalConsiderations: cleanText };
       } else if (refineKey === "bab4.penutup") {
-        updated.bab4 = { ...updated.bab4, penutup: finalText };
+        updated.bab4 = { ...updated.bab4, penutup: cleanText };
       } else if (refineKey === "bab4.disseminationPlan") {
-        updated.bab4 = { ...updated.bab4, disseminationPlan: finalText };
+        updated.bab4 = { ...updated.bab4, disseminationPlan: cleanText };
       }
       pushToHistory(updated);
       return updated;

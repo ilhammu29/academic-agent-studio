@@ -1,4 +1,5 @@
 import { ProposalDocument } from "@/types/studio";
+import { sanitizeAcademicText, stripDoubleAsterisks } from "@/lib/textSanitizer";
 
 /**
  * Academic Executive Presentation .PPTX Exporter
@@ -10,9 +11,10 @@ import { ProposalDocument } from "@/types/studio";
  */
 
 export async function generateAcademicProposalPptx(
-  doc: ProposalDocument,
+  rawDoc: ProposalDocument,
   slideVisualMap?: Record<number, string>
 ): Promise<void> {
+  const doc = sanitizeAcademicText(rawDoc);
   const pptxModule = await import("pptxgenjs");
   const pptxgen = (pptxModule as any).default || pptxModule;
   const pptx = new pptxgen();

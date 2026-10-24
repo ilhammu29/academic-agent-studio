@@ -13,6 +13,7 @@
 import type { ProposalDocument, ProposalCategory, ReportType, CampusGuideline } from '../types/studio.ts';
 import type { AcademicDocumentType } from './academicRuleEngine.ts';
 import { getAcademicTemplate } from './documentTemplates.ts';
+import { sanitizeAcademicText } from './textSanitizer.ts';
 
 export interface GenerationStageProgress {
   stageId: 'outline' | 'bab1' | 'bab2' | 'bab3' | 'bab4' | 'bab5' | 'frontmatter' | 'finalize';
@@ -346,7 +347,7 @@ export function buildDenseAcademicDocument(
     { id: 8, author: "Kementerian Pendidikan, Kebudayaan, Riset, dan Teknologi", year: "2023", title: "Pedoman Standar Nasional Pendidikan Tinggi No. 53 Tahun 2023", source: "Direktorat Jenderal Pendidikan Tinggi Kemendikbudristek RI.", doiUrl: "https://peraturan.bpk.go.id/Details/258284/permendikbudristek-no-53-tahun-2023" }
   ];
 
-  return {
+  const finalDoc: ProposalDocument = {
     id: `PROP-${Date.now().toString(36).toUpperCase()}`,
     title,
     category,
@@ -473,4 +474,6 @@ export function buildDenseAcademicDocument(
       { rule: 'Integritas Sitasi DOI', status: 'PASS', details: 'Seluruh teori Bab II sinkron dengan daftar pustaka ber-DOI', thinkingMode: 'Evidence Verification' }
     ]
   };
+
+  return sanitizeAcademicText(finalDoc);
 }

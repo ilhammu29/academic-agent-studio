@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { ProposalDocument, SlideDeckItem } from "@/types/studio";
 import { generateAcademicProposalPptx } from "@/lib/pptxExporter";
+import { sanitizeAcademicText } from "@/lib/textSanitizer";
 import { 
   Presentation, 
   Download, 
@@ -45,7 +46,7 @@ export const PresentationStudio: React.FC<PresentationStudioProps> = ({
   onBackToDocument,
   onUpdateDoc
 }) => {
-  const [currentDoc, setCurrentDoc] = useState<ProposalDocument>(doc);
+  const [currentDoc, setCurrentDoc] = useState<ProposalDocument>(() => sanitizeAcademicText(doc));
   const [activeSlideIndex, setActiveSlideIndex] = useState<number>(0);
   const [slideVisualMode, setSlideVisualMode] = useState<SlideVisualMode>("google-flow");
   const [slideTheme, setSlideTheme] = useState<SlideTheme>("executive-dark");

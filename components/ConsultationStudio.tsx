@@ -22,9 +22,146 @@ import {
   ExternalLink,
   HelpCircle,
   TrendingUp,
-  FileText
+  FileText,
+  Copy,
+  Check
 } from "lucide-react";
 import { TitleRecommendation } from "@/lib/titleGenerator";
+import { stripDoubleAsterisks, sanitizeAcademicText } from "@/lib/textSanitizer";
+
+/**
+ * Helper untuk mem-parse teks inline dengan sintaks bold, menghapus asterisks literal '**'
+ * dan merendernya sebagai elemen <strong> yang rapi.
+ */
+function renderFormattedInlineText(text: string) {
+  if (!text) return null;
+  const parts = text.split(/(\*\*[^*]+?\*\*)/g);
+  return parts.map((part, idx) => {
+    if (part.startsWith("**") && part.endsWith("**")) {
+      const cleanBold = part.slice(2, -2).trim();
+      return (
+        <strong key={idx} className="font-semibold text-[#0F172A] dark:text-[#F3F6FC]">
+          {cleanBold}
+        </strong>
+      );
+    }
+    const cleanPlain = part.replace(/\*\*/g, "");
+    return <span key={idx}>{cleanPlain}</span>;
+  });
+}
+
+/**
+ * Komponen pemformat jawaban AI Konsultasi:
+ * - Menghilangkan tanda '**' yang mengganggu
+ * - Memformat nomor poin (1., 2., 3.) dengan lencana nomor terstruktur (01, 02)
+ * - Memformat baris atribut (Kondisi:, Solusi:, Rekomendasi Judul:) dengan highlight rapi
+ * - Menata paragraf dengan ritme baca dan tipografi modern
+ */
+function FormattedConsultationMessage({ content }: { content: string }) {
+  const lines = content.split("\n");
+  const elements: React.ReactNode[] = [];
+  let currentBullets: { key?: string; text: string; raw: string }[] = [];
+
+  const flushBullets = (keyIdx: number) => {
+    if (currentBullets.length > 0) {
+      elements.push(
+        <div key={`bullets-${keyIdx}`} className="my-2.5 space-y-2 pl-1 sm:pl-2">
+          {currentBullets.map((b, bIdx) => (
+            <div key={bIdx} className="flex items-start gap-2.5 text-xs text-[#334155] dark:text-[#CBD5E1]">
+              <span className="w-1.5 h-1.5 rounded-full bg-[#7C9CFF] mt-1.5 flex-shrink-0" />
+              <div className="flex-1 leading-relaxed">
+                {b.key ? (
+                  <>
+                    <strong className="font-semibold text-[#0F172A] dark:text-[#F3F6FC]">
+                      {renderFormattedInlineText(b.key)}:{' '}
+                    </strong>
+                    <span>{renderFormattedInlineText(b.text)}</span>
+                  </>
+                ) : (
+                  <span>{renderFormattedInlineText(b.raw)}</span>
+                )}
+              </div>
+            </div>
+          ))}
+        </div>
+      );
+      currentBullets = [];
+    }
+  };
+
+  lines.forEach((rawLine, idx) => {
+    const line = rawLine.trim();
+
+    if (!line) {
+      flushBullets(idx);
+      return;
+    }
+
+    // Cek bullet: "- ...", "* ...", "• ..."
+    const bulletMatch = line.match(/^[-*•]\s+(.*)$/);
+    if (bulletMatch) {
+      const bulletBody = bulletMatch[1];
+      const kvMatch = bulletBody.match(/^(\*\*?[^*:]+\*\*?):\s*(.*)$/);
+      if (kvMatch) {
+        currentBullets.push({
+          key: kvMatch[1].replace(/\*/g, ""),
+          text: kvMatch[2],
+          raw: bulletBody
+        });
+      } else {
+        currentBullets.push({
+          text: bulletBody,
+          raw: bulletBody
+        });
+      }
+      return;
+    }
+
+    flushBullets(idx);
+
+    // Cek butir bernomor: "1. ...", "2. ..."
+    const numMatch = line.match(/^(\d+)[\.\)]\s+(.*)$/);
+    if (numMatch) {
+      const num = numMatch[1];
+      const title = numMatch[2];
+      elements.push(
+        <div key={`num-${idx}`} className="mt-3.5 mb-1.5 flex items-start gap-2.5">
+          <span className="inline-flex items-center justify-center w-5 h-5 rounded-md bg-[#7C9CFF]/15 border border-[#7C9CFF]/30 text-[#7C9CFF] font-mono text-[11px] font-bold flex-shrink-0 mt-0.5">
+            {num.length === 1 ? `0${num}` : num}
+          </span>
+          <div className="font-semibold text-xs sm:text-sm text-[#0F172A] dark:text-[#F3F6FC] leading-snug">
+            {renderFormattedInlineText(title)}
+          </div>
+        </div>
+      );
+      return;
+    }
+
+    // Cek baris penekanan rekomendasi judul atau solusi
+    if (line.startsWith("👉") || line.toLowerCase().includes("rekomendasi judul") || line.toLowerCase().includes("rekomendasi formulasi")) {
+      elements.push(
+        <div key={`rec-${idx}`} className="my-2.5 p-3 rounded-xl bg-[#7C9CFF]/10 border border-[#7C9CFF]/30 text-[#0F172A] dark:text-[#F3F6FC] text-xs font-medium flex items-start gap-2.5">
+          <span className="text-[#7C9CFF] text-sm leading-none mt-0.5">💡</span>
+          <div className="flex-1 leading-relaxed">
+            {renderFormattedInlineText(line.replace(/^👉\s*/, ""))}
+          </div>
+        </div>
+      );
+      return;
+    }
+
+    // Paragraf umum
+    elements.push(
+      <p key={`p-${idx}`} className="leading-relaxed font-sans text-xs text-[#334155] dark:text-[#CBD5E1] mb-2">
+        {renderFormattedInlineText(line)}
+      </p>
+    );
+  });
+
+  flushBullets(lines.length);
+
+  return <div className="space-y-0.5">{elements}</div>;
+}
 
 export interface ConsultationCandidateTitle {
   id: string;
@@ -98,6 +235,13 @@ Ceritakan situasi atau bidang yang sedang Anda hadapi di bawah, dan kita akan be
   const [inputText, setInputText] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [isListening, setIsListening] = useState(false);
+  const [copiedMessageId, setCopiedMessageId] = useState<string | null>(null);
+
+  const handleCopyMessage = (id: string, text: string) => {
+    navigator.clipboard.writeText(stripDoubleAsterisks(text));
+    setCopiedMessageId(id);
+    setTimeout(() => setCopiedMessageId(null), 2500);
+  };
 
   // Right Workbench Tabs: "titles" | "diagnostic" | "guidelines"
   const [activeRightTab, setActiveRightTab] = useState<"titles" | "diagnostic" | "guidelines">("titles");
@@ -304,11 +448,13 @@ Tolong bedah masalah ini dan rumuskan judul proposal akademik yang tajam dan tid
 
   // Apply Candidate Title to Studio
   const handleApplyCandidate = (candidate: ConsultationCandidateTitle) => {
-    setTitle(candidate.title);
+    const cleanTitle = stripDoubleAsterisks(candidate.title);
+    const cleanEntity = stripDoubleAsterisks(candidate.entity);
+    setTitle(cleanTitle);
     setCategory(candidate.category);
-    setTargetEntity(candidate.entity);
+    setTargetEntity(cleanEntity);
     setDurationMonths(candidate.durationMonths);
-    onProceedWithTitle(candidate.title, candidate.entity, candidate.category, candidate.durationMonths);
+    onProceedWithTitle(cleanTitle, cleanEntity, candidate.category, candidate.durationMonths);
   };
 
   const activeCandidate = candidateTitles.find((c) => c.id === selectedTitleId) || candidateTitles[0];
@@ -397,15 +543,47 @@ Tolong bedah masalah ini dan rumuskan judul proposal akademik yang tajam dan tid
 
                   <div className={`max-w-[85%] space-y-2 ${isAssistant ? "" : "items-end"}`}>
                     <div
-                      className={`p-4 rounded-2xl ${
+                      className={`p-4 sm:p-5 rounded-2xl ${
                         isAssistant
                           ? "bg-[#F8FAFC] dark:bg-[#111827] border border-[#E2E8F0] dark:border-[#253149] text-[#0F172A] dark:text-[#F3F6FC]"
                           : "bg-[#0F172A] text-white dark:bg-[#7C9CFF] dark:text-[#080B12] font-medium ml-auto"
                       }`}
                     >
-                      <div className="whitespace-pre-wrap leading-relaxed font-sans">
-                        {msg.content}
-                      </div>
+                      {isAssistant ? (
+                        <div className="space-y-3">
+                          {/* Assistant Header & Actions */}
+                          <div className="flex items-center justify-between border-b border-[#E2E8F0] dark:border-[#253149] pb-2 mb-2 text-[11px]">
+                            <div className="flex items-center gap-1.5 font-medium text-[#7C9CFF]">
+                              <Sparkles className="w-3.5 h-3.5" />
+                              <span>Telaah Pembimbing Akademik</span>
+                            </div>
+                            <button
+                              type="button"
+                              onClick={() => handleCopyMessage(msg.id, msg.content)}
+                              className="flex items-center gap-1 text-[10.5px] font-mono text-[#64748B] hover:text-[#7C9CFF] dark:text-[#A4B1C7] dark:hover:text-[#7C9CFF] px-2 py-0.5 rounded border border-transparent hover:border-[#253149] transition-all cursor-pointer"
+                              title="Salin Tanggapan"
+                            >
+                              {copiedMessageId === msg.id ? (
+                                <>
+                                  <Check className="w-3 h-3 text-[#34D399]" />
+                                  <span className="text-[#34D399]">Tersalin</span>
+                                </>
+                              ) : (
+                                <>
+                                  <Copy className="w-3 h-3" />
+                                  <span>Salin</span>
+                                </>
+                              )}
+                            </button>
+                          </div>
+
+                          <FormattedConsultationMessage content={msg.content} />
+                        </div>
+                      ) : (
+                        <div className="whitespace-pre-wrap leading-relaxed font-sans text-xs">
+                          {stripDoubleAsterisks(msg.content)}
+                        </div>
+                      )}
 
                       {/* Attached Candidate Title Card if Generated */}
                       {msg.candidateTitle && (

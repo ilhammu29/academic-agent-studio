@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { callGeminiApi } from "@/lib/geminiApi";
+import { stripDoubleAsterisks } from "@/lib/textSanitizer";
 
 /**
  * Intelligent Academic Proposal Section Refiner
@@ -56,7 +57,7 @@ Ketentuan:
         if (geminiResult && geminiResult.text && geminiResult.text.trim().length > 10) {
           return NextResponse.json({
             success: true,
-            revisedContent: geminiResult.text.trim(),
+            revisedContent: stripDoubleAsterisks(geminiResult.text.trim()),
             engine: geminiResult.model,
             message: "Naskah berhasil disempurnakan menggunakan Gemini AI."
           });
@@ -71,7 +72,7 @@ Ketentuan:
 
     return NextResponse.json({
       success: true,
-      revisedContent: refinedText,
+      revisedContent: stripDoubleAsterisks(refinedText),
       engine: "academic-heuristic-refiner",
       message: "Naskah berhasil disempurnakan dengan Standar Kaidah Ilmiah & 12 Metode Berpikir."
     });

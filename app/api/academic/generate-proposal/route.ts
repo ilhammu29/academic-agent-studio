@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { ProposalDocument, ProposalCategory, ReportType, CampusGuideline } from "@/types/studio";
 import { buildDenseAcademicDocument, planDocumentOutline } from "@/lib/longDocumentGenerator";
+import { sanitizeAcademicText } from "@/lib/textSanitizer";
 
 export async function POST(req: Request) {
   try {
@@ -227,7 +228,7 @@ OUTPUT WAJIB: Balas HANYA dengan objek JSON valid tanpa markdown fence:
 
             return NextResponse.json({
               success: true,
-              document: mergedDoc,
+              document: sanitizeAcademicText(mergedDoc),
               approximatePageCount: targetDepthPages || 45,
               engine: "gemini-2.5-flash-dense-hybrid"
             });
@@ -241,7 +242,7 @@ OUTPUT WAJIB: Balas HANYA dengan objek JSON valid tanpa markdown fence:
     // 3. Resilient Full Dense Academic Document Return
     return NextResponse.json({
       success: true,
-      document: baseDoc,
+      document: sanitizeAcademicText(baseDoc),
       approximatePageCount: targetDepthPages || 40,
       engine: "academic-dense-engine"
     });

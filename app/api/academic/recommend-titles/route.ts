@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { TitleRecommendation } from "@/lib/titleGenerator";
 import { ProposalCategory } from "@/types/studio";
 import { callGeminiApi } from "@/lib/geminiApi";
+import { sanitizeAcademicText } from "@/lib/textSanitizer";
 
 interface SimplePaper {
   title: string;
@@ -163,7 +164,7 @@ Keluarkan *hanya* format JSON valid:
               success: true,
               engine: geminiResult.model,
               mode,
-              recommendations: parsed.recommendations,
+              recommendations: sanitizeAcademicText(parsed.recommendations),
               papersCount: papers.length
             });
           }
@@ -179,7 +180,7 @@ Keluarkan *hanya* format JSON valid:
       success: true,
       engine: "domain-aware-synthesizer",
       mode,
-      recommendations: synthesized,
+      recommendations: sanitizeAcademicText(synthesized),
       papersCount: papers.length
     });
 

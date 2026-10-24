@@ -18,6 +18,7 @@ import {
 } from "docx";
 import type { ProposalDocument } from "../types/studio.ts";
 import { getSectionHeading, getSubSectionHeading } from "./academicNumbering.ts";
+import { stripDoubleAsterisks, sanitizeAcademicText } from "./textSanitizer.ts";
 
 /**
  * Academic Indonesian Proposal .DOCX Exporter
@@ -55,7 +56,8 @@ function parseImageData(dataUrl?: string): Uint8Array | null {
   return null;
 }
 
-export async function generateAcademicProposalDocx(doc: ProposalDocument): Promise<Blob> {
+export async function generateAcademicProposalDocx(rawDoc: ProposalDocument): Promise<Blob> {
+  const doc = sanitizeAcademicText(rawDoc);
   const guideline = doc.campusGuideline;
   const hs = guideline?.headingStyle || "decimal";
   const FONT_FAMILY = guideline?.typography?.fontFamily || "Times New Roman";
@@ -75,7 +77,7 @@ export async function generateAcademicProposalDocx(doc: ProposalDocument): Promi
       spacing: { before: 240, after: 280, line: 360 },
       children: [
         new TextRun({
-          text,
+          text: stripDoubleAsterisks(text),
           bold: true,
           font: FONT_FAMILY,
           size: 28, // 14pt
@@ -91,7 +93,7 @@ export async function generateAcademicProposalDocx(doc: ProposalDocument): Promi
       spacing: { before: 200, after: 140, line: 360 },
       children: [
         new TextRun({
-          text,
+          text: stripDoubleAsterisks(text),
           bold: true,
           font: FONT_FAMILY,
           size: 24, // 12pt
@@ -107,7 +109,7 @@ export async function generateAcademicProposalDocx(doc: ProposalDocument): Promi
       spacing: { before: 160, after: 100, line: 360 },
       children: [
         new TextRun({
-          text,
+          text: stripDoubleAsterisks(text),
           bold: true,
           font: FONT_FAMILY,
           size: 24, // 12pt
@@ -123,7 +125,7 @@ export async function generateAcademicProposalDocx(doc: ProposalDocument): Promi
       indent: { firstLine: cmToDxa(1.0) }, // Indentasi 1 cm paragraf baru
       children: [
         new TextRun({
-          text,
+          text: stripDoubleAsterisks(text),
           font: FONT_FAMILY,
           size: 24, // 12pt
           color: PRIMARY_COLOR,
@@ -138,7 +140,7 @@ export async function generateAcademicProposalDocx(doc: ProposalDocument): Promi
       indent: { left: cmToDxa(0.8), hanging: cmToDxa(0.4) },
       children: [
         new TextRun({
-          text: `• ${text}`,
+          text: `• ${stripDoubleAsterisks(text)}`,
           font: FONT_FAMILY,
           size: 24,
           color: PRIMARY_COLOR,

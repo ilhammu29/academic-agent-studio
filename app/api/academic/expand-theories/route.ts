@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { BibliographyItem } from "@/types/studio";
+import { sanitizeAcademicText } from "@/lib/textSanitizer";
 
 export async function POST(req: Request) {
   try {
@@ -79,8 +80,8 @@ Balas HANYA dengan format JSON valid tanpa markdown fence:
             if (parsed.theories && Array.isArray(parsed.theories)) {
               return NextResponse.json({
                 success: true,
-                theories: parsed.theories,
-                bibliography: parsed.bibliography || [],
+                theories: sanitizeAcademicText(parsed.theories),
+                bibliography: sanitizeAcademicText(parsed.bibliography || []),
                 engine: "gemini-2.5-flash"
               });
             }
@@ -153,8 +154,8 @@ Balas HANYA dengan format JSON valid tanpa markdown fence:
 
     return NextResponse.json({
       success: true,
-      theories: synthesizedTheories.slice(0, targetCount),
-      bibliography: synthesizedBib,
+      theories: sanitizeAcademicText(synthesizedTheories.slice(0, targetCount)),
+      bibliography: sanitizeAcademicText(synthesizedBib),
       engine: "heuristic-synthesizer"
     });
   } catch (error: any) {
