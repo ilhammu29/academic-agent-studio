@@ -18,7 +18,8 @@ import {
   RotateCcw,
   Sparkles,
   GraduationCap,
-  Plus
+  Plus,
+  Presentation
 } from 'lucide-react';
 import { StudioStage, ProposalCategory } from '@/types/studio';
 import { UserProfile } from '@/lib/supabase';
@@ -103,6 +104,13 @@ export default function AppShell({
       icon: FileText,
       isActive: currentStage === 'result',
       onClick: () => onNavigateStage('result')
+    },
+    {
+      id: 'slides',
+      label: 'Slide Studio (PPTX 16:9)',
+      icon: Presentation,
+      isActive: currentStage === 'slides',
+      onClick: () => onNavigateStage('slides')
     },
     {
       id: 'proyek',

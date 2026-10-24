@@ -70,12 +70,14 @@ interface DocumentStudioProps {
   doc: ProposalDocument;
   treeData: TreeNode;
   onReset: () => void;
+  onOpenPresentationStudio?: () => void;
 }
 
 export const DocumentStudio: React.FC<DocumentStudioProps> = ({
   doc,
   treeData,
-  onReset
+  onReset,
+  onOpenPresentationStudio
 }) => {
   const [currentDoc, setCurrentDoc] = useState<ProposalDocument>(doc);
   const [activeTab, setActiveTab] = useState<"naskah" | "flowchart" | "tree" | "jadwal" | "slides" | "audit" | "defense" | "revisionMatrix">("naskah");
@@ -877,6 +879,25 @@ NIP / NIK.
                   </div>
                 </button>
 
+                {onOpenPresentationStudio && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setIsExportDropdownOpen(false);
+                      onOpenPresentationStudio();
+                    }}
+                    className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-medium text-orange-600 dark:text-orange-400 hover:bg-orange-50 dark:hover:bg-orange-950/40 transition-colors text-left cursor-pointer"
+                  >
+                    <ExternalLink className="w-4 h-4 text-orange-500 flex-shrink-0" />
+                    <div>
+                      <p className="font-semibold text-zinc-900 dark:text-zinc-100">
+                        Buka Slide Studio Terpisah ↗
+                      </p>
+                      <p className="text-[10px] text-zinc-500">Visual AI, tema eksekutif & simulasi latihan sidang</p>
+                    </div>
+                  </button>
+                )}
+
                 <div className="my-1 border-t border-zinc-200 dark:border-zinc-800"></div>
 
                 <button
@@ -1192,15 +1213,26 @@ NIP / NIK.
 
               <button
                 type="button"
-                onClick={() => setActiveTab("slides")}
+                onClick={() => {
+                  if (onOpenPresentationStudio) {
+                    onOpenPresentationStudio();
+                  } else {
+                    setActiveTab("slides");
+                  }
+                }}
                 className={`px-3 py-1 rounded-md transition-all cursor-pointer flex items-center gap-1.5 ${
                   activeTab === "slides"
                     ? "bg-zinc-200 dark:bg-zinc-800 text-zinc-950 dark:text-zinc-100 font-semibold"
                     : "text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 hover:bg-zinc-100 dark:hover:bg-zinc-900"
                 }`}
               >
-                <Presentation className="w-3 h-3" />
+                <Presentation className="w-3 h-3 text-orange-500" />
                 <span>Slide Sidang (16:9 Eksekutif)</span>
+                {onOpenPresentationStudio && (
+                  <span className="text-[9px] px-1.5 py-0.5 rounded bg-orange-500/10 text-orange-600 dark:text-orange-400 font-semibold">
+                    Studio ↗
+                  </span>
+                )}
               </button>
 
               <button
@@ -3484,6 +3516,19 @@ NIP / NIK.
                 <Sparkles className={`w-3.5 h-3.5 ${isBatchGeneratingSlides ? "animate-spin" : ""}`} />
                 <span>{isBatchGeneratingSlides ? "Men-generate Semua..." : "✨ Visual AI Semua Slide"}</span>
               </button>
+
+              {/* Open Dedicated Standalone Presentation Studio */}
+              {onOpenPresentationStudio && (
+                <button
+                  type="button"
+                  onClick={onOpenPresentationStudio}
+                  className="px-3 py-1.5 rounded-lg bg-orange-500 hover:bg-orange-600 text-white text-xs font-semibold flex items-center gap-1.5 shadow-xs transition-colors cursor-pointer"
+                  title="Buka studio presentasi terpisah dengan layar lebar 16:9, pengatur waktu latihan, editor slide, dan tema kustom"
+                >
+                  <ExternalLink className="w-3.5 h-3.5" />
+                  <span>Buka Studio Layar Lebar ↗</span>
+                </button>
+              )}
 
               {/* Direct Download PPTX Button */}
               <button

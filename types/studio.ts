@@ -2,7 +2,7 @@ export type ProposalCategory = 'magang' | 'skripsi' | 'penelitian';
 
 export type ReportType = 'magang' | 'skripsi' | 'tugas_akhir' | 'tesis' | 'penelitian';
 
-export type StudioStage = 'input' | 'interview' | 'orchestration' | 'result' | 'drive' | 'consultation';
+export type StudioStage = 'input' | 'interview' | 'orchestration' | 'result' | 'slides' | 'drive' | 'consultation';
 
 export type SheetType = 'pengesahan' | 'berita_acara' | 'pernyataan_orisinalitas' | 'kata_pengantar' | 'abstrak' | 'custom_upload';
 

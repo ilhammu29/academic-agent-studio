@@ -11,11 +11,13 @@ import { TwelveModesModal } from "@/components/TwelveModesModal";
 import { CampusGuidelineModal } from "@/components/CampusGuidelineModal";
 import { AcademicConsultationModal } from "@/components/AcademicConsultationModal";
 import { ConsultationStudio } from "@/components/ConsultationStudio";
+import { PresentationStudio } from "@/components/PresentationStudio";
 import { CAMPUS_PRESETS } from "@/lib/campusPresets";
 import ScreenLoader from "@/components/ScreenLoader";
 import AuthModal from "@/components/AuthModal";
 import DatabaseDrawer from "@/components/DatabaseDrawer";
 import DriveFileManager from "@/components/DriveFileManager";
+import { Presentation, ArrowRight } from "lucide-react";
 import { generateDiagnosticQuestions } from "@/lib/questions";
 import { buildGeneratedDocument, buildVisualTreeGraph } from "@/lib/agentEngine";
 import { 
@@ -153,6 +155,16 @@ export default function Home() {
   const handleNavigateStage = (targetStage: StudioStage) => {
     if (targetStage === "drive") {
       setStage("drive");
+      return;
+    }
+
+    if (targetStage === "slides") {
+      setStage("slides");
+      return;
+    }
+
+    if (targetStage === "consultation") {
+      setStage("consultation");
       return;
     }
 
@@ -392,10 +404,51 @@ export default function Home() {
             doc={generatedDoc}
             treeData={treeData || buildVisualTreeGraph(generatedDoc)}
             onReset={handleResetSession}
+            onOpenPresentationStudio={() => setStage("slides")}
           />
         )}
 
-        {/* Stage 5: Google Drive Style File Storage Manager */}
+        {/* Stage 5: Dedicated Standalone Slide Presentation Studio (PPTX 16:9) */}
+        {stage === "slides" && (
+          generatedDoc ? (
+            <PresentationStudio
+              doc={generatedDoc}
+              onBackToDocument={() => setStage("result")}
+              onUpdateDoc={(updatedDoc) => setGeneratedDoc(updatedDoc)}
+            />
+          ) : (
+            <div className="flex-1 flex flex-col items-center justify-center p-8 text-center bg-white dark:bg-zinc-950 rounded-2xl border border-zinc-200 dark:border-zinc-850">
+              <div className="w-14 h-14 rounded-2xl bg-orange-500/10 text-orange-500 flex items-center justify-center mb-4">
+                <Presentation className="w-7 h-7" />
+              </div>
+              <h2 className="text-xl font-bold text-zinc-900 dark:text-zinc-100">
+                Belum Ada Proposal Aktif
+              </h2>
+              <p className="text-sm text-zinc-500 dark:text-zinc-400 max-w-md mt-2">
+                Slide presentasi disusun otomatis berdasarkan naskah proposal akademik Anda. Silakan susun naskah terlebih dahulu melalui menu Topik atau buka dari Arsip Proyek.
+              </p>
+              <div className="flex items-center gap-3 mt-6">
+                <button
+                  type="button"
+                  onClick={() => setStage("input")}
+                  className="px-4 py-2 rounded-xl text-xs font-semibold bg-emerald-500 hover:bg-emerald-600 text-white shadow-sm transition-all cursor-pointer flex items-center gap-1.5"
+                >
+                  <span>+ Susun Topik Baru</span>
+                  <ArrowRight className="w-3.5 h-3.5" />
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setIsDatabaseDrawerOpen(true)}
+                  className="px-4 py-2 rounded-xl text-xs font-semibold bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 text-zinc-800 dark:text-zinc-200 transition-all cursor-pointer"
+                >
+                  Buka Dari Arsip
+                </button>
+              </div>
+            </div>
+          )
+        )}
+
+        {/* Stage 6: Google Drive Style File Storage Manager */}
         {stage === "drive" && (
           <DriveFileManager
             onLoadProject={handleLoadProject}
