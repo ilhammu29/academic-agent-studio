@@ -16,6 +16,7 @@ import {
   convertInchesToTwip
 } from "docx";
 import { ProposalDocument } from "@/types/studio";
+import { getSectionHeading, getSubSectionHeading } from "@/lib/academicNumbering";
 
 /**
  * Academic Indonesian Proposal .DOCX Exporter
@@ -34,6 +35,7 @@ const cmToDxa = (cm: number) => Math.round(cm * 567);
 
 export async function generateAcademicProposalDocx(doc: ProposalDocument): Promise<Blob> {
   const guideline = doc.campusGuideline;
+  const hs = guideline?.headingStyle || "decimal";
   const FONT_FAMILY = guideline?.typography?.fontFamily || "Times New Roman";
   const PRIMARY_COLOR = "000000";
   const topCm = guideline?.margins?.topCm ?? 4;
@@ -592,10 +594,10 @@ export async function generateAcademicProposalDocx(doc: ProposalDocument): Promi
           createHeading1(doc.bab1.title),
           new Paragraph({ spacing: { after: 140 } }),
 
-          createHeading2("1.1 Latar Belakang Masalah"),
+          createHeading2(getSectionHeading(1, 0, "Latar Belakang Masalah", hs)),
           ...doc.bab1.latarBelakang.map((p) => createBodyParagraph(p)),
 
-          createHeading2("1.2 Rumusan Masalah"),
+          createHeading2(getSectionHeading(1, 1, "Rumusan Masalah", hs)),
           ...doc.bab1.rumusanMasalah.map((r, i) =>
             new Paragraph({
               alignment: AlignmentType.JUSTIFIED,
@@ -605,10 +607,10 @@ export async function generateAcademicProposalDocx(doc: ProposalDocument): Promi
             })
           ),
 
-          createHeading2("1.3 Batasan Masalah"),
+          createHeading2(getSectionHeading(1, 2, "Batasan Masalah", hs)),
           ...doc.bab1.batasanMasalah.map((b) => createBulletItem(b)),
 
-          createHeading2("1.4 Tujuan Kegiatan / Penelitian"),
+          createHeading2(getSectionHeading(1, 3, "Tujuan Kegiatan / Penelitian", hs)),
           new Paragraph({
             alignment: AlignmentType.JUSTIFIED,
             spacing: { after: 100, line: 360 },
@@ -622,7 +624,7 @@ export async function generateAcademicProposalDocx(doc: ProposalDocument): Promi
           }),
           ...doc.bab1.tujuanKhusus.map((t) => createBulletItem(t)),
 
-          createHeading2("1.5 Manfaat Kegiatan"),
+          createHeading2(getSectionHeading(1, 4, "Manfaat Kegiatan", hs)),
           new Paragraph({
             spacing: { after: 80, line: 360 },
             children: [new TextRun({ text: "A. Bagi Mahasiswa Pengusul:", bold: true, font: FONT_FAMILY, size: 24 })],
@@ -653,7 +655,7 @@ export async function generateAcademicProposalDocx(doc: ProposalDocument): Promi
           createHeading1(doc.bab2.title),
           new Paragraph({ spacing: { after: 140 } }),
 
-          createHeading2("2.1 Gambaran Umum & Profil Organisasi"),
+          createHeading2(getSectionHeading(2, 0, "Gambaran Umum & Profil Organisasi", hs)),
           createBodyParagraph(doc.bab2.profilInstansi),
 
           createHeading3("Visi dan Misi Organisasi"),
@@ -662,9 +664,9 @@ export async function generateAcademicProposalDocx(doc: ProposalDocument): Promi
           createHeading3("Struktur Supervisi & Lingkup Kerja"),
           createBodyParagraph(doc.bab2.strukturOrganisasi),
 
-          createHeading2("2.2 Landasan Teori & Tinjauan Pustaka Terkait"),
+          createHeading2(getSectionHeading(2, 1, "Landasan Teori & Tinjauan Pustaka Terkait", hs)),
           ...doc.bab2.landasanTeori.flatMap((t, i) => [
-            createHeading3(`2.2.${i + 1} ${t.topic}`),
+            createHeading3(getSubSectionHeading(2, 1, i, t.topic, hs)),
             createBodyParagraph(t.elaboration),
             new Paragraph({
               alignment: AlignmentType.JUSTIFIED,
@@ -694,10 +696,10 @@ export async function generateAcademicProposalDocx(doc: ProposalDocument): Promi
           createHeading1(doc.bab3.title),
           new Paragraph({ spacing: { after: 140 } }),
 
-          createHeading2("3.1 Metode Pelaksanaan"),
+          createHeading2(getSectionHeading(3, 0, "Metode Pelaksanaan", hs)),
           createBodyParagraph(doc.bab3.metodePelaksanaan),
 
-          createHeading2("3.2 Ruang Lingkup Penugasan & Pekerjaan"),
+          createHeading2(getSectionHeading(3, 1, "Ruang Lingkup Penugasan & Pekerjaan", hs)),
           ...doc.bab3.lingkupPekerjaan.map((l, i) =>
             new Paragraph({
               alignment: AlignmentType.JUSTIFIED,
@@ -707,10 +709,10 @@ export async function generateAcademicProposalDocx(doc: ProposalDocument): Promi
             })
           ),
 
-          createHeading2("3.3 Spesifikasi Perangkat Lunak & Tools"),
+          createHeading2(getSectionHeading(3, 2, "Spesifikasi Perangkat Lunak & Tools", hs)),
           ...doc.bab3.perangkatTools.map((p) => createBulletItem(p)),
 
-          createHeading2("3.4 Rencana Capaian Kompetensi"),
+          createHeading2(getSectionHeading(3, 3, "Rencana Capaian Kompetensi", hs)),
           ...doc.bab3.rencanaKompetensi.map((c) => createBulletItem(c)),
         ],
       },
@@ -725,7 +727,7 @@ export async function generateAcademicProposalDocx(doc: ProposalDocument): Promi
           createHeading1(doc.bab4.title),
           new Paragraph({ spacing: { after: 140 } }),
 
-          createHeading2("4.1 Matriks Rencana Kerja Mingguan (Tabel 3-Garis)"),
+          createHeading2(getSectionHeading(4, 0, "Matriks Rencana Kerja Mingguan (Tabel 3-Garis)", hs)),
           new Paragraph({
             alignment: AlignmentType.JUSTIFIED,
             spacing: { after: 140, line: 360 },
@@ -796,7 +798,7 @@ export async function generateAcademicProposalDocx(doc: ProposalDocument): Promi
             ],
           }),
 
-          createHeading2("4.2 Penutup"),
+          createHeading2(getSectionHeading(4, 1, "Penutup", hs)),
           createBodyParagraph(doc.bab4.penutup),
         ],
       },
@@ -810,19 +812,19 @@ export async function generateAcademicProposalDocx(doc: ProposalDocument): Promi
         children: [
           createHeading1(doc.bab5?.title || (isMagang ? "BAB V: PENUTUP & REKOMENDASI" : "BAB V: KESIMPULAN & REKOMENDASI KONTRIBUSI")),
           
-          createHeading2("5.1 Kesimpulan Rencana Usulan"),
+          createHeading2(getSectionHeading(5, 0, "Kesimpulan Rencana Usulan", hs)),
           ...(doc.bab5?.kesimpulanUsulan || [
             `Usulan pelaksanaan kegiatan dengan topik "${doc.title}" pada ${doc.targetEntity} telah dirancang secara sistematis memenuhi kaidah akademik.`,
             `Seluruh tahapan kerja dan beban waktu telah diselaraskan dengan standar capaian kompetensi kurikulum.`
           ]).map(k => createBulletItem(k)),
 
-          createHeading2("5.2 Rekomendasi Kontribusi Strategis"),
+          createHeading2(getSectionHeading(5, 1, "Rekomendasi Kontribusi Strategis", hs)),
           ...(doc.bab5?.kontribusiPraktis || [
             `Bagi ${doc.targetEntity}: Memberikan solusi aplikatif untuk mengatasi kendala operasional.`,
             `Bagi ${doc.institution}: Memperkuat jalinan kolaborasi dan dokumentasi studi kasus nyata.`
           ]).map(c => createBulletItem(c)),
 
-          createHeading2("5.3 Matriks Mitigasi Risiko Pelaksanaan"),
+          createHeading2(getSectionHeading(5, 2, "Matriks Mitigasi Risiko Pelaksanaan", hs)),
           new Table({
             width: { size: 100, type: WidthType.PERCENTAGE },
             rows: [
@@ -871,7 +873,7 @@ export async function generateAcademicProposalDocx(doc: ProposalDocument): Promi
             ],
           }),
 
-          createHeading2("5.4 Rencana Keberlanjutan Proyek (Sustainability Plan)"),
+          createHeading2(getSectionHeading(5, 3, "Rencana Keberlanjutan Proyek (Sustainability Plan)", hs)),
           createBodyParagraph(doc.bab5?.sustainabilityPlan || `Seluruh artefak hasil pekerjaan dan dokumentasi diserahkan secara resmi kepada pihak ${doc.targetEntity} disertai sesi transfer knowledge untuk pemanfaatan berkelanjutan.`),
         ],
       },

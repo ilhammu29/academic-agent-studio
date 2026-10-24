@@ -20,6 +20,7 @@ import { DocumentImageManagerModal } from "./DocumentImageManagerModal";
 import { LogbookManagerModal } from "./LogbookManagerModal";
 import { DefenseMinutesModal } from "./DefenseMinutesModal";
 import { getCampusLogoByInstitution } from "@/lib/campusLogos";
+import { getSectionHeading, HeadingStyleType } from "@/lib/academicNumbering";
 import { generateAcademicProposalDocx, downloadDocxBlob } from "@/lib/docxExporter";
 import { generateAcademicProposalPptx } from "@/lib/pptxExporter";
 import { generateBibTeX, generateRIS, downloadCitationFile } from "@/lib/bibtexExporter";
@@ -97,6 +98,8 @@ export const DocumentStudio: React.FC<DocumentStudioProps> = ({
   const [citationStyle, setCitationStyle] = useState<"apa" | "ieee">("apa");
   const [showMarginRuler, setShowMarginRuler] = useState(false);
   const [isConsultationModalOpen, setIsConsultationModalOpen] = useState(false);
+  const [watermarkType, setWatermarkType] = useState<"none" | "draft" | "plagiarisme_ok" | "siap_sidang" | "confidential">("none");
+  const [isBatchGeneratingSlides, setIsBatchGeneratingSlides] = useState(false);
   
   // Modals for Logo, Theories, Custom Sheets, Figures, Logbook, and Defense Minutes
   const [isCampusLogoModalOpen, setIsCampusLogoModalOpen] = useState(false);
@@ -465,12 +468,78 @@ NIP / NIK.
   const handleDownloadPptx = async () => {
     setIsExportingPptx(true);
     try {
-      await generateAcademicProposalPptx(currentDoc);
+      await generateAcademicProposalPptx(currentDoc, slideAiImageMap);
     } catch (err) {
       console.error("Gagal mengekspor PPTX:", err);
     } finally {
       setIsExportingPptx(false);
     }
+  };
+
+  const handleBatchGenerateAllSlideVisuals = async () => {
+    setIsBatchGeneratingSlides(true);
+    setToastMessage("Sedang men-generate visual AI untuk seluruh slide...");
+    
+    const newMap: Record<number, string> = { ...slideAiImageMap };
+    const promises = currentDoc.slides.map((slide, idx) => {
+      const prompt = `Academic presentation infographic visual, ${currentDoc.title}, slide ${idx + 1}: ${slide.title}, modern dark slate blue minimalist vector aesthetic, 8k`;
+      const seed = Math.floor(Math.random() * 999999);
+      const url = `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt)}?width=900&height=560&nologo=true&seed=${seed}`;
+      newMap[idx] = url;
+      return new Promise<void>((resolve) => {
+        const img = new window.Image();
+        img.src = url;
+        img.onload = () => resolve();
+        img.onerror = () => resolve();
+      });
+    });
+
+    try {
+      await Promise.all(promises);
+      setSlideAiImageMap(newMap);
+      setSlideVisualMode("ai-concept");
+      setToastMessage("Berhasil men-generate seluruh visual AI untuk presentasi!");
+    } catch {
+      setSlideAiImageMap(newMap);
+      setSlideVisualMode("ai-concept");
+    } finally {
+      setIsBatchGeneratingSlides(false);
+    }
+  };
+
+  const handleChangeHeadingStyle = (newStyle: HeadingStyleType) => {
+    const updatedDoc: ProposalDocument = {
+      ...currentDoc,
+      campusGuideline: {
+        ...(currentDoc.campusGuideline || {
+          campusName: currentDoc.institution,
+          paperSize: "A4",
+          margins: { topCm: 4, bottomCm: 3, leftCm: 4, rightCm: 3 },
+          typography: { fontFamily: "Times New Roman", bodySizePt: 12, heading1SizePt: 14, lineSpacing: 1.5 },
+          citationStyle: "apa",
+          approvalConfig: { supervisorCount: 1, requiresHeadOfProgram: true, requiresDeanOrFieldMentor: true }
+        }),
+        headingStyle: newStyle
+      }
+    };
+    setCurrentDoc(updatedDoc);
+    setToastMessage(`Gaya penomoran diubah ke standar: ${newStyle === 'decimal' ? 'Desimal (1.1, 1.2)' : newStyle === 'alphanumeric' ? 'Alfanumerik (A., B.)' : 'Romawi (I.A, I.B)'}`);
+    
+    // Auto sync to saved project cache
+    const projectRecord: SavedProjectRecord = {
+      id: updatedDoc.id,
+      userId: getStoredUser()?.id || 'usr-default',
+      title: updatedDoc.title,
+      category: updatedDoc.category,
+      targetEntity: updatedDoc.targetEntity,
+      durationMonths: updatedDoc.durationMonths,
+      stage: 'result',
+      answers: {},
+      documentData: updatedDoc,
+      updatedAt: new Date().toISOString(),
+      createdAt: new Date().toISOString(),
+    };
+    saveProjectRecord(projectRecord);
   };
 
   const handlePrint = () => {
@@ -1318,7 +1387,37 @@ NIP / NIK.
             </div>
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2">
+            {/* Heading Style Switcher */}
+            <div className="flex items-center gap-1.5 px-2 py-1 rounded-md border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-xs">
+              <span className="text-[11px] text-zinc-500 dark:text-zinc-400">Penomoran:</span>
+              <select
+                value={currentDoc.campusGuideline?.headingStyle || "decimal"}
+                onChange={(e) => handleChangeHeadingStyle(e.target.value as HeadingStyleType)}
+                className="bg-transparent font-medium text-zinc-800 dark:text-zinc-200 text-xs focus:outline-hidden cursor-pointer"
+              >
+                <option value="decimal">Desimal (1.1, 1.2)</option>
+                <option value="alphanumeric">Alfanumerik (A., B., 1.)</option>
+                <option value="roman">Romawi (I.A, I.B)</option>
+              </select>
+            </div>
+
+            {/* Watermark Selector */}
+            <div className="flex items-center gap-1.5 px-2 py-1 rounded-md border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-xs">
+              <span className="text-[11px] text-zinc-500 dark:text-zinc-400">Watermark:</span>
+              <select
+                value={watermarkType}
+                onChange={(e) => setWatermarkType(e.target.value as any)}
+                className="bg-transparent font-medium text-zinc-800 dark:text-zinc-200 text-xs focus:outline-hidden cursor-pointer"
+              >
+                <option value="none">Tanpa Watermark</option>
+                <option value="draft">Draf Usulan</option>
+                <option value="plagiarisme_ok">Bebas Plagiasi</option>
+                <option value="siap_sidang">Siap Sidang</option>
+                <option value="confidential">Confidential</option>
+              </select>
+            </div>
+
             {/* Toggle Ruler Guide */}
             <button
               type="button"
@@ -1329,7 +1428,7 @@ NIP / NIK.
                   : "bg-zinc-50 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 border-zinc-200 dark:border-zinc-700 hover:bg-zinc-100"
               }`}
             >
-              <span>{showMarginRuler ? "✓ Batas Margin Aktif" : "Tampilkan Batas Margin (Ruler)"}</span>
+              <span>{showMarginRuler ? "✓ Batas Margin Aktif" : "Tampilkan Margin"}</span>
             </button>
 
             {/* Change Guideline */}
@@ -1357,6 +1456,22 @@ NIP / NIK.
           }}
           className="relative bg-white dark:bg-zinc-950 rounded-2xl border border-zinc-200 dark:border-zinc-900 shadow-sm text-zinc-900 dark:text-zinc-100 print:bg-white print:text-black print:p-0 print:border-none print:shadow-none transition-all duration-200"
         >
+          {/* Watermark Diagonal Overlay */}
+          {watermarkType !== "none" && (
+            <div className="pointer-events-none absolute inset-0 overflow-hidden select-none z-10 flex flex-col justify-around items-center opacity-[0.05] dark:opacity-[0.07] print:opacity-[0.09] text-zinc-900 dark:text-zinc-100 print:text-black">
+              {Array.from({ length: 14 }).map((_, wIdx) => (
+                <div
+                  key={wIdx}
+                  className="transform -rotate-30 text-3xl sm:text-5xl md:text-6xl font-black font-sans uppercase tracking-widest whitespace-nowrap my-16 text-center"
+                >
+                  {watermarkType === "draft" && "DRAF USULAN PENELITIAN"}
+                  {watermarkType === "plagiarisme_ok" && "TERVALIDASI BEBAS PLAGIASI"}
+                  {watermarkType === "siap_sidang" && "DOKUMEN SIAP SIDANG"}
+                  {watermarkType === "confidential" && "CONFIDENTIAL / RAHASIA"}
+                </div>
+              ))}
+            </div>
+          )}
           {/* Visual Dashed Margin Guideline Overlay when ruler is toggled */}
           {showMarginRuler && (
             <div className="absolute inset-0 pointer-events-none border-2 border-dashed border-indigo-400/40 dark:border-indigo-500/40 rounded-xl m-2 p-2 flex flex-col justify-between text-[10px] font-mono text-indigo-600 dark:text-indigo-400 no-print z-10">
@@ -1855,27 +1970,27 @@ NIP / NIK.
               </div>
               <div className="pl-4 space-y-1 text-zinc-600 dark:text-zinc-400">
                 <div className="flex items-baseline justify-between cursor-pointer hover:text-indigo-600" onClick={() => scrollToSection("section-bab1")}>
-                  <span>1.1 Latar Belakang Masalah</span>
+                  <span>{getSectionHeading(1, 0, "Latar Belakang Masalah", currentDoc.campusGuideline?.headingStyle)}</span>
                   <span className="flex-1 mx-2 border-b border-dotted border-zinc-300 dark:border-zinc-800" />
                   <span className="font-mono">1</span>
                 </div>
                 <div className="flex items-baseline justify-between cursor-pointer hover:text-indigo-600" onClick={() => scrollToSection("section-bab1")}>
-                  <span>1.2 Rumusan Masalah</span>
+                  <span>{getSectionHeading(1, 1, "Rumusan Masalah", currentDoc.campusGuideline?.headingStyle)}</span>
                   <span className="flex-1 mx-2 border-b border-dotted border-zinc-300 dark:border-zinc-800" />
                   <span className="font-mono">4</span>
                 </div>
                 <div className="flex items-baseline justify-between cursor-pointer hover:text-indigo-600" onClick={() => scrollToSection("section-bab1")}>
-                  <span>1.3 Batasan Masalah</span>
+                  <span>{getSectionHeading(1, 2, "Batasan Masalah", currentDoc.campusGuideline?.headingStyle)}</span>
                   <span className="flex-1 mx-2 border-b border-dotted border-zinc-300 dark:border-zinc-800" />
                   <span className="font-mono">5</span>
                 </div>
                 <div className="flex items-baseline justify-between cursor-pointer hover:text-indigo-600" onClick={() => scrollToSection("section-bab1")}>
-                  <span>1.4 Tujuan Kegiatan / Riset</span>
+                  <span>{getSectionHeading(1, 3, "Tujuan Kegiatan / Riset", currentDoc.campusGuideline?.headingStyle)}</span>
                   <span className="flex-1 mx-2 border-b border-dotted border-zinc-300 dark:border-zinc-800" />
                   <span className="font-mono">6</span>
                 </div>
                 <div className="flex items-baseline justify-between cursor-pointer hover:text-indigo-600" onClick={() => scrollToSection("section-bab1")}>
-                  <span>1.5 Manfaat Kegiatan (Mahasiswa, Mitra, Akademik)</span>
+                  <span>{getSectionHeading(1, 4, "Manfaat Kegiatan (Mahasiswa, Mitra, Akademik)", currentDoc.campusGuideline?.headingStyle)}</span>
                   <span className="flex-1 mx-2 border-b border-dotted border-zinc-300 dark:border-zinc-800" />
                   <span className="font-mono">7</span>
                 </div>
@@ -1889,22 +2004,22 @@ NIP / NIK.
               </div>
               <div className="pl-4 space-y-1 text-zinc-600 dark:text-zinc-400">
                 <div className="flex items-baseline justify-between cursor-pointer hover:text-indigo-600" onClick={() => scrollToSection("section-bab2")}>
-                  <span>2.1 Landasan Teori Ilmiah ({currentDoc.bab2.landasanTeori?.length || 13} Teori Otoritatif)</span>
+                  <span>{getSectionHeading(2, 0, `Landasan Teori Ilmiah (${currentDoc.bab2.landasanTeori?.length || 13} Teori Otoritatif)`, currentDoc.campusGuideline?.headingStyle)}</span>
                   <span className="flex-1 mx-2 border-b border-dotted border-zinc-300 dark:border-zinc-800" />
                   <span className="font-mono">8</span>
                 </div>
                 <div className="flex items-baseline justify-between cursor-pointer hover:text-indigo-600" onClick={() => scrollToSection("section-bab2")}>
-                  <span>2.2 Matriks Sintesis Keaslian Penelitian (PRISMA 2020)</span>
+                  <span>{getSectionHeading(2, 1, "Matriks Sintesis Keaslian Penelitian (PRISMA 2020)", currentDoc.campusGuideline?.headingStyle)}</span>
                   <span className="flex-1 mx-2 border-b border-dotted border-zinc-300 dark:border-zinc-800" />
                   <span className="font-mono">18</span>
                 </div>
                 <div className="flex items-baseline justify-between cursor-pointer hover:text-indigo-600" onClick={() => scrollToSection("section-bab2")}>
-                  <span>2.3 Kerangka Konsep &amp; Alur Berpikir</span>
+                  <span>{getSectionHeading(2, 2, "Kerangka Konsep & Alur Berpikir", currentDoc.campusGuideline?.headingStyle)}</span>
                   <span className="flex-1 mx-2 border-b border-dotted border-zinc-300 dark:border-zinc-800" />
                   <span className="font-mono">22</span>
                 </div>
                 <div className="flex items-baseline justify-between cursor-pointer hover:text-indigo-600" onClick={() => scrollToSection("section-bab2")}>
-                  <span>2.4 Hipotesis Penelitian / Ekspektasi Capaian</span>
+                  <span>{getSectionHeading(2, 3, "Hipotesis Penelitian / Ekspektasi Capaian", currentDoc.campusGuideline?.headingStyle)}</span>
                   <span className="flex-1 mx-2 border-b border-dotted border-zinc-300 dark:border-zinc-800" />
                   <span className="font-mono">24</span>
                 </div>
@@ -1918,27 +2033,27 @@ NIP / NIK.
               </div>
               <div className="pl-4 space-y-1 text-zinc-600 dark:text-zinc-400">
                 <div className="flex items-baseline justify-between cursor-pointer hover:text-indigo-600" onClick={() => scrollToSection("section-bab3")}>
-                  <span>3.1 Desain Penelitian &amp; Bagan Alir Pelaksanaan</span>
+                  <span>{getSectionHeading(3, 0, "Desain Penelitian & Bagan Alir Pelaksanaan", currentDoc.campusGuideline?.headingStyle)}</span>
                   <span className="flex-1 mx-2 border-b border-dotted border-zinc-300 dark:border-zinc-800" />
                   <span className="font-mono">26</span>
                 </div>
                 <div className="flex items-baseline justify-between cursor-pointer hover:text-indigo-600" onClick={() => scrollToSection("section-bab3")}>
-                  <span>3.2 Populasi, Sampel, &amp; Subjek Penelitian / WBS</span>
+                  <span>{getSectionHeading(3, 1, "Populasi, Sampel, & Subjek Penelitian / WBS", currentDoc.campusGuideline?.headingStyle)}</span>
                   <span className="flex-1 mx-2 border-b border-dotted border-zinc-300 dark:border-zinc-800" />
                   <span className="font-mono">30</span>
                 </div>
                 <div className="flex items-baseline justify-between cursor-pointer hover:text-indigo-600" onClick={() => scrollToSection("section-bab3")}>
-                  <span>3.3 Definisi Operasional Variabel (Tabel 3 Garis Terbuka)</span>
+                  <span>{getSectionHeading(3, 2, "Definisi Operasional Variabel (Tabel 3 Garis Terbuka)", currentDoc.campusGuideline?.headingStyle)}</span>
                   <span className="flex-1 mx-2 border-b border-dotted border-zinc-300 dark:border-zinc-800" />
                   <span className="font-mono">32</span>
                 </div>
                 <div className="flex items-baseline justify-between cursor-pointer hover:text-indigo-600" onClick={() => scrollToSection("section-bab3")}>
-                  <span>3.4 Instrumen Penelitian, Kalibrasi, &amp; Perangkat Kerja</span>
+                  <span>{getSectionHeading(3, 3, "Instrumen Penelitian, Kalibrasi, & Perangkat Kerja", currentDoc.campusGuideline?.headingStyle)}</span>
                   <span className="flex-1 mx-2 border-b border-dotted border-zinc-300 dark:border-zinc-800" />
                   <span className="font-mono">35</span>
                 </div>
                 <div className="flex items-baseline justify-between cursor-pointer hover:text-indigo-600" onClick={() => scrollToSection("section-bab3")}>
-                  <span>3.5 Protokol Etika Penelitian / SOP Industri</span>
+                  <span>{getSectionHeading(3, 4, "Protokol Etika Penelitian / SOP Industri", currentDoc.campusGuideline?.headingStyle)}</span>
                   <span className="flex-1 mx-2 border-b border-dotted border-zinc-300 dark:border-zinc-800" />
                   <span className="font-mono">37</span>
                 </div>
@@ -1952,17 +2067,17 @@ NIP / NIK.
               </div>
               <div className="pl-4 space-y-1 text-zinc-600 dark:text-zinc-400">
                 <div className="flex items-baseline justify-between cursor-pointer hover:text-indigo-600" onClick={() => scrollToSection("section-bab4")}>
-                  <span>4.1 Matriks Jadwal Pelaksanaan (Gantt Chart 16 Minggu)</span>
+                  <span>{getSectionHeading(4, 0, "Matriks Jadwal Pelaksanaan (Gantt Chart 16 Minggu)", currentDoc.campusGuideline?.headingStyle)}</span>
                   <span className="flex-1 mx-2 border-b border-dotted border-zinc-300 dark:border-zinc-800" />
                   <span className="font-mono">39</span>
                 </div>
                 <div className="flex items-baseline justify-between cursor-pointer hover:text-indigo-600" onClick={() => scrollToSection("section-bab4")}>
-                  <span>4.2 Rencana Anggaran Biaya (RAB)</span>
+                  <span>{getSectionHeading(4, 1, "Rencana Anggaran Biaya (RAB)", currentDoc.campusGuideline?.headingStyle)}</span>
                   <span className="flex-1 mx-2 border-b border-dotted border-zinc-300 dark:border-zinc-800" />
                   <span className="font-mono">42</span>
                 </div>
                 <div className="flex items-baseline justify-between cursor-pointer hover:text-indigo-600" onClick={() => scrollToSection("section-bab4")}>
-                  <span>4.3 Rencana Diseminasi &amp; Publikasi Ilmiah</span>
+                  <span>{getSectionHeading(4, 2, "Rencana Diseminasi & Publikasi Ilmiah", currentDoc.campusGuideline?.headingStyle)}</span>
                   <span className="flex-1 mx-2 border-b border-dotted border-zinc-300 dark:border-zinc-800" />
                   <span className="font-mono">44</span>
                 </div>
@@ -2134,7 +2249,9 @@ NIP / NIK.
 
             <div className="space-y-4 text-xs sm:text-sm text-zinc-800 dark:text-zinc-300 leading-relaxed text-justify print:text-black font-sans">
               <div className="flex items-center justify-between pt-1">
-                <h3 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100 print:text-black font-serif">1.1 Latar Belakang Masalah</h3>
+                <h3 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100 print:text-black font-serif">
+                  {getSectionHeading(1, 0, "Latar Belakang Masalah", currentDoc.campusGuideline?.headingStyle)}
+                </h3>
                 <button
                   type="button"
                   onClick={() => handleRefineWithAI("bab1.latarBelakang", "1.1 Latar Belakang Masalah", currentDoc.bab1.latarBelakang.join("\n\n"))}
@@ -2149,7 +2266,9 @@ NIP / NIK.
               ))}
 
               <div className="flex items-center justify-between pt-2">
-                <h3 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100 print:text-black font-serif">1.2 Rumusan Masalah</h3>
+                <h3 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100 print:text-black font-serif">
+                  {getSectionHeading(1, 1, "Rumusan Masalah", currentDoc.campusGuideline?.headingStyle)}
+                </h3>
                 <button
                   type="button"
                   onClick={() => handleRefineWithAI("bab1.rumusanMasalah", "1.2 Rumusan Masalah", currentDoc.bab1.rumusanMasalah.join("\n"))}
@@ -2165,14 +2284,18 @@ NIP / NIK.
                 ))}
               </ol>
 
-              <h3 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100 print:text-black font-serif pt-2">1.3 Batasan Masalah</h3>
+              <h3 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100 print:text-black font-serif pt-2">
+                {getSectionHeading(1, 2, "Batasan Masalah", currentDoc.campusGuideline?.headingStyle)}
+              </h3>
               <ul className="list-disc pl-6 space-y-1">
                 {currentDoc.bab1.batasanMasalah.map((b, i) => (
                   <li key={i}>{b}</li>
                 ))}
               </ul>
 
-              <h3 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100 print:text-black font-serif pt-2">1.4 Tujuan Kegiatan</h3>
+              <h3 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100 print:text-black font-serif pt-2">
+                {getSectionHeading(1, 3, currentDoc.category === "magang" ? "Tujuan Kegiatan" : "Tujuan Penelitian", currentDoc.campusGuideline?.headingStyle)}
+              </h3>
               <p><strong>Tujuan Umum:</strong> {currentDoc.bab1.tujuanUmum}</p>
               <p className="pt-1"><strong>Tujuan Khusus:</strong></p>
               <ul className="list-disc pl-6 space-y-1">
@@ -2181,7 +2304,9 @@ NIP / NIK.
                 ))}
               </ul>
 
-              <h3 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100 print:text-black font-serif pt-2">1.5 Manfaat Kegiatan</h3>
+              <h3 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100 print:text-black font-serif pt-2">
+                {getSectionHeading(1, 4, currentDoc.category === "magang" ? "Manfaat Kegiatan" : "Manfaat Penelitian", currentDoc.campusGuideline?.headingStyle)}
+              </h3>
               <div className="space-y-2">
                 <p><strong>1. Bagi Mahasiswa:</strong></p>
                 <ul className="list-disc pl-6 space-y-0.5">
@@ -2245,7 +2370,9 @@ NIP / NIK.
                 /* Format Khusus Magang: Profil Perusahaan, Visi Misi, Struktur Organisasi */
                 <>
                   <div className="flex items-center justify-between">
-                    <h3 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100 print:text-black font-serif">2.1 Profil Instansi Mitra</h3>
+                    <h3 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100 print:text-black font-serif">
+                      {getSectionHeading(2, 0, "Profil Instansi Mitra", currentDoc.campusGuideline?.headingStyle)}
+                    </h3>
                     <button
                       type="button"
                       onClick={() => handleRefineWithAI("bab2.profilInstansi", "2.1 Profil Instansi Mitra", currentDoc.bab2.profilInstansi)}
@@ -2266,7 +2393,9 @@ NIP / NIK.
 
                   <p className="indent-6">{currentDoc.bab2.strukturOrganisasi}</p>
 
-                  <h3 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100 print:text-black font-serif pt-2">2.2 Landasan Teori Terapan & Standar Industri</h3>
+                  <h3 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100 print:text-black font-serif pt-2">
+                    {getSectionHeading(2, 1, "Landasan Teori Terapan & Standar Industri", currentDoc.campusGuideline?.headingStyle)}
+                  </h3>
                   <div className="space-y-3">
                     {currentDoc.bab2.landasanTeori.map((theory, i) => (
                       <div key={i} className="p-3.5 rounded-xl bg-zinc-50 dark:bg-zinc-900/40 border border-zinc-200 dark:border-zinc-800 print:border-gray-200">
@@ -2283,7 +2412,9 @@ NIP / NIK.
               ) : (
                 /* Format Khusus Skripsi/Penelitian: Tinjauan Pustaka, Matriks Keaslian 7 Kolom, Kerangka Konsep, Hipotesis */
                 <>
-                  <h3 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100 print:text-black font-serif">2.1 Tinjauan Teoretis Variabel Penelitian</h3>
+                  <h3 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100 print:text-black font-serif">
+                    {getSectionHeading(2, 0, "Tinjauan Teoretis Variabel Penelitian", currentDoc.campusGuideline?.headingStyle)}
+                  </h3>
                   <div className="space-y-3">
                     {currentDoc.bab2.landasanTeori.map((theory, i) => (
                       <div key={i} className="p-3.5 rounded-xl bg-zinc-50 dark:bg-zinc-900/40 border border-zinc-200 dark:border-zinc-800 print:border-gray-200">
@@ -2298,7 +2429,7 @@ NIP / NIK.
                   {currentDoc.bab2.researchGapMatrix && currentDoc.bab2.researchGapMatrix.length > 0 && (
                     <div className="pt-2">
                       <h3 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100 print:text-black font-serif mb-2">
-                        2.2 Matriks Keaslian Penelitian (Research Gap & State-of-the-Art)
+                        {getSectionHeading(2, 1, "Matriks Keaslian Penelitian (Research Gap & State-of-the-Art)", currentDoc.campusGuideline?.headingStyle)}
                       </h3>
                       <div className="overflow-x-auto my-3">
                         <table className="w-full text-left text-xs font-sans border-t-2 border-b-2 border-zinc-300 dark:border-zinc-700 print:border-black">
@@ -2338,7 +2469,7 @@ NIP / NIK.
                   {currentDoc.bab2.conceptualFramework && (
                     <div className="pt-2">
                       <h3 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100 print:text-black font-serif mb-1">
-                        2.3 Kerangka Konsep Penelitian
+                        {getSectionHeading(2, 2, "Kerangka Konsep Penelitian", currentDoc.campusGuideline?.headingStyle)}
                       </h3>
                       <p className="indent-6">{currentDoc.bab2.conceptualFramework}</p>
                     </div>
@@ -2350,7 +2481,7 @@ NIP / NIK.
                   {currentDoc.bab2.hypotheses && currentDoc.bab2.hypotheses.length > 0 && (
                     <div className="pt-2">
                       <h3 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100 print:text-black font-serif mb-1">
-                        2.4 Hipotesis Penelitian
+                        {getSectionHeading(2, 3, "Hipotesis Penelitian", currentDoc.campusGuideline?.headingStyle)}
                       </h3>
                       <ul className="list-disc pl-6 space-y-1 text-xs text-zinc-700 dark:text-zinc-300">
                         {currentDoc.bab2.hypotheses.map((h, i) => <li key={i}>{h}</li>)}
@@ -2423,7 +2554,9 @@ NIP / NIK.
                 /* Format Khusus Magang: Metode Kerja, WBS, Perangkat, Kompetensi */
                 <>
                   <div className="flex items-center justify-between">
-                    <h3 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100 print:text-black font-serif">3.1 Metode Pelaksanaan Kerja</h3>
+                    <h3 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100 print:text-black font-serif">
+                      {getSectionHeading(3, 0, "Metode Pelaksanaan Kerja", currentDoc.campusGuideline?.headingStyle)}
+                    </h3>
                     <button
                       type="button"
                       onClick={() => handleRefineWithAI("bab3.metodePelaksanaan", "3.1 Metode Pelaksanaan Kerja", currentDoc.bab3.metodePelaksanaan)}
@@ -2435,17 +2568,23 @@ NIP / NIK.
                   </div>
                   <p className="indent-6">{currentDoc.bab3.metodePelaksanaan}</p>
 
-                  <h3 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100 print:text-black font-serif pt-2">3.2 Lingkup Penugasan (Work Breakdown Structure)</h3>
+                  <h3 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100 print:text-black font-serif pt-2">
+                    {getSectionHeading(3, 1, "Lingkup Penugasan (Work Breakdown Structure)", currentDoc.campusGuideline?.headingStyle)}
+                  </h3>
                   <ol className="list-decimal pl-6 space-y-1">
                     {(currentDoc.bab3.wbsScope || currentDoc.bab3.lingkupPekerjaan).map((l, i) => <li key={i}>{l}</li>)}
                   </ol>
 
-                  <h3 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100 print:text-black font-serif pt-2">3.3 Lingkungan Kerja, Tools, & SOP</h3>
+                  <h3 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100 print:text-black font-serif pt-2">
+                    {getSectionHeading(3, 2, "Lingkungan Kerja, Tools, & SOP", currentDoc.campusGuideline?.headingStyle)}
+                  </h3>
                   <ul className="list-disc pl-6 space-y-1">
                     {currentDoc.bab3.perangkatTools.map((p, i) => <li key={i}>{p}</li>)}
                   </ul>
 
-                  <h3 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100 print:text-black font-serif pt-2">3.4 Target Capaian Hard & Soft Skills</h3>
+                  <h3 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100 print:text-black font-serif pt-2">
+                    {getSectionHeading(3, 3, "Target Capaian Hard & Soft Skills", currentDoc.campusGuideline?.headingStyle)}
+                  </h3>
                   <ul className="list-disc pl-6 space-y-1">
                     {currentDoc.bab3.rencanaKompetensi.map((k, i) => <li key={i}>{k}</li>)}
                   </ul>
@@ -2454,7 +2593,9 @@ NIP / NIK.
                 /* Format Khusus Skripsi: Desain Riset, Populasi & Sampel, DOV Table, KEPK */
                 <>
                   <div className="flex items-center justify-between">
-                    <h3 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100 print:text-black font-serif">3.1 Jenis dan Desain Penelitian</h3>
+                    <h3 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100 print:text-black font-serif">
+                      {getSectionHeading(3, 0, "Jenis dan Desain Penelitian", currentDoc.campusGuideline?.headingStyle)}
+                    </h3>
                     <button
                       type="button"
                       onClick={() => handleRefineWithAI("bab3.metodePelaksanaan", "3.1 Jenis dan Desain Penelitian", currentDoc.bab3.metodePelaksanaan)}
@@ -2469,7 +2610,9 @@ NIP / NIK.
                   {/* Populasi & Sampel */}
                   {currentDoc.bab3.populationSample && (
                     <div>
-                      <h3 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100 print:text-black font-serif pt-2">3.2 Populasi, Sampel, & Kriteria Subjek</h3>
+                      <h3 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100 print:text-black font-serif pt-2">
+                        {getSectionHeading(3, 1, "Populasi, Sampel, & Kriteria Subjek", currentDoc.campusGuideline?.headingStyle)}
+                      </h3>
                       <p className="indent-6">{currentDoc.bab3.populationSample}</p>
                     </div>
                   )}
@@ -2478,7 +2621,7 @@ NIP / NIK.
                   {currentDoc.bab3.operationalDefinitions && currentDoc.bab3.operationalDefinitions.length > 0 && (
                     <div className="pt-2">
                       <h3 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100 print:text-black font-serif mb-2">
-                        3.3 Tabel Definisi Operasional Variabel (DOV)
+                        {getSectionHeading(3, 2, "Tabel Definisi Operasional Variabel (DOV)", currentDoc.campusGuideline?.headingStyle)}
                       </h3>
                       <div className="overflow-x-auto my-3">
                         <table className="w-full text-left text-xs font-sans border-t-2 border-b-2 border-zinc-300 dark:border-zinc-700 print:border-black">
@@ -2506,7 +2649,9 @@ NIP / NIK.
                   )}
 
                   {/* Instrumen & Kalibrasi */}
-                  <h3 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100 print:text-black font-serif pt-2">3.4 Instrumen & Kalibrasi Alat Ukur</h3>
+                  <h3 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100 print:text-black font-serif pt-2">
+                    {getSectionHeading(3, 3, "Instrumen & Kalibrasi Alat Ukur", currentDoc.campusGuideline?.headingStyle)}
+                  </h3>
                   <ul className="list-disc pl-6 space-y-1">
                     {currentDoc.bab3.perangkatTools.map((p, i) => <li key={i}>{p}</li>)}
                   </ul>
@@ -2514,12 +2659,16 @@ NIP / NIK.
                   {/* Kelaikan Etik (Ethical Clearance) */}
                   {currentDoc.bab3.ethicalConsiderations && (
                     <div>
-                      <h3 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100 print:text-black font-serif pt-2">3.5 Protokol Etika Penelitian (Ethical Clearance)</h3>
+                      <h3 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100 print:text-black font-serif pt-2">
+                        {getSectionHeading(3, 4, "Protokol Etika Penelitian (Ethical Clearance)", currentDoc.campusGuideline?.headingStyle)}
+                      </h3>
                       <p className="indent-6">{currentDoc.bab3.ethicalConsiderations}</p>
                     </div>
                   )}
 
-                  <h3 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100 print:text-black font-serif pt-2">3.6 Rencana Analisis Data & Uji Hipotesis</h3>
+                  <h3 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100 print:text-black font-serif pt-2">
+                    {getSectionHeading(3, 5, "Rencana Analisis Data & Uji Hipotesis", currentDoc.campusGuideline?.headingStyle)}
+                  </h3>
                   <ul className="list-disc pl-6 space-y-1">
                     {currentDoc.bab3.rencanaKompetensi.map((k, i) => <li key={i}>{k}</li>)}
                   </ul>
@@ -2628,7 +2777,7 @@ NIP / NIK.
 
             <div className="flex items-center justify-between pt-3 mb-2">
               <h3 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100 print:text-black font-serif">
-                {currentDoc.category === "magang" ? "4.2 Penutup" : "4.4 Penutup"}
+                {getSectionHeading(4, currentDoc.category === "magang" ? 1 : 3, "Penutup Proposal", currentDoc.campusGuideline?.headingStyle)}
               </h3>
               <button
                 type="button"
@@ -2654,7 +2803,7 @@ NIP / NIK.
 
             <div className="space-y-4 text-xs sm:text-sm text-zinc-800 dark:text-zinc-300 leading-relaxed text-justify print:text-black font-sans">
               <h3 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100 print:text-black font-serif pt-1">
-                5.1 Kesimpulan Rencana Usulan
+                {getSectionHeading(5, 0, "Kesimpulan Rencana Usulan", currentDoc.campusGuideline?.headingStyle)}
               </h3>
               <ul className="list-disc pl-6 space-y-1.5">
                 {(currentDoc.bab5?.kesimpulanUsulan || [
@@ -2667,7 +2816,7 @@ NIP / NIK.
               </ul>
 
               <h3 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100 print:text-black font-serif pt-2">
-                5.2 Rekomendasi Kontribusi Strategis
+                {getSectionHeading(5, 1, "Rekomendasi Kontribusi Strategis", currentDoc.campusGuideline?.headingStyle)}
               </h3>
               <div className="space-y-2">
                 {(currentDoc.bab5?.kontribusiPraktis || [
@@ -2680,7 +2829,7 @@ NIP / NIK.
               </div>
 
               <h3 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100 print:text-black font-serif pt-2 mb-2">
-                5.3 Matriks Mitigasi Risiko Pelaksanaan (Contingency Plan)
+                {getSectionHeading(5, 2, "Matriks Mitigasi Risiko Pelaksanaan (Contingency Plan)", currentDoc.campusGuideline?.headingStyle)}
               </h3>
               <div className="overflow-x-auto my-3">
                 <table className="w-full text-left text-xs font-sans border-t-2 border-b-2 border-zinc-300 dark:border-zinc-700 print:border-black">
@@ -2708,7 +2857,7 @@ NIP / NIK.
               </div>
 
               <h3 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100 print:text-black font-serif pt-2">
-                5.4 Rencana Keberlanjutan Proyek (Sustainability Plan)
+                {getSectionHeading(5, 3, "Rencana Keberlanjutan Proyek (Sustainability Plan)", currentDoc.campusGuideline?.headingStyle)}
               </h3>
               <p className="indent-6">
                 {currentDoc.bab5?.sustainabilityPlan || `Seluruh artefak hasil pelaksanaan, meliputi dokumentasi teknis, lembar SOP, kode sumber/dataset tervalidasi, serta panduan operasional diserahkan secara resmi melalui Berita Acara Serah Terima kepada unit terkait di ${currentDoc.targetEntity} agar dapat dipelihara dan dikembangkan secara berkelanjutan.`}
@@ -3195,6 +3344,18 @@ NIP / NIK.
                   <span>Visual AI</span>
                 </button>
               </div>
+
+              {/* Batch Generate All Slides Visuals */}
+              <button
+                type="button"
+                onClick={handleBatchGenerateAllSlideVisuals}
+                disabled={isBatchGeneratingSlides}
+                className="px-3 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 text-white text-xs font-semibold flex items-center gap-1.5 shadow-xs transition-colors cursor-pointer"
+                title="Generate ilustrasi visual AI untuk semua slide sekaligus"
+              >
+                <Sparkles className={`w-3.5 h-3.5 ${isBatchGeneratingSlides ? "animate-spin" : ""}`} />
+                <span>{isBatchGeneratingSlides ? "Men-generate Semua..." : "✨ Visual AI Semua Slide"}</span>
+              </button>
 
               {/* Direct Download PPTX Button */}
               <button
