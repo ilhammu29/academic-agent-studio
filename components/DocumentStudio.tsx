@@ -13,6 +13,13 @@ import { CampusGuidelineModal } from "./CampusGuidelineModal";
 import { AcademicConsultationModal } from "./AcademicConsultationModal";
 import { AcademicFlowchartDiagram } from "./AcademicFlowchartDiagram";
 import { AcademicCopilotDrawer } from "./AcademicCopilotDrawer";
+import { CampusLogoManagerModal } from "./CampusLogoManagerModal";
+import { TheoryCustomizerModal } from "./TheoryCustomizerModal";
+import { CustomSheetModal } from "./CustomSheetModal";
+import { DocumentImageManagerModal } from "./DocumentImageManagerModal";
+import { LogbookManagerModal } from "./LogbookManagerModal";
+import { DefenseMinutesModal } from "./DefenseMinutesModal";
+import { getCampusLogoByInstitution } from "@/lib/campusLogos";
 import { generateAcademicProposalDocx, downloadDocxBlob } from "@/lib/docxExporter";
 import { generateAcademicProposalPptx } from "@/lib/pptxExporter";
 import { generateBibTeX, generateRIS, downloadCitationFile } from "@/lib/bibtexExporter";
@@ -90,6 +97,14 @@ export const DocumentStudio: React.FC<DocumentStudioProps> = ({
   const [citationStyle, setCitationStyle] = useState<"apa" | "ieee">("apa");
   const [showMarginRuler, setShowMarginRuler] = useState(false);
   const [isConsultationModalOpen, setIsConsultationModalOpen] = useState(false);
+  
+  // Modals for Logo, Theories, Custom Sheets, Figures, Logbook, and Defense Minutes
+  const [isCampusLogoModalOpen, setIsCampusLogoModalOpen] = useState(false);
+  const [isTheoryCustomizerModalOpen, setIsTheoryCustomizerModalOpen] = useState(false);
+  const [isCustomSheetModalOpen, setIsCustomSheetModalOpen] = useState(false);
+  const [isImageManagerModalOpen, setIsImageManagerModalOpen] = useState(false);
+  const [isLogbookModalOpen, setIsLogbookModalOpen] = useState(false);
+  const [isDefenseMinutesModalOpen, setIsDefenseMinutesModalOpen] = useState(false);
   
   // Co-Pilot & Dropdown states
   const [isCopilotOpen, setIsCopilotOpen] = useState(false);
@@ -494,6 +509,40 @@ NIP / NIK.
       setTimeout(() => setCopiedNotes(false), 2000);
       setToastMessage("Catatan presenter berhasil disalin!");
     }
+  };
+
+  const handleSaveLogo = (logoUrl: string) => {
+    setCurrentDoc(prev => ({ ...prev, campusLogoUrl: logoUrl }));
+    setToastMessage("Logo kampus berhasil diperbarui!");
+  };
+
+  const handleSaveTheories = (newTheories: any[], newBib: any[]) => {
+    setCurrentDoc(prev => ({
+      ...prev,
+      bab2: { ...prev.bab2, landasanTeori: newTheories },
+      bibliography: newBib
+    }));
+    setToastMessage(`Berhasil memperbarui ${newTheories.length} landasan teori & Daftar Pustaka.`);
+  };
+
+  const handleSaveCustomSheets = (updatedSheets: any[]) => {
+    setCurrentDoc(prev => ({ ...prev, customSheets: updatedSheets }));
+    setToastMessage("Lembar khusus & berkas scan berhasil diperbarui!");
+  };
+
+  const handleSaveFigures = (updatedFigures: any[]) => {
+    setCurrentDoc(prev => ({ ...prev, documentFigures: updatedFigures }));
+    setToastMessage("Daftar gambar & diagram bab berhasil diperbarui!");
+  };
+
+  const handleSaveLogbook = (updatedLogbook: any[]) => {
+    setCurrentDoc(prev => ({ ...prev, logbookEntries: updatedLogbook }));
+    setToastMessage("Buku catatan logbook aktivitas berhasil disimpan!");
+  };
+
+  const handleSaveDefenseMinutes = (updatedMinutes: any) => {
+    setCurrentDoc(prev => ({ ...prev, defenseMinutes: updatedMinutes }));
+    setToastMessage("Lembar berita acara sidang berhasil disimpan!");
   };
 
   return (
@@ -942,11 +991,38 @@ NIP / NIK.
 
               <button
                 type="button"
-                onClick={() => setIsApprovalModalOpen(true)}
+                onClick={() => setIsCampusLogoModalOpen(true)}
+                className="px-3 py-1 rounded-md text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 hover:bg-zinc-100 dark:hover:bg-zinc-900 transition-all cursor-pointer flex items-center gap-1.5"
+              >
+                <Landmark className="w-3 h-3 text-sky-500" />
+                <span>Logo Kampus</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setIsTheoryCustomizerModalOpen(true)}
+                className="px-3 py-1 rounded-md text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 hover:bg-zinc-100 dark:hover:bg-zinc-900 transition-all cursor-pointer flex items-center gap-1.5"
+              >
+                <BookOpen className="w-3 h-3 text-indigo-500" />
+                <span>13 Teori &amp; Jurnal</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setIsCustomSheetModalOpen(true)}
                 className="px-3 py-1 rounded-md text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 hover:bg-zinc-100 dark:hover:bg-zinc-900 transition-all cursor-pointer flex items-center gap-1.5"
               >
                 <FileSignature className="w-3 h-3 text-amber-500" />
-                <span>Lembar Pengesahan Dosen</span>
+                <span>Lembar Khusus &amp; Scan</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setIsImageManagerModalOpen(true)}
+                className="px-3 py-1 rounded-md text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 hover:bg-zinc-100 dark:hover:bg-zinc-900 transition-all cursor-pointer flex items-center gap-1.5"
+              >
+                <ImageIcon className="w-3 h-3 text-emerald-500" />
+                <span>Gambar &amp; Diagram Bab</span>
               </button>
 
               <button
@@ -955,7 +1031,7 @@ NIP / NIK.
                 className="px-3 py-1 rounded-md text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 hover:bg-zinc-100 dark:hover:bg-zinc-900 transition-all cursor-pointer flex items-center gap-1.5"
               >
                 <ClipboardList className="w-3 h-3 text-blue-500" />
-                <span>Instrumen Riset &amp; Angket</span>
+                <span>Instrumen Riset</span>
               </button>
 
               <button
@@ -963,8 +1039,8 @@ NIP / NIK.
                 onClick={() => setIsGuidelineModalOpen(true)}
                 className="px-3 py-1 rounded-md text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 hover:bg-zinc-100 dark:hover:bg-zinc-900 transition-all cursor-pointer flex items-center gap-1.5"
               >
-                <Landmark className="w-3 h-3 text-indigo-500" />
-                <span>Panduan Kampus ({currentDoc.campusGuideline?.campusName.split("(")[0].trim() || "Standar Dikti"})</span>
+                <Landmark className="w-3 h-3 text-purple-500" />
+                <span>Format Kampus ({currentDoc.campusGuideline?.campusName.split("(")[0].trim() || "Standar Dikti"})</span>
               </button>
             </>
           )}
@@ -982,6 +1058,15 @@ NIP / NIK.
               >
                 <CalendarDays className="w-3 h-3" />
                 <span>Matriks Jadwal &amp; Timeline</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setIsLogbookModalOpen(true)}
+                className="px-3 py-1 rounded-md text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 hover:bg-zinc-100 dark:hover:bg-zinc-900 transition-all cursor-pointer flex items-center gap-1.5"
+              >
+                <CalendarDays className="w-3 h-3 text-emerald-500" />
+                <span>Logbook Lapangan</span>
               </button>
 
               <button
@@ -1029,6 +1114,15 @@ NIP / NIK.
 
               <button
                 type="button"
+                onClick={() => setIsDefenseMinutesModalOpen(true)}
+                className="px-3 py-1 rounded-md text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 hover:bg-zinc-100 dark:hover:bg-zinc-900 transition-all cursor-pointer flex items-center gap-1.5"
+              >
+                <FileSignature className="w-3 h-3 text-amber-500" />
+                <span>Berita Acara Sidang</span>
+              </button>
+
+              <button
+                type="button"
                 onClick={() => setActiveTab("slides")}
                 className={`px-3 py-1 rounded-md transition-all cursor-pointer flex items-center gap-1.5 ${
                   activeTab === "slides"
@@ -1049,7 +1143,7 @@ NIP / NIK.
                     : "text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 hover:bg-zinc-100 dark:hover:bg-zinc-900"
                 }`}
               >
-                <FileCheck2 className="w-3 h-3" />
+                <Layers className="w-3 h-3" />
                 <span>Matriks Revisi Dosen</span>
               </button>
             </>
@@ -1094,16 +1188,65 @@ NIP / NIK.
 
       {/* QUICK JUMP OUTLINE RAIL (Only for Naskah Tab) */}
       {activeTab === "naskah" && (
-        <div className="flex items-center gap-1.5 pb-4 mb-4 overflow-x-auto text-[11px] font-mono no-print">
-          <span className="text-zinc-400 dark:text-zinc-500 flex items-center gap-1 mr-1 text-[11px]">
-            <Compass className="w-3.5 h-3.5" /> Lompat Cepat:
+        <div className="flex items-center gap-1.5 pb-3 mb-3 overflow-x-auto text-[11px] font-mono no-print">
+          <span className="text-zinc-400 dark:text-zinc-500 flex items-center gap-1 mr-1 text-[11px] font-bold">
+            <Compass className="w-3.5 h-3.5 text-sky-500" /> Navigasi Bab:
           </span>
           <button
             type="button"
-            onClick={() => scrollToSection("section-ringkasan")}
+            onClick={() => scrollToSection("section-cover")}
             className="px-2.5 py-1 rounded-md bg-zinc-100 dark:bg-zinc-900 text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 hover:bg-zinc-200 dark:hover:bg-zinc-800 whitespace-nowrap transition-colors cursor-pointer"
           >
-            Ringkasan
+            Cover &amp; Logo
+          </button>
+          <button
+            type="button"
+            onClick={() => scrollToSection("section-pengesahan")}
+            className="px-2.5 py-1 rounded-md bg-zinc-100 dark:bg-zinc-900 text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 hover:bg-zinc-200 dark:hover:bg-zinc-800 whitespace-nowrap transition-colors cursor-pointer"
+          >
+            Pengesahan
+          </button>
+          <button
+            type="button"
+            onClick={() => scrollToSection("section-orisinalitas")}
+            className="px-2.5 py-1 rounded-md bg-zinc-100 dark:bg-zinc-900 text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 hover:bg-zinc-200 dark:hover:bg-zinc-800 whitespace-nowrap transition-colors cursor-pointer"
+          >
+            Orisinalitas
+          </button>
+          <button
+            type="button"
+            onClick={() => scrollToSection("section-pengantar")}
+            className="px-2.5 py-1 rounded-md bg-zinc-100 dark:bg-zinc-900 text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 hover:bg-zinc-200 dark:hover:bg-zinc-800 whitespace-nowrap transition-colors cursor-pointer"
+          >
+            Pengantar
+          </button>
+          <button
+            type="button"
+            onClick={() => scrollToSection("section-abstrak")}
+            className="px-2.5 py-1 rounded-md bg-zinc-100 dark:bg-zinc-900 text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 hover:bg-zinc-200 dark:hover:bg-zinc-800 whitespace-nowrap transition-colors cursor-pointer"
+          >
+            Abstrak
+          </button>
+          <button
+            type="button"
+            onClick={() => scrollToSection("section-daftar-isi")}
+            className="px-2.5 py-1 rounded-md bg-zinc-100 dark:bg-zinc-900 text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 hover:bg-zinc-200 dark:hover:bg-zinc-800 whitespace-nowrap transition-colors cursor-pointer"
+          >
+            Daftar Isi
+          </button>
+          <button
+            type="button"
+            onClick={() => scrollToSection("section-daftar-gambar")}
+            className="px-2.5 py-1 rounded-md bg-zinc-100 dark:bg-zinc-900 text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 hover:bg-zinc-200 dark:hover:bg-zinc-800 whitespace-nowrap transition-colors cursor-pointer"
+          >
+            Daftar Gambar ({currentDoc.documentFigures?.length || 0})
+          </button>
+          <button
+            type="button"
+            onClick={() => scrollToSection("section-daftar-tabel")}
+            className="px-2.5 py-1 rounded-md bg-zinc-100 dark:bg-zinc-900 text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 hover:bg-zinc-200 dark:hover:bg-zinc-800 whitespace-nowrap transition-colors cursor-pointer"
+          >
+            Daftar Tabel
           </button>
           <button
             type="button"
@@ -1115,9 +1258,9 @@ NIP / NIK.
           <button
             type="button"
             onClick={() => scrollToSection("section-bab2")}
-            className="px-2.5 py-1 rounded-md bg-zinc-100 dark:bg-zinc-900 text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 hover:bg-zinc-200 dark:hover:bg-zinc-800 whitespace-nowrap transition-colors cursor-pointer"
+            className="px-2.5 py-1 rounded-md bg-indigo-50 dark:bg-indigo-950/80 text-indigo-700 dark:text-indigo-300 font-bold hover:bg-indigo-100 whitespace-nowrap transition-colors cursor-pointer"
           >
-            Bab II: Kajian Pustaka
+            Bab II: Teori ({currentDoc.bab2.landasanTeori.length} Teori)
           </button>
           <button
             type="button"
@@ -1131,35 +1274,28 @@ NIP / NIK.
             onClick={() => scrollToSection("section-bab4")}
             className="px-2.5 py-1 rounded-md bg-zinc-100 dark:bg-zinc-900 text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 hover:bg-zinc-200 dark:hover:bg-zinc-800 whitespace-nowrap transition-colors cursor-pointer"
           >
-            Bab IV: Rencana Kerja
+            Bab IV: Jadwal &amp; RAB
           </button>
           <button
             type="button"
             onClick={() => scrollToSection("section-bab5")}
             className="px-2.5 py-1 rounded-md bg-zinc-100 dark:bg-zinc-900 text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 hover:bg-zinc-200 dark:hover:bg-zinc-800 whitespace-nowrap transition-colors cursor-pointer"
           >
-            Bab V: Kesimpulan & Mitigasi
+            Bab V: Kesimpulan
           </button>
           <button
             type="button"
             onClick={() => scrollToSection("section-pustaka")}
-            className="px-2.5 py-1 rounded-md bg-zinc-100 dark:bg-zinc-900 text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 hover:bg-zinc-200 dark:hover:bg-zinc-800 whitespace-nowrap transition-colors cursor-pointer"
+            className="px-2.5 py-1 rounded-md bg-zinc-100 dark:bg-zinc-900 text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 hover:bg-zinc-200 dark:hover:bg-zinc-800 whitespace-nowrap transition-colors cursor-pointer font-bold"
           >
-            Daftar Pustaka
-          </button>
-          <button
-            type="button"
-            onClick={() => scrollToSection("section-pengesahan")}
-            className="px-2.5 py-1 rounded-md bg-zinc-100 dark:bg-zinc-900 text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 hover:bg-zinc-200 dark:hover:bg-zinc-800 whitespace-nowrap transition-colors cursor-pointer"
-          >
-            Lembar Pengesahan
+            Daftar Pustaka ({currentDoc.bibliography?.length || 0})
           </button>
           <button
             type="button"
             onClick={() => scrollToSection("section-lampiran")}
-            className="px-2.5 py-1 rounded-md bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 hover:bg-indigo-100 whitespace-nowrap transition-colors cursor-pointer"
+            className="px-2.5 py-1 rounded-md bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 hover:bg-emerald-100 whitespace-nowrap transition-colors cursor-pointer font-bold"
           >
-            Lampiran Lengkap
+            Lampiran &amp; Logbook
           </button>
         </div>
       )}
@@ -1239,26 +1375,736 @@ NIP / NIK.
             </div>
           )}
           
-          {/* Cover Header */}
-          <div className="text-center pb-8 border-b border-zinc-200 dark:border-zinc-850 print:border-black mb-8">
-            <div className="text-xs font-mono uppercase tracking-widest text-zinc-500 dark:text-zinc-400 print:text-gray-700">
-              PROPOSAL {currentDoc.category.toUpperCase()}
+          {/* ========================================================================= */}
+          {/* BAGIAN 1: HALAMAN JUDUL / COVER STANDAR DIKTI */}
+          {/* ========================================================================= */}
+          <div id="section-cover" className="relative text-center pb-12 mb-12 border-b-2 border-zinc-200 dark:border-zinc-800 print:border-black print:pb-0 print:mb-0 print:min-h-screen print:flex print:flex-col print:justify-between">
+            {/* Action Bar Cover (No-Print) */}
+            <div className="no-print mb-6 p-2.5 rounded-xl bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 flex items-center justify-between flex-wrap gap-2 text-xs">
+              <span className="font-mono text-zinc-500 text-[11px] flex items-center gap-1.5">
+                <Landmark className="w-3.5 h-3.5 text-indigo-500" />
+                Format Cover Standar Dikti (Logo 6x6 s.d. 7x7 cm)
+              </span>
+              <div className="flex items-center gap-1.5">
+                <button
+                  type="button"
+                  onClick={() => setIsCampusLogoModalOpen(true)}
+                  className="px-2.5 py-1 rounded-lg bg-white dark:bg-zinc-850 border border-zinc-200 dark:border-zinc-700 text-zinc-800 dark:text-zinc-200 hover:border-indigo-400 text-[11px] font-medium flex items-center gap-1.5 cursor-pointer shadow-xs transition-colors"
+                >
+                  <ImageIcon className="w-3 h-3 text-indigo-500" />
+                  <span>{currentDoc.campusLogoUrl ? "Ganti Logo Kampus" : "Unggah / Pilih Logo"}</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setIsCustomSheetModalOpen(true)}
+                  className="px-2.5 py-1 rounded-lg bg-white dark:bg-zinc-850 border border-zinc-200 dark:border-zinc-700 text-zinc-800 dark:text-zinc-200 hover:border-indigo-400 text-[11px] font-medium flex items-center gap-1.5 cursor-pointer shadow-xs transition-colors"
+                >
+                  <FileSignature className="w-3 h-3 text-emerald-500" />
+                  <span>Lembar Pengesahan & Scan</span>
+                </button>
+              </div>
             </div>
-            <h1 className="text-xl sm:text-2xl font-serif font-bold text-zinc-900 dark:text-zinc-100 mt-2 leading-snug print:text-black">
+
+            {/* Document Type Label */}
+            <div className="text-xs sm:text-sm font-serif font-bold uppercase tracking-widest text-zinc-700 dark:text-zinc-300 print:text-black">
+              PROPOSAL {currentDoc.category === "magang" ? "PRAKTIK KERJA LAPANGAN / MAGANG INDUSTRI" : currentDoc.category === "skripsi" ? "SKRIPSI" : "TUGAS AKHIR"}
+            </div>
+
+            {/* Main Title (All Uppercase, Bold) */}
+            <h1 className="text-lg sm:text-2xl font-serif font-bold text-zinc-900 dark:text-zinc-100 mt-4 leading-snug print:text-black uppercase max-w-2xl mx-auto px-2">
               {currentDoc.title}
             </h1>
-            <p className="text-xs sm:text-sm font-sans text-zinc-600 dark:text-zinc-400 mt-3 max-w-xl mx-auto print:text-gray-700">
-              Diajukan untuk Memenuhi Prasyarat Kurikulum Akademik pada {currentDoc.facultyMajor}, {currentDoc.institution}
+
+            {/* Sub-label */}
+            <p className="text-xs sm:text-sm font-serif italic text-zinc-600 dark:text-zinc-400 mt-4 max-w-lg mx-auto print:text-black">
+              Diajukan sebagai salah satu syarat untuk menyelesaikan program studi sarjana pada {currentDoc.facultyMajor}
             </p>
 
-            <div className="mt-6 pt-4 border-t border-zinc-200 dark:border-zinc-850/60 max-w-md mx-auto text-center font-sans text-xs space-y-1 text-zinc-700 dark:text-zinc-300 print:text-black">
-              <p className="font-semibold text-zinc-900 dark:text-zinc-200 print:text-black">{currentDoc.candidateName}</p>
-              <p className="text-zinc-500 font-mono print:text-gray-700">NIM: {currentDoc.candidateId}</p>
-              <p className="text-zinc-600 dark:text-zinc-400 print:text-black">{currentDoc.institution} &bull; {currentDoc.generationDate}</p>
+            {/* Centered Campus Logo */}
+            <div className="my-8 flex justify-center items-center">
+              {(() => {
+                const logoSrc = currentDoc.campusLogoUrl || getCampusLogoByInstitution(currentDoc.institution);
+                if (logoSrc) {
+                  return (
+                    <div className="relative group p-2">
+                      <img
+                        src={logoSrc}
+                        alt="Logo Perguruan Tinggi"
+                        className="w-24 h-24 sm:w-28 sm:h-28 object-contain mx-auto filter dark:brightness-105"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setIsCampusLogoModalOpen(true)}
+                        className="no-print absolute bottom-0 right-0 bg-white dark:bg-zinc-900 border border-zinc-300 dark:border-zinc-700 rounded-md px-1.5 py-0.5 text-[10px] font-mono text-zinc-700 dark:text-zinc-300 opacity-0 group-hover:opacity-100 transition-opacity shadow-xs flex items-center gap-1 cursor-pointer"
+                      >
+                        <ImageIcon className="w-2.5 h-2.5" /> Ganti
+                      </button>
+                    </div>
+                  );
+                }
+                return (
+                  <button
+                    type="button"
+                    onClick={() => setIsCampusLogoModalOpen(true)}
+                    className="no-print w-28 h-28 border-2 border-dashed border-zinc-300 dark:border-zinc-700 hover:border-indigo-400 rounded-2xl flex flex-col items-center justify-center p-3 text-zinc-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors cursor-pointer group text-center"
+                  >
+                    <ImageIcon className="w-7 h-7 mb-1 group-hover:scale-110 transition-transform" />
+                    <span className="text-[10px] font-mono leading-tight font-semibold">+ Logo Kampus</span>
+                    <span className="text-[9px] text-zinc-400">(6x6 cm)</span>
+                  </button>
+                );
+              })()}
+            </div>
+
+            {/* Author Block */}
+            <div className="text-xs sm:text-sm font-serif space-y-1 text-zinc-800 dark:text-zinc-200 print:text-black">
+              <p className="font-sans text-[11px] uppercase tracking-wider text-zinc-500 print:text-gray-600">Disusun Oleh:</p>
+              <p className="font-bold text-sm sm:text-base text-zinc-900 dark:text-zinc-100 print:text-black">{currentDoc.candidateName}</p>
+              <p className="font-mono text-xs text-zinc-600 dark:text-zinc-400 print:text-black">NIM: {currentDoc.candidateId}</p>
+            </div>
+
+            {/* Institution & Year Block */}
+            <div className="mt-8 pt-4 font-serif text-xs sm:text-sm text-zinc-800 dark:text-zinc-200 print:text-black space-y-1 uppercase tracking-wide">
+              <p className="font-bold">{currentDoc.facultyMajor}</p>
+              <p className="font-bold">{currentDoc.institution}</p>
+              <p className="font-medium text-xs font-mono">{currentDoc.generationDate ? new Date().getFullYear().toString() : "2026"}</p>
+            </div>
+
+            {/* Cover Page Indicator */}
+            <div className="absolute bottom-1 right-2 text-[10px] font-mono text-zinc-400 print:hidden">
+              [Halaman i - Tidak Dicetak]
             </div>
           </div>
 
-          {/* Executive Summary */}
+          {/* ========================================================================= */}
+          {/* BAGIAN 2: LEMBAR PENGESAHAN (Halaman ii) */}
+          {/* ========================================================================= */}
+          <section id="section-pengesahan" className="relative pb-12 mb-12 border-b-2 border-zinc-200 dark:border-zinc-800 print:border-black font-serif text-xs sm:text-sm">
+            <div className="flex items-center justify-between mb-4 border-b border-zinc-200 dark:border-zinc-850 pb-2 print:border-black">
+              <div className="text-center w-full">
+                <span className="text-[10px] font-mono uppercase tracking-widest text-zinc-500 block mb-1">
+                  HALAMAN PENGESAHAN AKADEMIK
+                </span>
+                <h2 className="text-base sm:text-lg font-bold text-zinc-900 dark:text-zinc-100 uppercase tracking-wide print:text-black">
+                  LEMBAR PENGESAHAN
+                </h2>
+              </div>
+              <button
+                type="button"
+                onClick={() => setIsCustomSheetModalOpen(true)}
+                className="no-print absolute right-0 top-0 text-[11px] font-mono text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 bg-white dark:bg-zinc-900 px-2.5 py-1 rounded-lg border border-zinc-200 dark:border-zinc-800 flex items-center gap-1.5 cursor-pointer shadow-xs"
+              >
+                <FileSignature className="w-3.5 h-3.5 text-emerald-500" />
+                <span>Unggah Scan / Edit</span>
+              </button>
+            </div>
+
+            {/* Check if user uploaded an official signed scan for Lembar Pengesahan */}
+            {(() => {
+              const uploadedScan = currentDoc.customSheets?.find(s => (s.id === "pengesahan" || s.type === "pengesahan") && s.fileDataUrl);
+              if (uploadedScan && uploadedScan.fileDataUrl) {
+                return (
+                  <div className="my-6 text-center">
+                    <div className="no-print mb-3 inline-flex items-center gap-2 px-3 py-1 bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800 text-emerald-700 dark:text-emerald-300 rounded-lg text-xs font-mono">
+                      <Check className="w-3.5 h-3.5" />
+                      <span>Berkas Scan Resmi Kampus Telah Terhubung ({uploadedScan.title})</span>
+                    </div>
+                    <img
+                      src={uploadedScan.fileDataUrl}
+                      alt="Scan Lembar Pengesahan"
+                      className="max-h-[600px] w-auto mx-auto rounded-lg border border-zinc-300 dark:border-zinc-700 shadow-sm print:max-h-full print:border-none"
+                    />
+                  </div>
+                );
+              }
+              return (
+                <div className="space-y-4 max-w-2xl mx-auto text-justify leading-relaxed">
+                  <p className="indent-6">
+                    Proposal {currentDoc.category === "magang" ? "Praktik Kerja Lapangan / Magang Industri" : "Skripsi / Tugas Akhir"} dengan judul <strong>"{currentDoc.title}"</strong> yang disusun oleh:
+                  </p>
+                  
+                  <div className="pl-6 space-y-1 font-sans text-xs">
+                    <div className="grid grid-cols-3 max-w-md">
+                      <span className="text-zinc-500">Nama</span>
+                      <span className="col-span-2 font-semibold text-zinc-900 dark:text-zinc-100 print:text-black">: {currentDoc.candidateName}</span>
+                    </div>
+                    <div className="grid grid-cols-3 max-w-md">
+                      <span className="text-zinc-500">NIM</span>
+                      <span className="col-span-2 font-mono font-medium text-zinc-900 dark:text-zinc-100 print:text-black">: {currentDoc.candidateId}</span>
+                    </div>
+                    <div className="grid grid-cols-3 max-w-md">
+                      <span className="text-zinc-500">Program Studi</span>
+                      <span className="col-span-2 font-medium text-zinc-900 dark:text-zinc-100 print:text-black">: {currentDoc.facultyMajor}</span>
+                    </div>
+                    <div className="grid grid-cols-3 max-w-md">
+                      <span className="text-zinc-500">Perguruan Tinggi</span>
+                      <span className="col-span-2 font-medium text-zinc-900 dark:text-zinc-100 print:text-black">: {currentDoc.institution}</span>
+                    </div>
+                  </div>
+
+                  <p className="indent-6">
+                    Telah diperiksa dan disetujui untuk diseminarkan dan dipertanggungjawabkan di hadapan Tim Penguji pada {currentDoc.facultyMajor}, {currentDoc.institution}.
+                  </p>
+
+                  <p className="text-right text-xs pt-4 font-sans text-zinc-600 dark:text-zinc-400 print:text-black">
+                    Disahkan di {currentDoc.institution.split(" ").slice(-1)[0] || "Kota Kampus"}, Tanggal: {currentDoc.approvalSheet?.approvalDate || currentDoc.generationDate}
+                  </p>
+
+                  {/* Signatures Grid */}
+                  <div className="grid grid-cols-2 gap-8 text-center pt-6">
+                    {currentDoc.approvalSheet?.primarySigners ? (
+                      currentDoc.approvalSheet.primarySigners.map((signer, sIdx) => (
+                        <div key={sIdx}>
+                          <p className="text-zinc-600 dark:text-zinc-400 print:text-black mb-16 leading-tight">
+                            Menyetujui,<br /><strong className="text-zinc-800 dark:text-zinc-200">{signer.role}</strong>
+                          </p>
+                          <p className="font-semibold text-zinc-900 dark:text-zinc-200 print:text-black underline underline-offset-4">
+                            {signer.name}
+                          </p>
+                          <p className="text-zinc-500 font-mono text-[11px] print:text-gray-600 mt-0.5">
+                            {signer.idNumber}
+                          </p>
+                        </div>
+                      ))
+                    ) : (
+                      <>
+                        <div>
+                          <p className="text-zinc-600 dark:text-zinc-400 print:text-black mb-16 leading-tight">
+                            Menyetujui,<br /><strong className="text-zinc-800 dark:text-zinc-200">Dosen Pembimbing Akademik</strong>
+                          </p>
+                          <p className="font-semibold text-zinc-900 dark:text-zinc-200 print:text-black underline underline-offset-4">
+                            (Nama Dosen Pembimbing, M.Kom / Ph.D)
+                          </p>
+                          <p className="text-zinc-500 font-mono text-[11px] print:text-gray-600">NIP. 198501012010121001</p>
+                        </div>
+                        <div>
+                          <p className="text-zinc-600 dark:text-zinc-400 print:text-black mb-16 leading-tight">
+                            Menyetujui,<br /><strong className="text-zinc-800 dark:text-zinc-200">Pembimbing Lapangan / Mentor Industri</strong>
+                          </p>
+                          <p className="font-semibold text-zinc-900 dark:text-zinc-200 print:text-black underline underline-offset-4">
+                            (Nama Mentor Lapangan / PIC Mitra)
+                          </p>
+                          <p className="text-zinc-500 font-mono text-[11px] print:text-gray-600">NIK / NIP. 20210998</p>
+                        </div>
+                      </>
+                    )}
+                  </div>
+
+                  {/* Ketua Program Studi */}
+                  <div className="mt-10 text-center">
+                    <p className="text-zinc-600 dark:text-zinc-400 print:text-black mb-16 leading-tight">
+                      Mengetahui,<br />
+                      <strong className="text-zinc-800 dark:text-zinc-200">
+                        {currentDoc.approvalSheet?.headSigner?.role || "Ketua Program Studi"}
+                      </strong>
+                    </p>
+                    <p className="font-semibold text-zinc-900 dark:text-zinc-200 print:text-black underline underline-offset-4">
+                      {currentDoc.approvalSheet?.headSigner?.name || "(Nama Ketua Program Studi, Dr. Eng.)"}
+                    </p>
+                    <p className="text-zinc-500 font-mono text-[11px] print:text-gray-600 mt-0.5">
+                      {currentDoc.approvalSheet?.headSigner?.idNumber || "NIP. 197805122003121002"}
+                    </p>
+                  </div>
+                </div>
+              );
+            })()}
+
+            <div className="mt-10 text-center font-serif text-xs text-zinc-400">
+              ii
+            </div>
+          </section>
+
+          {/* ========================================================================= */}
+          {/* BAGIAN 3: LEMBAR PERNYATAAN ORISINALITAS (Halaman iii) */}
+          {/* ========================================================================= */}
+          <section id="section-orisinalitas" className="relative pb-12 mb-12 border-b-2 border-zinc-200 dark:border-zinc-850 print:border-black font-serif text-xs sm:text-sm">
+            <div className="flex items-center justify-between mb-4 border-b border-zinc-200 dark:border-zinc-850 pb-2 print:border-black">
+              <div className="text-center w-full">
+                <span className="text-[10px] font-mono uppercase tracking-widest text-zinc-500 block mb-1">
+                  SURAT PERNYATAAN INTEGRITAS AKADEMIK
+                </span>
+                <h2 className="text-base sm:text-lg font-bold text-zinc-900 dark:text-zinc-100 uppercase tracking-wide print:text-black">
+                  PERNYATAAN KEASLIAN &amp; BEBAS PLAGIARISME
+                </h2>
+              </div>
+            </div>
+
+            {/* Check if user uploaded a scanned copy of orisinalitas */}
+            {(() => {
+              const uploadedScan = currentDoc.customSheets?.find(s => s.id === "orisinalitas" && s.fileDataUrl);
+              if (uploadedScan && uploadedScan.fileDataUrl) {
+                return (
+                  <div className="my-6 text-center">
+                    <img
+                      src={uploadedScan.fileDataUrl}
+                      alt="Scan Lembar Orisinalitas"
+                      className="max-h-[600px] w-auto mx-auto rounded-lg border border-zinc-300 dark:border-zinc-700 shadow-sm print:max-h-full print:border-none"
+                    />
+                  </div>
+                );
+              }
+              return (
+                <div className="space-y-4 max-w-2xl mx-auto text-justify leading-relaxed">
+                  <p>Yang bertanda tangan di bawah ini:</p>
+                  <div className="pl-6 space-y-1 font-sans text-xs">
+                    <div className="grid grid-cols-3 max-w-md">
+                      <span className="text-zinc-500">Nama</span>
+                      <span className="col-span-2 font-semibold text-zinc-900 dark:text-zinc-100 print:text-black">: {currentDoc.candidateName}</span>
+                    </div>
+                    <div className="grid grid-cols-3 max-w-md">
+                      <span className="text-zinc-500">NIM</span>
+                      <span className="col-span-2 font-mono font-medium text-zinc-900 dark:text-zinc-100 print:text-black">: {currentDoc.candidateId}</span>
+                    </div>
+                    <div className="grid grid-cols-3 max-w-md">
+                      <span className="text-zinc-500">Program Studi</span>
+                      <span className="col-span-2 font-medium text-zinc-900 dark:text-zinc-100 print:text-black">: {currentDoc.facultyMajor}</span>
+                    </div>
+                    <div className="grid grid-cols-3 max-w-md">
+                      <span className="text-zinc-500">Perguruan Tinggi</span>
+                      <span className="col-span-2 font-medium text-zinc-900 dark:text-zinc-100 print:text-black">: {currentDoc.institution}</span>
+                    </div>
+                  </div>
+
+                  <p className="indent-6 pt-2">
+                    Menyatakan dengan sesungguhnya bahwa naskah usulan karya ilmiah dengan judul:
+                  </p>
+                  <p className="font-bold text-center uppercase py-1 text-zinc-900 dark:text-zinc-100 print:text-black">
+                    "{currentDoc.title}"
+                  </p>
+                  <p className="indent-6">
+                    Adalah benar-benar hasil karya asli dan pemikiran mandiri saya, bukan merupakan hasil penjiplakan, fabrikasi, falsifikasi data, maupun plagiarisme dari karya orang lain, baik sebagian maupun seluruhnya. Apabila di kemudian hari terbukti atau dapat dibuktikan terdapat unsur penipuan, plagiarisme, atau pelanggaran etika akademik dalam karya ini, maka saya bersedia menerima sanksi akademik sesuai peraturan perundang-undangan yang berlaku di {currentDoc.institution} dan hukum Republik Indonesia.
+                  </p>
+
+                  {/* Meterai Box & Signature */}
+                  <div className="pt-8 flex justify-end">
+                    <div className="text-center font-sans space-y-2 w-64">
+                      <p className="text-xs text-zinc-600 dark:text-zinc-400 print:text-black">
+                        {currentDoc.institution.split(" ").slice(-1)[0] || "Kota"}, {currentDoc.generationDate}
+                      </p>
+                      <p className="text-xs text-zinc-500">Yang membuat pernyataan,</p>
+                      <div className="my-3 mx-auto w-24 h-16 border-2 border-dashed border-zinc-400 dark:border-zinc-600 rounded flex flex-col items-center justify-center text-[10px] text-zinc-400 font-mono">
+                        <span>MATERAI</span>
+                        <span className="font-bold">Rp 10.000</span>
+                      </div>
+                      <p className="font-bold text-sm text-zinc-900 dark:text-zinc-100 print:text-black underline underline-offset-4">
+                        {currentDoc.candidateName}
+                      </p>
+                      <p className="font-mono text-xs text-zinc-500">NIM. {currentDoc.candidateId}</p>
+                    </div>
+                  </div>
+                </div>
+              );
+            })()}
+
+            <div className="mt-10 text-center font-serif text-xs text-zinc-400">
+              iii
+            </div>
+          </section>
+
+          {/* ========================================================================= */}
+          {/* BAGIAN 4: KATA PENGANTAR (Halaman iv) */}
+          {/* ========================================================================= */}
+          <section id="section-pengantar" className="relative pb-12 mb-12 border-b-2 border-zinc-200 dark:border-zinc-850 print:border-black font-serif text-xs sm:text-sm">
+            <div className="flex items-center justify-between mb-4 border-b border-zinc-200 dark:border-zinc-850 pb-2 print:border-black">
+              <div className="text-center w-full">
+                <h2 className="text-base sm:text-lg font-bold text-zinc-900 dark:text-zinc-100 uppercase tracking-wide print:text-black">
+                  KATA PENGANTAR
+                </h2>
+              </div>
+            </div>
+
+            <div className="space-y-4 max-w-2xl mx-auto text-justify leading-relaxed">
+              <p className="indent-6">
+                Puji syukur ke hadirat Tuhan Yang Maha Esa atas segala rahmat, taufik, dan hidayah-Nya, sehingga penulis dapat menyelesaikan naskah proposal {currentDoc.category === "magang" ? "Praktik Kerja Lapangan / Magang Industri" : "Skripsi / Tugas Akhir"} yang berjudul <strong>"{currentDoc.title}"</strong> dengan lancar dan tepat waktu.
+              </p>
+              <p className="indent-6">
+                Penyusunan usulan ini dimaksudkan untuk memenuhi salah satu syarat kelulusan kurikulum akademik pada {currentDoc.facultyMajor}, {currentDoc.institution}. Dalam proses penyusunan proposal ini, penulis memperoleh banyak bimbingan, arahan, saran, serta dukungan moral dan material dari berbagai pihak. Oleh karena itu, perkenankan penulis menyampaikan penghargaan dan rasa terima kasih yang sebesar-besarnya kepada:
+              </p>
+              
+              <ol className="list-decimal pl-6 space-y-1.5 font-sans text-xs">
+                <li>Bapak/Ibu Rektor {currentDoc.institution} beserta jajaran pimpinan universitas yang telah memberikan fasilitas dan kesempatan belajar terbaik.</li>
+                <li>Bapak/Ibu Dekan Fakultas dan Ketua Program Studi {currentDoc.facultyMajor} atas arahan kebijakan akademik serta kurikulum yang berkualitas.</li>
+                <li>Dosen Pembimbing Akademik yang dengan penuh kesabaran, dedikasi, dan ketelitian telah meluangkan waktu serta tenaga untuk memberikan bimbingan, evaluasi kritis, dan motivasi berharga kepada penulis.</li>
+                <li>Pimpinan serta segenap staf dan pembimbing lapangan pada {currentDoc.targetEntity} yang telah memberikan izin, fasilitas, data, dan pendampingan kerja profesional selama kegiatan berlangsung.</li>
+                <li>Kedua orang tua dan keluarga tercinta atas doa yang tiada henti, cinta kasih, pengorbanan, dan dukungan moril yang selalu menjadi sumber kekuatan penulis.</li>
+                <li>Rekan-rekan seperjuangan civitas akademika {currentDoc.facultyMajor} yang telah saling bertukar pikiran, berdiskusi, dan berbagi semangat selama studi.</li>
+              </ol>
+
+              <p className="indent-6">
+                Penulis menyadari sepenuhnya bahwa proposal ini masih jauh dari kesempurnaan karena keterbatasan wawasan dan pengalaman. Oleh sebab itu, kritik dan saran yang konstruktif dari para penguji dan pembaca sangat diharapkan demi penyempurnaan karya ilmiah ini ke depan. Akhir kata, semoga usulan ini dapat memberikan sumbangsih nyata bagi pengembangan ilmu pengetahuan dan kemaslahatan masyarakat luas.
+              </p>
+
+              <div className="pt-6 flex justify-end font-sans">
+                <div className="text-center w-56 space-y-1">
+                  <p className="text-xs text-zinc-600 dark:text-zinc-400 print:text-black">
+                    {currentDoc.institution.split(" ").slice(-1)[0] || "Kota Kampus"}, {currentDoc.generationDate}
+                  </p>
+                  <p className="text-xs text-zinc-500 mb-12">Penulis,</p>
+                  <p className="font-bold text-sm text-zinc-900 dark:text-zinc-100 print:text-black underline underline-offset-4">
+                    {currentDoc.candidateName}
+                  </p>
+                  <p className="font-mono text-xs text-zinc-500">NIM. {currentDoc.candidateId}</p>
+                </div>
+              </div>
+            </div>
+
+            <div className="mt-10 text-center font-serif text-xs text-zinc-400">
+              iv
+            </div>
+          </section>
+
+          {/* ========================================================================= */}
+          {/* BAGIAN 5: ABSTRAK & ABSTRACT BILINGUAL (Halaman v) */}
+          {/* ========================================================================= */}
+          <section id="section-abstrak" className="relative pb-12 mb-12 border-b-2 border-zinc-200 dark:border-zinc-850 print:border-black font-serif text-xs sm:text-sm">
+            <div className="flex items-center justify-between mb-4 border-b border-zinc-200 dark:border-zinc-850 pb-2 print:border-black">
+              <div className="text-center w-full">
+                <h2 className="text-base sm:text-lg font-bold text-zinc-900 dark:text-zinc-100 uppercase tracking-wide print:text-black">
+                  ABSTRAK
+                </h2>
+              </div>
+            </div>
+
+            {/* Versi Bahasa Indonesia */}
+            <div className="max-w-2xl mx-auto space-y-3 leading-relaxed text-justify mb-8">
+              <div className="text-center font-sans text-xs space-y-0.5 mb-3">
+                <p className="font-bold text-zinc-900 dark:text-zinc-100 print:text-black uppercase">{currentDoc.title}</p>
+                <p className="text-zinc-600 dark:text-zinc-400 print:text-black">
+                  Nama Mahasiswa: {currentDoc.candidateName} (NIM: {currentDoc.candidateId})
+                </p>
+                <p className="text-zinc-500 text-[11px]">{currentDoc.facultyMajor}, {currentDoc.institution}</p>
+              </div>
+
+              <p className="indent-6">
+                {currentDoc.executiveSummary || `Usulan penelitian ini dirancang untuk mengatasi permasalahan mendasar pada objek studi ${currentDoc.targetEntity}. Pendekatan yang diusulkan mengintegrasikan landasan teoretis terdepan dengan metodologi terukur demi mencapai efisiensi dan validitas ilmiah yang tinggi.`}
+              </p>
+              <p className="indent-6">
+                Metodologi pelaksanaan mencakup tahapan identifikasi kebutuhan, perancangan arsitektur pemecahan masalah, validasi empiris, serta evaluasi berbasis metrik kinerja terstandar. Diharapkan luaran dari kegiatan ini mampu memberikan kontribusi aplikatif berupa prototipe kerja dan pedoman operasional bagi ${currentDoc.targetEntity}, serta memperkaya literatur ilmiah di lingkungan ${currentDoc.institution}.
+              </p>
+
+              <div className="pt-2 font-sans text-xs">
+                <p>
+                  <strong>Kata Kunci:</strong> <em>{currentDoc.category}, {currentDoc.targetDepartment || "Metodologi"}, {currentDoc.facultyMajor.split(" ").slice(0, 2).join(" ")}, Optimasi Sistem, Analisis Kinerja</em>
+                </p>
+              </div>
+            </div>
+
+            {/* Versi Bahasa Inggris (Abstract) */}
+            <div className="max-w-2xl mx-auto pt-6 border-t border-zinc-200 dark:border-zinc-800 print:border-black space-y-3 leading-relaxed text-justify italic">
+              <h3 className="text-sm font-bold text-center uppercase tracking-wider not-italic text-zinc-900 dark:text-zinc-100 print:text-black">
+                ABSTRACT
+              </h3>
+              <p className="indent-6">
+                This academic proposal addresses the fundamental operational and scientific challenges observed within {currentDoc.targetEntity}. The research method rigorously integrates multi-disciplinary foundational theories with systematic empirical measurement protocols to achieve high reliability and rigorous validity.
+              </p>
+              <p className="indent-6">
+                The execution pipeline encompasses structured problem scoping, architectural design, controlled implementation, and comprehensive validation against benchmark industry standards. The expected deliverables include verified technological prototypes, operational standard guidelines, and peer-reviewed academic contributions beneficial to both {currentDoc.targetEntity} and {currentDoc.institution}.
+              </p>
+              <div className="pt-2 font-sans text-xs not-italic">
+                <p>
+                  <strong>Keywords:</strong> <em>Academic Research, Applied Methodology, Operational Excellence, Performance Metric, {currentDoc.category.toUpperCase()}</em>
+                </p>
+              </div>
+            </div>
+
+            <div className="mt-10 text-center font-serif text-xs text-zinc-400">
+              v
+            </div>
+          </section>
+
+          {/* ========================================================================= */}
+          {/* BAGIAN 6: DAFTAR ISI FORMAL (Halaman vi) */}
+          {/* ========================================================================= */}
+          <section id="section-daftar-isi" className="relative pb-12 mb-12 border-b-2 border-zinc-200 dark:border-zinc-850 print:border-black font-serif text-xs sm:text-sm">
+            <div className="flex items-center justify-between mb-6 border-b border-zinc-200 dark:border-zinc-850 pb-2 print:border-black">
+              <div className="text-center w-full">
+                <h2 className="text-base sm:text-lg font-bold text-zinc-900 dark:text-zinc-100 uppercase tracking-wide print:text-black">
+                  DAFTAR ISI
+                </h2>
+              </div>
+            </div>
+
+            <div className="max-w-2xl mx-auto space-y-1.5 font-sans text-xs leading-normal">
+              {/* Preliminary Entries */}
+              {[
+                { title: "HALAMAN JUDUL / COVER", page: "i", anchor: "section-cover", isBold: true },
+                { title: "LEMBAR PENGESAHAN", page: "ii", anchor: "section-pengesahan", isBold: true },
+                { title: "LEMBAR PERNYATAAN BEBAS PLAGIARISME", page: "iii", anchor: "section-orisinalitas", isBold: true },
+                { title: "KATA PENGANTAR", page: "iv", anchor: "section-pengantar", isBold: true },
+                { title: "ABSTRAK", page: "v", anchor: "section-abstrak", isBold: true },
+                { title: "ABSTRACT", page: "vi", anchor: "section-abstrak", isBold: true },
+                { title: "DAFTAR ISI", page: "vii", anchor: "section-daftar-isi", isBold: true },
+                { title: "DAFTAR GAMBAR", page: "viii", anchor: "section-daftar-gambar", isBold: true },
+                { title: "DAFTAR TABEL", page: "ix", anchor: "section-daftar-tabel", isBold: true },
+                { title: "RINGKASAN EKSEKUTIF", page: "x", anchor: "section-ringkasan", isBold: true },
+              ].map((item, idx) => (
+                <div key={idx} className="flex items-baseline justify-between hover:text-indigo-600 dark:hover:text-indigo-400 cursor-pointer group" onClick={() => scrollToSection(item.anchor)}>
+                  <span className={`${item.isBold ? "font-semibold text-zinc-900 dark:text-zinc-100" : "text-zinc-700 dark:text-zinc-300"} group-hover:underline`}>{item.title}</span>
+                  <span className="flex-1 mx-2 border-b border-dotted border-zinc-300 dark:border-zinc-700" />
+                  <span className="font-mono text-zinc-500 font-medium">{item.page}</span>
+                </div>
+              ))}
+
+              <div className="pt-2" />
+
+              {/* BAB I */}
+              <div className="flex items-baseline justify-between font-semibold text-zinc-900 dark:text-zinc-100 pt-2 cursor-pointer hover:text-indigo-600" onClick={() => scrollToSection("section-bab1")}>
+                <span>BAB I PENDAHULUAN</span>
+                <span className="flex-1 mx-2 border-b border-dotted border-zinc-300 dark:border-zinc-700" />
+                <span className="font-mono text-zinc-700 dark:text-zinc-300">1</span>
+              </div>
+              <div className="pl-4 space-y-1 text-zinc-600 dark:text-zinc-400">
+                <div className="flex items-baseline justify-between cursor-pointer hover:text-indigo-600" onClick={() => scrollToSection("section-bab1")}>
+                  <span>1.1 Latar Belakang Masalah</span>
+                  <span className="flex-1 mx-2 border-b border-dotted border-zinc-300 dark:border-zinc-800" />
+                  <span className="font-mono">1</span>
+                </div>
+                <div className="flex items-baseline justify-between cursor-pointer hover:text-indigo-600" onClick={() => scrollToSection("section-bab1")}>
+                  <span>1.2 Rumusan Masalah</span>
+                  <span className="flex-1 mx-2 border-b border-dotted border-zinc-300 dark:border-zinc-800" />
+                  <span className="font-mono">4</span>
+                </div>
+                <div className="flex items-baseline justify-between cursor-pointer hover:text-indigo-600" onClick={() => scrollToSection("section-bab1")}>
+                  <span>1.3 Batasan Masalah</span>
+                  <span className="flex-1 mx-2 border-b border-dotted border-zinc-300 dark:border-zinc-800" />
+                  <span className="font-mono">5</span>
+                </div>
+                <div className="flex items-baseline justify-between cursor-pointer hover:text-indigo-600" onClick={() => scrollToSection("section-bab1")}>
+                  <span>1.4 Tujuan Kegiatan / Riset</span>
+                  <span className="flex-1 mx-2 border-b border-dotted border-zinc-300 dark:border-zinc-800" />
+                  <span className="font-mono">6</span>
+                </div>
+                <div className="flex items-baseline justify-between cursor-pointer hover:text-indigo-600" onClick={() => scrollToSection("section-bab1")}>
+                  <span>1.5 Manfaat Kegiatan (Mahasiswa, Mitra, Akademik)</span>
+                  <span className="flex-1 mx-2 border-b border-dotted border-zinc-300 dark:border-zinc-800" />
+                  <span className="font-mono">7</span>
+                </div>
+              </div>
+
+              {/* BAB II */}
+              <div className="flex items-baseline justify-between font-semibold text-zinc-900 dark:text-zinc-100 pt-2 cursor-pointer hover:text-indigo-600" onClick={() => scrollToSection("section-bab2")}>
+                <span>BAB II TINJAUAN PUSTAKA / LANDASAN TEORI</span>
+                <span className="flex-1 mx-2 border-b border-dotted border-zinc-300 dark:border-zinc-700" />
+                <span className="font-mono text-zinc-700 dark:text-zinc-300">8</span>
+              </div>
+              <div className="pl-4 space-y-1 text-zinc-600 dark:text-zinc-400">
+                <div className="flex items-baseline justify-between cursor-pointer hover:text-indigo-600" onClick={() => scrollToSection("section-bab2")}>
+                  <span>2.1 Landasan Teori Ilmiah ({currentDoc.bab2.landasanTeori?.length || 13} Teori Otoritatif)</span>
+                  <span className="flex-1 mx-2 border-b border-dotted border-zinc-300 dark:border-zinc-800" />
+                  <span className="font-mono">8</span>
+                </div>
+                <div className="flex items-baseline justify-between cursor-pointer hover:text-indigo-600" onClick={() => scrollToSection("section-bab2")}>
+                  <span>2.2 Matriks Sintesis Keaslian Penelitian (PRISMA 2020)</span>
+                  <span className="flex-1 mx-2 border-b border-dotted border-zinc-300 dark:border-zinc-800" />
+                  <span className="font-mono">18</span>
+                </div>
+                <div className="flex items-baseline justify-between cursor-pointer hover:text-indigo-600" onClick={() => scrollToSection("section-bab2")}>
+                  <span>2.3 Kerangka Konsep &amp; Alur Berpikir</span>
+                  <span className="flex-1 mx-2 border-b border-dotted border-zinc-300 dark:border-zinc-800" />
+                  <span className="font-mono">22</span>
+                </div>
+                <div className="flex items-baseline justify-between cursor-pointer hover:text-indigo-600" onClick={() => scrollToSection("section-bab2")}>
+                  <span>2.4 Hipotesis Penelitian / Ekspektasi Capaian</span>
+                  <span className="flex-1 mx-2 border-b border-dotted border-zinc-300 dark:border-zinc-800" />
+                  <span className="font-mono">24</span>
+                </div>
+              </div>
+
+              {/* BAB III */}
+              <div className="flex items-baseline justify-between font-semibold text-zinc-900 dark:text-zinc-100 pt-2 cursor-pointer hover:text-indigo-600" onClick={() => scrollToSection("section-bab3")}>
+                <span>BAB III METODOLOGI PENELITIAN / PELAKSANAAN</span>
+                <span className="flex-1 mx-2 border-b border-dotted border-zinc-300 dark:border-zinc-700" />
+                <span className="font-mono text-zinc-700 dark:text-zinc-300">26</span>
+              </div>
+              <div className="pl-4 space-y-1 text-zinc-600 dark:text-zinc-400">
+                <div className="flex items-baseline justify-between cursor-pointer hover:text-indigo-600" onClick={() => scrollToSection("section-bab3")}>
+                  <span>3.1 Desain Penelitian &amp; Bagan Alir Pelaksanaan</span>
+                  <span className="flex-1 mx-2 border-b border-dotted border-zinc-300 dark:border-zinc-800" />
+                  <span className="font-mono">26</span>
+                </div>
+                <div className="flex items-baseline justify-between cursor-pointer hover:text-indigo-600" onClick={() => scrollToSection("section-bab3")}>
+                  <span>3.2 Populasi, Sampel, &amp; Subjek Penelitian / WBS</span>
+                  <span className="flex-1 mx-2 border-b border-dotted border-zinc-300 dark:border-zinc-800" />
+                  <span className="font-mono">30</span>
+                </div>
+                <div className="flex items-baseline justify-between cursor-pointer hover:text-indigo-600" onClick={() => scrollToSection("section-bab3")}>
+                  <span>3.3 Definisi Operasional Variabel (Tabel 3 Garis Terbuka)</span>
+                  <span className="flex-1 mx-2 border-b border-dotted border-zinc-300 dark:border-zinc-800" />
+                  <span className="font-mono">32</span>
+                </div>
+                <div className="flex items-baseline justify-between cursor-pointer hover:text-indigo-600" onClick={() => scrollToSection("section-bab3")}>
+                  <span>3.4 Instrumen Penelitian, Kalibrasi, &amp; Perangkat Kerja</span>
+                  <span className="flex-1 mx-2 border-b border-dotted border-zinc-300 dark:border-zinc-800" />
+                  <span className="font-mono">35</span>
+                </div>
+                <div className="flex items-baseline justify-between cursor-pointer hover:text-indigo-600" onClick={() => scrollToSection("section-bab3")}>
+                  <span>3.5 Protokol Etika Penelitian / SOP Industri</span>
+                  <span className="flex-1 mx-2 border-b border-dotted border-zinc-300 dark:border-zinc-800" />
+                  <span className="font-mono">37</span>
+                </div>
+              </div>
+
+              {/* BAB IV */}
+              <div className="flex items-baseline justify-between font-semibold text-zinc-900 dark:text-zinc-100 pt-2 cursor-pointer hover:text-indigo-600" onClick={() => scrollToSection("section-bab4")}>
+                <span>BAB IV JADWAL KEGIATAN &amp; ALOKASI ANGGARAN</span>
+                <span className="flex-1 mx-2 border-b border-dotted border-zinc-300 dark:border-zinc-700" />
+                <span className="font-mono text-zinc-700 dark:text-zinc-300">39</span>
+              </div>
+              <div className="pl-4 space-y-1 text-zinc-600 dark:text-zinc-400">
+                <div className="flex items-baseline justify-between cursor-pointer hover:text-indigo-600" onClick={() => scrollToSection("section-bab4")}>
+                  <span>4.1 Matriks Jadwal Pelaksanaan (Gantt Chart 16 Minggu)</span>
+                  <span className="flex-1 mx-2 border-b border-dotted border-zinc-300 dark:border-zinc-800" />
+                  <span className="font-mono">39</span>
+                </div>
+                <div className="flex items-baseline justify-between cursor-pointer hover:text-indigo-600" onClick={() => scrollToSection("section-bab4")}>
+                  <span>4.2 Rencana Anggaran Biaya (RAB)</span>
+                  <span className="flex-1 mx-2 border-b border-dotted border-zinc-300 dark:border-zinc-800" />
+                  <span className="font-mono">42</span>
+                </div>
+                <div className="flex items-baseline justify-between cursor-pointer hover:text-indigo-600" onClick={() => scrollToSection("section-bab4")}>
+                  <span>4.3 Rencana Diseminasi &amp; Publikasi Ilmiah</span>
+                  <span className="flex-1 mx-2 border-b border-dotted border-zinc-300 dark:border-zinc-800" />
+                  <span className="font-mono">44</span>
+                </div>
+              </div>
+
+              {/* BAB V */}
+              <div className="flex items-baseline justify-between font-semibold text-zinc-900 dark:text-zinc-100 pt-2 cursor-pointer hover:text-indigo-600" onClick={() => scrollToSection("section-bab5")}>
+                <span>BAB V KESIMPULAN, KONTRIBUSI, &amp; MITIGASI RISIKO</span>
+                <span className="flex-1 mx-2 border-b border-dotted border-zinc-300 dark:border-zinc-700" />
+                <span className="font-mono text-zinc-700 dark:text-zinc-300">46</span>
+              </div>
+
+              {/* DAFTAR PUSTAKA & LAMPIRAN */}
+              <div className="flex items-baseline justify-between font-semibold text-zinc-900 dark:text-zinc-100 pt-2 cursor-pointer hover:text-indigo-600" onClick={() => scrollToSection("section-pustaka")}>
+                <span>DAFTAR PUSTAKA ({citationStyle === "apa" ? "STANDAR APA 7TH" : "STANDAR IEEE"})</span>
+                <span className="flex-1 mx-2 border-b border-dotted border-zinc-300 dark:border-zinc-700" />
+                <span className="font-mono text-zinc-700 dark:text-zinc-300">50</span>
+              </div>
+              <div className="flex items-baseline justify-between font-semibold text-zinc-900 dark:text-zinc-100 pt-2 cursor-pointer hover:text-indigo-600" onClick={() => scrollToSection("section-lampiran")}>
+                <span>LAMPIRAN-LAMPIRAN AKADEMIK</span>
+                <span className="flex-1 mx-2 border-b border-dotted border-zinc-300 dark:border-zinc-700" />
+                <span className="font-mono text-zinc-700 dark:text-zinc-300">55</span>
+              </div>
+              <div className="pl-4 space-y-1 text-zinc-600 dark:text-zinc-400">
+                <div className="flex items-baseline justify-between cursor-pointer hover:text-indigo-600" onClick={() => scrollToSection("section-lampiran")}>
+                  <span>Lampiran A: Pedoman Wawancara &amp; Instrumen Riset</span>
+                  <span className="flex-1 mx-2 border-b border-dotted border-zinc-300 dark:border-zinc-800" />
+                  <span className="font-mono">55</span>
+                </div>
+                <div className="flex items-baseline justify-between cursor-pointer hover:text-indigo-600" onClick={() => scrollToSection("section-lampiran")}>
+                  <span>Lampiran B: Matriks Logbook Aktivitas Harian &amp; Bukti Capaian</span>
+                  <span className="flex-1 mx-2 border-b border-dotted border-zinc-300 dark:border-zinc-800" />
+                  <span className="font-mono">58</span>
+                </div>
+                <div className="flex items-baseline justify-between cursor-pointer hover:text-indigo-600" onClick={() => scrollToSection("section-lampiran")}>
+                  <span>Lampiran C: Berita Acara Bimbingan / Ujian Kolokium</span>
+                  <span className="flex-1 mx-2 border-b border-dotted border-zinc-300 dark:border-zinc-800" />
+                  <span className="font-mono">62</span>
+                </div>
+              </div>
+            </div>
+
+            <div className="mt-10 text-center font-serif text-xs text-zinc-400">
+              vii
+            </div>
+          </section>
+
+          {/* ========================================================================= */}
+          {/* BAGIAN 7: DAFTAR GAMBAR FORMAL (Halaman vii) */}
+          {/* ========================================================================= */}
+          <section id="section-daftar-gambar" className="relative pb-12 mb-12 border-b-2 border-zinc-200 dark:border-zinc-850 print:border-black font-serif text-xs sm:text-sm">
+            <div className="flex items-center justify-between mb-6 border-b border-zinc-200 dark:border-zinc-850 pb-2 print:border-black">
+              <div className="text-center w-full">
+                <h2 className="text-base sm:text-lg font-bold text-zinc-900 dark:text-zinc-100 uppercase tracking-wide print:text-black">
+                  DAFTAR GAMBAR
+                </h2>
+              </div>
+              <button
+                type="button"
+                onClick={() => setIsImageManagerModalOpen(true)}
+                className="no-print absolute right-0 top-0 text-[11px] font-mono text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 bg-white dark:bg-zinc-900 px-2.5 py-1 rounded-lg border border-zinc-200 dark:border-zinc-800 flex items-center gap-1.5 cursor-pointer shadow-xs"
+              >
+                <ImageIcon className="w-3.5 h-3.5 text-indigo-500" />
+                <span>+ Kelola Gambar</span>
+              </button>
+            </div>
+
+            <div className="max-w-2xl mx-auto space-y-2 font-sans text-xs">
+              <div className="flex items-baseline justify-between hover:text-indigo-600 cursor-pointer" onClick={() => scrollToSection("section-bab2")}>
+                <span>Gambar 2.1 Diagram Kerangka Konseptual &amp; Pola Pikir Penelitian</span>
+                <span className="flex-1 mx-2 border-b border-dotted border-zinc-300 dark:border-zinc-700" />
+                <span className="font-mono text-zinc-600 dark:text-zinc-400">23</span>
+              </div>
+              <div className="flex items-baseline justify-between hover:text-indigo-600 cursor-pointer" onClick={() => scrollToSection("section-bab3")}>
+                <span>Gambar 3.1 Bagan Alir Tahapan Metodologi Pelaksanaan {currentDoc.category === "magang" ? "Magang Industri" : "Penelitian"}</span>
+                <span className="flex-1 mx-2 border-b border-dotted border-zinc-300 dark:border-zinc-700" />
+                <span className="font-mono text-zinc-600 dark:text-zinc-400">28</span>
+              </div>
+
+              {/* Dynamic user figures */}
+              {currentDoc.documentFigures && currentDoc.documentFigures.length > 0 && currentDoc.documentFigures.map((fig, fIdx) => (
+                <div key={fig.id || fIdx} className="flex items-baseline justify-between hover:text-indigo-600 cursor-pointer" onClick={() => scrollToSection(`section-bab${fig.chapterPlacement || 3}`)}>
+                  <span>{fig.figureNumber || `Gambar ${fig.chapterPlacement || 3}.${fIdx + 2}`} {fig.caption}</span>
+                  <span className="flex-1 mx-2 border-b border-dotted border-zinc-300 dark:border-zinc-700" />
+                  <span className="font-mono text-zinc-600 dark:text-zinc-400">{20 + (fig.chapterPlacement || 3) * 6 + fIdx}</span>
+                </div>
+              ))}
+            </div>
+
+            <div className="mt-10 text-center font-serif text-xs text-zinc-400">
+              viii
+            </div>
+          </section>
+
+          {/* ========================================================================= */}
+          {/* BAGIAN 8: DAFTAR TABEL FORMAL (Halaman viii) */}
+          {/* ========================================================================= */}
+          <section id="section-daftar-tabel" className="relative pb-12 mb-12 border-b-2 border-zinc-200 dark:border-zinc-850 print:border-black font-serif text-xs sm:text-sm">
+            <div className="flex items-center justify-between mb-6 border-b border-zinc-200 dark:border-zinc-850 pb-2 print:border-black">
+              <div className="text-center w-full">
+                <h2 className="text-base sm:text-lg font-bold text-zinc-900 dark:text-zinc-100 uppercase tracking-wide print:text-black">
+                  DAFTAR TABEL
+                </h2>
+              </div>
+            </div>
+
+            <div className="max-w-2xl mx-auto space-y-2 font-sans text-xs">
+              <div className="flex items-baseline justify-between hover:text-indigo-600 cursor-pointer" onClick={() => scrollToSection("section-bab2")}>
+                <span>Tabel 2.1 Matriks Sintesis Keaslian Penelitian (PRISMA 2020 7-Kolom)</span>
+                <span className="flex-1 mx-2 border-b border-dotted border-zinc-300 dark:border-zinc-700" />
+                <span className="font-mono text-zinc-600 dark:text-zinc-400">19</span>
+              </div>
+              <div className="flex items-baseline justify-between hover:text-indigo-600 cursor-pointer" onClick={() => scrollToSection("section-bab3")}>
+                <span>Tabel 3.1 Definisi Operasional Variabel Penelitian (DOV)</span>
+                <span className="flex-1 mx-2 border-b border-dotted border-zinc-300 dark:border-zinc-700" />
+                <span className="font-mono text-zinc-600 dark:text-zinc-400">32</span>
+              </div>
+              <div className="flex items-baseline justify-between hover:text-indigo-600 cursor-pointer" onClick={() => scrollToSection("section-bab4")}>
+                <span>Tabel 4.1 Matriks Rencana Kerja Mingguan (Gantt Chart 16 Minggu)</span>
+                <span className="flex-1 mx-2 border-b border-dotted border-zinc-300 dark:border-zinc-700" />
+                <span className="font-mono text-zinc-600 dark:text-zinc-400">40</span>
+              </div>
+              <div className="flex items-baseline justify-between hover:text-indigo-600 cursor-pointer" onClick={() => scrollToSection("section-bab4")}>
+                <span>Tabel 4.2 Rencana Anggaran Biaya (RAB Penelitian)</span>
+                <span className="flex-1 mx-2 border-b border-dotted border-zinc-300 dark:border-zinc-700" />
+                <span className="font-mono text-zinc-600 dark:text-zinc-400">42</span>
+              </div>
+              <div className="flex items-baseline justify-between hover:text-indigo-600 cursor-pointer" onClick={() => scrollToSection("section-bab5")}>
+                <span>Tabel 5.1 Matriks Mitigasi Risiko &amp; Rencana Kontinjensi</span>
+                <span className="flex-1 mx-2 border-b border-dotted border-zinc-300 dark:border-zinc-700" />
+                <span className="font-mono text-zinc-600 dark:text-zinc-400">48</span>
+              </div>
+            </div>
+
+            <div className="mt-10 text-center font-serif text-xs text-zinc-400">
+              ix
+            </div>
+          </section>
+
+          {/* ========================================================================= */}
+          {/* BAGIAN 9: RINGKASAN EKSEKUTIF */}
+          {/* ========================================================================= */}
           <div id="section-ringkasan" className="mb-10 p-4 sm:p-5 rounded-xl bg-zinc-50 dark:bg-zinc-900/60 border border-zinc-200 dark:border-zinc-850 print:border-gray-300 print:bg-gray-50">
             <div className="flex items-center justify-between mb-2">
               <h3 className="text-xs font-mono font-semibold uppercase tracking-wider text-zinc-800 dark:text-zinc-300 print:text-black">
@@ -1357,10 +2203,41 @@ NIP / NIK.
 
           {/* BAB II */}
           <section id="section-bab2" className="mb-10">
-            <div className="border-b border-zinc-200 dark:border-zinc-850 pb-2 mb-4 print:border-black">
+            <div className="border-b border-zinc-200 dark:border-zinc-850 pb-2 mb-4 print:border-black flex items-center justify-between">
               <h2 className="text-base sm:text-lg font-serif font-bold text-zinc-900 dark:text-zinc-100 print:text-black uppercase">
                 {currentDoc.bab2.title}
               </h2>
+              <button
+                type="button"
+                onClick={() => setIsTheoryCustomizerModalOpen(true)}
+                className="no-print text-[11px] font-mono text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 bg-indigo-50 dark:bg-indigo-950/50 px-2.5 py-1 rounded-lg border border-indigo-200 dark:border-indigo-800 flex items-center gap-1.5 cursor-pointer transition-colors shadow-xs"
+              >
+                <Sparkles className="w-3.5 h-3.5 text-indigo-500" />
+                <span>Kustomisasi Teori ({currentDoc.bab2.landasanTeori?.length || 13} Teori)</span>
+              </button>
+            </div>
+
+            {/* Depth Banner & Customizer Alert */}
+            <div className="no-print mb-4 p-3 rounded-xl bg-indigo-50/70 dark:bg-indigo-950/40 border border-indigo-200 dark:border-indigo-850 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
+              <div className="flex items-center gap-2">
+                <BookOpen className="w-4 h-4 text-indigo-600 dark:text-indigo-400 flex-shrink-0" />
+                <div>
+                  <p className="font-semibold text-zinc-900 dark:text-zinc-100">
+                    Kedalaman Bab II: {currentDoc.bab2.landasanTeori?.length || 0} Landasan Teori Ilmiah Otoritatif
+                  </p>
+                  <p className="text-[11px] text-zinc-500 dark:text-zinc-400">
+                    Setiap teori disinkronkan langsung dengan sitasi jurnal pada Daftar Pustaka ({citationStyle === "apa" ? "APA 7th" : "IEEE"})
+                  </p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setIsTheoryCustomizerModalOpen(true)}
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white font-medium text-xs shadow-xs transition-colors cursor-pointer self-start sm:self-auto"
+              >
+                <Sparkles className="w-3.5 h-3.5" />
+                <span>+ Atur Jumlah Teori (5, 8, 13, 20)</span>
+              </button>
             </div>
 
             <div className="space-y-4 text-xs sm:text-sm text-zinc-800 dark:text-zinc-300 leading-relaxed text-justify print:text-black font-sans">
@@ -1482,15 +2359,38 @@ NIP / NIK.
                   )}
                 </>
               )}
+
+              {/* Inserted Chapter 2 Custom Figures */}
+              {currentDoc.documentFigures?.filter(f => f.chapterPlacement === 2).map((fig, fIdx) => (
+                <div key={fig.id || fIdx} className="my-6 p-4 rounded-xl border border-zinc-200 dark:border-zinc-800 bg-zinc-50/50 dark:bg-zinc-900/30 text-center">
+                  <img
+                    src={fig.imageDataUrl}
+                    alt={fig.caption}
+                    className="max-h-80 object-contain mx-auto rounded-lg shadow-xs"
+                  />
+                  <p className="text-xs font-serif font-bold text-zinc-900 dark:text-zinc-100 mt-2 text-center">
+                    {fig.figureNumber || `Gambar 2.${fIdx + 2}`} {fig.caption}
+                  </p>
+                  {fig.source && <p className="text-[11px] text-zinc-500 font-sans mt-0.5">Sumber: {fig.source}</p>}
+                </div>
+              ))}
             </div>
           </section>
 
           {/* BAB III */}
           <section id="section-bab3" className="mb-10">
-            <div className="border-b border-zinc-200 dark:border-zinc-850 pb-2 mb-4 print:border-black">
+            <div className="border-b border-zinc-200 dark:border-zinc-850 pb-2 mb-4 print:border-black flex items-center justify-between">
               <h2 className="text-base sm:text-lg font-serif font-bold text-zinc-900 dark:text-zinc-100 print:text-black uppercase">
                 {currentDoc.bab3.title}
               </h2>
+              <button
+                type="button"
+                onClick={() => setIsImageManagerModalOpen(true)}
+                className="no-print text-[11px] font-mono text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 bg-white dark:bg-zinc-900 px-2.5 py-1 rounded-lg border border-zinc-200 dark:border-zinc-800 flex items-center gap-1.5 cursor-pointer shadow-xs"
+              >
+                <ImageIcon className="w-3.5 h-3.5 text-indigo-500" />
+                <span>+ Sisipkan Gambar / Diagram</span>
+              </button>
             </div>
 
             {/* Formal Academic Figure 3.1: Bagan Alir Tahapan Pelaksanaan */}
@@ -1502,6 +2402,21 @@ NIP / NIK.
                 Gambar 3.1 Bagan Alir Tahapan Pelaksanaan {currentDoc.category === "magang" ? "Kegiatan Magang & Analisis" : "Penelitian"}
               </p>
             </div>
+
+            {/* Inserted Chapter 3 Custom Figures */}
+            {currentDoc.documentFigures?.filter(f => f.chapterPlacement === 3).map((fig, fIdx) => (
+              <div key={fig.id || fIdx} className="my-6 p-4 rounded-xl border border-zinc-200 dark:border-zinc-850 bg-zinc-50/50 dark:bg-zinc-900/30 text-center">
+                <img
+                  src={fig.imageDataUrl}
+                  alt={fig.caption}
+                  className="max-h-80 object-contain mx-auto rounded-lg shadow-xs"
+                />
+                <p className="text-xs font-serif font-bold text-zinc-900 dark:text-zinc-100 mt-2 text-center">
+                  {fig.figureNumber || `Gambar 3.${fIdx + 2}`} {fig.caption}
+                </p>
+                {fig.source && <p className="text-[11px] text-zinc-500 font-sans mt-0.5">Sumber: {fig.source}</p>}
+              </div>
+            ))}
 
             <div className="space-y-4 text-xs sm:text-sm text-zinc-800 dark:text-zinc-300 leading-relaxed text-justify print:text-black font-sans">
               {currentDoc.category === "magang" ? (
@@ -1836,147 +2751,204 @@ NIP / NIK.
             </section>
           )}
 
-          {/* Lembar Pengesahan Formal */}
-          <div id="section-pengesahan" className="pt-8 mt-10 border-t border-zinc-200 dark:border-zinc-850 print:border-black font-sans text-xs relative">
-            <div className="flex items-center justify-between mb-2">
-              <h3 className="font-serif font-bold text-sm text-zinc-900 dark:text-zinc-100 uppercase tracking-wider print:text-black text-center flex-1">
-                {currentDoc.approvalSheet?.title || "LEMBAR PENGESAHAN PROPOSAL"}
-              </h3>
-              <button
-                type="button"
-                onClick={() => setIsApprovalModalOpen(true)}
-                className="no-print text-[11px] font-mono text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 bg-white dark:bg-zinc-900 px-2.5 py-1 rounded-lg border border-zinc-200 dark:border-zinc-800 flex items-center gap-1.5 cursor-pointer transition-colors shadow-xs"
-                title="Kustomisasi tanda tangan dosen pembimbing dan kaprodi"
-              >
-                <FileSignature className="w-3.5 h-3.5 text-zinc-500 dark:text-zinc-400" />
-                <span>Edit Tanda Tangan</span>
-              </button>
-            </div>
-            <p className="text-center text-[11px] text-zinc-500 font-mono mb-8 print:text-gray-600">
-              Disahkan di {currentDoc.institution}, Tanggal: {currentDoc.approvalSheet?.approvalDate || currentDoc.generationDate}
-            </p>
-
-            <div className="grid grid-cols-2 gap-8 text-center pt-4">
-              {currentDoc.approvalSheet?.primarySigners ? (
-                currentDoc.approvalSheet.primarySigners.map((signer, sIdx) => (
-                  <div key={sIdx}>
-                    <p className="text-zinc-600 dark:text-zinc-400 print:text-black mb-16 leading-tight">
-                      Menyetujui,<br /><strong className="text-zinc-800 dark:text-zinc-200">{signer.role}</strong>
-                    </p>
-                    <p className="font-semibold text-zinc-900 dark:text-zinc-200 print:text-black underline underline-offset-4">
-                      {signer.name}
-                    </p>
-                    <p className="text-zinc-500 font-mono print:text-gray-600 mt-0.5">
-                      {signer.idNumber}
-                    </p>
-                  </div>
-                ))
-              ) : (
-                <>
-                  <div>
-                    <p className="text-zinc-600 dark:text-zinc-400 print:text-black mb-16">Menyetujui,<br /><strong className="text-zinc-800 dark:text-zinc-200">Dosen Pembimbing Akademik</strong></p>
-                    <p className="font-semibold text-zinc-900 dark:text-zinc-200 print:text-black">(__________________________________)</p>
-                    <p className="text-zinc-500 font-mono print:text-gray-600">NIP.</p>
-                  </div>
-
-                  <div>
-                    <p className="text-zinc-600 dark:text-zinc-400 print:text-black mb-16">Menyetujui,<br /><strong className="text-zinc-800 dark:text-zinc-200">Pimpinan / Mentor Lapangan {currentDoc.targetEntity}</strong></p>
-                    <p className="font-semibold text-zinc-900 dark:text-zinc-200 print:text-black">(__________________________________)</p>
-                    <p className="text-zinc-500 font-mono print:text-gray-600">NIP / NIK.</p>
-                  </div>
-                </>
-              )}
-            </div>
-
-            {/* Ketua Program Studi Approval */}
-            {currentDoc.approvalSheet?.headSigner && (
-              <div className="mt-12 text-center">
-                <p className="text-zinc-500 dark:text-zinc-400 print:text-black mb-16 leading-tight">
-                  Mengetahui,<br /><strong className="text-zinc-800 dark:text-zinc-200">{currentDoc.approvalSheet.headSigner.role}</strong>
-                </p>
-                <p className="font-semibold text-zinc-900 dark:text-zinc-200 print:text-black underline underline-offset-4">
-                  {currentDoc.approvalSheet.headSigner.name}
-                </p>
-                <p className="text-zinc-500 font-mono print:text-gray-600 mt-0.5">
-                  {currentDoc.approvalSheet.headSigner.idNumber}
-                </p>
-              </div>
-            )}
-          </div>
-
           {/* LAMPIRAN-LAMPIRAN AKADEMIK */}
           <section id="section-lampiran" className="mt-12 pt-8 border-t-2 border-zinc-300 dark:border-zinc-800 print:border-black font-sans">
-            <div className="border-b border-zinc-200 dark:border-zinc-850 pb-2 mb-6 print:border-black text-center">
-              <span className="text-[10px] font-mono uppercase tracking-widest text-zinc-500 dark:text-zinc-400 block mb-1">
-                BERKAS PENDUKUNG & INSTRUMEN BAKU
-              </span>
-              <h2 className="text-base sm:text-lg font-serif font-bold text-zinc-900 dark:text-zinc-100 print:text-black uppercase">
-                LAMPIRAN-LAMPIRAN DOKUMEN USULAN
-              </h2>
+            <div className="border-b border-zinc-200 dark:border-zinc-850 pb-2 mb-6 print:border-black text-center flex flex-col sm:flex-row items-center justify-between gap-3">
+              <div className="text-left">
+                <span className="text-[10px] font-mono uppercase tracking-widest text-zinc-500 dark:text-zinc-400 block mb-1">
+                  BERKAS PENDUKUNG, LOGBOOK &amp; INSTRUMEN BAKU
+                </span>
+                <h2 className="text-base sm:text-lg font-serif font-bold text-zinc-900 dark:text-zinc-100 print:text-black uppercase">
+                  LAMPIRAN-LAMPIRAN DOKUMEN USULAN
+                </h2>
+              </div>
+              <div className="no-print flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => setIsLogbookModalOpen(true)}
+                  className="px-3 py-1.5 rounded-lg bg-indigo-50 dark:bg-indigo-950/50 border border-indigo-200 dark:border-indigo-850 text-indigo-700 dark:text-indigo-300 hover:bg-indigo-100 text-xs font-mono font-medium flex items-center gap-1.5 cursor-pointer shadow-xs transition-colors"
+                >
+                  <CalendarDays className="w-3.5 h-3.5" />
+                  <span>Kelola Logbook ({currentDoc.logbookEntries?.length || 0} Entri)</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setIsDefenseMinutesModalOpen(true)}
+                  className="px-3 py-1.5 rounded-lg bg-emerald-50 dark:bg-emerald-950/50 border border-emerald-200 dark:border-emerald-850 text-emerald-700 dark:text-emerald-300 hover:bg-emerald-100 text-xs font-mono font-medium flex items-center gap-1.5 cursor-pointer shadow-xs transition-colors"
+                >
+                  <FileSignature className="w-3.5 h-3.5" />
+                  <span>Berita Acara Sidang</span>
+                </button>
+              </div>
             </div>
 
             <div className="space-y-6">
-              {(currentDoc.appendices || [
-                {
-                  id: "lampiran_a",
-                  title: "Lampiran A: Pedoman Wawancara & Instrumen Pengumpulan Data",
-                  content: `Pedoman instrumen ini dirancang untuk mengumpulkan data empiris pada ${currentDoc.targetEntity}. Terdiri dari instrumen kuesioner berskala Likert 1-5, rubrik observasi lapangan terstruktur, dan panduan wawancara mendalam.`,
-                  tableRows: [
-                    { col1: "Item 01", col2: "Tingkat relevansi masalah operasional dengan kebutuhan riil unit kerja sasaran", col3: "Skala Likert 1-5 & Catatan Kualitatif" },
-                    { col1: "Item 02", col2: "Ketersediaan dokumentasi SOP eksisting dan kepatuhan pengguna terhadap prosedur", col3: "Checklist Observasi Langsung" },
-                    { col1: "Item 03", col2: "Efektivitas integrasi alat ukur/sistem yang diusulkan terhadap waktu siklus kerja", col3: "Metrik Kinerja & Uji Waktu Kerja" },
-                    { col1: "Item 04", col2: "Tingkat kepuasan pengguna akhir (User Acceptance Testing) terhadap luaran fungsional", col3: "Kuesioner UAT (4 Parameter Kunci)" }
-                  ]
-                },
-                {
-                  id: "lampiran_b",
-                  title: "Lampiran B: Matriks Logbook Mingguan Aktivitas Lapangan & Bukti Capaian",
-                  content: "Logbook berkala ini merekam kehadiran, aktivitas harian, bimbingan berkala, dan luaran mingguan selama 16 minggu pelaksanaan kegiatan akademik.",
-                  tableRows: [
-                    { col1: "Bulan I (Minggu 1-4)", col2: "Orientasi lingkungan kerja, perizinan, WBS, dan penyusunan instrumen spesifikasi", col3: "Logbook Ditandatangani & Dokumen Spesifikasi" },
-                    { col1: "Bulan II (Minggu 5-8)", col2: "Pengambilan data primer/lapangan, kalibrasi instrumen, dan pembangunan prototipe awal", col3: "Dataset Terverifikasi & Draf Bab III" },
-                    { col1: "Bulan III (Minggu 9-12)", col2: "Implementasi inti, pengujian fungsionalitas, evaluasi bersama mentor, dan perbaikan", col3: "Berita Acara Uji Hasil & Revisi" },
-                    { col1: "Bulan IV (Minggu 13-16)", col2: "Penyusunan laporan komprehensif lengkap, manuskrip publikasi, dan seminar pertanggungjawaban", col3: "Naskah Lengkap & Lembar Pengesahan" }
-                  ]
-                },
-                {
-                  id: "lampiran_c",
-                  title: "Lampiran C: Surat Pernyataan Pakta Integritas & Bebas Fabrikasi Data",
-                  content: `Pernyataan tertulis bermeterai dari mahasiswa pengusul (${currentDoc.candidateName}, NIM: ${currentDoc.candidateId}) yang menyatakan bahwa seluruh data, metodologi, dan naskah yang diajukan adalah orisinal, bebas dari unsur fabrikasi, falsifikasi, dan plagiarisme, serta menjunjung tinggi kerahasiaan informasi internal ${currentDoc.targetEntity}.`
-                }
-              ]).map((app, aIdx) => (
-                <div key={app.id || aIdx} className="p-4 sm:p-5 rounded-xl bg-zinc-50 dark:bg-zinc-900/40 border border-zinc-200 dark:border-zinc-800 print:bg-white print:border-gray-300">
-                  <h3 className="text-xs sm:text-sm font-semibold font-serif text-zinc-900 dark:text-zinc-100 mb-2 print:text-black">
-                    {app.title}
-                  </h3>
-                  <p className="text-xs text-zinc-700 dark:text-zinc-300 mb-3 leading-relaxed">
-                    {app.content}
-                  </p>
+              {/* Lampiran A: Pedoman Wawancara */}
+              <div className="p-4 sm:p-5 rounded-xl bg-zinc-50 dark:bg-zinc-900/40 border border-zinc-200 dark:border-zinc-800 print:bg-white print:border-gray-300">
+                <h3 className="text-xs sm:text-sm font-semibold font-serif text-zinc-900 dark:text-zinc-100 mb-2 print:text-black">
+                  Lampiran A: Pedoman Wawancara Mendalam &amp; Rubrik Pengumpulan Data Empiris
+                </h3>
+                <p className="text-xs text-zinc-700 dark:text-zinc-300 mb-3 leading-relaxed">
+                  Instrumen ini dirancang untuk menggali data empiris pada {currentDoc.targetEntity}. Terdiri dari instrumen kuesioner berskala Likert 1-5, rubrik observasi lapangan terstruktur, dan panduan wawancara mendalam dengan pemangku kepentingan kunci.
+                </p>
+                <div className="overflow-x-auto my-2">
+                  <table className="w-full text-left text-xs font-sans border-t-2 border-b-2 border-zinc-300 dark:border-zinc-700 print:border-black">
+                    <thead>
+                      <tr className="border-b border-zinc-200 dark:border-zinc-850 print:border-black font-semibold text-zinc-900 dark:text-zinc-100 print:text-black">
+                        <th className="py-2 px-2.5">Item Instrumen</th>
+                        <th className="py-2 px-2.5">Indikator &amp; Fokus Penggalian Masalah</th>
+                        <th className="py-2 px-2.5">Metode Verifikasi / Skala Ukur</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-zinc-200 dark:divide-zinc-800 print:divide-gray-300 text-zinc-700 dark:text-zinc-300 print:text-black text-[11px]">
+                      <tr>
+                        <td className="py-2 px-2.5 font-mono font-medium text-zinc-900 dark:text-zinc-200 print:text-black">Item 01</td>
+                        <td className="py-2 px-2.5">Tingkat relevansi masalah operasional dengan kebutuhan riil unit kerja sasaran di {currentDoc.targetEntity}</td>
+                        <td className="py-2 px-2.5 font-mono text-[10px]">Skala Likert 1-5 &amp; Catatan Kualitatif</td>
+                      </tr>
+                      <tr>
+                        <td className="py-2 px-2.5 font-mono font-medium text-zinc-900 dark:text-zinc-200 print:text-black">Item 02</td>
+                        <td className="py-2 px-2.5">Ketersediaan dokumentasi SOP eksisting dan tingkat kepatuhan personil terhadap alur kerja baku</td>
+                        <td className="py-2 px-2.5 font-mono text-[10px]">Checklist Observasi Langsung</td>
+                      </tr>
+                      <tr>
+                        <td className="py-2 px-2.5 font-mono font-medium text-zinc-900 dark:text-zinc-200 print:text-black">Item 03</td>
+                        <td className="py-2 px-2.5">Efektivitas integrasi alat bantu / sistem baru yang diusulkan terhadap waktu siklus kerja operasional</td>
+                        <td className="py-2 px-2.5 font-mono text-[10px]">Metrik Kinerja &amp; Uji Waktu Nyata</td>
+                      </tr>
+                      <tr>
+                        <td className="py-2 px-2.5 font-mono font-medium text-zinc-900 dark:text-zinc-200 print:text-black">Item 04</td>
+                        <td className="py-2 px-2.5">Tingkat penerimaan pengguna akhir (User Acceptance Testing) terhadap luaran fungsional yang dihasilkan</td>
+                        <td className="py-2 px-2.5 font-mono text-[10px]">Kuesioner UAT (4 Parameter Kunci)</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
 
-                  {app.tableRows && app.tableRows.length > 0 && (
-                    <div className="overflow-x-auto my-2">
-                      <table className="w-full text-left text-xs font-sans border-t-2 border-b-2 border-zinc-300 dark:border-zinc-700 print:border-black">
-                        <thead>
-                          <tr className="border-b border-zinc-200 dark:border-zinc-850 print:border-black font-semibold text-zinc-900 dark:text-zinc-100 print:text-black">
-                            <th className="py-2 px-2.5">Indikator / Periode</th>
-                            <th className="py-2 px-2.5">Aktivitas & Parameter</th>
-                            <th className="py-2 px-2.5">Metode Verifikasi / Bukti</th>
+              {/* Lampiran B: Matriks Logbook Lapangan Interaktif */}
+              <div className="p-4 sm:p-5 rounded-xl bg-zinc-50 dark:bg-zinc-900/40 border border-zinc-200 dark:border-zinc-800 print:bg-white print:border-gray-300">
+                <div className="flex items-center justify-between mb-2">
+                  <h3 className="text-xs sm:text-sm font-semibold font-serif text-zinc-900 dark:text-zinc-100 print:text-black">
+                    Lampiran B: Buku Catatan Logbook Aktivitas Harian &amp; Bukti Capaian Lapangan
+                  </h3>
+                  <button
+                    type="button"
+                    onClick={() => setIsLogbookModalOpen(true)}
+                    className="no-print text-[11px] font-mono text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 bg-white dark:bg-zinc-850 px-2.5 py-1 rounded-lg border border-zinc-200 dark:border-zinc-700 flex items-center gap-1 cursor-pointer shadow-xs"
+                  >
+                    <CalendarDays className="w-3 h-3 text-indigo-500" />
+                    <span>Edit Logbook</span>
+                  </button>
+                </div>
+                <p className="text-xs text-zinc-700 dark:text-zinc-300 mb-3 leading-relaxed">
+                  Logbook berkala ini merekam aktivitas kerja nyata, alokasi jam kerja, luaran artefak, dan status verifikasi pembimbing lapangan selama pelaksanaan kegiatan di {currentDoc.targetEntity}.
+                </p>
+
+                {currentDoc.logbookEntries && currentDoc.logbookEntries.length > 0 ? (
+                  <div className="overflow-x-auto my-2">
+                    <table className="w-full text-left text-xs font-sans border-t-2 border-b-2 border-zinc-300 dark:border-zinc-700 print:border-black">
+                      <thead>
+                        <tr className="border-b border-zinc-200 dark:border-zinc-850 print:border-black font-semibold text-zinc-900 dark:text-zinc-100 print:text-black">
+                          <th className="py-2 px-2.5">Minggu</th>
+                          <th className="py-2 px-2.5">Tanggal &amp; Jam</th>
+                          <th className="py-2 px-2.5">Aktivitas &amp; Rincian Pekerjaan</th>
+                          <th className="py-2 px-2.5">Luaran (Output)</th>
+                          <th className="py-2 px-2.5 text-center">Status</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-zinc-200 dark:divide-zinc-800 print:divide-gray-300 text-zinc-700 dark:text-zinc-300 print:text-black text-[11px]">
+                        {currentDoc.logbookEntries.map((entry, eIdx) => (
+                          <tr key={entry.id || eIdx} className="align-top">
+                            <td className="py-2 px-2.5 font-mono font-medium text-zinc-900 dark:text-zinc-200 print:text-black whitespace-nowrap">Mg {entry.weekNumber}</td>
+                            <td className="py-2 px-2.5 font-mono whitespace-nowrap">{entry.date}<br /><span className="text-[10px] text-zinc-500">{entry.hoursSpent} Jam</span></td>
+                            <td className="py-2 px-2.5 font-sans">{entry.activityDescription}</td>
+                            <td className="py-2 px-2.5 font-mono text-[10px] text-zinc-600 dark:text-zinc-400 print:text-black">{entry.outputDeliverable}</td>
+                            <td className="py-2 px-2.5 text-center font-mono text-[10px]">
+                              {entry.mentorApprovalStatus === "approved" ? (
+                                <span className="inline-flex items-center gap-1 text-emerald-600 font-semibold"><Check className="w-3 h-3" /> Disetujui</span>
+                              ) : (
+                                <span className="text-amber-600 font-medium">Draft</span>
+                              )}
+                            </td>
                           </tr>
-                        </thead>
-                        <tbody className="divide-y divide-zinc-200 dark:divide-zinc-800 print:divide-gray-300 text-zinc-700 dark:text-zinc-300 print:text-black text-[11px]">
-                          {app.tableRows.map((r, rIdx) => (
-                            <tr key={rIdx} className="align-top">
-                              <td className="py-2 px-2.5 font-mono font-medium text-zinc-900 dark:text-zinc-200 print:text-black">{r.col1}</td>
-                              <td className="py-2 px-2.5">{r.col2}</td>
-                              <td className="py-2 px-2.5 font-mono text-[10px]">{r.col3}</td>
-                            </tr>
-                          ))}
-                        </tbody>
-                      </table>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                ) : (
+                  <div className="p-4 rounded-xl border border-dashed border-zinc-300 dark:border-zinc-700 text-center text-xs text-zinc-500 space-y-2">
+                    <p>Belum ada entri logbook khusus yang disimpan.</p>
+                    <button
+                      type="button"
+                      onClick={() => setIsLogbookModalOpen(true)}
+                      className="px-3 py-1.5 rounded-lg bg-indigo-50 hover:bg-indigo-100 dark:bg-indigo-950/50 text-indigo-600 dark:text-indigo-400 font-medium inline-flex items-center gap-1.5 transition-colors cursor-pointer"
+                    >
+                      <Sparkles className="w-3.5 h-3.5" />
+                      <span>Generate Otomatis Logbook 8-16 Minggu via AI</span>
+                    </button>
+                  </div>
+                )}
+              </div>
+
+              {/* Lampiran C: Berita Acara Kolokium / Sidang */}
+              <div className="p-4 sm:p-5 rounded-xl bg-zinc-50 dark:bg-zinc-900/40 border border-zinc-200 dark:border-zinc-800 print:bg-white print:border-gray-300">
+                <div className="flex items-center justify-between mb-2">
+                  <h3 className="text-xs sm:text-sm font-semibold font-serif text-zinc-900 dark:text-zinc-100 print:text-black">
+                    Lampiran C: Berita Acara Ujian / Seminar Kolokium Proposal
+                  </h3>
+                  <button
+                    type="button"
+                    onClick={() => setIsDefenseMinutesModalOpen(true)}
+                    className="no-print text-[11px] font-mono text-emerald-600 dark:text-emerald-400 hover:text-emerald-700 bg-white dark:bg-zinc-850 px-2.5 py-1 rounded-lg border border-zinc-200 dark:border-zinc-700 flex items-center gap-1 cursor-pointer shadow-xs"
+                  >
+                    <FileSignature className="w-3 h-3 text-emerald-500" />
+                    <span>Edit Berita Acara</span>
+                  </button>
+                </div>
+
+                <div className="space-y-3 font-sans text-xs">
+                  <div className="p-3 bg-white dark:bg-zinc-950 rounded-lg border border-zinc-200 dark:border-zinc-800 text-[11px] space-y-1">
+                    <div className="flex justify-between">
+                      <span className="text-zinc-500">Tanggal Pelaksanaan:</span>
+                      <span className="font-mono font-medium text-zinc-800 dark:text-zinc-200">{currentDoc.defenseMinutes?.meetingDate || currentDoc.generationDate}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-zinc-500">Nilai Rata-rata Ujian:</span>
+                      <span className="font-mono font-bold text-emerald-600 dark:text-emerald-400">{currentDoc.defenseMinutes?.averageScore || 87.5} / 100</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-zinc-500">Keputusan Tim Penguji:</span>
+                      <span className="font-semibold text-zinc-900 dark:text-zinc-100 uppercase">
+                        {currentDoc.defenseMinutes?.status === "lulus_revisi_ringan" ? "LULUS DENGAN REVISI RINGAN" : currentDoc.defenseMinutes?.status || "LULUS DENGAN REVISI RINGAN"}
+                      </span>
+                    </div>
+                  </div>
+
+                  {currentDoc.defenseMinutes?.revisions && currentDoc.defenseMinutes.revisions.length > 0 && (
+                    <div className="pt-2">
+                      <p className="font-semibold text-zinc-800 dark:text-zinc-200 mb-1">Catatan &amp; Poin Revisi Dosen Penguji:</p>
+                      <ul className="list-disc pl-5 space-y-1 text-zinc-700 dark:text-zinc-300">
+                        {currentDoc.defenseMinutes.revisions.map((rev, rIdx) => (
+                          <li key={rev.id || rIdx}>
+                            <span className="font-medium text-zinc-900 dark:text-zinc-100">{rev.section}:</span> {rev.revisionPoint}
+                          </li>
+                        ))}
+                      </ul>
                     </div>
                   )}
                 </div>
-              ))}
+              </div>
+
+              {/* Lampiran D: Surat Pernyataan Pakta Integritas & Bebas Fabrikasi Data */}
+              <div className="p-4 sm:p-5 rounded-xl bg-zinc-50 dark:bg-zinc-900/40 border border-zinc-200 dark:border-zinc-800 print:bg-white print:border-gray-300">
+                <h3 className="text-xs sm:text-sm font-semibold font-serif text-zinc-900 dark:text-zinc-100 mb-2 print:text-black">
+                  Lampiran D: Surat Pernyataan Pakta Integritas &amp; Bebas Fabrikasi Data
+                </h3>
+                <p className="text-xs text-zinc-700 dark:text-zinc-300 leading-relaxed">
+                  Pernyataan tertulis bermeterai dari mahasiswa pengusul ({currentDoc.candidateName}, NIM: {currentDoc.candidateId}) yang menyatakan bahwa seluruh data, metodologi, dan naskah yang diajukan adalah orisinal, bebas dari unsur fabrikasi, falsifikasi, dan plagiarisme, serta menjunjung tinggi kerahasiaan informasi internal {currentDoc.targetEntity}.
+                </p>
+              </div>
             </div>
           </section>
 
@@ -3010,6 +3982,67 @@ NIP / NIK.
           setToastMessage(`Judul berhasil diperbarui ke: "${appliedTitle}"`);
           setTimeout(() => setToastMessage(null), 3000);
         }}
+      />
+
+      {/* MODAL 1: CAMPUS LOGO MANAGER */}
+      <CampusLogoManagerModal
+        isOpen={isCampusLogoModalOpen}
+        onClose={() => setIsCampusLogoModalOpen(false)}
+        currentLogoUrl={currentDoc.campusLogoUrl}
+        institution={currentDoc.institution}
+        onSelectLogo={handleSaveLogo}
+      />
+
+      {/* MODAL 2: THEORY CUSTOMIZER (5, 8, 13, 20 THEORIES & CITATIONS) */}
+      <TheoryCustomizerModal
+        isOpen={isTheoryCustomizerModalOpen}
+        onClose={() => setIsTheoryCustomizerModalOpen(false)}
+        title={currentDoc.title}
+        category={currentDoc.category}
+        theories={currentDoc.bab2.landasanTeori || []}
+        bibliography={currentDoc.bibliography || []}
+        onSave={handleSaveTheories}
+      />
+
+      {/* MODAL 3: CUSTOM SHEET & OFFICIAL SCAN MANAGER */}
+      <CustomSheetModal
+        isOpen={isCustomSheetModalOpen}
+        onClose={() => setIsCustomSheetModalOpen(false)}
+        sheets={currentDoc.customSheets || []}
+        onSave={handleSaveCustomSheets}
+      />
+
+      {/* MODAL 4: DOCUMENT IMAGE & DIAGRAM MANAGER WITH AI PLACEMENT */}
+      <DocumentImageManagerModal
+        isOpen={isImageManagerModalOpen}
+        onClose={() => setIsImageManagerModalOpen(false)}
+        docTitle={currentDoc.title}
+        figures={currentDoc.documentFigures || []}
+        onSave={handleSaveFigures}
+      />
+
+      {/* MODAL 5: STANDALONE LOGBOOK MANAGER WITH AI AUTOFILL */}
+      <LogbookManagerModal
+        isOpen={isLogbookModalOpen}
+        onClose={() => setIsLogbookModalOpen(false)}
+        title={currentDoc.title}
+        category={currentDoc.category}
+        targetEntity={currentDoc.targetEntity}
+        scheduleMatrix={currentDoc.bab4.jadwalMatriks}
+        entries={currentDoc.logbookEntries || []}
+        onSave={handleSaveLogbook}
+      />
+
+      {/* MODAL 6: DEFENSE MINUTES & REVISION RECOMMENDATION */}
+      <DefenseMinutesModal
+        isOpen={isDefenseMinutesModalOpen}
+        onClose={() => setIsDefenseMinutesModalOpen(false)}
+        docTitle={currentDoc.title}
+        candidateName={currentDoc.candidateName}
+        candidateId={currentDoc.candidateId}
+        institution={currentDoc.institution}
+        minutes={currentDoc.defenseMinutes}
+        onSave={handleSaveDefenseMinutes}
       />
 
     </div>

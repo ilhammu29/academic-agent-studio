@@ -1,6 +1,72 @@
 export type ProposalCategory = 'magang' | 'skripsi' | 'penelitian';
 
+export type ReportType = 'magang' | 'skripsi' | 'tugas_akhir' | 'tesis' | 'penelitian';
+
 export type StudioStage = 'input' | 'interview' | 'orchestration' | 'result' | 'drive' | 'consultation';
+
+export type SheetType = 'pengesahan' | 'berita_acara' | 'pernyataan_orisinalitas' | 'kata_pengantar' | 'abstrak' | 'custom_upload';
+
+export interface CustomSheetItem {
+  id: string;
+  type: SheetType;
+  title: string;
+  pagePosition?: number; // e.g. 2 for after cover, 3, 4, etc.
+  content?: string;
+  englishContent?: string; // For abstract
+  uploadedFileUrl?: string; // Base64 or URL of scanned doc
+  fileDataUrl?: string; // Alias for uploaded scan image
+  signers?: ApprovalSigner[];
+  metaNotes?: string;
+  enabled?: boolean;
+}
+
+export interface DocumentFigureItem {
+  id: string;
+  chapterKey: 'bab1' | 'bab2' | 'bab3' | 'bab4' | 'bab5' | 'lampiran';
+  chapterPlacement?: number; // Numeric chapter placement (e.g. 2, 3, 4)
+  subSectionKey?: string;
+  figureNumber: string; // e.g. "Gambar 3.1"
+  title: string;
+  caption: string;
+  imageUrl?: string;
+  imageDataUrl?: string; // Base64 or URL data source
+  sourceText?: string;
+  source?: string; // Alias for source text
+  placementRationale?: string;
+}
+
+export interface LogbookEntry {
+  id: string;
+  date: string;
+  timeRange?: string;
+  weekNumber?: number;
+  hoursSpent?: number | string;
+  activity: string;
+  activityDescription?: string;
+  output: string;
+  outputDeliverable?: string;
+  mentorFeedback?: string;
+  mentorApprovalStatus?: 'approved' | 'draft' | 'pending';
+  status?: 'verified' | 'pending' | 'revised';
+  evidenceUrl?: string;
+}
+
+export interface DefenseMinutesInfo {
+  id?: string;
+  sessionType?: 'bimbingan' | 'seminar_proposal' | 'sidang_akhir';
+  date?: string;
+  meetingDate?: string;
+  time?: string;
+  roomOrPlatform?: string;
+  examiners?: { role: string; name: string; nip?: string; idNumber?: string; attendance?: 'hadir' | 'izin' }[];
+  candidateScore?: number;
+  averageScore?: number;
+  gradeResult?: 'Lulus Tanpa Revisi' | 'Lulus dengan Revisi Minor' | 'Lulus dengan Revisi Mayor' | 'Sidang Ulang' | string;
+  status?: string;
+  revisionNotes?: string[];
+  revisions?: { id?: string | number; section: string; revisionPoint: string; isCompleted?: boolean }[];
+  signatureReady?: boolean;
+}
 
 export interface DiagnosticQuestion {
   id: string;
@@ -135,7 +201,9 @@ export interface ProposalDocument {
   id: string;
   title: string;
   category: ProposalCategory;
+  reportType?: ReportType;
   campusGuideline?: CampusGuideline;
+  campusLogoUrl?: string;
   institution: string;
   facultyMajor: string;
   targetEntity: string;
@@ -145,7 +213,22 @@ export interface ProposalDocument {
   candidateId: string;
   generationDate: string;
   executiveSummary: string;
+  targetDepthPages?: number;
+  preface?: string;
+  abstractId?: string;
+  abstractEn?: string;
   approvalSheet?: ApprovalSheetInfo;
+  customSheets?: CustomSheetItem[];
+  documentFigures?: DocumentFigureItem[];
+  logbookEntries?: LogbookEntry[];
+  defenseMinutes?: DefenseMinutesInfo;
+  preliminaryOptions?: {
+    includeToC: boolean;
+    includeListOfFigures: boolean;
+    includeListOfTables: boolean;
+    includePreface: boolean;
+    includeAbstract: boolean;
+  };
   bab1: {
     title: string;
     latarBelakang: string[];
