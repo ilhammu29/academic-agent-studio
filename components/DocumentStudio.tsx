@@ -20,7 +20,7 @@ import { DocumentImageManagerModal } from "./DocumentImageManagerModal";
 import { LogbookManagerModal } from "./LogbookManagerModal";
 import { DefenseMinutesModal } from "./DefenseMinutesModal";
 import { getCampusLogoByInstitution } from "@/lib/campusLogos";
-import { getSectionHeading, HeadingStyleType } from "@/lib/academicNumbering";
+import { getSectionHeading, HeadingStyleType, parseChapterTitle } from "@/lib/academicNumbering";
 import { generateAcademicProposalDocx, downloadDocxBlob } from "@/lib/docxExporter";
 import { generateAcademicProposalPptx } from "@/lib/pptxExporter";
 import { generateBibTeX, generateRIS, downloadCitationFile } from "@/lib/bibtexExporter";
@@ -863,6 +863,27 @@ NIP / NIK.
   const handleSaveDefenseMinutes = (updatedMinutes: any) => {
     setCurrentDoc(prev => ({ ...prev, defenseMinutes: updatedMinutes }));
     setToastMessage("Lembar berita acara sidang berhasil disimpan!");
+  };
+
+  /**
+   * Standard Dikti Chapter Heading Renderer:
+   * Centers the chapter number (e.g. "BAB I") and chapter title (e.g. "PENDAHULUAN")
+   * as required by Indonesian academic report & thesis guidelines.
+   */
+  const renderChapterHeading = (
+    rawTitle: string,
+    fallbackBab: string,
+    fallbackTitle: string
+  ) => {
+    const { chapterNumber, chapterTitle } = parseChapterTitle(rawTitle, fallbackBab, fallbackTitle);
+    return (
+      <div className="text-center w-full chapter-heading">
+        <h2 className="text-base sm:text-lg font-serif font-bold text-[#0F172A] dark:text-[#F3F6FC] print:text-black uppercase tracking-wide leading-snug chapter-title">
+          <span className="block">{chapterNumber}</span>
+          <span className="block mt-1">{chapterTitle}</span>
+        </h2>
+      </div>
+    );
   };
 
   return (
@@ -2646,10 +2667,8 @@ NIP / NIK.
           {/* BAB I */}
           {!disabledSections.includes("section-bab1") && (
           <section id="section-bab1" className="mb-10 print-break-page print:break-after-page">
-            <div className="border-b border-[#E2E8F0] dark:border-[#253149] pb-2 mb-4 print:border-black">
-              <h2 className="text-base sm:text-lg font-serif font-bold text-[#0F172A] dark:text-[#F3F6FC] print:text-black uppercase">
-                {currentDoc.bab1.title}
-              </h2>
+            <div className="border-b border-[#E2E8F0] dark:border-[#253149] pb-3 mb-6 print:border-black">
+              {renderChapterHeading(currentDoc.bab1.title, "BAB I", "PENDAHULUAN")}
             </div>
 
             <div className="space-y-4 text-xs sm:text-sm text-[#334155] dark:text-[#CBD5E1] leading-relaxed text-justify print:text-black">
@@ -2764,18 +2783,22 @@ NIP / NIK.
               {/* BAB II */}
               {!disabledSections.includes("section-bab2") && (
               <section id="section-bab2" className="mb-10 print-break-page print:break-after-page">
-            <div className="border-b border-[#E2E8F0] dark:border-[#253149] pb-2 mb-4 print:border-black flex items-center justify-between">
-              <h2 className="text-base sm:text-lg font-serif font-bold text-[#0F172A] dark:text-[#F3F6FC] print:text-black uppercase">
-                {currentDoc.bab2.title}
-              </h2>
-              <button
-                type="button"
-                onClick={() => setIsTheoryCustomizerModalOpen(true)}
-                className="no-print text-[11px] font-mono text-[#7C9CFF] hover:text-[#9B8CFF] bg-[#7C9CFF]/10 hover:bg-[#7C9CFF]/15 px-2.5 py-1 rounded-lg border border-[#7C9CFF]/30 flex items-center gap-1.5 cursor-pointer transition-colors shadow-2xs"
-              >
-                <Sparkles className="w-3.5 h-3.5 text-[#7C9CFF]" />
-                <span>Kustomisasi Teori ({currentDoc.bab2.landasanTeori?.length || 13} Teori)</span>
-              </button>
+            <div className="relative border-b border-[#E2E8F0] dark:border-[#253149] pb-3 mb-6 print:border-black flex flex-col items-center">
+              {renderChapterHeading(
+                currentDoc.bab2.title,
+                "BAB II",
+                currentDoc.category === "magang" ? "GAMBARAN UMUM INSTANSI & LANDASAN TEORI TERAPAN" : "TINJAUAN PUSTAKA & KERANGKA TEORETIS"
+              )}
+              <div className="no-print mt-2 sm:mt-0 sm:absolute sm:right-0 sm:top-1/2 sm:-translate-y-1/2">
+                <button
+                  type="button"
+                  onClick={() => setIsTheoryCustomizerModalOpen(true)}
+                  className="text-[11px] font-mono text-[#7C9CFF] hover:text-[#9B8CFF] bg-[#7C9CFF]/10 hover:bg-[#7C9CFF]/15 px-2.5 py-1 rounded-lg border border-[#7C9CFF]/30 flex items-center gap-1.5 cursor-pointer transition-colors shadow-2xs"
+                >
+                  <Sparkles className="w-3.5 h-3.5 text-[#7C9CFF]" />
+                  <span>Kustomisasi Teori ({currentDoc.bab2.landasanTeori?.length || 13} Teori)</span>
+                </button>
+              </div>
             </div>
 
             {/* Depth Banner & Customizer Alert */}
@@ -2977,18 +3000,22 @@ NIP / NIK.
               {/* BAB III */}
               {!disabledSections.includes("section-bab3") && (
               <section id="section-bab3" className="mb-10 print-break-page print:break-after-page">
-            <div className="border-b border-[#E2E8F0] dark:border-[#253149] pb-2 mb-4 print:border-black flex items-center justify-between">
-              <h2 className="text-base sm:text-lg font-serif font-bold text-[#0F172A] dark:text-[#F3F6FC] print:text-black uppercase">
-                {currentDoc.bab3.title}
-              </h2>
-              <button
-                type="button"
-                onClick={() => setIsImageManagerModalOpen(true)}
-                className="no-print text-[11px] font-mono text-[#64748B] dark:text-[#A4B1C7] hover:text-[#0F172A] dark:hover:text-[#F3F6FC] bg-white dark:bg-[#172033] px-2.5 py-1 rounded-md border border-[#E2E8F0] dark:border-[#253149] hover:border-[#7C9CFF] flex items-center gap-1.5 cursor-pointer shadow-2xs transition-colors"
-              >
-                <ImageIcon className="w-3.5 h-3.5 text-[#7C9CFF]" />
-                <span>+ Sisipkan Gambar / Diagram</span>
-              </button>
+            <div className="relative border-b border-[#E2E8F0] dark:border-[#253149] pb-3 mb-6 print:border-black flex flex-col items-center">
+              {renderChapterHeading(
+                currentDoc.bab3.title,
+                "BAB III",
+                currentDoc.category === "magang" ? "RENCANA PELAKSANAAN & METODE KERJA" : "METODE PENELITIAN & PROTOKOL RISET"
+              )}
+              <div className="no-print mt-2 sm:mt-0 sm:absolute sm:right-0 sm:top-1/2 sm:-translate-y-1/2">
+                <button
+                  type="button"
+                  onClick={() => setIsImageManagerModalOpen(true)}
+                  className="text-[11px] font-mono text-[#64748B] dark:text-[#A4B1C7] hover:text-[#0F172A] dark:hover:text-[#F3F6FC] bg-white dark:bg-[#172033] px-2.5 py-1 rounded-md border border-[#E2E8F0] dark:border-[#253149] hover:border-[#7C9CFF] flex items-center gap-1.5 cursor-pointer shadow-2xs transition-colors"
+                >
+                  <ImageIcon className="w-3.5 h-3.5 text-[#7C9CFF]" />
+                  <span>+ Sisipkan Gambar / Diagram</span>
+                </button>
+              </div>
             </div>
 
             {/* Formal Academic Figure 3.1: Bagan Alir Tahapan Pelaksanaan */}
@@ -3177,10 +3204,12 @@ NIP / NIK.
               {/* BAB IV: MATRIKS TABEL AKADEMIK (3 Garis Horizontal Standar) */}
               {!disabledSections.includes("section-bab4") && (
               <section id="section-bab4" className="mb-10 print-break-page print:break-after-page">
-            <div className="border-b border-[#E2E8F0] dark:border-[#253149] pb-2 mb-4 print:border-black">
-              <h2 className="text-base sm:text-lg font-serif font-bold text-[#0F172A] dark:text-[#F3F6FC] print:text-black uppercase">
-                {currentDoc.bab4.title}
-              </h2>
+            <div className="border-b border-[#E2E8F0] dark:border-[#253149] pb-3 mb-6 print:border-black">
+              {renderChapterHeading(
+                currentDoc.bab4.title,
+                "BAB IV",
+                currentDoc.category === "magang" ? "JADWAL PELAKSANAAN & RENCANA ANGGARAN" : "JADWAL PENELITIAN & RENCANA ANGGARAN"
+              )}
             </div>
 
             <h3 className="text-sm font-semibold text-[#0F172A] dark:text-[#F3F6FC] print:text-black font-serif mb-3">
@@ -3324,10 +3353,12 @@ NIP / NIK.
               {/* BAB V: KESIMPULAN, REKOMENDASI KONTRIBUSI, & MITIGASI RISIKO */}
               {!disabledSections.includes("section-bab5") && (
               <section id="section-bab5" className="mb-10 print-break-page print:break-after-page">
-            <div className="border-b border-[#E2E8F0] dark:border-[#253149] pb-2 mb-4 print:border-black">
-              <h2 className="text-base sm:text-lg font-serif font-bold text-[#0F172A] dark:text-[#F3F6FC] print:text-black uppercase">
-                {currentDoc.bab5?.title || (currentDoc.category === "magang" ? "BAB V: PENUTUP, KONTRIBUSI, & MITIGASI RISIKO" : "BAB V: KESIMPULAN, REKOMENDASI KONTRIBUSI, & MITIGASI RISIKO")}
-              </h2>
+            <div className="border-b border-[#E2E8F0] dark:border-[#253149] pb-3 mb-6 print:border-black">
+              {renderChapterHeading(
+                currentDoc.bab5?.title || (currentDoc.category === "magang" ? "BAB V: PENUTUP, KONTRIBUSI, & MITIGASI RISIKO" : "BAB V: KESIMPULAN, REKOMENDASI KONTRIBUSI, & MITIGASI RISIKO"),
+                "BAB V",
+                currentDoc.category === "magang" ? "PENUTUP, KONTRIBUSI, & MITIGASI RISIKO" : "KESIMPULAN, REKOMENDASI KONTRIBUSI, & MITIGASI RISIKO"
+              )}
             </div>
 
             <div className="space-y-4 text-xs sm:text-sm text-[#334155] dark:text-[#CBD5E1] leading-relaxed text-justify print:text-black">
@@ -3427,13 +3458,17 @@ NIP / NIK.
               {/* DAFTAR PUSTAKA (Standar APA 7th Edition / IEEE) */}
           {currentDoc.bibliography && currentDoc.bibliography.length > 0 && !disabledSections.includes("section-pustaka") && (
             <section id="section-pustaka" className="mb-10 pt-6 border-t border-[#E2E8F0] dark:border-[#253149] print:border-black print-break-page print:break-after-page">
-              <div className="border-b border-[#E2E8F0] dark:border-[#253149] pb-2 mb-4 print:border-black flex items-center justify-between">
-                <h2 className="text-base sm:text-lg font-serif font-bold text-[#0F172A] dark:text-[#F3F6FC] print:text-black uppercase">
-                  DAFTAR PUSTAKA ({citationStyle === "apa" ? "STANDAR APA 7TH EDITION" : "STANDAR IEEE"})
-                </h2>
-                <span className="no-print text-[10px] font-mono px-2 py-0.5 rounded bg-[#F8FAFC] dark:bg-[#111827] text-[#64748B] dark:text-[#A4B1C7] border border-[#E2E8F0] dark:border-[#253149]">
-                  {citationStyle === "apa" ? "Format: Nama, Tahun" : "Format: Numerik [N]"}
-                </span>
+              <div className="relative border-b border-[#E2E8F0] dark:border-[#253149] pb-3 mb-6 print:border-black flex flex-col items-center">
+                <div className="text-center w-full chapter-heading">
+                  <h2 className="text-base sm:text-lg font-serif font-bold text-[#0F172A] dark:text-[#F3F6FC] print:text-black uppercase tracking-wide chapter-title">
+                    DAFTAR PUSTAKA
+                  </h2>
+                </div>
+                <div className="no-print mt-2 sm:mt-0 sm:absolute sm:right-0 sm:top-1/2 sm:-translate-y-1/2">
+                  <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-[#F8FAFC] dark:bg-[#111827] text-[#64748B] dark:text-[#A4B1C7] border border-[#E2E8F0] dark:border-[#253149]">
+                    {citationStyle === "apa" ? "STANDAR APA 7TH EDITION" : "STANDAR IEEE"}
+                  </span>
+                </div>
               </div>
               <div className="space-y-3 text-xs sm:text-sm text-[#334155] dark:text-[#CBD5E1] print:text-black">
                 {currentDoc.bibliography.map((bib, bIdx) => (
@@ -3462,16 +3497,16 @@ NIP / NIK.
           {/* LAMPIRAN-LAMPIRAN AKADEMIK */}
           {!disabledSections.includes("section-lampiran") && (
           <section id="section-lampiran" className="mt-12 pt-8 border-t-2 border-[#E2E8F0] dark:border-[#253149] print:border-black font-serif print-break-page print:break-after-page">
-            <div className="border-b border-[#E2E8F0] dark:border-[#253149] pb-2 mb-6 print:border-black text-center flex flex-col sm:flex-row items-center justify-between gap-3">
-              <div className="text-left">
+            <div className="relative border-b border-[#E2E8F0] dark:border-[#253149] pb-3 mb-6 print:border-black flex flex-col items-center">
+              <div className="text-center w-full chapter-heading">
                 <span className="text-[10px] font-mono uppercase tracking-widest text-[#64748B] dark:text-[#A4B1C7] block mb-1">
                   BERKAS PENDUKUNG, LOGBOOK &amp; INSTRUMEN BAKU
                 </span>
-                <h2 className="text-base sm:text-lg font-serif font-bold text-[#0F172A] dark:text-[#F3F6FC] print:text-black uppercase">
+                <h2 className="text-base sm:text-lg font-serif font-bold text-[#0F172A] dark:text-[#F3F6FC] print:text-black uppercase tracking-wide chapter-title">
                   LAMPIRAN-LAMPIRAN DOKUMEN USULAN
                 </h2>
               </div>
-              <div className="no-print flex items-center gap-2">
+              <div className="no-print mt-2 sm:mt-0 sm:absolute sm:right-0 sm:top-1/2 sm:-translate-y-1/2 flex items-center gap-2">
                 <button
                   type="button"
                   onClick={() => setIsLogbookModalOpen(true)}

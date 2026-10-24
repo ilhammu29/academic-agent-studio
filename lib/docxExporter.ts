@@ -70,14 +70,41 @@ export async function generateAcademicProposalDocx(rawDoc: ProposalDocument, dis
   const isMagang = doc.category === "magang";
 
   // Reusable Paragraph styling
-  const createHeading1 = (text: string) =>
-    new Paragraph({
+  const createHeading1 = (text: string) => {
+    const cleaned = stripDoubleAsterisks(text);
+    const match = cleaned.match(/^(BAB\s+[IVXLCDM\d]+)\s*[:\-–]?\s*(.+)$/i);
+    if (match) {
+      return new Paragraph({
+        alignment: AlignmentType.CENTER,
+        heading: HeadingLevel.HEADING_1,
+        spacing: { before: 240, after: 280, line: lineSpacingTwip },
+        children: [
+          new TextRun({
+            text: match[1].toUpperCase(),
+            bold: true,
+            font: FONT_FAMILY,
+            size: 28, // 14pt
+            color: PRIMARY_COLOR,
+          }),
+          new TextRun({
+            text: match[2].toUpperCase(),
+            bold: true,
+            font: FONT_FAMILY,
+            size: 28, // 14pt
+            color: PRIMARY_COLOR,
+            break: 1, // Dikti standard: Chapter Number and Title on separate centered lines
+          }),
+        ],
+      });
+    }
+
+    return new Paragraph({
       alignment: AlignmentType.CENTER,
       heading: HeadingLevel.HEADING_1,
       spacing: { before: 240, after: 280, line: lineSpacingTwip },
       children: [
         new TextRun({
-          text: stripDoubleAsterisks(text),
+          text: cleaned.toUpperCase(),
           bold: true,
           font: FONT_FAMILY,
           size: 28, // 14pt
@@ -85,6 +112,7 @@ export async function generateAcademicProposalDocx(rawDoc: ProposalDocument, dis
         }),
       ],
     });
+  };
 
   const createHeading2 = (text: string) =>
     new Paragraph({

@@ -49,3 +49,30 @@ export function getSubSectionHeading(
 
   return `${chapterNumber}.${sectionIndex + 1}.${subSectionIndex + 1} ${title}`;
 }
+
+/**
+ * Parses chapter titles (e.g. "BAB I: PENDAHULUAN", "BAB II - TINJAUAN PUSTAKA", "BAB 1 PENDAHULUAN")
+ * into separated Chapter Number and Chapter Title for centered Indonesian academic report formatting.
+ */
+export function parseChapterTitle(
+  rawTitle: string,
+  fallbackChapter = "BAB I",
+  fallbackTitle = "PENDAHULUAN"
+): {
+  chapterNumber: string;
+  chapterTitle: string;
+} {
+  const cleaned = (rawTitle || "").replace(/\*\*/g, "").trim();
+  const match = cleaned.match(/^(BAB\s+[IVXLCDM\d]+)\s*[:\-–]?\s*(.+)$/i);
+  if (match) {
+    return {
+      chapterNumber: match[1].toUpperCase(),
+      chapterTitle: match[2].toUpperCase(),
+    };
+  }
+  return {
+    chapterNumber: fallbackChapter.toUpperCase(),
+    chapterTitle: (cleaned || fallbackTitle).toUpperCase(),
+  };
+}
+

@@ -206,6 +206,13 @@ html.light ::-webkit-scrollbar-thumb:hover {
   line-height: var(--doc-line-height, 1.5) !important;
 }
 
+/* Indonesian Academic Chapter Headings (Dikti Standard: Center aligned by default) */
+.academic-doc-canvas .chapter-heading,
+.academic-doc-canvas .chapter-title,
+.academic-doc-canvas h2.chapter-title {
+  text-align: center !important;
+}
+
 /* Print Styles */
 @page {
   size: A4;
