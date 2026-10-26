@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert';
-import { planDocumentOutline, buildDenseAcademicDocument } from '../lib/longDocumentGenerator.ts';
+import { planDocumentOutline, buildDenseAcademicDocument, scaleAcademicDocumentDepth } from '../lib/longDocumentGenerator.ts';
 import { generateAcademicProposalDocx } from '../lib/docxExporter.ts';
 
 test('planDocumentOutline calculates depth blueprint for Proposal Skripsi vs Magang vs Tesis', () => {
@@ -126,3 +126,35 @@ test('generateAcademicProposalDocx respects disabledSections filtering', async (
 
   assert.ok(blobFiltered.size < blobFull.size, 'Filtered DOCX must be smaller than full DOCX because disabled sections were excluded');
 });
+
+test('scaleAcademicDocumentDepth dynamically expands manuscript to 100% real depth without data loss', () => {
+  const baseDoc = buildDenseAcademicDocument(
+    'Rancang Bangun Sistem Informasi Berbasis Prediktif',
+    'skripsi',
+    {},
+    'Budi Pratama',
+    'NIM-102030',
+    'Universitas Indonesia',
+    'Fakultas Ilmu Komputer',
+    'PT GoTo Gojek Tokopedia',
+    undefined,
+    'skripsi',
+    25
+  );
+
+  assert.strictEqual(baseDoc.targetDepthPages, 25);
+  const baseTheoryCount = baseDoc.bab2.landasanTeori.length;
+  const baseLatarCount = baseDoc.bab1.latarBelakang.length;
+
+  // Scale to 75 pages
+  const scaledDoc = scaleAcademicDocumentDepth(baseDoc, 75);
+
+  assert.strictEqual(scaledDoc.targetDepthPages, 75, 'Target depth pages must be updated to 75');
+  assert.ok(scaledDoc.bab1.latarBelakang.length > baseLatarCount, 'Latar belakang paragraphs must increase');
+  assert.ok(scaledDoc.bab2.landasanTeori.length >= 9, 'Theories must scale up to >= 9');
+  assert.ok(scaledDoc.bab2.researchGapMatrix && scaledDoc.bab2.researchGapMatrix.length >= 6, 'Research gap matrix must scale up to 6 studies');
+  assert.ok(scaledDoc.logbookEntries && scaledDoc.logbookEntries.length === 16, 'Logbook entries must scale to full 16 weeks');
+  assert.strictEqual(scaledDoc.title, baseDoc.title, 'Document metadata like title must be preserved');
+  assert.strictEqual(scaledDoc.candidateName, baseDoc.candidateName, 'Candidate name must be preserved');
+});
+
