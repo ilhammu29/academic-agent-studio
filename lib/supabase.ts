@@ -127,6 +127,25 @@ export const CURATED_ACADEMIC_TEMPLATES: SavedProjectRecord[] = [
     createdAt: new Date(Date.now() - 3600000 * 72).toISOString()
   },
   {
+    id: 'proj-pkl-unp-semenpadang-2025',
+    userId: 'usr-default',
+    title: 'Analisis Preventive Maintenance Mesin Finish Mill Indarung V PT Semen Padang Berbasis Kepatuhan SOP dan Getaran Vibrasi',
+    category: 'magang',
+    targetEntity: 'PT Semen Padang (Persero)',
+    durationMonths: 2,
+    stage: 'result',
+    answers: {
+      divisi_unit: 'Departemen Tambang & Pemeliharaan Mesin Pabrik Indarung V, PT Semen Padang',
+      masalah_teknis: 'Tingginya getaran vibrasi abnormal bearing pada unit Finish Mill 5R1 yang berpotensi menyebabkan breakdown mendadak dan kerugian siklus produksi semen.',
+      metode_tools: 'Vibration Analyzer Fluke 810, Dial Indicator Shaft Alignment, Form Checklist SOP Harian, Buku Harian Tulis Tangan Asli, dan Form Bimbingan UHI FT UNP.',
+      deliverable_output: '1 Berkas Laporan PKL 3 Bab Baku FT UNP 2025, 1 Matriks Logbook Buku Harian Asli Paraf Supervisor, 1 Flowchart SOP Maintenance, dan Rekomendasi Interval Pelumasan Bearing.',
+      durasi_waktu: '2 Bulan (Juli - Agustus 2025 / Sesuai Kalender PKL FT UNP)',
+      manfaat_spesifik: 'Menurunkan risiko unpredicted downtime mesin Finish Mill sebesar 18%, melatih kompetensi mahasiswa FT UNP dalam analisis vibrasi industri semen, dan memenuhi seluruh regulasi Buku Pedoman PKL FT UNP 2025.'
+    },
+    updatedAt: new Date(Date.now() - 3600000 * 2).toISOString(),
+    createdAt: new Date(Date.now() - 3600000 * 12).toISOString()
+  },
+  {
     id: 'proj-tesis-biomarker-fibrosis',
     userId: 'usr-default',
     title: 'Korelasi Kadar Ekspresi miRNA-21 Serum dan High-Sensitivity CRP terhadap Derajat Fibrosis Pasien Hepatitis B Kronis',

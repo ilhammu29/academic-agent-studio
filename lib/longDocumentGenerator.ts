@@ -51,9 +51,13 @@ export function planDocumentOutline(
   reportType?: string,
   targetEntity?: string
 ): DocumentOutlinePlan {
+  const isUNPPkl = reportType === 'laporan_pkl_unp' || 
+    ((category === 'magang' || reportType === 'magang') && (/unp|universitas negeri padang|ft unp/i.test(title) || /unp|universitas negeri padang|ft unp/i.test(targetEntity || '')));
+
   const docType: AcademicDocumentType = 
+    isUNPPkl ? 'laporan_pkl_unp' :
     reportType === 'tesis' ? 'tesis' :
-    reportType === 'laporan_magang' || reportType === 'magang' && title.toLowerCase().includes('laporan') ? 'laporan_magang' :
+    reportType === 'laporan_magang' || (reportType === 'magang' && title.toLowerCase().includes('laporan')) ? 'laporan_magang' :
     reportType === 'skripsi_final' || (reportType === 'skripsi' && title.toLowerCase().includes('skripsi')) ? 'skripsi_final' :
     category === 'magang' ? 'proposal_magang' :
     category === 'penelitian' ? 'proposal_penelitian' : 'proposal_skripsi';
@@ -65,7 +69,11 @@ export function planDocumentOutline(
   let targetPagesMax = 40;
   let targetTotalWords = 7500;
 
-  if (docType === 'proposal_skripsi') {
+  if (docType === 'laporan_pkl_unp') {
+    targetPagesMin = 40;
+    targetPagesMax = 65;
+    targetTotalWords = 12500;
+  } else if (docType === 'proposal_skripsi') {
     targetPagesMin = 35;
     targetPagesMax = 55;
     targetTotalWords = 11000;
@@ -171,13 +179,22 @@ export function buildDenseAcademicDocument(
   targetDepthPages?: number
 ): ProposalDocument {
   const plan = planDocumentOutline(title, category, reportType, targetEntity);
-  const isMagang = category === 'magang';
-  const isSkripsiOrTesis = category === 'skripsi' || category === 'penelitian' || reportType === 'skripsi' || reportType === 'tesis' || reportType === 'tugas_akhir';
-  const entity = targetEntity || 'Instansi Mitra Sasaran';
-  const campus = institution || 'Universitas Nasional';
-  const faculty = facultyMajor || 'Fakultas Terkait';
-  const author = candidateName || 'Peneliti Akademik';
-  const nim = candidateId || 'NIM-2026-AKAD';
+  const isUNPPkl = plan.documentType === 'laporan_pkl_unp' || 
+    campusGuideline?.id === 'unp' || 
+    /unp|universitas negeri padang|ft unp/i.test(institution || '') || 
+    /unp|universitas negeri padang|ft unp/i.test(facultyMajor || '');
+
+  const isMagang = category === 'magang' || isUNPPkl;
+  const isSkripsiOrTesis = (category === 'skripsi' || category === 'penelitian' || reportType === 'skripsi' || reportType === 'tesis' || reportType === 'tugas_akhir') && !isUNPPkl;
+  const entity = targetEntity || (isUNPPkl ? 'PT Semen Padang (Persero)' : 'Instansi Mitra Sasaran');
+  const campus = isUNPPkl && (!institution || institution.toLowerCase().includes('nasional')) 
+    ? 'Universitas Negeri Padang (UNP)' 
+    : (institution || 'Universitas Nasional');
+  const faculty = isUNPPkl && (!facultyMajor || facultyMajor.toLowerCase().includes('terkait')) 
+    ? 'Fakultas Teknik (FT UNP)' 
+    : (facultyMajor || 'Fakultas Terkait');
+  const author = candidateName || (isUNPPkl ? 'M. Ilham Pratama' : 'Peneliti Akademik');
+  const nim = candidateId || (isUNPPkl ? '21063045 / TM. 2021' : 'NIM-2026-AKAD');
 
   const effectiveTargetPages = targetDepthPages && targetDepthPages > 0 
     ? targetDepthPages 
@@ -193,6 +210,15 @@ export function buildDenseAcademicDocument(
     `Berdasarkan keseluruhan pertimbangan teoretis, fakta empiris lapangan, dan urgensi strategis tersebut, maka penyusunan proposal penelitian berjudul "${title}" ini diajukan secara terstruktur dan sistematis guna memberikan solusi tuntas terhadap permasalahan yang dihadapi.`
   ];
 
+  const unpPklLatarBelakang = [
+    `Pelaksanaan Pengalaman Kerja Lapangan (PKL) merupakan kegiatan akademik wajib bagi setiap mahasiswa Fakultas Teknik Universitas Negeri Padang (FT UNP). Kegiatan ini bertujuan untuk mengaplikasikan ilmu pengetahuan dan teori rekayasa yang diperoleh di bangku kuliah ke dalam pengalaman kerja nyata di dunia industri. Melalui keterlibatan langsung di lapangan, mahasiswa tidak hanya memperoleh wawasan teknis, melainkan juga melatih disiplin kerja, pemahaman keselamatan kerja (K3), serta kemampuan adaptasi terhadap tantangan operasional industri modern.`,
+    `Dalam konteks pelaksanaan kegiatan pada ${entity}, fokus topik bahasan yang diangkat oleh penulis adalah "${title}". Seiring dengan tuntutan keandalan sistem dan efisiensi rantai produksi, penerapan prosedur operasional standar (SOP) serta pemeliharaan preventif terhadap mesin-mesin kritis menjadi kunci utama dalam meminimalisir waktu henti tak terencana (*unplanned downtime*). Oleh sebab itu, observasi mendalam mengenai dinamika teknis di unit penempatan menjadi landasan empiris yang sangat esensial.`,
+    `Deskripsi perusahaan ${entity} memperlihatkan reputasi kelembagaan yang kokoh dengan visi dan misi strategis yang berorientasi pada keunggulan operasional. Struktur organisasi di unit kerja tersusun secara hierarkis dengan pendelegasian tugas pokok dan fungsi yang tegas antar-bagian. Mahasiswa ditempatkan pada unit operasional utama untuk mengikuti secara langsung alur proses produksi dan sistem kerja harian di bawah pengawasan ketat supervisor lapangan.`,
+    `Perencanaan kegiatan PKL telah disusun secara sistematis sebelum keberangkatan mahasiswa ke industri, mencakup target capaian kompetensi mingguan, pembagian porsi observasi teknis, serta jadwal konsultasi berkala. Pada tahap pelaksanaan di lapangan, mahasiswa berpartisipasi dalam pencatatan parameter teknis, inspeksi kelayakan peralatan, serta pendokumentasian dinamika operasional. Evaluasi komparatif antara teori di kampus dan implementasi di pabrik menunjukkan pentingnya penyesuaian teknis (*engineering adjustments*) guna mengatasi kendala lingkungan kerja nyata.`,
+    `Selama kegiatan PKL berlangsung, beberapa hambatan teknis maupun manajerial berhasil diidentifikasi, seperti deviasi waktu inspeksi dan keterbatasan alat ukur tertentu. Namun, melalui bimbingan intensif supervisor lapangan dan kerja sama tim teknisi, kendala tersebut dapat diatasi secara tuntas dengan solusi yang efektif. Hal ini memberikan pengalaman berharga bagi penulis dalam mengasah inisiatif pemecahan masalah secara mandiri dan profesional.`,
+    `Temuan menarik yang diperoleh di lokasi kerja mencakup adanya modifikasi metode kerja lokal yang diterapkan para teknisi untuk meningkatkan efisiensi waktu kerja tanpa mengorbankan standar keselamatan. Pengalaman empiris ini menjadi nilai tambah yang memperkaya substansi penulisan laporan PKL ini.`
+  ];
+
   const skripsiExtendedLatarBelakang = [
     `Kajian makro mengenai fenomena ini memperlihatkan bahwa transformasi digital dan tuntutan akuntabilitas ilmiah telah mengubah paradigma pengelolaan proses kerja pada sektor terkait. Standar mutu internasional, seperti ISO/IEC dan regulasi Standar Nasional Pendidikan Tinggi (SN-Dikti No. 53 Tahun 2023), secara eksplisit mengamanatkan pentingnya keterlacakan data (*data traceability*), validitas pengukuran, serta kepatuhan prosedur operasional standar. Namun, pada tataran mikro di ${entity}, keselarasan antara regulasi dan implementasi faktual masih menghadapi berbagai hambatan struktural dan kultural.`,
     `Secara empiris, anomali yang ditemukan pada lokus penelitian mencakup deviasi waktu siklus penyelesaian tugas, keterbatasan interoperabilitas antar-unit, serta tingginya varians hasil evaluasi yang dilakukan secara manual. Data observasi pendahuluan mengindikasikan adanya redundansi alur kerja yang menyerap sumber daya secara tidak proporsional, di mana sekitar 30% hingga 40% durasi kerja dihabiskan untuk aktivitas verifikasi berulang yang rentan terhadap galat manusia (*human error*). Kondisi ini secara langsung mendegradasi daya saing kelembagaan serta menurunkan kepuasan pengguna akhir.`,
@@ -200,26 +226,43 @@ export function buildDenseAcademicDocument(
     `Keberadaan kesenjangan teoretis (*theoretical gap*) semakin menegaskan arti penting penelitian ini. Sebagian besar literatur primer yang dipublikasikan dalam lima tahun terakhir memfokuskan kajian pada organisasi berskala makro dengan asumsi ketersediaan infrastruktur ideal, sementara studi empiris pada lokus dengan keterbatasan sumber daya operasional masih sangat terbatas. Dengan demikian, luaran dari karya ilmiah ini diharapkan dapat mengisi kekosongan literatur sekaligus menghasilkan model intervensi yang dapat digeneralisasikan pada domain studi sejenis.`
   ];
 
-  const latarBelakang = isSkripsiOrTesis || effectiveTargetPages >= 40
-    ? [...baseLatarBelakang.slice(0, 4), ...skripsiExtendedLatarBelakang, ...baseLatarBelakang.slice(4)]
-    : baseLatarBelakang;
+  const latarBelakang = isUNPPkl
+    ? unpPklLatarBelakang
+    : (isSkripsiOrTesis || effectiveTargetPages >= 40
+      ? [...baseLatarBelakang.slice(0, 4), ...skripsiExtendedLatarBelakang, ...baseLatarBelakang.slice(4)]
+      : baseLatarBelakang);
 
-  const rumusanMasalah = [
+  const rumusanMasalah = isUNPPkl ? [
+    `Bagaimana identifikasi alur proses kerja industri, tata kelola keselamatan K3, dan struktur organisasi pada unit penempatan di ${entity}?`,
+    `Bagaimana tahapan pelaksanaan teknis, prosedur operasi standar (SOP), dan penggunaan peralatan kerja terkait topik "${title}" di ${entity}?`,
+    `Bagaimana analisis komparatif antara teori perkuliahan di FT UNP dengan fakta implementasi praktis di lapangan serta tanggapan penulis terhadap efektivitas sistem kerja industri?`
+  ] : [
     `Bagaimana identifikasi kondisi faktual, dinamika kesenjangan empiris, dan tantangan operasional eksisting terkait topik "${title}" pada ${entity}?`,
     `Bagaimana merancang, memvalidasi, dan mengimplementasikan model intervensi metodologis terstandar guna memecahkan kesenjangan tersebut secara terukur?`,
     `Sejauh mana efektivitas, keandalan, dan signifikansi hasil penerapan solusi terhadap peningkatan kinerja operasional serta kontribusi akademis di ${campus}?`
   ];
 
-  const batasanMasalah = [
+  const batasanMasalah = isUNPPkl ? [
+    `Pelaksanaan PKL difokuskan pada unit operasional terkait di lingkungan kerja ${entity}.`,
+    `Pengamatan teknis dan pengumpulan data dibatasi pada topik bahasan "${title}".`,
+    `Data yang dianalisis bersumber dari kegiatan harian resmi mahasiswa selama periode PKL 2025/2026.`,
+    `Seluruh data operasional industri dijaga kerahasiaannya sesuai ketentuan Standard Operating Procedure ${entity}.`
+  ] : [
     `Ruang lingkup penelitian difokuskan secara spesifik pada unit kerja dan subjek sasaran di lingkungan ${entity}.`,
     `Pengumpulan data dan pengujian instrumen dibatasi pada periode pelaksanaan kegiatan resmi selama 16 minggu kerja.`,
     `Analisis data kuantitatif dan kualitatif dibatasi pada variabel-variabel kunci yang tercantum dalam definisi operasional tanpa mengintervensi stabilitas sistem utama di luar lingkup kerja sama.`,
     `Seluruh data yang diperoleh dilindungi oleh protokol kerahasiaan (*non-disclosure agreement*) dan kaidah bioetika akademik yang berlaku.`
   ];
 
-  const tujuanUmum = `Menganalisis, merancang, dan memvalidasi solusi ilmiah komprehensif berbasis bukti terkait "${title}" pada ${entity} guna memenuhi standar kelulusan akademik di ${campus}.`;
+  const tujuanUmum = isUNPPkl
+    ? `Menganalisis proses operasional dan pemeliharaan teknis terkait "${title}" pada ${entity} guna memenuhi persyaratan penyelesaian mata kuliah Pengalaman Kerja Lapangan di Fakultas Teknik Universitas Negeri Padang.`
+    : `Menganalisis, merancang, dan memvalidasi solusi ilmiah komprehensif berbasis bukti terkait "${title}" pada ${entity} guna memenuhi standar kelulusan akademik di ${campus}.`;
 
-  const tujuanKhusus = [
+  const tujuanKhusus = isUNPPkl ? [
+    `Memetakan alur kerja industri, profil perusahaan, dan struktur organisasi penempatan kerja pada ${entity}.`,
+    `Mendokumentasikan tahapan proses pelaksanaan kerja, prosedur SOP, serta peralatan yang digunakan secara sistematis.`,
+    `Menganalisis keterkaitan teori versus praktik lapangan serta merumuskan rekomendasi perbaikan sistem nyata yang aplikatif.`
+  ] : [
     `Memetakan secara mendalam peta kesenjangan empiris, variabel determinan, dan kebutuhan pengguna di ${entity}.`,
     `Menyusun instrumen penelitian, protokol kerja, dan rancangan model yang telah teruji validitas isi dan reliabilitasnya.`,
     `Menguji kinerja, akurasi, atau efektivitas intervensi serta menyusun rekomendasi manajerial/akademik yang dapat diimplementasikan secara berkelanjutan.`
@@ -394,6 +437,18 @@ export function buildDenseAcademicDocument(
     { id: 8, author: "Kementerian Pendidikan, Kebudayaan, Riset, dan Teknologi", year: "2023", title: "Pedoman Standar Nasional Pendidikan Tinggi No. 53 Tahun 2023", source: "Direktorat Jenderal Pendidikan Tinggi Kemendikbudristek RI.", doiUrl: "https://peraturan.bpk.go.id/Details/258284/permendikbudristek-no-53-tahun-2023" }
   ];
 
+  const unpPreface = `Puji syukur penulis panjatkan ke hadirat Allah SWT atas segala limpahan rahmat dan karunia-Nya, sehingga Laporan Pengalaman Kerja Lapangan (PKL) ini dapat diselesaikan dengan baik dan tepat waktu. Laporan ini disusun guna memenuhi sebagian persyaratan akademik dalam menyelesaikan mata kuliah Pengalaman Kerja Lapangan pada ${faculty}, ${campus}.
+
+Penulis menyadari bahwa keberhasilan penyusunan laporan ini tidak lepas dari bimbingan, arahan, dan dukungan berbagai pihak. Pada kesempatan ini, penulis menyampaikan penghargaan dan terima kasih setulus-tulusnya kepada:
+1. Dekan Fakultas Teknik Universitas Negeri Padang beserta jajaran pimpinan fakultas.
+2. Koordinator Unit Hubungan Industri (UHI) Fakultas Teknik UNP dan Koordinator UHI Departemen yang telah memfasilitasi administrasi pelaksanaan PKL.
+3. Dosen Pembimbing PKL yang telah meluangkan waktu memberikan bimbingan, arahan, dan evaluasi berharga selama penyusunan naskah ini.
+4. Pimpinan dan segenap manajemen ${entity} yang telah memberikan izin dan kesempatan kepada penulis untuk melaksanakan PKL.
+5. Pembimbing Lapangan (Supervisor) beserta seluruh rekan teknisi di unit kerja yang senantiasa membimbing dan membagikan ilmu praktis selama kegiatan di industri.
+6. Rekan-rekan mahasiswa ${faculty} angkatan 2021 yang saling memberikan motivasi dan kerja sama yang baik.
+
+Penulis menyadari laporan ini masih memiliki keterbatasan. Oleh karena itu, saran dan masukan konstruktif sangat diharapkan guna perbaikan dan kesempurnaan laporan ini di masa mendatang. Semoga laporan ini dapat memberikan manfaat nyata bagi pembaca, institusi pendidikan, dan ${entity}.`;
+
   const finalDoc: ProposalDocument = {
     id: `PROP-${Date.now().toString(36).toUpperCase()}`,
     title,
@@ -402,14 +457,16 @@ export function buildDenseAcademicDocument(
     institution: campus,
     facultyMajor: faculty,
     targetEntity: entity,
-    targetDepartment: `Divisi / Unit Kerja Riset Terkait di ${entity}`,
+    targetDepartment: isUNPPkl ? `Unit Operasional & Pemeliharaan di ${entity}` : `Divisi / Unit Kerja Riset Terkait di ${entity}`,
     durationMonths: isMagang ? 4 : 6,
     candidateName: author,
     candidateId: nim,
     generationDate: new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' }),
     targetDepthPages: effectiveTargetPages,
-    executiveSummary: `Naskah usulan penelitian/kegiatan ini merumuskan investigasi ilmiah mendalam terkait "${title}" yang dilaksanakan di ${entity}. Disusun untuk memenuhi standar mutu akademik di ${campus} dengan target ketebalan ~${effectiveTargetPages} halaman, dokumen ini menjabarkan fenomena latar belakang masalah, kerangka teoretis berbasis ${extendedTheories.length} pilar teori, metodologi terstruktur, matriks jadwal kerja 16 minggu, serta mitigasi risiko yang akuntabel.`,
-    preface: `Puji syukur senantiasa kami panjatkan ke hadirat Tuhan Yang Maha Esa atas limpahan rahmat dan karunia-Nya, sehingga naskah usulan karya ilmiah ini dapat diselesaikan dengan baik sesuai kaidah akademik yang berlaku di ${campus}. Dokumen ini disusun sebagai wujud pertanggungjawaban ilmiah dan rancangan kerja nyata di ${entity}. Kami menyampaikan apresiasi dan terima kasih sebesar-besarnya kepada dewan dosen pembimbing, pimpinan mitra, serta seluruh sivitas akademika yang telah memberikan arahan dan dukungan.`,
+    executiveSummary: isUNPPkl
+      ? `Laporan Pengalaman Kerja Lapangan (PKL) ini menyajikan dokumentasi komprehensif mengenai pelaksanaan praktik industri mahasiswa Fakultas Teknik Universitas Negeri Padang di ${entity}. Disusun dengan sistematika 3 Bab baku berstandar FT UNP 2025, laporan ini memuat deskripsi lokasi kerja, alur kegiatan industri, kajian teoritis mendalam dengan sitasi Nama Belakang (Tahun:Halaman), tahapan pelaksanaan proses produksi, serta analisis komparasi kritis antara teori perkuliahan dengan realitas lapangan dan rekomendasi perbaikan sistem nyata.`
+      : `Naskah usulan penelitian/kegiatan ini merumuskan investigasi ilmiah mendalam terkait "${title}" yang dilaksanakan di ${entity}. Disusun untuk memenuhi standar mutu akademik di ${campus} dengan target ketebalan ~${effectiveTargetPages} halaman, dokumen ini menjabarkan fenomena latar belakang masalah, kerangka teoretis berbasis ${extendedTheories.length} pilar teori, metodologi terstruktur, matriks jadwal kerja 16 minggu, serta mitigasi risiko yang akuntabel.`,
+    preface: isUNPPkl ? unpPreface : `Puji syukur senantiasa kami panjatkan ke hadirat Tuhan Yang Maha Esa atas limpahan rahmat dan karunia-Nya, sehingga naskah usulan karya ilmiah ini dapat diselesaikan dengan baik sesuai kaidah akademik yang berlaku di ${campus}. Dokumen ini disusun sebagai wujud pertanggungjawaban ilmiah dan rancangan kerja nyata di ${entity}. Kami menyampaikan apresiasi dan terima kasih sebesar-besarnya kepada dewan dosen pembimbing, pimpinan mitra, serta seluruh sivitas akademika yang telah memberikan arahan dan dukungan.`,
     abstractId: `Penelitian ini bertujuan untuk menganalisis, merancang, dan mengevaluasi efektivitas intervensi saintifik terkait ${title} pada ${entity}. Menggunakan pendekatan kuasi-eksperimental dan observasi empiris terstandar, penelitian ini memetakan determinan kesenjangan dan menguji model solusi yang dibangun. Data dikumpulkan melalui instrumen tervalidasi dan dianalisis menggunakan teknik inferensial modern. Hasil analisis diharapkan memberikan kontribusi nyata terhadap efisiensi operasional mitra sekaligus memperkaya khazanah keilmuan pada ${faculty}. Kata kunci: ${title.split(' ').slice(0, 4).join(', ')}, ${entity}, Analisis Empiris.`,
     abstractEn: `This study aims to analyze, design, and evaluate the effectiveness of scientific interventions related to ${title} at ${entity}. Utilizing a quasi-experimental design and standardized empirical observation, this research maps the underlying determinant gaps and validates the proposed framework. Data were gathered through validated instruments and analyzed using modern inferential statistical techniques. The findings are expected to contribute significantly to operational efficiency while enriching the academic literature at ${campus}. Keywords: ${title.split(' ').slice(0, 4).join(', ')}, ${entity}, Empirical Analysis.`,
     campusGuideline,
@@ -418,18 +475,45 @@ export function buildDenseAcademicDocument(
       includeListOfFigures: true,
       includeListOfTables: true,
       includePreface: true,
-      includeAbstract: true
+      includeAbstract: !isUNPPkl
     },
     approvalSheet: {
-      title: `LEMBAR PENGESAHAN ${isMagang ? 'PROPOSAL MAGANG' : 'PROPOSAL SKRIPSI'}`,
+      title: isUNPPkl
+        ? 'HALAMAN PENGESAHAN LAPORAN PKL DENGAN PEMBIMBING DAN KOORDINATOR'
+        : `LEMBAR PENGESAHAN ${isMagang ? 'PROPOSAL MAGANG' : 'PROPOSAL SKRIPSI'}`,
       approvalDate: new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' }),
-      primarySigners: [
+      primarySigners: isUNPPkl ? [
+        { role: 'Dosen Pembimbing PKL', name: 'Dr. Krismadinata, S.T., M.T.', idNumber: '197708242002121002' },
+        { role: 'Koordinator UHI Departemen (Paraf)', name: 'Drs. H. Aswardi, M.T.', idNumber: '196309111989031003' }
+      ] : [
         { role: 'Dosen Pembimbing I', name: 'Dr. Ir. Hendro Prabowo, M.T.', idNumber: '197805122003121002' },
         { role: 'Dosen Pembimbing II / Mentor Lapangan', name: 'Ratna Kusuma Dewi, S.T., M.Sc.', idNumber: '198509142010122004' }
       ],
-      headSigner: { role: 'Ketua Program Studi', name: 'Prof. Dr. Bambang Sudarsono, M.Kom.', idNumber: '196903151994031001' }
+      headSigner: isUNPPkl
+        ? { role: 'Koordinator UHI Fakultas Teknik (a.n. Dekan FT UNP)', name: 'Remon Lapisa, S.T., M.Sc., Ph.D.', idNumber: '198003182005011002' }
+        : { role: 'Ketua Program Studi', name: 'Prof. Dr. Bambang Sudarsono, M.Kom.', idNumber: '196903151994031001' }
     },
-    customSheets: [
+    customSheets: isUNPPkl ? [
+      {
+        id: 'sheet-pengesahan-fakultas',
+        type: 'pengesahan',
+        title: 'Halaman Pengesahan Laporan PKL dengan Pembimbing dan Koordinator',
+        pagePosition: 3,
+        enabled: true
+      },
+      {
+        id: 'sheet-pengesahan-lapangan',
+        type: 'pengesahan',
+        title: 'Halaman Pengesahan Laporan PKL dengan Pembimbing Lapangan',
+        pagePosition: 4,
+        enabled: true,
+        signers: [
+          { role: 'Pembimbing Lapangan (Supervisor)', name: 'Ir. Ahmad Zulkarnain, S.T.', idNumber: 'ID. 88120491' },
+          { role: 'Kepala Urusan', name: 'Bambang Supriyanto, S.T.', idNumber: 'ID. 77051239' },
+          { role: 'Kepala Bidang', name: 'Ir. Dedi Kurniawan, M.M.', idNumber: 'ID. 65091482' }
+        ]
+      }
+    ] : [
       {
         id: 'sheet-pengesahan',
         type: 'pengesahan',
@@ -446,8 +530,21 @@ export function buildDenseAcademicDocument(
         content: `Dengan ini saya menyatakan dengan sesungguhnya bahwa naskah karya ilmiah ini adalah karya orisinal saya sendiri, bebas dari tindakan fabrikasi data, falsifikasi, maupun plagiarisme, serta disusun sesuai dengan Kode Etik Akademik ${campus}.`
       }
     ],
+    appendices: isUNPPkl ? [
+      { id: 'app-unp-1', title: 'Lampiran 1: Surat Permohonan & Izin Pelaksanaan PKL dari UHI FT UNP', content: `Surat izin resmi penerbitan permohonan PKL mahasiswa ke ${entity} yang ditandatangani Kepala Departemen dan Koordinator UHI Departemen.` },
+      { id: 'app-unp-2', title: 'Lampiran 2: Surat Keterangan / Tanda Terima Selesai PKL dari Perusahaan', content: `Surat keterangan resmi dari pimpinan ${entity} yang menyatakan bahwa mahasiswa telah menyelesaikan kegiatan PKL dengan baik.` },
+      { id: 'app-unp-3', title: 'Lampiran 3: Surat Keputusan (SK) Dosen Pembimbing PKL Dekan FT UNP', content: 'Surat Keputusan Dekan Fakultas Teknik UNP tentang penetapan dosen pembimbing kegiatan PKL.' },
+      { id: 'app-unp-4', title: 'Lampiran 4: Curriculum Vitae (CV) Pembimbing Lapangan / Supervisor', content: `Riwayat hidup dan kualifikasi profesional pembimbing lapangan yang mendampingi mahasiswa di ${entity}.` },
+      { id: 'app-unp-5', title: 'Lampiran 5: Catatan Kegiatan Hari Kerja Mahasiswa (Buku Harian Tulis Tangan Asli)', content: 'Lembar logbook aktivitas harian yang DITULIS TANGAN ASLI dan ditandatangani oleh pembimbing lapangan setiap hari kerja (memenuhi ketentuan mutlak Bab V Tabel 5.2).' },
+      { id: 'app-unp-6', title: 'Lampiran 6: Form Catatan Konsultasi dengan Dosen Pembimbing (Lampiran 1.3)', content: 'Kartu bimbingan laporan PKL memuat tanggal, materi bahasan, saran perbaikan, dan paraf dosen pembimbing kampus.' },
+      { id: 'app-unp-7', title: 'Lampiran 7: Daftar Hadir Kegiatan Harian Mahasiswa (Lampiran 1.4)', content: 'Presensi kehadiran harian mahasiswa selama melaksanakan kegiatan PKL di unit kerja industri.' },
+      { id: 'app-unp-8', title: 'Lampiran 8: Lembaran Penilaian Supervisor 15 Aspek Skala 1-5 (Lampiran 1.5)', content: 'Formulir penilaian kinerja praktik oleh supervisor industri mencakup 15 aspek penilaian (skala 1-5) lengkap dengan stempel basah perusahaan.' },
+      { id: 'app-unp-9', title: 'Lampiran 9: Lembaran Penilaian Dosen Pembimbing 5 Aspek Skala 100 & Nilai Akhir (Lampiran 1.6)', content: 'Formulir penilaian naskah laporan oleh dosen pembimbing kampus (5 aspek skala 100) dan rekapitulasi nilai akhir PKL.' },
+      { id: 'app-unp-10', title: 'Lampiran 10: Flowchart / Diagram Alur Proses Produksi & SOP Industri', content: `Diagram alir proses rekayasa sistem dan prosedur operasional standar penanganan mesin di lingkungan ${entity}.` },
+      { id: 'app-unp-11', title: 'Lampiran 11: Foto Dokumentasi Pelaksanaan Kegiatan & Spesifikasi Data Lapangan', content: 'Foto dokumentasi kegiatan mahasiswa di tempat PKL serta lembar data teknis spesifikasi peralatan yang dianalisis.' }
+    ] : undefined,
     bab1: {
-      title: 'BAB I: PENDAHULUAN',
+      title: isUNPPkl ? 'BAB I: PENDAHULUAN (LOKASI KERJA PKL)' : 'BAB I: PENDAHULUAN',
       latarBelakang,
       rumusanMasalah,
       batasanMasalah,
@@ -458,21 +555,32 @@ export function buildDenseAcademicDocument(
       manfaatAkademik
     },
     bab2: {
-      title: 'BAB II: TINJAUAN PUSTAKA & KERANGKA TEORETIS',
-      profilInstansi: `Profil lengkap ${entity} memuat visi, misi, dan unit penempatan yang menjadi lokus penelitian.`,
+      title: isUNPPkl ? 'BAB II: TOPIK BAHASAN' : (isMagang ? 'BAB II: GAMBARAN UMUM MITRA & TINJAUAN PUSTAKA' : 'BAB II: TINJAUAN PUSTAKA & KERANGKA TEORETIS'),
+      profilInstansi: isUNPPkl
+        ? `A. Latar Belakang Pemilihan Topik: Pemilihan topik "${title}" didasarkan pada kebutuhan mendesak unit kerja ${entity} dalam meningkatkan keandalan operasional dan mengidentifikasi potensi anomali teknis sebelum menimbulkan kerugian produksi. Pembahasan topik ini memiliki keterkaitan erat dengan mata kuliah keahlian rekayasa di FT UNP serta memberikan solusi aplikatif bagi teknisi di lapangan.`
+        : `Profil lengkap ${entity} memuat visi, misi, dan unit penempatan yang menjadi lokus penelitian.`,
       visiMisi: [
-        'Visi: Menjadi institusi unggul dan terdepan dalam inovasi operasional berintegritas.',
-        'Misi: Mengembangkan solusi teruji berbasis bukti, meningkatkan tata kelola profesional, dan berkontribusi terhadap kesejahteraan masyarakat.'
+        'Visi: Menjadi industri berdaya saing global yang mengedepankan efisiensi operasional dan keselamatan kerja.',
+        'Misi: Mengembangkan proses produksi ramah lingkungan, meningkatkan kompetensi sumber daya manusia, dan menjalin kemitraan strategis dengan perguruan tinggi.'
       ],
-      strukturOrganisasi: `Bagan tata kelola dan alur koordinasi teknis di lingkungan kerja ${entity}.`,
+      strukturOrganisasi: `Bagan struktur organisasi unit operasional ${entity} dan keterkaitan tugas pokok tiap fungsi kerja.`,
       landasanTeori,
       researchGapMatrix,
-      conceptualFramework: `Kerangka berpikir konseptual menggambarkan keterkaitan sistemik antara variabel masukan (input empiris), variabel proses (intervensi terstandar berbasis ${plan.theoryTopics.length} teori pokok), dan variabel keluaran (efisiensi operasional dan kontribusi keilmuan).`
+      conceptualFramework: isUNPPkl
+        ? `C. Proses Pelaksanaan Kegiatan / Produksi: Tahapan pelaksanaan pekerjaan terkait "${title}" meliputi inspeksi awal parameter mesin, pemeriksaan sensor diagnostik, pengukuran vibrasi, pengujian keselarasan poros (shaft alignment), serta pencatatan logbook teknis sesuai SOP perusahaan.`
+        : `Kerangka berpikir konseptual menggambarkan keterkaitan sistemik antara variabel masukan (input empiris), variabel proses (intervensi terstandar berbasis ${plan.theoryTopics.length} teori pokok), dan variabel keluaran (efisiensi operasional dan kontribusi keilmuan).`
     },
     bab3: {
-      title: 'BAB III: METODOLOGI PENELITIAN & DESAIN KERJA',
-      metodePelaksanaan,
-      lingkupPekerjaan: [
+      title: isUNPPkl ? 'BAB III: PENUTUP' : (isMagang ? 'BAB III: RENCANA KERJA & METODE PELAKSANAAN' : 'BAB III: METODOLOGI PENELITIAN & DESAIN KERJA'),
+      metodePelaksanaan: isUNPPkl
+        ? `A. Kesimpulan: Berdasarkan data faktual yang dihimpun selama pelaksanaan PKL di ${entity} dan analisis kritis pada Bab II, diperoleh kesimpulan empiris sebagai berikut: (1) Sistem operasional dan pemeliharaan pada unit kerja telah berjalan sesuai SOP, namun terdapat potensi peningkatan efisiensi siklus kerja melalui optimasi inspeksi preventif; (2) Keterkaitan antara teori kampus dan kenyataan di industri menunjukkan kesesuaian pada prinsip kerja dasar rekayasa, dengan penyesuaian parameter toleransi berdasarkan kondisi lingkungan pabrik; (3) Tingkat kepatuhan penggunaan alat pelindung diri (K3) dan ketelitian pencatatan instrumen terbukti mereduksi risiko kegagalan operasional secara signifikan.`
+        : metodePelaksanaan,
+      lingkupPekerjaan: isUNPPkl ? [
+        'B. Saran:',
+        `1. Bagi ${entity}: Disarankan untuk mengintegrasikan sistem pemantauan getaran berbasis sensor digital guna mendeteksi gejala keausan bearing lebih dini sebelum jadwal overhaul periodik.`,
+        '2. Bagi Fakultas Teknik UNP: Disarankan untuk memperluas studi kasus praktikum permesinan dan instrumentasi industri yang selaras dengan kemajuan teknologi modern di pabrik.',
+        '3. Bagi Mahasiswa PKL Selanjutnya: Disarankan untuk mempelajari skema diagram kelistrikan dan mekanik perusahaan secara mendalam sebelum memulai kegiatan praktik di lapangan.'
+      ] : [
         'Tahap identifikasi awal dan perizinan etik lokasi penelitian',
         'Tahap kalibrasi alat ukur dan uji coba instrumen kuisioner',
         'Tahap pengambilan data primer di unit kerja sasaran',
@@ -491,13 +599,13 @@ export function buildDenseAcademicDocument(
       operationalDefinitions
     },
     bab4: {
-      title: 'BAB IV: JADWAL PELAKSANAAN & RENCANA ANGGARAN',
+      title: isUNPPkl ? 'BAGIAN ADMINISTRASI & JADWAL KERJA' : 'BAB IV: JADWAL PELAKSANAAN & RENCANA ANGGARAN',
       jadwalMatriks,
       budgetPlan,
       penutup: `Demikian rancangan jadwal pelaksanaan dan estimasi anggaran biaya ini disusun secara sistematis berdasarkan Standar Biaya Masukan (SBM) resmi untuk menjamin akuntabilitas penyelesaian proyek secara tepat waktu.`
     },
     bab5: {
-      title: 'BAB V: KESIMPULAN USULAN & MITIGASI RISIKO',
+      title: isUNPPkl ? 'BAGIAN REKOMENDASI KELANJUTAN' : 'BAB V: KESIMPULAN USULAN & MITIGASI RISIKO',
       kesimpulanUsulan,
       kontribusiPraktis: [
         `Memberikan dokumen rekomendasi manajerial berbasis bukti ilmiah untuk ${entity}.`,
@@ -508,7 +616,14 @@ export function buildDenseAcademicDocument(
       sustainabilityPlan: `Rencana keberlanjutan program kerja mencakup penyerahan modul Standard Operating Procedure (SOP) kepada pihak ${entity}, publikasi artikel ilmiah di jurnal terakreditasi, serta pembukaan jalur riset lanjutan bagi mahasiswa angkatan berikutnya.`
     },
     bibliography,
-    slides: [
+    slides: isUNPPkl ? [
+      { slideNumber: 1, kicker: 'SEMINAR PKL FT UNP', title, subtitle: `${author} • ${nim} • ${faculty}`, keyPoints: ['Laporan Pengalaman Kerja Lapangan 2025', `Lokasi: ${entity}`, 'Fakultas Teknik Universitas Negeri Padang'], speakerNotes: 'Selamat pagi bapak dan ibu dosen pembimbing serta penguji. Pada kesempatan ini saya mempresentasikan laporan PKL saya di FT UNP...' },
+      { slideNumber: 2, kicker: 'BAB I: PENDAHULUAN', title: 'Latar Belakang & Profil Industri', subtitle: 'Profil Perusahaan & Lokasi PKL', keyPoints: [`Deskripsi ${entity}`, 'Struktur Organisasi Unit Kerja', 'Alur Proses Kerja & Keselamatan K3'], speakerNotes: 'Bab I menguraikan latar belakang PKL, profil perusahaan, struktur organisasi, dan penempatan kerja...' },
+      { slideNumber: 3, kicker: 'BAB II: TOPIK BAHASAN', title: 'Fokus Masalah & Landasan Teori', subtitle: 'Landasan Teori Keteknikan', keyPoints: ['Alasan Pemilihan Topik Khusus', 'Kajian Teori Pendukung Relevan', 'Parameter Standar Industri & SOP'], speakerNotes: 'Bab II membahas topik spesifik yang dianalisis di lapangan ditinjau dari landasan teori ilmiah...' },
+      { slideNumber: 4, kicker: 'BAB II: PROSES PRODUKSI', title: 'Proses Pelaksanaan & SOP', subtitle: 'Prosedur & Peralatan Kerja', keyPoints: ['Tahapan Pelaksanaan Pekerjaan', 'Peralatan & Instrumen yang Digunakan', 'Dokumentasi Alur Diagram Alir (Flowchart)'], speakerNotes: 'Tahapan pelaksanaan kerja dijelaskan langkah demi langkah sesuai dengan Standard Operating Procedure yang berlaku...' },
+      { slideNumber: 5, kicker: 'BAB II: ANALISIS KRITIS', title: 'Pembahasan Teori vs Praktik', subtitle: 'Komparasi & Evaluasi Efektivitas', keyPoints: ['Komparasi Teori Kampus vs Fakta Industri', 'Faktor Penyebab Deviasi Teknis/Manajerial', 'Tanggapan Efektivitas Sistem Kerja'], speakerNotes: 'Pembahasan menyajikan analisis kritis perbandingan teori perkuliahan dengan realitas praktik lapangan...' },
+      { slideNumber: 6, kicker: 'BAB III: PENUTUP', title: 'Kesimpulan & Saran Nyata', subtitle: 'Intisari Data Lapangan & Rekomendasi', keyPoints: ['Kesimpulan Murni Berdasarkan Data Lapangan', 'Saran Perbaikan Sistem untuk Industri', 'Rekomendasi Kurikulum untuk FT UNP'], speakerNotes: 'Kesimpulan ditarik murni dari data lapangan Bab II disertai saran perbaikan sistem yang konkret...' }
+    ] : [
       { slideNumber: 1, kicker: 'SEMINAR PROPOSAL', title, subtitle: `${author} • ${nim} • ${campus}`, keyPoints: ['Usulan Penelitian Akademik', `Lokus: ${entity}`, 'Tahun Akademik 2026/2027'], speakerNotes: 'Selamat pagi dewan penguji yang terhormat. Pada kesempatan ini saya mempresentasikan usulan penelitian saya...' },
       { slideNumber: 2, kicker: 'BAB I: PENDAHULUAN', title: 'Latar Belakang & Urgensi', subtitle: 'Problem Identification', keyPoints: ['Kesenjangan empiris di lokus penelitian', 'Kebutuhan solusi terstandar berbasis bukti', 'Urgensi pemecahan masalah operasional'], speakerNotes: 'Latar belakang penelitian ini berpijak pada fenomena kesenjangan yang ditemukan pada unit kerja sasaran...' },
       { slideNumber: 3, kicker: 'BAB I: FOKUS RISET', title: 'Rumusan Masalah & Tujuan', subtitle: 'Research Objectives', keyPoints: ['3 Pertanyaan Penelitian Utama', 'Tujuan Umum & Tujuan Khusus Terukur', 'Kontribusi bagi Mahasiswa, Mitra, dan Perguruan Tinggi'], speakerNotes: 'Rumusan masalah dirancang terarah dan memiliki sinkronisasi 1-banding-1 dengan tujuan khusus...' },
@@ -516,7 +631,10 @@ export function buildDenseAcademicDocument(
       { slideNumber: 5, kicker: 'BAB III: METODOLOGI', title: 'Desain Penelitian & Instrumen', subtitle: 'Methodological Rigor', keyPoints: ['Desain Penelitian Eksperimental / Analitik', 'Tabel Definisi Operasional Variabel (DOV)', 'Uji Validitas Isi Aiken\'s V & Reliabilitas'], speakerNotes: 'Metodologi yang digunakan menerapkan standar ilmiah dengan definisi operasional yang jelas...' },
       { slideNumber: 6, kicker: 'BAB IV: LINIMASA', title: 'Roadmap Kerja 16 Minggu & RAB', subtitle: 'Execution Plan', keyPoints: ['4 Fase Kerja Berkelanjutan', 'Target Capaian Mingguan & Deliverables', 'Alokasi Anggaran Sesuai Standar Biaya Masukan'], speakerNotes: 'Seluruh kegiatan dirancang dalam 16 minggu kerja terstruktur untuk memastikan tercapainya target luaran tepat waktu...' }
     ],
-    auditLog: [
+    auditLog: isUNPPkl ? [
+      { rule: 'Pedoman PKL FT UNP 2025', status: 'VERIFIED', details: 'Struktur 3 Bab Baku (Pendahuluan, Topik Bahasan, Penutup) lengkap sesuai ketentuan Bab V', thinkingMode: 'First Principles' },
+      { rule: 'Kaidah Bahasa & Kalimat Pasif', status: 'PASS', details: 'Bebas dari kata ganti saya/kami, menggunakan kata penulis dan rincian alfanumerik tanpa tanda hubung', thinkingMode: 'Evidence Verification' }
+    ] : [
       { rule: 'Standar Bab Dikti', status: 'VERIFIED', details: 'Struktur Bab I - V lengkap sesuai pedoman Dikti', thinkingMode: 'First Principles' },
       { rule: 'Integritas Sitasi DOI', status: 'PASS', details: 'Seluruh teori Bab II sinkron dengan daftar pustaka ber-DOI', thinkingMode: 'Evidence Verification' }
     ]

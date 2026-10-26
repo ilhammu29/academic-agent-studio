@@ -278,6 +278,7 @@ Jawablah dengan ringkas, tajam, bernas, berstandar akademik tinggi, tanpa klise 
   const [zoomLevel, setZoomLevel] = useState<number>(100);
   const [isPageCustomizerModalOpen, setIsPageCustomizerModalOpen] = useState<boolean>(false);
   const [disabledSections, setDisabledSections] = useState<string[]>([]);
+  const isUNPPkl = currentDoc.reportType === "laporan_pkl_unp" || currentDoc.campusGuideline?.id === "unp";
 
   const handleToggleSection = (key: string) => {
     setDisabledSections(prev => 
@@ -1196,7 +1197,14 @@ NIP / NIK.
           <div className="flex items-center gap-2 shrink-0">
             {/* Chapter Jump Selector */}
             <div className="flex items-center gap-0.5 bg-[#F1F5F9] dark:bg-[#111827] p-0.5 rounded-lg border border-[#E2E8F0] dark:border-[#253149] text-xs">
-              {[
+              {(isUNPPkl ? [
+                { id: "all", label: "Semua" },
+                { id: "frontmatter", label: "Cover" },
+                { id: "bab1", label: "Bab I" },
+                { id: "bab2", label: "Bab II" },
+                { id: "bab3", label: "Bab III (Penutup)" },
+                { id: "backmatter", label: "Pustaka & Lampiran" }
+              ] : [
                 { id: "all", label: "Semua" },
                 { id: "frontmatter", label: "Cover" },
                 { id: "bab1", label: "Bab I" },
@@ -1205,7 +1213,7 @@ NIP / NIK.
                 { id: "bab4", label: "Bab IV" },
                 { id: "bab5", label: "Bab V" },
                 { id: "backmatter", label: "Pustaka" }
-              ].map((s) => (
+              ]).map((s) => (
                 <button
                   key={s.id}
                   type="button"
@@ -1437,7 +1445,14 @@ NIP / NIK.
                   <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-[#475569] dark:text-[#A4B1C7] px-2 block mb-1">
                     Daftar Bab &amp; Bagian
                   </span>
-                  {[
+                  {(isUNPPkl ? [
+                    { id: "all", label: "Semua Halaman", icon: Layers },
+                    { id: "frontmatter", label: "Cover & Bagian Awal", icon: BookOpen },
+                    { id: "bab1", label: "Bab I: Pendahuluan", icon: FileText },
+                    { id: "bab2", label: "Bab II: Topik Bahasan", icon: BookMarked, badge: `${currentDoc.bab2?.landasanTeori?.length || 4}` },
+                    { id: "bab3", label: "Bab III: Penutup", icon: ShieldCheck },
+                    { id: "backmatter", label: "Pustaka & Lampiran (11)", icon: BookmarkCheck }
+                  ] : [
                     { id: "all", label: "Semua Halaman", icon: Layers },
                     { id: "frontmatter", label: "Cover & Bagian Awal", icon: BookOpen },
                     { id: "bab1", label: "Bab I: Pendahuluan", icon: FileText },
@@ -1446,7 +1461,7 @@ NIP / NIK.
                     { id: "bab4", label: "Bab IV: Jadwal & Anggaran", icon: CalendarDays },
                     { id: "bab5", label: "Bab V: Kesimpulan & Mitigasi", icon: ShieldCheck },
                     { id: "backmatter", label: "Pustaka & Lampiran", icon: BookmarkCheck }
-                  ].map((s) => {
+                  ]).map((s) => {
                     const isActive = naskahSection === s.id;
                     const IconComp = s.icon;
                     return (
@@ -1685,8 +1700,8 @@ NIP / NIK.
                   Fokus Bagian: {
                     naskahSection === "frontmatter" ? "Cover & Kelengkapan Awal" :
                     naskahSection === "bab1" ? "Bab I: Pendahuluan" :
-                    naskahSection === "bab2" ? `Bab II: Tinjauan Pustaka (${currentDoc.bab2?.landasanTeori?.length || 13} Teori)` :
-                    naskahSection === "bab3" ? "Bab III: Metodologi / Pelaksanaan" :
+                    naskahSection === "bab2" ? (isUNPPkl ? "Bab II: Topik Bahasan" : `Bab II: Tinjauan Pustaka (${currentDoc.bab2?.landasanTeori?.length || 13} Teori)`) :
+                    naskahSection === "bab3" ? (isUNPPkl ? "Bab III: Penutup (Kesimpulan & Saran)" : "Bab III: Metodologi / Pelaksanaan") :
                     naskahSection === "bab4" ? "Bab IV: Rencana Kerja & Analisis" :
                     naskahSection === "bab5" ? "Bab V: Penutup & Rekomendasi" :
                     "Daftar Pustaka, Logbook & Berita Acara"
@@ -2672,81 +2687,139 @@ NIP / NIK.
             </div>
 
             <div className="space-y-4 text-xs sm:text-sm text-[#334155] dark:text-[#CBD5E1] leading-relaxed text-justify print:text-black">
-              <div className="flex items-center justify-between pt-1">
-                <h3 className="text-sm font-semibold text-[#0F172A] dark:text-[#F3F6FC] print:text-black font-serif">
-                  {getSectionHeading(1, 0, "Latar Belakang Masalah", currentDoc.campusGuideline?.headingStyle)}
-                </h3>
-                <button
-                  type="button"
-                  onClick={() => handleRefineWithAI("bab1.latarBelakang", "1.1 Latar Belakang Masalah", currentDoc.bab1.latarBelakang.join("\n\n"))}
-                  className="no-print opacity-70 hover:opacity-100 text-[11px] font-mono text-[#64748B] hover:text-[#7C9CFF] dark:text-[#A4B1C7] dark:hover:text-[#7C9CFF] bg-white dark:bg-[#172033] px-2 py-0.5 rounded border border-[#E2E8F0] dark:border-[#253149] hover:border-[#7C9CFF] flex items-center gap-1 cursor-pointer transition-all shadow-2xs"
-                >
-                  <Sparkles className="w-3 h-3 text-[#7C9CFF]" />
-                  <span>Revisi AI</span>
-                </button>
-              </div>
-              {currentDoc.bab1.latarBelakang.map((para, i) => (
-                <p key={i} className="indent-6">{para}</p>
-              ))}
+              {isUNPPkl ? (
+                <>
+                  <div className="flex items-center justify-between pt-1">
+                    <h3 className="text-sm font-semibold text-[#0F172A] dark:text-[#F3F6FC] print:text-black font-serif">
+                      A. Latar Belakang
+                    </h3>
+                    <button
+                      type="button"
+                      onClick={() => handleRefineWithAI("bab1.latarBelakang", "A. Latar Belakang", currentDoc.bab1.latarBelakang.join("\n\n"))}
+                      className="no-print opacity-70 hover:opacity-100 text-[11px] font-mono text-[#64748B] hover:text-[#7C9CFF] dark:text-[#A4B1C7] dark:hover:text-[#7C9CFF] bg-white dark:bg-[#172033] px-2 py-0.5 rounded border border-[#E2E8F0] dark:border-[#253149] hover:border-[#7C9CFF] flex items-center gap-1 cursor-pointer transition-all shadow-2xs"
+                    >
+                      <Sparkles className="w-3 h-3 text-[#7C9CFF]" />
+                      <span>Revisi AI</span>
+                    </button>
+                  </div>
+                  {currentDoc.bab1.latarBelakang.map((para, i) => (
+                    <p key={i} className="indent-6">{para}</p>
+                  ))}
 
-              <div className="flex items-center justify-between pt-2">
-                <h3 className="text-sm font-semibold text-[#0F172A] dark:text-[#F3F6FC] print:text-black font-serif">
-                  {getSectionHeading(1, 1, "Rumusan Masalah", currentDoc.campusGuideline?.headingStyle)}
-                </h3>
-                <button
-                  type="button"
-                  onClick={() => handleRefineWithAI("bab1.rumusanMasalah", "1.2 Rumusan Masalah", currentDoc.bab1.rumusanMasalah.join("\n"))}
-                  className="no-print opacity-70 hover:opacity-100 text-[11px] font-mono text-[#64748B] hover:text-[#7C9CFF] dark:text-[#A4B1C7] dark:hover:text-[#7C9CFF] bg-white dark:bg-[#172033] px-2 py-0.5 rounded border border-[#E2E8F0] dark:border-[#253149] hover:border-[#7C9CFF] flex items-center gap-1 cursor-pointer transition-all shadow-2xs"
-                >
-                  <Sparkles className="w-3 h-3 text-[#7C9CFF]" />
-                  <span>Revisi AI</span>
-                </button>
-              </div>
-              <ol className="list-decimal pl-6 space-y-1.5">
-                {currentDoc.bab1.rumusanMasalah.map((r, i) => (
-                  <li key={i}>{r}</li>
-                ))}
-              </ol>
+                  <h3 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100 print:text-black font-serif pt-2">
+                    B. Deskripsi Perusahaan &amp; Struktur Organisasi
+                  </h3>
+                  <p className="indent-6">{currentDoc.bab2?.profilInstansi || `Deskripsi umum kegiatan operasional, sejarah, visi misi, serta struktur hierarki organisasi pada unit kerja ${currentDoc.targetEntity}.`}</p>
 
-              <h3 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100 print:text-black font-serif pt-2">
-                {getSectionHeading(1, 2, "Batasan Masalah", currentDoc.campusGuideline?.headingStyle)}
-              </h3>
-              <ul className="list-disc pl-6 space-y-1">
-                {currentDoc.bab1.batasanMasalah.map((b, i) => (
-                  <li key={i}>{b}</li>
-                ))}
-              </ul>
+                  <h3 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100 print:text-black font-serif pt-2">
+                    C. Deskripsi Kegiatan Industri / Pekerjaan
+                  </h3>
+                  <p className="indent-6">Pelaksanaan aktivitas keteknikan di {currentDoc.targetEntity} meliputi operasional harian, inspeksi peralatan berkala, pemeliharaan preventif, dan keterlibatan langsung pada alur proses utama.</p>
 
-              <h3 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100 print:text-black font-serif pt-2">
-                {getSectionHeading(1, 3, currentDoc.category === "magang" ? "Tujuan Kegiatan" : "Tujuan Penelitian", currentDoc.campusGuideline?.headingStyle)}
-              </h3>
-              <p><strong>Tujuan Umum:</strong> {currentDoc.bab1.tujuanUmum}</p>
-              <p className="pt-1"><strong>Tujuan Khusus:</strong></p>
-              <ul className="list-disc pl-6 space-y-1">
-                {currentDoc.bab1.tujuanKhusus.map((t, i) => (
-                  <li key={i}>{t}</li>
-                ))}
-              </ul>
+                  <h3 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100 print:text-black font-serif pt-2">
+                    D. Perencanaan Kegiatan PKL
+                  </h3>
+                  <p className="indent-6">Rencana kerja disusun secara bertahap selama periode PKL dengan matriks target mingguan:</p>
+                  <ol className="list-decimal pl-6 space-y-1">
+                    {(currentDoc.bab4?.ganttSchedule || []).map((s: any, idx: number) => (
+                      <li key={idx}><strong>{s.task || s.activity || s.minggu}:</strong> {s.output || s.fase || 'Pelaksanaan & evaluasi'}</li>
+                    ))}
+                  </ol>
 
-              <h3 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100 print:text-black font-serif pt-2">
-                {getSectionHeading(1, 4, currentDoc.category === "magang" ? "Manfaat Kegiatan" : "Manfaat Penelitian", currentDoc.campusGuideline?.headingStyle)}
-              </h3>
-              <div className="space-y-2">
-                <p><strong>1. Bagi Mahasiswa:</strong></p>
-                <ul className="list-disc pl-6 space-y-0.5">
-                  {currentDoc.bab1.manfaatMahasiswa.map((m, i) => <li key={i}>{m}</li>)}
-                </ul>
+                  <h3 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100 print:text-black font-serif pt-2">
+                    E. Pelaksanaan Kegiatan PKL
+                  </h3>
+                  <p className="indent-6">Realisasi kegiatan praktik kerja lapangan dilaksanakan pada unit kerja {currentDoc.targetEntity} dengan mengikuti SOP operasional dan pengawasan langsung dari supervisor lapangan.</p>
 
-                <p className="pt-1"><strong>2. Bagi Instansi Mitra ({currentDoc.targetEntity}):</strong></p>
-                <ul className="list-disc pl-6 space-y-0.5">
-                  {currentDoc.bab1.manfaatInstansi.map((m, i) => <li key={i}>{m}</li>)}
-                </ul>
+                  <h3 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100 print:text-black font-serif pt-2">
+                    F. Hambatan dan Penyelesaian Masalah
+                  </h3>
+                  <p className="indent-6">Selama pelaksanaan kegiatan di lapangan, dijumpai hambatan teknis berupa: (1) Kendala ketersediaan suku cadang cepat aus yang diatasi melalui koordinasi logistik terjadwal, dan (2) Penyesuaian variasi beban mesin diatasi melalui pemantauan parameter sensorik secara berkala.</p>
 
-                <p className="pt-1"><strong>3. Bagi Perguruan Tinggi ({currentDoc.institution}):</strong></p>
-                <ul className="list-disc pl-6 space-y-0.5">
-                  {currentDoc.bab1.manfaatAkademik.map((m, i) => <li key={i}>{m}</li>)}
-                </ul>
-              </div>
+                  <h3 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100 print:text-black font-serif pt-2">
+                    G. Temuan Menarik di Lapangan
+                  </h3>
+                  <p className="indent-6">Temuan berharga di lokasi industri meliputi inovasi modifikasi pelumasan bearing secara terpusat yang mampu memperpanjang waktu retensi oli hingga 15% serta penerapan budaya K3 berbasis reward sistem di lini produksi.</p>
+                </>
+              ) : (
+                <>
+                  <div className="flex items-center justify-between pt-1">
+                    <h3 className="text-sm font-semibold text-[#0F172A] dark:text-[#F3F6FC] print:text-black font-serif">
+                      {getSectionHeading(1, 0, "Latar Belakang Masalah", currentDoc.campusGuideline?.headingStyle)}
+                    </h3>
+                    <button
+                      type="button"
+                      onClick={() => handleRefineWithAI("bab1.latarBelakang", "1.1 Latar Belakang Masalah", currentDoc.bab1.latarBelakang.join("\n\n"))}
+                      className="no-print opacity-70 hover:opacity-100 text-[11px] font-mono text-[#64748B] hover:text-[#7C9CFF] dark:text-[#A4B1C7] dark:hover:text-[#7C9CFF] bg-white dark:bg-[#172033] px-2 py-0.5 rounded border border-[#E2E8F0] dark:border-[#253149] hover:border-[#7C9CFF] flex items-center gap-1 cursor-pointer transition-all shadow-2xs"
+                    >
+                      <Sparkles className="w-3 h-3 text-[#7C9CFF]" />
+                      <span>Revisi AI</span>
+                    </button>
+                  </div>
+                  {currentDoc.bab1.latarBelakang.map((para, i) => (
+                    <p key={i} className="indent-6">{para}</p>
+                  ))}
+
+                  <div className="flex items-center justify-between pt-2">
+                    <h3 className="text-sm font-semibold text-[#0F172A] dark:text-[#F3F6FC] print:text-black font-serif">
+                      {getSectionHeading(1, 1, "Rumusan Masalah", currentDoc.campusGuideline?.headingStyle)}
+                    </h3>
+                    <button
+                      type="button"
+                      onClick={() => handleRefineWithAI("bab1.rumusanMasalah", "1.2 Rumusan Masalah", currentDoc.bab1.rumusanMasalah.join("\n"))}
+                      className="no-print opacity-70 hover:opacity-100 text-[11px] font-mono text-[#64748B] hover:text-[#7C9CFF] dark:text-[#A4B1C7] dark:hover:text-[#7C9CFF] bg-white dark:bg-[#172033] px-2 py-0.5 rounded border border-[#E2E8F0] dark:border-[#253149] hover:border-[#7C9CFF] flex items-center gap-1 cursor-pointer transition-all shadow-2xs"
+                    >
+                      <Sparkles className="w-3 h-3 text-[#7C9CFF]" />
+                      <span>Revisi AI</span>
+                    </button>
+                  </div>
+                  <ol className="list-decimal pl-6 space-y-1.5">
+                    {currentDoc.bab1.rumusanMasalah.map((r, i) => (
+                      <li key={i}>{r}</li>
+                    ))}
+                  </ol>
+
+                  <h3 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100 print:text-black font-serif pt-2">
+                    {getSectionHeading(1, 2, "Batasan Masalah", currentDoc.campusGuideline?.headingStyle)}
+                  </h3>
+                  <ul className="list-disc pl-6 space-y-1">
+                    {currentDoc.bab1.batasanMasalah.map((b, i) => (
+                      <li key={i}>{b}</li>
+                    ))}
+                  </ul>
+
+                  <h3 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100 print:text-black font-serif pt-2">
+                    {getSectionHeading(1, 3, currentDoc.category === "magang" ? "Tujuan Kegiatan" : "Tujuan Penelitian", currentDoc.campusGuideline?.headingStyle)}
+                  </h3>
+                  <p><strong>Tujuan Umum:</strong> {currentDoc.bab1.tujuanUmum}</p>
+                  <p className="pt-1"><strong>Tujuan Khusus:</strong></p>
+                  <ul className="list-disc pl-6 space-y-1">
+                    {currentDoc.bab1.tujuanKhusus.map((t, i) => (
+                      <li key={i}>{t}</li>
+                    ))}
+                  </ul>
+
+                  <h3 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100 print:text-black font-serif pt-2">
+                    {getSectionHeading(1, 4, currentDoc.category === "magang" ? "Manfaat Kegiatan" : "Manfaat Penelitian", currentDoc.campusGuideline?.headingStyle)}
+                  </h3>
+                  <div className="space-y-2">
+                    <p><strong>1. Bagi Mahasiswa:</strong></p>
+                    <ul className="list-disc pl-6 space-y-0.5">
+                      {currentDoc.bab1.manfaatMahasiswa.map((m, i) => <li key={i}>{m}</li>)}
+                    </ul>
+
+                    <p className="pt-1"><strong>2. Bagi Instansi Mitra ({currentDoc.targetEntity}):</strong></p>
+                    <ul className="list-disc pl-6 space-y-0.5">
+                      {currentDoc.bab1.manfaatInstansi.map((m, i) => <li key={i}>{m}</li>)}
+                    </ul>
+
+                    <p className="pt-1"><strong>3. Bagi Perguruan Tinggi ({currentDoc.institution}):</strong></p>
+                    <ul className="list-disc pl-6 space-y-0.5">
+                      {currentDoc.bab1.manfaatAkademik.map((m, i) => <li key={i}>{m}</li>)}
+                    </ul>
+                  </div>
+                </>
+              )}
             </div>
           </section>
           )}
@@ -2767,7 +2840,7 @@ NIP / NIK.
                     onClick={() => { setNaskahSection("bab2"); window.scrollTo({ top: 0, behavior: "smooth" }); }}
                     className="px-4 py-2 rounded-lg bg-[#0F172A] hover:bg-black text-white dark:bg-[#7C9CFF] dark:hover:bg-[#688bf5] dark:text-[#080B12] font-semibold text-xs flex items-center gap-1.5 transition-colors cursor-pointer shadow-xs"
                   >
-                    <span>Lanjut ke Bab II: Tinjauan Pustaka</span>
+                    <span>Lanjut ke Bab II: {isUNPPkl ? "Topik Bahasan" : "Tinjauan Pustaka"}</span>
                     <ChevronRight className="w-4 h-4" />
                   </button>
                 </div>
@@ -2787,7 +2860,7 @@ NIP / NIK.
               {renderChapterHeading(
                 currentDoc.bab2.title,
                 "BAB II",
-                currentDoc.category === "magang" ? "GAMBARAN UMUM INSTANSI & LANDASAN TEORI TERAPAN" : "TINJAUAN PUSTAKA & KERANGKA TEORETIS"
+                isUNPPkl ? "TOPIK BAHASAN" : (currentDoc.category === "magang" ? "GAMBARAN UMUM INSTANSI & LANDASAN TEORI TERAPAN" : "TINJAUAN PUSTAKA & KERANGKA TEORETIS")
               )}
               <div className="no-print mt-2 sm:mt-0 sm:absolute sm:right-0 sm:top-1/2 sm:-translate-y-1/2">
                 <button
@@ -2825,7 +2898,64 @@ NIP / NIK.
             </div>
 
             <div className="space-y-4 text-xs sm:text-sm text-[#334155] dark:text-[#CBD5E1] leading-relaxed text-justify print:text-black">
-              {currentDoc.category === "magang" ? (
+              {isUNPPkl ? (
+                <>
+                  <div className="flex items-center justify-between">
+                    <h3 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100 print:text-black font-serif">
+                      A. Latar Belakang Pemilihan Topik
+                    </h3>
+                    <button
+                      type="button"
+                      onClick={() => handleRefineWithAI("bab2.profilInstansi", "A. Latar Belakang Pemilihan Topik", currentDoc.bab2.profilInstansi)}
+                      className="no-print text-[11px] font-mono text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-100 bg-zinc-100 dark:bg-zinc-900 px-2 py-0.5 rounded border border-zinc-200 dark:border-zinc-800 flex items-center gap-1 cursor-pointer transition-colors shadow-xs"
+                    >
+                      <Sparkles className="w-3 h-3 text-zinc-500 dark:text-zinc-400" />
+                      <span>Revisi AI</span>
+                    </button>
+                  </div>
+                  <p className="indent-6">{currentDoc.bab2.profilInstansi?.replace(/^A\.\s*Latar Belakang Pemilihan Topik:\s*/i, "") || `Alasan pemilihan topik "${currentDoc.title}" sebagai fokus kajian di ${currentDoc.targetEntity} adalah relevansi teknologi dan kebutuhan efisiensi operasional.`}</p>
+
+                  <h3 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100 print:text-black font-serif pt-2">
+                    B. Kajian Teoritis
+                  </h3>
+                  <p className="text-xs text-zinc-600 dark:text-zinc-400 mb-2">
+                    Kajian landasan teori ilmiah mendalam yang mendasari analisis topik di lapangan mengacu pada pustaka primer bereputasi:
+                  </p>
+                  <div className="space-y-3">
+                    {currentDoc.bab2.landasanTeori?.map((teori, idx) => (
+                      <div key={idx} className="p-3.5 rounded-xl bg-zinc-50 dark:bg-zinc-900/40 border border-zinc-200 dark:border-zinc-800 print:border-gray-200">
+                        <h4 className="text-xs font-semibold text-zinc-900 dark:text-zinc-100 print:text-black mb-1">
+                          2.{idx + 1} {teori.topic}
+                        </h4>
+                        <p className="text-xs text-zinc-700 dark:text-zinc-300 print:text-black">{teori.elaboration}</p>
+                        <p className="text-[11px] text-zinc-500 font-mono mt-1 print:text-gray-600">Sitasi acuan: {teori.citation}</p>
+                      </div>
+                    ))}
+                  </div>
+
+                  <h3 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100 print:text-black font-serif pt-2">
+                    C. Proses Pelaksanaan Kegiatan / Produksi
+                  </h3>
+                  <p className="indent-6">{(currentDoc.bab2.conceptualFramework || "Uraian prosedur operasional standar (SOP), tahapan teknis pelaksanaan proses produksi, instrumen dan peralatan yang digunakan.").replace(/^C\.\s*Proses Pelaksanaan Kegiatan \/ Produksi:\s*/i, "")}</p>
+
+                  <h3 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100 print:text-black font-serif pt-2">
+                    D. Pembahasan dan Analisis Kritis
+                  </h3>
+                  <div className="space-y-2">
+                    {currentDoc.bab2.researchGapMatrix && currentDoc.bab2.researchGapMatrix.length > 0 ? (
+                      currentDoc.bab2.researchGapMatrix.map((rg, idx) => (
+                        <p key={idx} className="indent-6">
+                          <strong>Kajian {rg.authorYear}:</strong> {rg.findingsEffect} {rg.gapDifference}
+                        </p>
+                      ))
+                    ) : (
+                      <p className="indent-6">
+                        Berdasarkan observasi data lapangan, kesesuaian prosedur mencapai 92% dengan beberapa penyesuaian teknis minor untuk mengatasi kendala lingkungan pabrik.
+                      </p>
+                    )}
+                  </div>
+                </>
+              ) : currentDoc.category === "magang" ? (
                 /* Format Khusus Magang: Profil Perusahaan, Visi Misi, Struktur Organisasi */
                 <>
                   <div className="flex items-center justify-between">
@@ -2984,7 +3114,7 @@ NIP / NIK.
                     onClick={() => { setNaskahSection("bab3"); window.scrollTo({ top: 0, behavior: "smooth" }); }}
                     className="px-4 py-2 rounded-lg bg-[#0F172A] hover:bg-black text-white dark:bg-[#7C9CFF] dark:hover:bg-[#688bf5] dark:text-[#080B12] font-semibold text-xs flex items-center gap-1.5 transition-colors cursor-pointer shadow-xs"
                   >
-                    <span>Lanjut ke Bab III: Metodologi</span>
+                    <span>Lanjut ke Bab III: {isUNPPkl ? "Penutup" : "Metodologi"}</span>
                     <ChevronRight className="w-4 h-4" />
                   </button>
                 </div>
@@ -3004,7 +3134,7 @@ NIP / NIK.
               {renderChapterHeading(
                 currentDoc.bab3.title,
                 "BAB III",
-                currentDoc.category === "magang" ? "RENCANA PELAKSANAAN & METODE KERJA" : "METODE PENELITIAN & PROTOKOL RISET"
+                isUNPPkl ? "PENUTUP" : (currentDoc.category === "magang" ? "RENCANA PELAKSANAAN & METODE KERJA" : "METODE PENELITIAN & PROTOKOL RISET")
               )}
               <div className="no-print mt-2 sm:mt-0 sm:absolute sm:right-0 sm:top-1/2 sm:-translate-y-1/2">
                 <button
@@ -3019,14 +3149,16 @@ NIP / NIK.
             </div>
 
             {/* Formal Academic Figure 3.1: Bagan Alir Tahapan Pelaksanaan */}
-            <div className="my-6 p-4 rounded-xl border border-[#E2E8F0] dark:border-[#253149] bg-[#F8FAFC] dark:bg-[#111827]/50 text-center">
-              <div className="max-w-2xl mx-auto py-2">
-                <AcademicFlowchartDiagram doc={currentDoc} type="methodology" />
+            {!isUNPPkl && (
+              <div className="my-6 p-4 rounded-xl border border-[#E2E8F0] dark:border-[#253149] bg-[#F8FAFC] dark:bg-[#111827]/50 text-center">
+                <div className="max-w-2xl mx-auto py-2">
+                  <AcademicFlowchartDiagram doc={currentDoc} type="methodology" />
+                </div>
+                <p className="text-xs font-serif font-bold text-[#0F172A] dark:text-[#F3F6FC] mt-2 text-center">
+                  Gambar 3.1 Bagan Alir Tahapan Pelaksanaan {currentDoc.category === "magang" ? "Kegiatan Magang & Analisis" : "Penelitian"}
+                </p>
               </div>
-              <p className="text-xs font-serif font-bold text-[#0F172A] dark:text-[#F3F6FC] mt-2 text-center">
-                Gambar 3.1 Bagan Alir Tahapan Pelaksanaan {currentDoc.category === "magang" ? "Kegiatan Magang & Analisis" : "Penelitian"}
-              </p>
-            </div>
+            )}
 
             {/* Inserted Chapter 3 Custom Figures */}
             {currentDoc.documentFigures?.filter(f => f.chapterPlacement === 3).map((fig, fIdx) => (
@@ -3044,7 +3176,33 @@ NIP / NIK.
             ))}
 
             <div className="space-y-4 text-xs sm:text-sm text-[#334155] dark:text-[#CBD5E1] leading-relaxed text-justify print:text-black">
-              {currentDoc.category === "magang" ? (
+              {isUNPPkl ? (
+                <>
+                  <div className="flex items-center justify-between">
+                    <h3 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100 print:text-black font-serif">
+                      A. Kesimpulan
+                    </h3>
+                    <button
+                      type="button"
+                      onClick={() => handleRefineWithAI("bab3.metodePelaksanaan", "A. Kesimpulan", currentDoc.bab3.metodePelaksanaan)}
+                      className="no-print text-[11px] font-mono text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-100 bg-zinc-100 dark:bg-zinc-900 px-2 py-0.5 rounded border border-zinc-200 dark:border-zinc-800 flex items-center gap-1 cursor-pointer transition-colors shadow-xs"
+                    >
+                      <Sparkles className="w-3 h-3 text-zinc-500 dark:text-zinc-400" />
+                      <span>Revisi AI</span>
+                    </button>
+                  </div>
+                  <p className="indent-6">{currentDoc.bab3.metodePelaksanaan.replace(/^A\.\s*Kesimpulan:\s*/i, "")}</p>
+
+                  <h3 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100 print:text-black font-serif pt-2">
+                    B. Saran
+                  </h3>
+                  <div className="space-y-2">
+                    {currentDoc.bab3.lingkupPekerjaan.filter(s => !s.startsWith("B. Saran")).map((s, i) => (
+                      <p key={i} className="indent-6">{s}</p>
+                    ))}
+                  </div>
+                </>
+              ) : currentDoc.category === "magang" ? (
                 /* Format Khusus Magang: Metode Kerja, WBS, Perangkat, Kompetensi */
                 <>
                   <div className="flex items-center justify-between">
@@ -3181,14 +3339,14 @@ NIP / NIK.
                     className="px-3.5 py-2 rounded-lg border border-[#E2E8F0] dark:border-[#253149] hover:bg-[#F1F5F9] dark:hover:bg-[#172033] transition-colors flex items-center gap-1.5 cursor-pointer text-[#64748B] dark:text-[#A4B1C7]"
                   >
                     <ChevronLeft className="w-4 h-4" />
-                    <span>Bab II: Tinjauan Pustaka</span>
+                    <span>Bab II: {isUNPPkl ? "Topik Bahasan" : "Tinjauan Pustaka"}</span>
                   </button>
                   <button
                     type="button"
-                    onClick={() => { setNaskahSection("bab4"); window.scrollTo({ top: 0, behavior: "smooth" }); }}
+                    onClick={() => { setNaskahSection(isUNPPkl ? "backmatter" : "bab4"); window.scrollTo({ top: 0, behavior: "smooth" }); }}
                     className="px-4 py-2 rounded-lg bg-[#0F172A] hover:bg-black text-white dark:bg-[#7C9CFF] dark:hover:bg-[#688bf5] dark:text-[#080B12] font-semibold text-xs flex items-center gap-1.5 transition-colors cursor-pointer shadow-xs"
                   >
-                    <span>Lanjut ke Bab IV: Rencana Kerja</span>
+                    <span>{isUNPPkl ? "Lanjut ke Pustaka & Lampiran" : "Lanjut ke Bab IV: Rencana Kerja"}</span>
                     <ChevronRight className="w-4 h-4" />
                   </button>
                 </div>
@@ -3199,7 +3357,7 @@ NIP / NIK.
           {/* ========================================================================= */}
           {/* BAB IV: RENCANA KERJA & ANALISIS */}
           {/* ========================================================================= */}
-          {(naskahSection === "all" || naskahSection === "bab4") && (
+          {!isUNPPkl && (naskahSection === "all" || naskahSection === "bab4") && (
             <>
               {/* BAB IV: MATRIKS TABEL AKADEMIK (3 Garis Horizontal Standar) */}
               {!disabledSections.includes("section-bab4") && (
@@ -3348,7 +3506,7 @@ NIP / NIK.
           {/* ========================================================================= */}
           {/* BAB V: PENUTUP */}
           {/* ========================================================================= */}
-          {(naskahSection === "all" || naskahSection === "bab5") && (
+          {!isUNPPkl && (naskahSection === "all" || naskahSection === "bab5") && (
             <>
               {/* BAB V: KESIMPULAN, REKOMENDASI KONTRIBUSI, & MITIGASI RISIKO */}
               {!disabledSections.includes("section-bab5") && (
@@ -3702,11 +3860,11 @@ NIP / NIK.
                 <div className="flex items-center justify-between pt-8 mt-12 border-t border-[#E2E8F0] dark:border-[#253149] text-xs font-medium no-print">
                   <button
                     type="button"
-                    onClick={() => { setNaskahSection("bab5"); window.scrollTo({ top: 0, behavior: "smooth" }); }}
+                    onClick={() => { setNaskahSection(isUNPPkl ? "bab3" : "bab5"); window.scrollTo({ top: 0, behavior: "smooth" }); }}
                     className="px-3.5 py-2 rounded-lg border border-[#E2E8F0] dark:border-[#253149] hover:bg-[#F1F5F9] dark:hover:bg-[#172033] transition-colors flex items-center gap-1.5 cursor-pointer text-[#64748B] dark:text-[#A4B1C7]"
                   >
                     <ChevronLeft className="w-4 h-4" />
-                    <span>Bab V: Penutup</span>
+                    <span>{isUNPPkl ? "Bab III: Penutup" : "Bab V: Penutup"}</span>
                   </button>
                   <button
                     type="button"

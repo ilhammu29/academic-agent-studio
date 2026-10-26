@@ -62,6 +62,13 @@ export const PRESET_CAMPUS_LOGOS: CampusLogo[] = [
     svgIcon: `data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" fill="none"><circle cx="50" cy="50" r="46" fill="%23003366" stroke="%23C5A059" stroke-width="4"/><path d="M50 20 L75 42 L65 76 L35 76 L25 42 Z" fill="%23C5A059"/><circle cx="50" cy="50" r="12" fill="%23FFFFFF"/><text x="50" y="54" font-family="Arial, sans-serif" font-size="9" font-weight="bold" fill="%23003366" text-anchor="middle">UNDIP</text></svg>`
   },
   {
+    id: 'unp',
+    campusName: 'Universitas Negeri Padang',
+    shortName: 'UNP',
+    primaryColor: '#F5B800',
+    svgIcon: `data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" fill="none"><circle cx="50" cy="50" r="46" fill="%230A4275" stroke="%23F5B800" stroke-width="4"/><circle cx="50" cy="50" r="38" fill="%23FFFFFF"/><path d="M50 18 L63 32 L58 50 L50 44 L42 50 L37 32 Z" fill="%23F5B800" stroke="%230A4275" stroke-width="1.5"/><path d="M30 52 C35 68 65 68 70 52 C65 60 35 60 30 52 Z" fill="%230A4275"/><circle cx="50" cy="34" r="5" fill="%230A4275"/><text x="50" y="80" font-family="Arial, sans-serif" font-size="11" font-weight="bold" fill="%230A4275" text-anchor="middle">UNP</text></svg>`
+  },
+  {
     id: 'dikti',
     campusName: 'Kemendikbudristek / Standar Nasional Dikti',
     shortName: 'DIKTI',
@@ -78,6 +85,7 @@ export function getCampusLogoByInstitution(institution: string = ""): string {
   if (norm.includes("sepuluh nopember") || norm.includes("its")) return PRESET_CAMPUS_LOGOS[4].svgIcon;
   if (norm.includes("airlangga") || norm.includes("unair")) return PRESET_CAMPUS_LOGOS[5].svgIcon;
   if (norm.includes("diponegoro") || norm.includes("undip")) return PRESET_CAMPUS_LOGOS[6].svgIcon;
+  if (norm.includes("negeri padang") || norm.includes("unp")) return PRESET_CAMPUS_LOGOS[7].svgIcon;
   if (norm.includes("sebelas maret") || norm.includes("uns")) return PRESET_CAMPUS_LOGOS[0].svgIcon;
-  return PRESET_CAMPUS_LOGOS[7].svgIcon; // Default Tut Wuri Handayani / Dikti
+  return PRESET_CAMPUS_LOGOS[8].svgIcon; // Default Tut Wuri Handayani / Dikti
 }

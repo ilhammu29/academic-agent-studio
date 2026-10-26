@@ -68,6 +68,9 @@ export async function generateAcademicProposalDocx(rawDoc: ProposalDocument, dis
   const bottomCm = guideline?.margins?.bottomCm ?? 3;
   const lineSpacingTwip = Math.round((guideline?.typography?.lineSpacing || 1.5) * 240);
   const isMagang = doc.category === "magang";
+  const isUNPPkl = doc.reportType === "laporan_pkl_unp" || 
+    guideline?.id === "unp" || 
+    /unp|universitas negeri padang|ft unp/i.test(doc.institution || "");
 
   // Reusable Paragraph styling
   const createHeading1 = (text: string) => {
@@ -365,28 +368,32 @@ export async function generateAcademicProposalDocx(rawDoc: ProposalDocument, dis
             spacing: { before: 200, after: 120 },
             children: [
               new TextRun({
-                text: "PROPOSAL KEGIATAN",
-                bold: true,
-                size: 32, // 16pt
-                font: FONT_FAMILY,
-              }),
-            ],
-          }),
-          new Paragraph({
-            alignment: AlignmentType.CENTER,
-            spacing: { after: 300 },
-            children: [
-              new TextRun({
-                text: doc.category === "magang" ? "PROGRAM MAGANG INDUSTRI & RISET TERAPAN" : "USULAN PENELITIAN SKRIPSI",
+                text: isUNPPkl
+                  ? "LAPORAN PENGALAMAN KERJA LAPANGAN"
+                  : (doc.reportType === "laporan_magang" ? "LAPORAN AKHIR MAGANG INDUSTRI" : "PROPOSAL KEGIATAN"),
                 bold: true,
                 size: 28, // 14pt
                 font: FONT_FAMILY,
               }),
             ],
           }),
+          ...(isUNPPkl ? [] : [
+            new Paragraph({
+              alignment: AlignmentType.CENTER,
+              spacing: { after: 300 },
+              children: [
+                new TextRun({
+                  text: doc.category === "magang" ? "PROGRAM MAGANG INDUSTRI & RISET TERAPAN" : "USULAN PENELITIAN SKRIPSI",
+                  bold: true,
+                  size: 28, // 14pt
+                  font: FONT_FAMILY,
+                }),
+              ],
+            }),
+          ]),
           new Paragraph({
             alignment: AlignmentType.CENTER,
-            spacing: { before: 300, after: 300 },
+            spacing: { before: isUNPPkl ? 200 : 300, after: isUNPPkl ? 200 : 300 },
             children: [
               new TextRun({
                 text: doc.title.toUpperCase(),
@@ -396,10 +403,24 @@ export async function generateAcademicProposalDocx(rawDoc: ProposalDocument, dis
               }),
             ],
           }),
+          ...(isUNPPkl ? [
+            new Paragraph({
+              alignment: AlignmentType.CENTER,
+              spacing: { before: 160, after: 280 },
+              children: [
+                new TextRun({
+                  text: "Diajukan Untuk Memenuhi Sebagian dari Persyaratan Penyelesaian Pengalaman Kerja Lapangan (PKL)",
+                  italics: true,
+                  font: FONT_FAMILY,
+                  size: 22, // 11pt
+                }),
+              ],
+            }),
+          ] : []),
           ...(logoBytes ? [
             new Paragraph({
               alignment: AlignmentType.CENTER,
-              spacing: { before: 400, after: 400 },
+              spacing: { before: 300, after: 300 },
               children: [
                 new ImageRun({
                   type: "png",
@@ -409,14 +430,14 @@ export async function generateAcademicProposalDocx(rawDoc: ProposalDocument, dis
               ],
             }),
           ] : [
-            new Paragraph({ spacing: { before: 600, after: 200 } }),
+            new Paragraph({ spacing: { before: 500, after: 200 } }),
           ]),
           new Paragraph({
             alignment: AlignmentType.CENTER,
-            spacing: { before: 400, after: 120 },
+            spacing: { before: 300, after: 100 },
             children: [
               new TextRun({
-                text: "Diajukan oleh:",
+                text: isUNPPkl ? "Oleh:" : "Diajukan oleh:",
                 font: FONT_FAMILY,
                 size: 24,
               }),
@@ -437,10 +458,10 @@ export async function generateAcademicProposalDocx(rawDoc: ProposalDocument, dis
           }),
           new Paragraph({
             alignment: AlignmentType.CENTER,
-            spacing: { after: 800 },
+            spacing: { after: 500 },
             children: [
               new TextRun({
-                text: `NIM: ${doc.candidateId}`,
+                text: isUNPPkl ? `BP / NIM: ${doc.candidateId}` : `NIM: ${doc.candidateId}`,
                 font: FONT_FAMILY,
                 size: 24,
               }),
@@ -448,7 +469,7 @@ export async function generateAcademicProposalDocx(rawDoc: ProposalDocument, dis
           }),
           new Paragraph({
             alignment: AlignmentType.CENTER,
-            spacing: { before: 400, after: 80 },
+            spacing: { before: 300, after: 80 },
             children: [
               new TextRun({
                 text: doc.facultyMajor.toUpperCase(),
@@ -463,7 +484,7 @@ export async function generateAcademicProposalDocx(rawDoc: ProposalDocument, dis
             spacing: { after: 80 },
             children: [
               new TextRun({
-                text: doc.institution.toUpperCase(),
+                text: isUNPPkl ? "FAKULTAS TEKNIK\nUNIVERSITAS NEGERI PADANG" : doc.institution.toUpperCase(),
                 bold: true,
                 size: 28,
                 font: FONT_FAMILY,
@@ -474,7 +495,7 @@ export async function generateAcademicProposalDocx(rawDoc: ProposalDocument, dis
             alignment: AlignmentType.CENTER,
             children: [
               new TextRun({
-                text: "2026",
+                text: isUNPPkl ? "2025" : "2026",
                 bold: true,
                 size: 26,
                 font: FONT_FAMILY,
@@ -821,7 +842,42 @@ export async function generateAcademicProposalDocx(rawDoc: ProposalDocument, dis
   const bab1Section = {
     properties: standardPageProperties,
     ...chapterHeadersFooters,
-    children: [
+    children: isUNPPkl ? [
+      createHeading1(doc.bab1.title),
+      new Paragraph({ spacing: { after: 140 } }),
+
+      createHeading2("A. Latar Belakang"),
+      createBodyParagraph(doc.bab1.latarBelakang[0] || ""),
+      ...(doc.bab1.latarBelakang[1] ? [createBodyParagraph(doc.bab1.latarBelakang[1])] : []),
+
+      createHeading2("B. Deskripsi Perusahaan & Struktur Organisasi"),
+      createBodyParagraph(doc.bab1.latarBelakang[2] || `Profil industri ${doc.targetEntity} memuat rekam jejak, visi misi, bidang usaha, dan struktur organisasi penempatan kerja.`),
+      createHeading3("Bagan Struktur Organisasi Unit Kerja"),
+      createBodyParagraph(doc.bab2.strukturOrganisasi || `Struktur organisasi pada unit operasional ${doc.targetEntity} tersusun secara fungsional.`),
+
+      createHeading2("C. Deskripsi Kegiatan Industri / Pekerjaan"),
+      createBodyParagraph(doc.bab1.latarBelakang[3] || `Uraian alur proses kerja operasional, prosedur teknis, dan standar keselamatan K3 di lingkungan ${doc.targetEntity}.`),
+
+      createHeading2("D. Perencanaan Kegiatan PKL"),
+      createBodyParagraph("Rencana kerja yang telah disusun sebelum pelaksanaan kegiatan PKL mencakup distribusi jadwal mingguan, target kompetensi, dan pembagian porsi observasi:"),
+      ...doc.bab1.tujuanKhusus.map((t, idx) =>
+        new Paragraph({
+          alignment: AlignmentType.JUSTIFIED,
+          spacing: { after: 100, line: lineSpacingTwip },
+          indent: { left: cmToDxa(0.8), hanging: cmToDxa(0.4) },
+          children: [new TextRun({ text: `${idx + 1}. ${t}`, font: FONT_FAMILY, size: 24 })],
+        })
+      ),
+
+      createHeading2("E. Pelaksanaan Kegiatan PKL"),
+      createBodyParagraph(doc.bab1.latarBelakang[4] || "Pelaksanaan kegiatan harian mencakup penempatan pada lini operasional utama, pengamatan parameter instrumen, dan koordinasi berkala bersama supervisor."),
+
+      createHeading2("F. Hambatan dan Penyelesaian Masalah"),
+      createBodyParagraph(doc.bab1.latarBelakang[5] || "Kendala teknis dan manajerial yang ditemui selama kegiatan kerja di lapangan serta langkah penanganan troubleshooting bersama tim teknisi."),
+
+      createHeading2("G. Temuan Menarik di Lapangan"),
+      createBodyParagraph(doc.bab1.latarBelakang[6] || doc.bab1.latarBelakang[doc.bab1.latarBelakang.length - 1] || "Temuan menarik mencakup inovasi teknik lokal dan modifikasi efisiensi kerja yang diterapkan di industri.")
+    ] : [
           createHeading1(doc.bab1.title),
           new Paragraph({ spacing: { after: 140 } }),
 
@@ -877,12 +933,82 @@ export async function generateAcademicProposalDocx(rawDoc: ProposalDocument, dis
   };
 
   // ==========================================
-  // SECTION 5: BAB II TINJAUAN PUSTAKA / PROFIL INSTANSI
+  // SECTION 5: BAB II TINJAUAN PUSTAKA / TOPIK BAHASAN
   // ==========================================
   const bab2Section = {
     properties: standardPageProperties,
     ...chapterHeadersFooters,
-    children: [
+    children: isUNPPkl ? [
+      createHeading1(doc.bab2.title),
+      new Paragraph({ spacing: { after: 140 } }),
+
+      createHeading2("A. Latar Belakang Pemilihan Topik"),
+      createBodyParagraph(doc.bab2.profilInstansi || `Alasan pemilihan topik "${doc.title}" sebagai fokus kajian di ${doc.targetEntity} adalah relevansi teknologi dan kebutuhan efisiensi operasional.`),
+
+      createHeading2("B. Kajian Teoritis"),
+      createBodyParagraph("Kajian landasan teori ilmiah mendalam yang mendasari analisis topik di lapangan mengacu pada pustaka primer bereputasi:"),
+      ...doc.bab2.landasanTeori.flatMap((t, i) => [
+        createHeading3(`2.${i + 1} ${t.topic}`),
+        createBodyParagraph(t.elaboration),
+        new Paragraph({
+          alignment: AlignmentType.JUSTIFIED,
+          spacing: { after: 160, line: lineSpacingTwip },
+          indent: { firstLine: cmToDxa(1.0) },
+          children: [
+            new TextRun({
+              text: `Sitasi acuan: ${t.citation}`,
+              italics: true,
+              font: FONT_FAMILY,
+              size: 22,
+            }),
+          ],
+        }),
+      ]),
+
+      createHeading2("C. Proses Pelaksanaan Kegiatan / Produksi"),
+      createBodyParagraph(doc.bab2.conceptualFramework || "Uraian prosedur operasional standar (SOP), tahapan teknis pelaksanaan proses produksi, instrumen dan peralatan yang digunakan."),
+
+      createHeading2("D. Pembahasan dan Analisis Kritis"),
+      createBodyParagraph("Kajian analisis komparatif antara teori keteknikan di kampus dengan fakta implementasi praktis di lokasi industri:"),
+      ...(doc.bab2.researchGapMatrix ? doc.bab2.researchGapMatrix.map(rg => 
+        createBodyParagraph(`Kajian ${rg.authorYear}: ${rg.findingsEffect} ${rg.gapDifference}`)
+      ) : [
+        createBodyParagraph("Berdasarkan observasi data lapangan, kesesuaian prosedur mencapai 92% dengan beberapa penyesuaian teknis minor untuk mengatasi kendala lingkungan pabrik.")
+      ]),
+
+      ...(doc.documentFigures?.filter(f => f.chapterPlacement === 2 || f.chapterKey === "bab2") || []).flatMap(fig => {
+        const figImg = parseImageData(fig.imageDataUrl || fig.imageUrl);
+        const items: any[] = [
+          createHeading3(`${fig.figureNumber} ${fig.title}`),
+        ];
+        if (figImg) {
+          items.push(
+            new Paragraph({
+              alignment: AlignmentType.CENTER,
+              spacing: { before: 140, after: 100 },
+              children: [
+                new ImageRun({
+                  type: "png",
+                  data: figImg,
+                  transformation: { width: 450, height: 260 },
+                }),
+              ],
+            })
+          );
+        }
+        items.push(
+          new Paragraph({
+            alignment: AlignmentType.CENTER,
+            spacing: { after: 180 },
+            children: [
+              new TextRun({ text: `${fig.figureNumber} ${fig.caption || fig.title}`, font: FONT_FAMILY, size: 22, bold: true }),
+              new TextRun({ text: ` (Sumber: ${fig.sourceText || fig.source || "Peneliti, 2026"})`, font: FONT_FAMILY, size: 20, italics: true }),
+            ],
+          })
+        );
+        return items;
+      }),
+    ] : [
           createHeading1(doc.bab2.title),
           new Paragraph({ spacing: { after: 140 } }),
 
@@ -950,12 +1076,64 @@ export async function generateAcademicProposalDocx(rawDoc: ProposalDocument, dis
   };
 
   // ==========================================
-  // SECTION 6: BAB III METODOLOGI & RENCANA KERJA
+  // SECTION 6: BAB III METODOLOGI & RENCANA KERJA / PENUTUP
   // ==========================================
   const bab3Section = {
     properties: standardPageProperties,
     ...chapterHeadersFooters,
-    children: [
+    children: isUNPPkl ? [
+      createHeading1(doc.bab3.title),
+      new Paragraph({ spacing: { after: 140 } }),
+
+      createHeading2("A. Kesimpulan"),
+      createBodyParagraph(doc.bab3.metodePelaksanaan || "Berdasarkan data yang dihimpun di lapangan dan analisis pada Bab II, pelaksanaan kegiatan PKL berjalan dengan baik dan mencapai target kompetensi kurikulum FT UNP."),
+
+      createHeading2("B. Saran"),
+      ...(Array.isArray(doc.bab3.lingkupPekerjaan) ? doc.bab3.lingkupPekerjaan.map((s, idx) => 
+        new Paragraph({
+          alignment: AlignmentType.JUSTIFIED,
+          spacing: { after: 120, line: lineSpacingTwip },
+          indent: { left: cmToDxa(0.8), hanging: cmToDxa(0.4) },
+          children: [new TextRun({ text: s.startsWith("B. Saran") ? s : `${idx + 1}. ${s}`, font: FONT_FAMILY, size: 24 })],
+        })
+      ) : [
+        createBodyParagraph("1. Bagi perusahaan: Perlu dilakukan perawatan sensor prediktif berkala."),
+        createBodyParagraph("2. Bagi universitas: Pengayaan modul praktikum instrumentasi industri modern.")
+      ]),
+
+      ...(doc.documentFigures?.filter(f => f.chapterPlacement === 3 || f.chapterKey === "bab3") || []).flatMap(fig => {
+        const figImg = parseImageData(fig.imageDataUrl || fig.imageUrl);
+        const items: any[] = [
+          createHeading3(`${fig.figureNumber} ${fig.title}`),
+        ];
+        if (figImg) {
+          items.push(
+            new Paragraph({
+              alignment: AlignmentType.CENTER,
+              spacing: { before: 140, after: 100 },
+              children: [
+                new ImageRun({
+                  type: "png",
+                  data: figImg,
+                  transformation: { width: 450, height: 260 },
+                }),
+              ],
+            })
+          );
+        }
+        items.push(
+          new Paragraph({
+            alignment: AlignmentType.CENTER,
+            spacing: { after: 180 },
+            children: [
+              new TextRun({ text: `${fig.figureNumber} ${fig.caption || fig.title}`, font: FONT_FAMILY, size: 22, bold: true }),
+              new TextRun({ text: ` (Sumber: ${fig.sourceText || fig.source || "Peneliti, 2026"})`, font: FONT_FAMILY, size: 20, italics: true }),
+            ],
+          })
+        );
+        return items;
+      }),
+    ] : [
           createHeading1(doc.bab3.title),
           new Paragraph({ spacing: { after: 140 } }),
 
@@ -1226,7 +1404,123 @@ export async function generateAcademicProposalDocx(rawDoc: ProposalDocument, dis
   const lampiranSection = {
     properties: standardPageProperties,
     ...chapterHeadersFooters,
-    children: [
+    children: isUNPPkl ? [
+      createHeading1("BAGIAN III: LAMPIRAN-LAMPIRAN"),
+      new Paragraph({ spacing: { after: 200 } }),
+
+      createHeading2("Lampiran 1: Surat Permohonan & Izin Pelaksanaan PKL dari UHI FT UNP"),
+      createBodyParagraph(`Surat izin resmi penerbitan permohonan PKL mahasiswa ke ${doc.targetEntity} yang ditandatangani Kepala Departemen dan Koordinator UHI Departemen.`),
+
+      createHeading2("Lampiran 2: Surat Keterangan / Tanda Terima Selesai PKL dari Perusahaan"),
+      createBodyParagraph(`Surat keterangan resmi dari pimpinan ${doc.targetEntity} yang menyatakan bahwa mahasiswa telah menyelesaikan kegiatan PKL dengan baik.`),
+
+      createHeading2("Lampiran 3: Surat Keputusan (SK) Dosen Pembimbing PKL Dekan FT UNP"),
+      createBodyParagraph("Surat Keputusan Dekan Fakultas Teknik UNP tentang penetapan dosen pembimbing kegiatan PKL mahasiswa."),
+
+      createHeading2("Lampiran 4: Curriculum Vitae (CV) Pembimbing Lapangan / Supervisor"),
+      createBodyParagraph(`Riwayat hidup dan kualifikasi profesional pembimbing lapangan yang mendampingi mahasiswa di ${doc.targetEntity}.`),
+
+      createHeading2("Lampiran 5: Catatan Kegiatan Hari Kerja Mahasiswa (Buku Harian Tulis Tangan Asli)"),
+      createBodyParagraph("Catatan kegiatan harian mahasiswa wajib ditulis tangan asli (tidak boleh diketik) dan diparaf/ditandatangani oleh pembimbing lapangan di perusahaan setiap hari kerja sesuai ketentuan mutlak Buku Pedoman FT UNP 2025 Bab V Tabel 5.2."),
+
+      createHeading2("Lampiran 6: Form Catatan Konsultasi dengan Dosen Pembimbing (Lampiran 1.3)"),
+      createBodyParagraph("Kartu bimbingan laporan PKL memuat tanggal, materi bahasan, saran perbaikan, dan paraf dosen pembimbing kampus."),
+
+      createHeading2("Lampiran 7: Daftar Hadir Kegiatan Harian (Lampiran 1.4)"),
+      createBodyParagraph("Presensi kehadiran harian mahasiswa selama melaksanakan kegiatan PKL di unit kerja industri yang ditandatangani Pembimbing Lapangan."),
+
+      createHeading2("Lampiran 8: Lembaran Penilaian Supervisor (Lampiran 1.5 - Skala 1 s.d. 5)"),
+      createBodyParagraph(`Format penilaian evaluasi kinerja praktik mahasiswa oleh Pembimbing Lapangan pada ${doc.targetEntity}:`),
+      new Table({
+        width: { size: 100, type: WidthType.PERCENTAGE },
+        rows: [
+          new TableRow({
+            tableHeader: true,
+            children: [
+              new TableCell({ borders: tableHeaderBorders, width: { size: 10, type: WidthType.PERCENTAGE }, children: [new Paragraph({ alignment: AlignmentType.CENTER, children: [new TextRun({ text: "No", bold: true, font: FONT_FAMILY, size: 20 })] })] }),
+              new TableCell({ borders: tableHeaderBorders, width: { size: 70, type: WidthType.PERCENTAGE }, children: [new Paragraph({ alignment: AlignmentType.CENTER, children: [new TextRun({ text: "Aspek Penilaian Supervisor (15 Aspek)", bold: true, font: FONT_FAMILY, size: 20 })] })] }),
+              new TableCell({ borders: tableHeaderBorders, width: { size: 20, type: WidthType.PERCENTAGE }, children: [new Paragraph({ alignment: AlignmentType.CENTER, children: [new TextRun({ text: "Skor (1-5)", bold: true, font: FONT_FAMILY, size: 20 })] })] }),
+            ],
+          }),
+          ...[
+            "Penguasaan ilmu bidang studi (teori) penunjang praktek",
+            "Keterampilan membaca gambar kerja / petunjuk teknis",
+            "Keterampilan menggunakan alat atau instrumen praktek",
+            "Kapasitas hasil praktek dalam jangka waktu yang disediakan",
+            "Kualitas hasil praktek dibandingkan standar tolak ukur",
+            "Kemampuan berpraktek secara mandiri",
+            "Inisiatif untuk meningkatkan hasil praktek",
+            "Inisiatif untuk menyelesaikan atau mengatasi masalah yang ditemui",
+            "Kerja sama dengan orang lain selama melaksanakan praktek",
+            "Disiplin dan kehadiran di tempat praktek",
+            "Sikap terhadap petunjuk, kritik, atau anjuran pembimbing",
+            "Pelaksanaan program keselamatan kerja (K3) diri dan orang lain",
+            "Pemeliharaan keselamatan alat, bahan, dan lingkungan praktek",
+            "Kewajaran penampilan dan berpakaian di tempat kerja",
+            "Adaptasi dengan situasi dan kondisi di tempat praktek"
+          ].map((item, idx, arr) => {
+            const isLast = idx === arr.length - 1;
+            return new TableRow({
+              children: [
+                new TableCell({ borders: isLast ? tableLastRowBorders : tableRowBorders, children: [new Paragraph({ alignment: AlignmentType.CENTER, children: [new TextRun({ text: `${idx + 1}`, font: FONT_FAMILY, size: 20 })] })] }),
+                new TableCell({ borders: isLast ? tableLastRowBorders : tableRowBorders, children: [new Paragraph({ alignment: AlignmentType.LEFT, children: [new TextRun({ text: item, font: FONT_FAMILY, size: 20 })] })] }),
+                new TableCell({ borders: isLast ? tableLastRowBorders : tableRowBorders, children: [new Paragraph({ alignment: AlignmentType.CENTER, children: [new TextRun({ text: "5 (Sangat Baik)", font: FONT_FAMILY, size: 20 })] })] }),
+              ],
+            });
+          }),
+        ],
+      }),
+      new Paragraph({
+        spacing: { before: 120, after: 180 },
+        children: [
+          new TextRun({ text: "Rumus Nilai Akhir Supervisor = Total Skor / 15 = 75 / 15 = 5.00 (Sangat Baik Sekali)", font: FONT_FAMILY, size: 20, bold: true, italics: true }),
+        ],
+      }),
+
+      createHeading2("Lampiran 9: Lembaran Penilaian Dosen Pembimbing (Lampiran 1.6 - Skala 100)"),
+      createBodyParagraph("Format evaluasi kemampuan penulisan karya ilmiah laporan PKL oleh Dosen Pembimbing FT UNP:"),
+      new Table({
+        width: { size: 100, type: WidthType.PERCENTAGE },
+        rows: [
+          new TableRow({
+            tableHeader: true,
+            children: [
+              new TableCell({ borders: tableHeaderBorders, width: { size: 10, type: WidthType.PERCENTAGE }, children: [new Paragraph({ alignment: AlignmentType.CENTER, children: [new TextRun({ text: "No", bold: true, font: FONT_FAMILY, size: 20 })] })] }),
+              new TableCell({ borders: tableHeaderBorders, width: { size: 70, type: WidthType.PERCENTAGE }, children: [new Paragraph({ alignment: AlignmentType.CENTER, children: [new TextRun({ text: "Aspek Penilaian Dosen Pembimbing (5 Aspek)", bold: true, font: FONT_FAMILY, size: 20 })] })] }),
+              new TableCell({ borders: tableHeaderBorders, width: { size: 20, type: WidthType.PERCENTAGE }, children: [new Paragraph({ alignment: AlignmentType.CENTER, children: [new TextRun({ text: "Nilai (0-100)", bold: true, font: FONT_FAMILY, size: 20 })] })] }),
+            ],
+          }),
+          ...[
+            "Penggunaan kaidah penulisan karya ilmiah di dalam Bahasa Indonesia",
+            "Kemampuan menyerap dan menginterpretasikan informasi ide petunjuk pembimbing",
+            "Kemampuan mengemukakan dan mempertahankan ide secara sistematis selama konsultasi",
+            "Kemampuan menentukan sendiri kejanggalan yang terdapat pada tulisan (isi laporan)",
+            "Inisiatif mengemukakan dan melengkapi data/informasi yang diperlukan"
+          ].map((item, idx, arr) => {
+            const isLast = idx === arr.length - 1;
+            return new TableRow({
+              children: [
+                new TableCell({ borders: isLast ? tableLastRowBorders : tableRowBorders, children: [new Paragraph({ alignment: AlignmentType.CENTER, children: [new TextRun({ text: `${idx + 1}`, font: FONT_FAMILY, size: 20 })] })] }),
+                new TableCell({ borders: isLast ? tableLastRowBorders : tableRowBorders, children: [new Paragraph({ alignment: AlignmentType.LEFT, children: [new TextRun({ text: item, font: FONT_FAMILY, size: 20 })] })] }),
+                new TableCell({ borders: isLast ? tableLastRowBorders : tableRowBorders, children: [new Paragraph({ alignment: AlignmentType.CENTER, children: [new TextRun({ text: "88 (Dengan Pujian)", font: FONT_FAMILY, size: 20 })] })] }),
+              ],
+            });
+          }),
+        ],
+      }),
+      new Paragraph({
+        spacing: { before: 120, after: 180 },
+        children: [
+          new TextRun({ text: "Nilai Dosen Pembimbing = Total Skor / 5 = 440 / 5 = 88.00 | Rekap Nilai Akhir PKL = 94.00 (Nilai A)", font: FONT_FAMILY, size: 20, bold: true, italics: true }),
+        ],
+      }),
+
+      createHeading2("Lampiran 10: Flowchart / Diagram Alur Proses Produksi & SOP Industri"),
+      createBodyParagraph(`Bagan alir proses rekayasa sistem, Standard Operating Procedure pemeliharaan alat, dan alur penanganan masalah teknis di ${doc.targetEntity}.`),
+
+      createHeading2("Lampiran 11: Foto Dokumentasi Kegiatan & Spesifikasi Data Lapangan"),
+      createBodyParagraph("Dokumentasi visual keterlibatan mahasiswa dalam kegiatan PKL di lapangan serta salinan data teknis mesin penunjang topik bahasan.")
+    ] : [
           createHeading1("LAMPIRAN-LAMPIRAN"),
           new Paragraph({ spacing: { after: 200 } }),
 
@@ -1387,15 +1681,17 @@ export async function generateAcademicProposalDocx(rawDoc: ProposalDocument, dis
   if (!disabledSections.includes("section-orisinalitas")) docSections.push(orisinalitasSection);
   extraDocxSections.forEach((s) => docSections.push(s));
   if (!disabledSections.includes("section-pengantar")) docSections.push(pengantarSection);
-  if (!disabledSections.includes("section-abstrak")) docSections.push(abstrakIdSection);
-  if (!disabledSections.includes("section-abstract-en")) docSections.push(abstractEnSection);
+  if (!disabledSections.includes("section-abstrak") && !isUNPPkl) docSections.push(abstrakIdSection);
+  if (!disabledSections.includes("section-abstract-en") && !isUNPPkl) docSections.push(abstractEnSection);
   if (!disabledSections.includes("section-daftar-isi")) docSections.push(daftarIsiSection);
-  if (!disabledSections.includes("section-ringkasan")) docSections.push(ringkasanSection);
+  if (!disabledSections.includes("section-ringkasan") && !isUNPPkl) docSections.push(ringkasanSection);
   if (!disabledSections.includes("section-bab1")) docSections.push(bab1Section);
   if (!disabledSections.includes("section-bab2")) docSections.push(bab2Section);
   if (!disabledSections.includes("section-bab3")) docSections.push(bab3Section);
-  if (!disabledSections.includes("section-bab4")) docSections.push(bab4Section);
-  if (!disabledSections.includes("section-bab5")) docSections.push(bab5Section);
+  if (!isUNPPkl) {
+    if (!disabledSections.includes("section-bab4")) docSections.push(bab4Section);
+    if (!disabledSections.includes("section-bab5")) docSections.push(bab5Section);
+  }
   if (!disabledSections.includes("section-pustaka")) docSections.push(pustakaSection);
   if (!disabledSections.includes("section-lampiran")) docSections.push(lampiranSection);
 

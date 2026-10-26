@@ -1,6 +1,6 @@
 export type ProposalCategory = 'magang' | 'skripsi' | 'penelitian';
 
-export type ReportType = 'magang' | 'skripsi' | 'tugas_akhir' | 'tesis' | 'penelitian';
+export type ReportType = 'magang' | 'skripsi' | 'tugas_akhir' | 'tesis' | 'penelitian' | 'laporan_pkl_unp' | 'laporan_magang';
 
 export type StudioStage = 'input' | 'interview' | 'orchestration' | 'result' | 'slides' | 'drive' | 'consultation';
 
@@ -166,9 +166,15 @@ export interface BibliographyItem {
 }
 
 export interface CampusGuideline {
+  id?: string;
   campusName: string;
   facultyMajor?: string;
   guideDocTitle?: string;
+  badge?: string;
+  description?: string;
+  chapterCount?: number;
+  numberingSystem?: 'decimal' | 'alphanumeric' | 'roman';
+  rules?: string[];
   paperSize: 'A4' | 'Letter';
   margins: {
     topCm: number;
@@ -181,6 +187,8 @@ export interface CampusGuideline {
     bodySizePt: number;
     heading1SizePt: number;
     lineSpacing: number;
+    tableFontSizePt?: number;
+    tableLineSpacing?: number;
   };
   headingStyle: 'decimal' | 'alphanumeric' | 'roman';
   citationStyle: 'apa' | 'ieee' | 'harvard' | 'vancouver';
@@ -265,6 +273,8 @@ export interface ProposalDocument {
   bab4: {
     title: string;
     jadwalMatriks: WeeklyScheduleItem[];
+    ganttSchedule?: any[];
+    anggaranBiaya?: any[];
     rencanaAnggaran?: string;
     budgetPlan?: BudgetItem[];        // Used for Skripsi
     disseminationPlan?: string;       // Used for Skripsi
@@ -273,6 +283,9 @@ export interface ProposalDocument {
   bab5?: {
     title: string;
     kesimpulanUsulan: string[];
+    kesimpulanUmum?: string;
+    saranPraktis?: string[];
+    kontribusiTeoretis?: string;
     kontribusiPraktis: string[];
     mitigasiRisiko: { risiko: string; mitigasi: string }[];
     sustainabilityPlan?: string;

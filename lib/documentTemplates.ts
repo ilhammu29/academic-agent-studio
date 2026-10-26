@@ -178,6 +178,68 @@ export const ACADEMIC_TEMPLATES: Record<AcademicDocumentType, AcademicDocumentTe
     ]
   },
 
+  laporan_pkl_unp: {
+    id: 'laporan_pkl_unp',
+    name: 'Laporan Pengalaman Kerja Lapangan (PKL) FT UNP 2025',
+    category: 'magang',
+    reportType: 'magang',
+    degreeLevel: 'S1',
+    isFinalReport: true,
+    badge: 'FT UNP 2025 • 3 Bab Baku • UHI & SIAKAMA',
+    description: 'Sistematika resmi Laporan Pengalaman Kerja Lapangan (PKL/PLI) Fakultas Teknik Universitas Negeri Padang 2025: Bagian I (10 komponen preliminaries), Bagian II (Bab I Pendahuluan 7 sub-bab, Bab II Topik Bahasan 4 sub-bab, Bab III Penutup Kesimpulan & Saran, Daftar Pustaka APA hanging indent 1cm), dan Bagian III (11 Lampiran Wajib termasuk logbook tulis tangan asli dan rubrik supervisor 15 aspek).',
+    targetDepthPagesDefault: 45,
+    requiredChapters: [
+      {
+        chapterNumber: 1,
+        title: 'BAB I: PENDAHULUAN (LOKASI KERJA PKL)',
+        sections: [
+          { key: 'latarBelakang', title: 'A. Latar Belakang PKL & Urgensi Industri', isMandatory: true, description: 'Alasan PKL, manfaat mahasiswa, kaitan keilmuan kuliah, kondisi industri nyata' },
+          { key: 'deskripsiPerusahaan', title: 'B. Deskripsi Perusahaan & Struktur Organisasi', isMandatory: true, description: 'Sejarah, visi misi, bidang usaha, bagan struktur dan tugas pokok bagian' },
+          { key: 'kegiatanIndustri', title: 'C. Deskripsi Kegiatan Industri / Pekerjaan', isMandatory: true, description: 'Jenis kegiatan produksi, alur proses kerja industri, SOP perusahaan, dan posisi mahasiswa' },
+          { key: 'perencanaanPKL', title: 'D. Perencanaan Kegiatan PKL', isMandatory: true, description: 'Rencana jadwal, target pembelajaran, dan pembagian tugas yang disusun sebelum PKL' },
+          { key: 'pelaksanaanPKL', title: 'E. Pelaksanaan Kegiatan PKL', isMandatory: true, description: 'Unit kerja penempatan, aktivitas harian, teknik kerja dipelajari, komparasi teori vs praktik' },
+          { key: 'hambatanPenyelesaian', title: 'F. Hambatan dan Penyelesaian Masalah', isMandatory: true, description: 'Kendala teknis, manajerial, non-teknis beserta solusi mandiri maupun perusahaan' },
+          { key: 'temuanMenarik', title: 'G. Temuan Menarik di Lapangan', isMandatory: true, description: 'Hal baru/unik, sistem kerja berbeda dari teori kampus, inovasi teknologi perusahaan' }
+        ]
+      },
+      {
+        chapterNumber: 2,
+        title: 'BAB II: TOPIK BAHASAN',
+        sections: [
+          { key: 'latarBelakangTopik', title: 'A. Latar Belakang Pemilihan Topik', isMandatory: true, description: 'Alasan pemilihan topik fokus, relevansi keilmuan kampus, kesesuaian unit, dan manfaat praktis' },
+          { key: 'kajianTeoritis', title: 'B. Kajian Teoritis (Landasan Teori Ilmiah)', isMandatory: true, description: 'Teori dan konsep dasar dari sumber asli bereputasi dengan format sitasi Nama Belakang (Tahun:Halaman)' },
+          { key: 'prosesPelaksanaan', title: 'C. Proses Pelaksanaan Kegiatan / Produksi', isMandatory: true, description: 'Tahapan kerja sistematis, prosedur, peralatan, bahan, SOP, diagram alir, dan hasil yang diperoleh' },
+          { key: 'pembahasanAnalisis', title: 'D. Pembahasan dan Analisis Kritis', isMandatory: true, description: 'Analisis komparatif teori vs praktik lapangan, penyebab deviasi, dampak teknis/manajerial, evaluasi efektivitas sistem kerja' }
+        ]
+      },
+      {
+        chapterNumber: 3,
+        title: 'BAB III: PENUTUP',
+        sections: [
+          { key: 'kesimpulan', title: 'A. Kesimpulan Berbasis Data Lapangan', isMandatory: true, description: 'Intisari hasil PKL murni berdasarkan data lapangan dan analisis Bab II (dilarang dari tinjauan pustaka)' },
+          { key: 'saran', title: 'B. Saran Perbaikan Sistem Nyata', isMandatory: true, description: 'Rekomendasi pengembangan topik dan usaha perbaikan sistem nyata di lapangan yang aplikatif' }
+        ]
+      }
+    ],
+    adminChecklist: [
+      { id: 'buku_harian_tulis_tangan', label: 'Buku Harian Catatan Kegiatan Kerja (Wajib DITULIS TANGAN ASLI & diparaf harian supervisor)', isRequired: true, stage: 'final_defense', notes: 'Sanksi pembimbing jika diketik (Tabel 5.2)' },
+      { id: 'form_bimbingan_1_3', label: 'Form Catatan Konsultasi dengan Dosen Pembimbing (Lampiran 1.3)', isRequired: true, stage: 'final_defense', notes: 'Paraf dan catatan revisi dosen' },
+      { id: 'daftar_hadir_1_4', label: 'Daftar Hadir Kegiatan Harian (Lampiran 1.4)', isRequired: true, stage: 'final_defense', notes: 'Ditandatangani Pembimbing Lapangan' },
+      { id: 'nilai_supervisor_1_5', label: 'Lembaran Penilaian Supervisor 15 Aspek Skala 1-5 (Lampiran 1.5)', isRequired: true, stage: 'final_defense', notes: 'Stempel basah perusahaan/instansi' },
+      { id: 'nilai_dosen_1_6', label: 'Lembaran Penilaian Dosen Pembimbing 5 Aspek Skala 100 (Lampiran 1.6)', isRequired: true, stage: 'final_defense', notes: 'Diserahkan ke kantor UHI bersama laporan' },
+      { id: 'surat_izin_permohonan', label: 'Surat Permohonan PKL & Surat Keterangan Selesai dari Perusahaan', isRequired: true, stage: 'pre_submission', notes: 'Dokumen legalitas instansi' },
+      { id: 'sk_pembimbing', label: 'Surat Keputusan (SK) Dosen Pembimbing PKL', isRequired: true, stage: 'pre_submission', notes: 'Diterbitkan Dekan FT UNP' },
+      { id: 'cv_pembimbing_lapangan', label: 'Curriculum Vitae (CV) Pembimbing Lapangan / Mentor Industri', isRequired: true, stage: 'pre_submission', notes: 'Profil mentor perusahaan' },
+      { id: 'cd_softcopy_pdf', label: 'Keping CD Berisi Laporan Lengkap PDF Terakhir (Label & Sampul Sesuai Bab VI)', isRequired: true, stage: 'final_defense', notes: 'Diserahkan ke kantor UHI' }
+    ],
+    requiredSigners: [
+      { role: 'Dosen Pembimbing PKL FT UNP', description: 'Dosen pembimbing departemen', count: 1 },
+      { role: 'Pembimbing Lapangan (Supervisor)', description: 'Supervisor/Mentor instansi tempat PKL', count: 1 },
+      { role: 'Koordinator UHI Departemen', description: 'Pemeriksa berkas tingkat departemen', count: 1 },
+      { role: 'Koordinator UHI Fakultas Teknik (a.n. Dekan)', description: 'Pengesahan tingkat fakultas', count: 1 }
+    ]
+  },
+
   proposal_skripsi: {
     id: 'proposal_skripsi',
     name: 'Proposal Skripsi / Tugas Akhir (Sempro)',

@@ -15,6 +15,7 @@ export type DegreeLevel = 'D3' | 'D4' | 'S1' | 'S2' | 'S3';
 export type AcademicDocumentType =
   | 'proposal_magang'
   | 'laporan_magang'
+  | 'laporan_pkl_unp'
   | 'proposal_skripsi'
   | 'skripsi_final'
   | 'proposal_penelitian'
@@ -291,6 +292,119 @@ export const DEFAULT_ACADEMIC_RULES: AcademicRule[] = [
       requiresIndustryMentorSignature: true
     },
     changelog: [{ date: '2024-02-01', version: 'v2024.1', summary: 'Struktur laporan magang industri', author: 'MSIB' }]
+  },
+
+  // --- INSTITUTION SPECIFIC: UNIVERSITAS NEGERI PADANG (UNP) - FAKULTAS TEKNIK ---
+  {
+    id: 'UNP-FT-PKL-STRUCT-001',
+    category: 'frontmatter',
+    ruleName: 'Struktur 3 Bab Baku Laporan PKL FT UNP',
+    description: 'Sistematika Bagian II Laporan PKL FT UNP terdiri atas 3 Bab: Bab I Pendahuluan (7 sub-bab), Bab II Topik Bahasan (4 sub-bab), dan Bab III Penutup (Kesimpulan & Saran). Bab IV dan V tidak digunakan.',
+    institution: 'Universitas Negeri Padang',
+    faculty: 'Fakultas Teknik',
+    documentType: 'laporan_pkl_unp',
+    guidelineName: 'Buku Pedoman Pengalaman Kerja Lapangan (PKL) Mahasiswa FT UNP Padang',
+    guidelineVersion: 'v2025.1',
+    effectiveYear: 2025,
+    officialSourcePage: 'Buku Pedoman PKL Hal. 6-8 (Bab V)',
+    status: 'mandatory',
+    verificationStatus: 'verified',
+    value: {
+      chapterCount: 3,
+      chapters: ['BAB I: PENDAHULUAN', 'BAB II: TOPIK BAHASAN', 'BAB III: PENUTUP'],
+      hasSeparateEnglishAbstract: false
+    },
+    changelog: [{ date: '2025-01-15', version: 'v2025.1', summary: 'Format 3 Bab Baku Laporan PKL FT UNP', author: 'UHI FT UNP' }]
+  },
+  {
+    id: 'UNP-FT-PKL-MARGIN-001',
+    category: 'page_setup',
+    ruleName: 'Batas Tepi (Margin) 4-4-3-3 cm FT UNP',
+    description: 'Pengetikan naskah laporan PKL wajib menggunakan batas tepi: Atas 4 cm, Kiri 4 cm, Bawah 3 cm, dan Kanan 3 cm.',
+    institution: 'Universitas Negeri Padang',
+    faculty: 'Fakultas Teknik',
+    documentType: 'laporan_pkl_unp',
+    guidelineName: 'Buku Pedoman Pengalaman Kerja Lapangan (PKL) Mahasiswa FT UNP Padang',
+    guidelineVersion: 'v2025.1',
+    effectiveYear: 2025,
+    officialSourcePage: 'Buku Pedoman PKL Hal. 19 (Bab VI.B.3)',
+    status: 'mandatory',
+    verificationStatus: 'verified',
+    value: { leftCm: 4, topCm: 4, rightCm: 3, bottomCm: 3 },
+    changelog: [{ date: '2025-01-15', version: 'v2025.1', summary: 'Margin 4-4-3-3 cm', author: 'UHI FT UNP' }]
+  },
+  {
+    id: 'UNP-FT-PKL-TYPO-001',
+    category: 'typography',
+    ruleName: 'Tipografi Times New Roman 12pt Spasi 1.5 & Tabel 11pt Bold',
+    description: 'Naskah diketik dengan font Times New Roman 12pt spasi 1.5. Khusus tabel menggunakan Times New Roman 11pt Bold dengan jarak 1 spasi.',
+    institution: 'Universitas Negeri Padang',
+    faculty: 'Fakultas Teknik',
+    documentType: 'laporan_pkl_unp',
+    guidelineName: 'Buku Pedoman Pengalaman Kerja Lapangan (PKL) Mahasiswa FT UNP Padang',
+    guidelineVersion: 'v2025.1',
+    effectiveYear: 2025,
+    officialSourcePage: 'Buku Pedoman PKL Hal. 19 & 23 (Bab VI.B)',
+    status: 'mandatory',
+    verificationStatus: 'verified',
+    value: { fontFamily: 'Times New Roman', bodySizePt: 12, lineSpacing: 1.5, tableFontSizePt: 11, tableBold: true },
+    changelog: [{ date: '2025-01-15', version: 'v2025.1', summary: 'Tipografi naskah dan tabel FT UNP', author: 'UHI FT UNP' }]
+  },
+  {
+    id: 'UNP-FT-PKL-NUMBERING-001',
+    category: 'numbering',
+    ruleName: 'Larangan Tanda Hubung (-) pada Rincian & Penomoran Alfanumerik',
+    description: 'Penggunaan tanda hubung (-) yang ditempatkan di depan rincian ke bawah tidak dibenarkan; wajib menggunakan angka atau huruf secara hierarkis.',
+    institution: 'Universitas Negeri Padang',
+    faculty: 'Fakultas Teknik',
+    documentType: 'laporan_pkl_unp',
+    guidelineName: 'Buku Pedoman Pengalaman Kerja Lapangan (PKL) Mahasiswa FT UNP Padang',
+    guidelineVersion: 'v2025.1',
+    effectiveYear: 2025,
+    officialSourcePage: 'Buku Pedoman PKL Hal. 20 (Bab VI.B.8)',
+    status: 'mandatory',
+    verificationStatus: 'verified',
+    value: { allowHyphenBullet: false, headingStyle: 'alphanumeric' },
+    changelog: [{ date: '2025-01-15', version: 'v2025.1', summary: 'Larangan tanda hubung rincian', author: 'UHI FT UNP' }]
+  },
+  {
+    id: 'UNP-FT-PKL-LANGUAGE-001',
+    category: 'headings',
+    ruleName: 'Kaidah Kalimat Pasif & Larangan Kata Ganti Orang',
+    description: 'Kalimat naskah disusun dalam bentuk pasif. Dilarang menggunakan kata ganti orang pertama (saya, kami). Pada Kata Pengantar, kata "saya" wajib diganti menjadi "penulis".',
+    institution: 'Universitas Negeri Padang',
+    faculty: 'Fakultas Teknik',
+    documentType: 'laporan_pkl_unp',
+    guidelineName: 'Buku Pedoman Pengalaman Kerja Lapangan (PKL) Mahasiswa FT UNP Padang',
+    guidelineVersion: 'v2025.1',
+    effectiveYear: 2025,
+    officialSourcePage: 'Buku Pedoman PKL Hal. 19 (Bab VI.B)',
+    status: 'mandatory',
+    verificationStatus: 'verified',
+    value: { forbidFirstPersonPronouns: true, useAuthorSubstitute: 'penulis' },
+    changelog: [{ date: '2025-01-15', version: 'v2025.1', summary: 'Kaidah kebahasaan pasif dan kata penulis', author: 'UHI FT UNP' }]
+  },
+  {
+    id: 'UNP-FT-PKL-APPENDICES-001',
+    category: 'appendices',
+    ruleName: 'Kelengkapan 11 Lampiran Wajib & Buku Harian Tulis Tangan Asli',
+    description: 'Laporan wajib memuat Bagian III (Lampiran) mencakup Catatan Kegiatan Harian kerja yang DITULIS TANGAN ASLI dan diparaf harian oleh supervisor, Form Bimbingan Dosen (1.3), Rubrik Supervisor 15 Aspek Skala 1-5 (1.5), dan Rubrik Dosen 5 Aspek Skala 100 (1.6).',
+    institution: 'Universitas Negeri Padang',
+    faculty: 'Fakultas Teknik',
+    documentType: 'laporan_pkl_unp',
+    guidelineName: 'Buku Pedoman Pengalaman Kerja Lapangan (PKL) Mahasiswa FT UNP Padang',
+    guidelineVersion: 'v2025.1',
+    effectiveYear: 2025,
+    officialSourcePage: 'Buku Pedoman PKL Hal. 17-18 (Bab V) & Lampiran 1.1-1.8',
+    status: 'mandatory',
+    verificationStatus: 'verified',
+    value: {
+      mandatoryAppendicesCount: 11,
+      requiresHandwrittenLogbook: true,
+      requiresSupervisorRubric15: true,
+      requiresFacultyAdvisorRubric5: true
+    },
+    changelog: [{ date: '2025-01-15', version: 'v2025.1', summary: 'Kewajiban 11 lampiran dan logbook tulis tangan', author: 'UHI FT UNP' }]
   }
 ];
 
@@ -323,7 +437,12 @@ export function resolveActiveRules(
   for (const rule of allRules) {
     // Check compatibility
     const institutionMatch =
-      rule.institution === context.institution || rule.institution === 'Kemendiktisaintek RI';
+      rule.institution === context.institution ||
+      rule.institution === 'Kemendiktisaintek RI' ||
+      Boolean(rule.institution && context.institution && (
+        context.institution.toLowerCase().includes(rule.institution.toLowerCase()) ||
+        rule.institution.toLowerCase().includes(context.institution.toLowerCase())
+      ));
     if (!institutionMatch) continue;
 
     if (rule.faculty && context.faculty && rule.faculty !== context.faculty) continue;
@@ -511,6 +630,48 @@ export function validateProposalDocumentRules(
           officialSourcePage: rule.officialSourcePage,
           explanation: 'Laporan magang wajib memuat logbook aktivitas mingguan/harian terverifikasi oleh pembimbing lapangan.',
           recommendation: 'Buka menu Kelola Naskah > Logbook Catatan Lapangan dan lengkapi entri kegiatan magang Anda.',
+          isDeterministic: true,
+          remediationStatus: 'pending'
+        });
+        rulePassed = false;
+      }
+    }
+
+    // 6. UNP FT PKL Specific Validations
+    if (rule.id === 'UNP-FT-PKL-STRUCT-001') {
+      const isBab3Penutup = /penutup/i.test(doc.bab3?.title || '');
+      const isBab2Topik = /topik bahasan/i.test(doc.bab2?.title || '');
+      if (!isBab3Penutup || !isBab2Topik) {
+        violations.push({
+          ruleId: rule.id,
+          category: rule.category,
+          severity: 'critical',
+          location: 'Struktur Sistematika Bab',
+          ruleName: rule.ruleName,
+          guidelineSource: rule.guidelineName,
+          officialSourcePage: rule.officialSourcePage,
+          explanation: 'Laporan PKL FT UNP wajib menggunakan struktur 3 Bab baku: Bab I Pendahuluan, Bab II Topik Bahasan, dan Bab III Penutup.',
+          recommendation: 'Gunakan template laporan PKL FT UNP 2025 agar naskah otomatis tersusun ke dalam 3 Bab baku.',
+          isDeterministic: true,
+          remediationStatus: 'pending'
+        });
+        rulePassed = false;
+      }
+    }
+
+    if (rule.id === 'UNP-FT-PKL-LANGUAGE-001') {
+      const allText = `${doc.preface || ''} ${(doc.bab1?.latarBelakang || []).join(' ')}`;
+      if (/\b(saya|kami)\b/i.test(allText)) {
+        violations.push({
+          ruleId: rule.id,
+          category: rule.category,
+          severity: 'high',
+          location: 'Kaidah Kebahasaan Akademik',
+          ruleName: rule.ruleName,
+          guidelineSource: rule.guidelineName,
+          officialSourcePage: rule.officialSourcePage,
+          explanation: 'Ditemukan kata ganti orang pertama (saya/kami). Pedoman FT UNP mewajibkan kalimat pasif dan kata ganti pertama diganti menjadi "penulis".',
+          recommendation: 'Ganti seluruh kemunculan kata "saya" atau "kami" dengan kata "penulis" atau ubah menjadi kalimat pasif.',
           isDeterministic: true,
           remediationStatus: 'pending'
         });

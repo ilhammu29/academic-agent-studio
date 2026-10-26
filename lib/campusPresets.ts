@@ -1,4 +1,4 @@
-import { CampusGuideline } from '@/types/studio';
+import type { CampusGuideline } from '../types/studio.ts';
 
 export const CAMPUS_PRESETS: (CampusGuideline & { id: string; badge: string; description: string })[] = [
   {
@@ -297,6 +297,46 @@ export const CAMPUS_PRESETS: (CampusGuideline & { id: string; badge: string; des
       'Bab II wajib menguraikan profil mitra, divisi penempatan, dan alur proses bisnis.',
       'Bab IV memuat rincian logbook mingguan dan capaian kompetensi CPL yang dikonversi.',
       'Lembar Pengesahan ditandatangani Dosen Pembimbing Akademik, Mentor Lapangan Industri, dan Ketua Program Studi.'
+    ]
+  },
+  {
+    id: 'unp',
+    campusName: 'Universitas Negeri Padang (UNP)',
+    facultyMajor: 'Fakultas Teknik (FT UNP) — 6 Departemen Rekayasa',
+    guideDocTitle: 'Buku Pedoman Pengalaman Kerja Lapangan (PKL) Mahasiswa FT UNP Padang 2025',
+    badge: 'Margin 4-4-3-3 • TNR 12 • 3 Bab Baku • UHI FT UNP',
+    description: 'Pedoman resmi Laporan Pengalaman Kerja Lapangan (PKL/PLI) FT UNP 2025: Format 3 Bab (Pendahuluan, Topik Bahasan, Penutup), penomoran A. B. C., kaidah kalimat pasif ("penulis"), dilarang tanda hubung (-) pada rincian, dan 11 lampiran wajib termasuk buku harian tulis tangan asli.',
+    paperSize: 'A4',
+    chapterCount: 3,
+    margins: {
+      leftCm: 4,
+      topCm: 4,
+      rightCm: 3,
+      bottomCm: 3
+    },
+    typography: {
+      fontFamily: 'Times New Roman',
+      bodySizePt: 12,
+      heading1SizePt: 14,
+      lineSpacing: 1.5,
+      tableFontSizePt: 11,
+      tableLineSpacing: 1.0
+    },
+    headingStyle: 'alphanumeric',
+    citationStyle: 'apa',
+    numberingSystem: 'alphanumeric',
+    rules: ['no-first-person', 'mandatory-handwritten-logbook', '3-chapter-structure'],
+    approvalConfig: {
+      supervisorCount: 1, // Dosen Pembimbing
+      requiresHeadOfProgram: true, // Koordinator UHI Departemen
+      requiresDeanOrFieldMentor: true // Pembimbing Lapangan + Koordinator UHI Fakultas a.n. Dekan
+    },
+    extractedNotes: [
+      'Struktur 3 Bab Baku: BAB I PENDAHULUAN (7 Sub-bab: Latar Belakang, Deskripsi Perusahaan, Kegiatan Industri, Perencanaan, Pelaksanaan, Hambatan & Solusi, Temuan Menarik), BAB II TOPIK BAHASAN (4 Sub-bab: Alasan Topik, Kajian Teori, Proses Pelaksanaan/Produksi, Pembahasan Kritis Teori vs Praktik), BAB III PENUTUP (Kesimpulan Data Lapangan & Saran Perbaikan Sistem Nyata).',
+      'Format Bahasa: Wajib kalimat pasif, kata ganti "saya" diganti "penulis", dilarang tanda hubung (-) di depan rincian ke bawah (wajib angka/huruf).',
+      'Aturan Tabel: Huruf Times New Roman 11 pt Bold, spasi 1.0, judul simetris di atas tabel, sumber di kiri bawah.',
+      'Daftar Pustaka: Mengacu APA style dengan hanging indent 1 cm dan urutan alfabetis nama belakang penulis pertama.',
+      'Lampiran Wajib: Catatan Harian Kerja Tulis Tangan Asli (paraf supervisor tiap hari), Form Bimbingan Dosen (Lampiran 1.3), Rubrik Supervisor 15 Aspek Skala 1-5 (Lampiran 1.5), dan Rubrik Dosen 5 Aspek Skala 100 (Lampiran 1.6).'
     ]
   }
 ];
