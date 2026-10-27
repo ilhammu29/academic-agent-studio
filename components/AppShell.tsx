@@ -35,6 +35,8 @@ interface AppShellProps {
   onOpenTwelveModes: () => void;
   onOpenDatabase: () => void;
   onOpenAuth: () => void;
+  onOpenPayment?: () => void;
+  onOpenSuperadmin?: () => void;
   onOpenConsultation?: () => void;
   onOpenGuidelines?: () => void;
   onResetSession: () => void;
@@ -51,6 +53,8 @@ export default function AppShell({
   onOpenTwelveModes,
   onOpenDatabase,
   onOpenAuth,
+  onOpenPayment,
+  onOpenSuperadmin,
   onOpenConsultation,
   onOpenGuidelines,
   onResetSession,
@@ -305,17 +309,17 @@ export default function AppShell({
           {currentUser?.isSuperAdmin ? (
             <button
               type="button"
-              onClick={onOpenAuth}
-              className="hidden sm:flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/30 hover:bg-amber-500/20 transition-colors cursor-pointer"
-              title="Akun Superadmin: Akses Penuh Tanpa Batas Kuota"
+              onClick={onOpenSuperadmin || onOpenAuth}
+              className="flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-bold bg-amber-500 text-white shadow-sm hover:bg-amber-600 transition-colors cursor-pointer"
+              title="Panel Superadmin: Persetujuan QRIS & Manajemen Kuota Pengguna"
             >
-              <Crown className="w-3.5 h-3.5 text-amber-500" />
-              <span>Superadmin (∞)</span>
+              <Crown className="w-3.5 h-3.5" />
+              <span>Panel Superadmin</span>
             </button>
           ) : currentUser?.isSubscribed ? (
             <button
               type="button"
-              onClick={onOpenAuth}
+              onClick={onOpenPayment || onOpenAuth}
               className="hidden sm:flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold bg-purple-500/10 text-purple-600 dark:text-purple-400 border border-purple-500/30 hover:bg-purple-500/20 transition-colors cursor-pointer"
               title="Paket Langganan Pro Aktif (Unlimited)"
             >
@@ -325,7 +329,7 @@ export default function AppShell({
           ) : (currentUser?.trialGeneratesLeft ?? 3) > 0 ? (
             <button
               type="button"
-              onClick={onOpenAuth}
+              onClick={onOpenPayment || onOpenAuth}
               className="hidden sm:flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30 hover:bg-emerald-500/20 transition-colors cursor-pointer"
               title="Sisa Kuota Trial Penuh: Semua bab terbuka 100%"
             >
@@ -335,9 +339,9 @@ export default function AppShell({
           ) : (currentUser?.restrictedGeneratesLeft ?? 5) > 0 ? (
             <button
               type="button"
-              onClick={onOpenAuth}
+              onClick={onOpenPayment || onOpenAuth}
               className="hidden sm:flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/30 hover:bg-amber-500/20 transition-colors cursor-pointer"
-              title="Trial Habis: Kuota Judul Terkunci (3 Halaman Terbuka)"
+              title="Trial Habis: Kuota Judul Terkunci (3 Halaman Terbuka) - Klik untuk Bayar QRIS"
             >
               <Lock className="w-3.5 h-3.5 text-amber-500" />
               <span>Judul: {currentUser?.restrictedGeneratesLeft ?? 5}/5</span>
@@ -345,12 +349,12 @@ export default function AppShell({
           ) : (
             <button
               type="button"
-              onClick={onOpenAuth}
-              className="hidden sm:flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold bg-red-500/10 text-red-600 dark:text-red-400 border border-red-500/30 hover:bg-red-500/20 transition-colors cursor-pointer"
-              title="Kuota Habis: Klik untuk berlangganan Paket Pro"
+              onClick={onOpenPayment || onOpenAuth}
+              className="flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-bold bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-sm hover:opacity-90 transition-opacity cursor-pointer animate-pulse"
+              title="Kuota Habis: Klik untuk bayar via QRIS Resmi"
             >
-              <Lock className="w-3.5 h-3.5 text-red-500" />
-              <span>Upgrade Pro</span>
+              <Sparkles className="w-3.5 h-3.5" />
+              <span>Upgrade Pro (QRIS)</span>
             </button>
           )}
           

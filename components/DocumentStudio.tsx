@@ -21,6 +21,7 @@ import { LogbookManagerModal } from "./LogbookManagerModal";
 import { DefenseMinutesModal } from "./DefenseMinutesModal";
 import { LockedContentOverlay } from "./LockedContentOverlay";
 import AuthModal from "./AuthModal";
+import { PaymentModal } from "./PaymentModal";
 import { getCampusLogoByInstitution } from "@/lib/campusLogos";
 import { getSectionHeading, HeadingStyleType, parseChapterTitle } from "@/lib/academicNumbering";
 import { generateAcademicProposalDocx, downloadDocxBlob } from "@/lib/docxExporter";
@@ -5805,12 +5806,13 @@ NIP / NIK.
         onSave={handleSaveDefenseMinutes}
       />
 
-      {/* MODAL 7: UPGRADE PAKET LANGGANAN & BUKA GEMBOK DOKUMEN */}
-      <AuthModal
+      {/* MODAL 7: UPGRADE PAKET LANGGANAN & BUKA GEMBOK DOKUMEN (REAL QRIS) */}
+      <PaymentModal
         isOpen={isSubscriptionModalOpen}
         onClose={() => setIsSubscriptionModalOpen(false)}
         currentUser={currentUserProfile}
-        onUpdateUser={(updated) => {
+        onPaymentSuccess={() => {
+          const updated = getStoredUser();
           setCurrentUserProfile(updated);
           if (updated.isSubscribed || updated.isSuperAdmin) {
             setCurrentDoc(prev => ({
@@ -5820,7 +5822,6 @@ NIP / NIK.
             }));
           }
         }}
-        defaultTab="pricing"
       />
 
     </div>

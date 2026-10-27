@@ -54,6 +54,8 @@ interface LandingPageViewProps {
     campusGuideline?: CampusGuideline;
   }) => void;
   onOpenAuth: () => void;
+  onOpenPayment?: () => void;
+  onOpenSuperadmin?: () => void;
   currentUser: UserProfile;
   isLoggedIn: boolean;
 }
@@ -61,6 +63,8 @@ interface LandingPageViewProps {
 export const LandingPageView: React.FC<LandingPageViewProps> = ({
   onEnterStudio,
   onOpenAuth,
+  onOpenPayment,
+  onOpenSuperadmin,
   currentUser,
   isLoggedIn,
 }) => {
@@ -239,12 +243,13 @@ export const LandingPageView: React.FC<LandingPageViewProps> = ({
               >
                 Examples
               </a>
-              <a 
-                href="#pricing-section" 
-                className="hover:text-[#0F172A] dark:hover:text-white transition-colors cursor-pointer"
+              <button 
+                type="button"
+                onClick={() => { if (onOpenPayment) onOpenPayment(); }} 
+                className="hover:text-[#0F172A] dark:hover:text-white transition-colors cursor-pointer text-xs font-medium text-[#475569] dark:text-[#94A3B8]"
               >
                 Pricing
-              </a>
+              </button>
               <a 
                 href="#docs-section" 
                 className="hover:text-[#0F172A] dark:hover:text-white transition-colors cursor-pointer"
@@ -258,6 +263,30 @@ export const LandingPageView: React.FC<LandingPageViewProps> = ({
 
             {/* User Account / Try Studio CTA */}
             <div className="flex items-center gap-2.5 sm:gap-3">
+              {/* Superadmin Panel Trigger Button */}
+              {isLoggedIn && currentUser?.isSuperAdmin && onOpenSuperadmin ? (
+                <button
+                  type="button"
+                  onClick={onOpenSuperadmin}
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white font-bold text-xs shadow-sm shadow-amber-500/20 hover:scale-105 active:scale-95 transition-all cursor-pointer"
+                >
+                  <Crown className="w-3.5 h-3.5" />
+                  <span>Panel Superadmin</span>
+                </button>
+              ) : null}
+
+              {/* Upgrade Pro Trigger for standard users */}
+              {isLoggedIn && !currentUser?.isSuperAdmin && !currentUser?.isSubscribed && onOpenPayment ? (
+                <button
+                  type="button"
+                  onClick={onOpenPayment}
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-blue-50 dark:bg-blue-950/40 border border-blue-200 dark:border-blue-800 text-blue-600 dark:text-blue-400 font-bold text-xs hover:bg-blue-100 transition-colors cursor-pointer"
+                >
+                  <Sparkles className="w-3.5 h-3.5" />
+                  <span>Upgrade Pro (QRIS)</span>
+                </button>
+              ) : null}
+
               {isLoggedIn ? (
                 <button
                   type="button"
@@ -296,13 +325,6 @@ export const LandingPageView: React.FC<LandingPageViewProps> = ({
         className="relative z-10 pt-6 sm:pt-12 pb-20 px-4 sm:px-6 lg:px-8 select-none"
       >
         <div className="max-w-6xl mx-auto text-center">
-          
-          {/* Top Kicker: — AI WRITING PARTNER — */}
-          <div className="flex items-center justify-center gap-3 text-[11px] sm:text-xs font-mono font-medium tracking-[0.25em] text-[#64748B] dark:text-[#94A3B8] uppercase mb-8 sm:mb-12">
-            <span className="w-8 sm:w-12 h-[1px] bg-[#CBD5E1] dark:bg-[#334155]" />
-            <span>AI WRITING PARTNER</span>
-            <span className="w-8 sm:w-12 h-[1px] bg-[#CBD5E1] dark:bg-[#334155]" />
-          </div>
 
           {/* MAIN 3-COLUMN HERO HEADLINE WITH 3D INTERACTIVE GLASS ORB */}
           <div className="flex flex-col lg:flex-row items-center justify-center gap-4 sm:gap-6 lg:gap-8 xl:gap-12">

@@ -14,7 +14,9 @@ import { AcademicConsultationModal } from "@/components/AcademicConsultationModa
 import { ConsultationStudio } from "@/components/ConsultationStudio";
 import { PresentationStudio } from "@/components/PresentationStudio";
 import { CAMPUS_PRESETS } from "@/lib/campusPresets";
-import ScreenLoader from "@/components/ScreenLoader";
+import FirstTimeLoadingScreen from "@/components/FirstTimeLoadingScreen";
+import { PaymentModal } from "@/components/PaymentModal";
+import { SuperadminPanelModal } from "@/components/SuperadminPanelModal";
 import AuthModal from "@/components/AuthModal";
 import DatabaseDrawer from "@/components/DatabaseDrawer";
 import DriveFileManager from "@/components/DriveFileManager";
@@ -71,6 +73,8 @@ export default function Home() {
   const [isThinkingModalOpen, setIsThinkingModalOpen] = useState(false);
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [isDatabaseDrawerOpen, setIsDatabaseDrawerOpen] = useState(false);
+  const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
+  const [isSuperadminModalOpen, setIsSuperadminModalOpen] = useState(false);
 
   // Campus Guideline & Formatting State
   const [campusGuideline, setCampusGuideline] = useState<CampusGuideline>(CAMPUS_PRESETS[0]);
@@ -470,7 +474,7 @@ export default function Home() {
     <>
       {/* 1. Cinematic Screen Loader Animation on Initial Mount */}
       {showSplash && (
-        <ScreenLoader onComplete={() => setShowSplash(false)} />
+        <FirstTimeLoadingScreen onComplete={() => setShowSplash(false)} />
       )}
 
       {/* 2. Full-Bleed Desktop & Mobile Responsive App Shell / Landing View */}
@@ -478,6 +482,8 @@ export default function Home() {
         <LandingPageView
           onEnterStudio={handleEnterStudio}
           onOpenAuth={() => setIsAuthModalOpen(true)}
+          onOpenPayment={() => setIsPaymentModalOpen(true)}
+          onOpenSuperadmin={() => setIsSuperadminModalOpen(true)}
           currentUser={currentUser}
           isLoggedIn={isLoggedIn}
         />
@@ -488,6 +494,8 @@ export default function Home() {
           onOpenTwelveModes={() => setIsThinkingModalOpen(true)}
           onOpenDatabase={() => setIsDatabaseDrawerOpen(true)}
           onOpenAuth={() => setIsAuthModalOpen(true)}
+          onOpenPayment={() => setIsPaymentModalOpen(true)}
+          onOpenSuperadmin={() => setIsSuperadminModalOpen(true)}
           onOpenConsultation={() => setStage("consultation")}
           onOpenGuidelines={() => setIsGuidelineModalOpen(true)}
           onResetSession={handleResetSession}
@@ -698,6 +706,28 @@ export default function Home() {
           setTitle(appliedTitle);
           if (appliedEntity) setTargetEntity(appliedEntity);
           if (appliedCategory) setCategory(appliedCategory);
+        }}
+      />
+
+      {/* 8. QRIS Real Payment & Upgrade Subscription Modal */}
+      <PaymentModal
+        isOpen={isPaymentModalOpen}
+        onClose={() => setIsPaymentModalOpen(false)}
+        currentUser={currentUser}
+        onPaymentSuccess={() => {
+          const updated = getStoredUser();
+          setCurrentUser(updated);
+        }}
+      />
+
+      {/* 9. Superadmin Management Panel Modal */}
+      <SuperadminPanelModal
+        isOpen={isSuperadminModalOpen}
+        onClose={() => setIsSuperadminModalOpen(false)}
+        currentUser={currentUser}
+        onDataChanged={() => {
+          const updated = getStoredUser();
+          setCurrentUser(updated);
         }}
       />
     </>

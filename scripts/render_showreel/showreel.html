@@ -1,0 +1,550 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Academic Agent Studio Showreel</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    body, html {
+      width: 1920px;
+      height: 1080px;
+      overflow: hidden;
+      background-color: #0A0D14;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      color: #FFFFFF;
+      -webkit-font-smoothing: antialiased;
+    }
+    #stage {
+      position: relative;
+      width: 1920px;
+      height: 1080px;
+      background: #0A0D14;
+      overflow: hidden;
+    }
+    canvas {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 1920px;
+      height: 1080px;
+    }
+  </style>
+</head>
+<body>
+  <div id="stage">
+    <canvas id="canvas" width="1920" height="1080"></canvas>
+  </div>
+
+  <script>
+    const canvas = document.getElementById('canvas');
+    const ctx = canvas.getContext('2d');
+
+    // Mathematical Easing Functions
+    function easeOutExpo(x) {
+      return x === 1 ? 1 : 1 - Math.pow(2, -10 * x);
+    }
+    function easeInOutCubic(x) {
+      return x < 0.5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2;
+    }
+    function easeOutCubic(x) {
+      return 1 - Math.pow(1 - x, 3);
+    }
+    function clamp(val, min, max) {
+      return Math.max(min, Math.min(max, val));
+    }
+    function lerp(a, b, t) {
+      return a + (b - a) * t;
+    }
+
+    // Palette
+    const COLOR_BG = '#0A0D14';
+    const COLOR_WHITE = '#FFFFFF';
+    const COLOR_BLUE = '#2563EB';
+    const COLOR_VIOLET = '#7C3AED';
+    const COLOR_MUTED = '#64748B';
+
+    /**
+     * Master render function for time t (0.000s to 15.000s)
+     */
+    window.seek = function(t) {
+      // Loop wrapping if t exceeds 15.0
+      t = t % 15.0;
+
+      ctx.save();
+      ctx.clearRect(0, 0, 1920, 1080);
+      ctx.fillStyle = COLOR_BG;
+      ctx.fillRect(0, 0, 1920, 1080);
+
+      // Beats: 120 BPM = 0.5s per beat.
+      // Total 30 beats.
+      const beat = t * 2.0;
+
+      // =========================================================================
+      // SCENE 1: BEATS 0 - 4 (0.0s - 2.0s): HOOK & KINETIC TYPE
+      // "INQUIRY" -> "HYPOTHESIS" -> 4 COLUMNS
+      // =========================================================================
+      if (t < 2.0) {
+        const p1 = clamp(t / 0.5, 0, 1);
+        const p2 = clamp((t - 0.5) / 0.5, 0, 1);
+        const p3 = clamp((t - 1.0) / 0.5, 0, 1);
+        const p4 = clamp((t - 1.5) / 0.5, 0, 1);
+
+        const cx = 960;
+        const cy = 540;
+
+        if (t < 0.5) {
+          // Beat 0: Expanding Initial White Spark
+          const radius = lerp(4, 18, easeOutExpo(p1));
+          ctx.fillStyle = COLOR_WHITE;
+          ctx.beginPath();
+          ctx.arc(cx, cy, radius, 0, Math.PI * 2);
+          ctx.fill();
+
+          // Reticle lines
+          const lineLen = lerp(0, 120, easeOutExpo(p1));
+          ctx.strokeStyle = COLOR_BLUE;
+          ctx.lineWidth = 2;
+          ctx.beginPath();
+          ctx.moveTo(cx - lineLen, cy); ctx.lineTo(cx + lineLen, cy);
+          ctx.moveTo(cx, cy - lineLen); ctx.lineTo(cx, cy + lineLen);
+          ctx.stroke();
+        } else if (t < 1.0) {
+          // Beat 1: Kinetic Type "INQUIRY"
+          const scale = lerp(0.7, 1.0, easeOutExpo(p2));
+          const offset = lerp(80, 0, easeOutExpo(p2));
+          ctx.font = '900 130px Inter, sans-serif';
+          ctx.textAlign = 'center';
+          ctx.textBaseline = 'middle';
+          ctx.fillStyle = COLOR_WHITE;
+          ctx.fillText('INQUIRY', cx, cy - offset * 0.2);
+
+          ctx.font = '700 24px monospace';
+          ctx.fillStyle = COLOR_BLUE;
+          ctx.fillText('PHASE 01 // ONTOLOGY OF INQUIRY', cx, cy + 90);
+        } else if (t < 1.5) {
+          // Beat 2: Horizontal Slice Transform into "HYPOTHESIS"
+          const split = lerp(0, 40, easeOutExpo(p3));
+          ctx.font = '900 120px Inter, sans-serif';
+          ctx.textAlign = 'center';
+          ctx.textBaseline = 'middle';
+          
+          // Upper slice
+          ctx.save();
+          ctx.beginPath();
+          ctx.rect(0, 0, 1920, cy);
+          ctx.clip();
+          ctx.fillStyle = COLOR_BLUE;
+          ctx.fillText('HYPOTHESIS', cx - split, cy);
+          ctx.restore();
+
+          // Lower slice
+          ctx.save();
+          ctx.beginPath();
+          ctx.rect(0, cy, 1920, cy);
+          ctx.clip();
+          ctx.fillStyle = COLOR_WHITE;
+          ctx.fillText('HYPOTHESIS', cx + split, cy);
+          ctx.restore();
+        } else {
+          // Beat 3: Letters collapse into 4 vertical research pillars
+          const p = easeOutCubic(p4);
+          const colW = 120;
+          const spacing = 280;
+          const startX = cx - (spacing * 1.5);
+
+          for (let i = 0; i < 4; i++) {
+            const x = startX + i * spacing;
+            const h = lerp(40, 520, p);
+            const y = cy - h / 2;
+
+            ctx.fillStyle = (i === 1 || i === 2) ? COLOR_BLUE : (i === 3 ? COLOR_VIOLET : COLOR_WHITE);
+            ctx.fillRect(x - colW / 2, y, colW, h);
+
+            ctx.font = '700 14px monospace';
+            ctx.fillStyle = COLOR_BG;
+            ctx.textAlign = 'center';
+            if (p > 0.6) {
+              ctx.fillText('COL.0' + (i + 1), x, y + 30);
+            }
+          }
+        }
+      }
+
+      // =========================================================================
+      // SCENE 2: BEATS 4 - 8 (2.0s - 4.0s): SHAPE MORPHING & TOPOLOGICAL LATTICE
+      // =========================================================================
+      else if (t < 4.0) {
+        const localT = t - 2.0;
+        const p = clamp(localT / 2.0, 0, 1);
+        const subP = clamp((localT % 0.5) / 0.5, 0, 1);
+        const subBeat = Math.floor(localT / 0.5);
+
+        const cx = 960;
+        const cy = 540;
+
+        ctx.lineWidth = 3;
+
+        if (subBeat === 0) {
+          // Beat 4: Pillars compress into intersecting vector arcs
+          const f = easeOutExpo(subP);
+          for (let i = 0; i < 4; i++) {
+            const angle = (i * Math.PI) / 2 + f * Math.PI * 0.5;
+            const r = lerp(320, 240, f);
+            ctx.strokeStyle = i % 2 === 0 ? COLOR_BLUE : COLOR_VIOLET;
+            ctx.beginPath();
+            ctx.arc(cx, cy, r, angle, angle + Math.PI * 0.6);
+            ctx.stroke();
+          }
+        } else if (subBeat === 1 || subBeat === 2) {
+          // Beats 5-6: Topological citation network & graph matrix
+          const f = easeOutExpo(subP);
+          const numNodes = 12;
+          const nodeRadius = 260;
+
+          ctx.strokeStyle = '#1E293B';
+          ctx.lineWidth = 1.5;
+
+          // Connect nodes
+          for (let i = 0; i < numNodes; i++) {
+            const a1 = (i / numNodes) * Math.PI * 2;
+            const x1 = cx + Math.cos(a1) * nodeRadius;
+            const y1 = cy + Math.sin(a1) * nodeRadius;
+
+            const next = (i + 4) % numNodes;
+            const a2 = (next / numNodes) * Math.PI * 2;
+            const x2 = cx + Math.cos(a2) * nodeRadius;
+            const y2 = cy + Math.sin(a2) * nodeRadius;
+
+            ctx.beginPath();
+            ctx.moveTo(x1, y1);
+            ctx.lineTo(x2, y2);
+            ctx.stroke();
+
+            // Node dots
+            ctx.fillStyle = (i % 3 === 0) ? COLOR_BLUE : (i % 3 === 1 ? COLOR_VIOLET : COLOR_WHITE);
+            ctx.beginPath();
+            ctx.arc(x1, y1, 8, 0, Math.PI * 2);
+            ctx.fill();
+          }
+
+          ctx.font = '800 32px monospace';
+          ctx.fillStyle = COLOR_WHITE;
+          ctx.textAlign = 'center';
+          ctx.fillText('TOPOLOGY: 12 THINKING MODES', cx, cy - 20);
+          ctx.font = '500 16px monospace';
+          ctx.fillStyle = COLOR_BLUE;
+          ctx.fillText('RESEARCH CITATION GRAPH ACTIVE', cx, cy + 20);
+        } else {
+          // Beat 7: Matrix collapses into standard A4 academic page outline
+          const f = easeOutExpo(subP);
+          const pageW = lerp(600, 480, f);
+          const pageH = lerp(600, 680, f);
+          const px = cx - pageW / 2;
+          const py = cy - pageH / 2;
+
+          ctx.fillStyle = '#0F172A';
+          ctx.strokeStyle = COLOR_WHITE;
+          ctx.lineWidth = 2;
+          ctx.fillRect(px, py, pageW, pageH);
+          ctx.strokeRect(px, py, pageW, pageH);
+
+          // Simulated clean line paragraphs
+          ctx.fillStyle = '#334155';
+          for (let l = 0; l < 8; l++) {
+            const lw = (l % 2 === 0 ? 380 : 320);
+            ctx.fillRect(px + 50, py + 120 + l * 40, lw, 6);
+          }
+        }
+      }
+
+      // =========================================================================
+      // SCENE 3: BEATS 8 - 12 (4.0s - 6.0s): 2D-TO-3D ISOMETRIC DOCUMENT UNFOLDING
+      // =========================================================================
+      else if (t < 6.0) {
+        const localT = t - 4.0;
+        const p = localT / 2.0;
+        const rotY = lerp(0, 0.78, easeInOutCubic(p));
+        const rotX = lerp(0, 0.52, easeInOutCubic(p));
+
+        const cx = 960;
+        const cy = 540;
+
+        ctx.save();
+        ctx.translate(cx, cy);
+
+        // 3D Isometric projection math
+        const chapters = [
+          { name: 'BAB I : PENDAHULUAN', color: COLOR_WHITE, z: -120 },
+          { name: 'BAB II : KAJIAN PUSTAKA', color: COLOR_BLUE, z: -40 },
+          { name: 'BAB III : METODE PENELITIAN', color: COLOR_VIOLET, z: 40 },
+          { name: 'BAB IV : ANALISIS & DESAIN', color: COLOR_BLUE, z: 120 },
+          { name: 'BAB V : PENUTUP', color: COLOR_WHITE, z: 200 }
+        ];
+
+        chapters.forEach((chap, i) => {
+          ctx.save();
+          const zOffset = chap.z * easeOutCubic(clamp(localT / 1.2, 0, 1));
+          
+          // Isometric 2.5D skew
+          ctx.transform(
+            Math.cos(rotY), Math.sin(rotX) * 0.4,
+            -Math.sin(rotY) * 0.4, Math.cos(rotX),
+            0, zOffset * 0.8
+          );
+
+          // Layer plate
+          const w = 460;
+          const h = 80;
+          ctx.fillStyle = '#0F172A';
+          ctx.strokeStyle = chap.color;
+          ctx.lineWidth = 2;
+          ctx.fillRect(-w/2, -h/2, w, h);
+          ctx.strokeRect(-w/2, -h/2, w, h);
+
+          ctx.font = '800 18px Inter, sans-serif';
+          ctx.fillStyle = chap.color;
+          ctx.textAlign = 'left';
+          ctx.textBaseline = 'middle';
+          ctx.fillText(chap.name, -w/2 + 30, 0);
+
+          ctx.restore();
+        });
+
+        ctx.restore();
+
+        // Kicker label
+        ctx.font = '700 16px monospace';
+        ctx.fillStyle = COLOR_MUTED;
+        ctx.textAlign = 'center';
+        ctx.fillText('ISOMETRIC STRUCTURE DECOMPOSITION // BAB I - V', cx, 980);
+      }
+
+      // =========================================================================
+      // SCENE 4: BEATS 12 - 16 (6.0s - 8.0s): DATA & UI MATRIX TELEMETRY
+      // =========================================================================
+      else if (t < 8.0) {
+        const localT = t - 6.0;
+        const p = clamp(localT / 2.0, 0, 1);
+        const cx = 960;
+        const cy = 540;
+
+        // UI Compliance Matrix Card
+        const cardW = 900;
+        const cardH = 500;
+        ctx.fillStyle = '#0B1120';
+        ctx.strokeStyle = '#1E293B';
+        ctx.lineWidth = 2;
+        ctx.strokeRect(cx - cardW/2, cy - cardH/2, cardW, cardH);
+        ctx.fillRect(cx - cardW/2, cy - cardH/2, cardW, cardH);
+
+        // Header bar
+        ctx.fillStyle = '#1E293B';
+        ctx.fillRect(cx - cardW/2, cy - cardH/2, cardW, 50);
+
+        ctx.font = '800 16px monospace';
+        ctx.fillStyle = COLOR_WHITE;
+        ctx.textAlign = 'left';
+        ctx.fillText('DIKTI & CAMPUS GUIDELINE ENGINE // REAL-TIME VALIDATION', cx - cardW/2 + 25, cy - cardH/2 + 32);
+
+        // Telemetry metrics
+        const metrics = [
+          { label: 'DIKTI STANDARDS COMPLIANCE', val: clamp(Math.round(p * 100), 0, 100) + '%', color: COLOR_WHITE },
+          { label: 'STRUCTURAL CHAPTER SYMMETRY', val: '5/5 VERIFIED', color: COLOR_BLUE },
+          { label: 'CITATION INTEGRITY (APA/IEEE)', val: '100% AUDITED', color: COLOR_VIOLET },
+          { label: 'UNP FT 2025 REGULATORY RULE', val: 'LOCKED ACTIVE', color: '#10B981' }
+        ];
+
+        metrics.forEach((m, i) => {
+          const y = cy - cardH/2 + 100 + i * 85;
+          ctx.font = '700 14px monospace';
+          ctx.fillStyle = COLOR_MUTED;
+          ctx.fillText(m.label, cx - cardW/2 + 40, y);
+
+          // Metric Bar
+          const barW = 540;
+          ctx.fillStyle = '#1E293B';
+          ctx.fillRect(cx - cardW/2 + 40, y + 12, barW, 10);
+
+          const fillW = barW * clamp(p * 1.2, 0, 1);
+          ctx.fillStyle = m.color;
+          ctx.fillRect(cx - cardW/2 + 40, y + 12, fillW, 10);
+
+          ctx.font = '800 20px monospace';
+          ctx.textAlign = 'right';
+          ctx.fillText(m.val, cx + cardW/2 - 40, y + 22);
+          ctx.textAlign = 'left';
+        });
+      }
+
+      // =========================================================================
+      // SCENE 5 & 6: BEATS 16 - 24 (8.0s - 12.0s): THE STRONGEST MOMENT
+      // REAL 3D HOLOGRAPHIC GLASS ORB SYNTHESIS (SPIRAL PETALS & FLUID CORE)
+      // =========================================================================
+      else if (t < 12.0) {
+        const localT = t - 8.0;
+        const p = localT / 4.0;
+        const cx = 960;
+        const cy = 520;
+        const r = 210;
+
+        // Dynamic 3D rotation angle
+        const rot = localT * 1.8;
+
+        // 1. Floor shadow breathing
+        const shadowW = r * 1.6 * (1 + Math.sin(localT * 3) * 0.08);
+        const shadowH = 34 * (1 - Math.sin(localT * 3) * 0.08);
+        ctx.fillStyle = 'rgba(30, 27, 75, 0.45)';
+        ctx.beginPath();
+        ctx.ellipse(cx, cy + r + 50, shadowW, shadowH, 0, 0, Math.PI * 2);
+        ctx.fill();
+
+        // 2. Inner fluid gradients swirling
+        const grad = ctx.createRadialGradient(
+          cx - 40 + Math.sin(rot) * 60, cy - 40 + Math.cos(rot) * 50, 20,
+          cx, cy, r
+        );
+        grad.addColorStop(0, '#FFFFFF');
+        grad.addColorStop(0.35, COLOR_BLUE);
+        grad.addColorStop(0.75, COLOR_VIOLET);
+        grad.addColorStop(1, '#0F172A');
+
+        ctx.fillStyle = grad;
+        ctx.beginPath();
+        ctx.arc(cx, cy, r, 0, Math.PI * 2);
+        ctx.fill();
+
+        // 3. Curved Glass Spiral Petals / Ribs
+        ctx.lineWidth = 4;
+        for (let i = 0; i < 3; i++) {
+          const petalOffset = (i * Math.PI) / 1.5 + rot * 0.6;
+          ctx.strokeStyle = i === 1 ? COLOR_WHITE : (i === 0 ? '#60A5FA' : '#C084FC');
+          ctx.beginPath();
+          ctx.ellipse(
+            cx, cy, 
+            r * 0.95, r * 0.42, 
+            petalOffset, 
+            0, Math.PI * 2
+          );
+          ctx.stroke();
+        }
+
+        // 4. Crisp outer glass specular highlight rim
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.85)';
+        ctx.lineWidth = 6;
+        ctx.beginPath();
+        ctx.arc(cx, cy, r - 3, -Math.PI * 0.75, -Math.PI * 0.25);
+        ctx.stroke();
+
+        // 5. High-speed academic keyword streaks
+        if (localT > 1.5) {
+          const streakT = (localT - 1.5) / 2.5;
+          const words = ['SKRIPSI', 'TESIS', 'LAPORAN MAGANG', 'JURNAL ILMIAH'];
+          const wordIdx = Math.floor(streakT * words.length) % words.length;
+
+          ctx.font = '900 48px Inter, sans-serif';
+          ctx.fillStyle = COLOR_WHITE;
+          ctx.textAlign = 'center';
+          ctx.fillText(words[wordIdx], cx, 860);
+
+          ctx.font = '700 16px monospace';
+          ctx.fillStyle = COLOR_BLUE;
+          ctx.fillText('SYNTHESIS ENGINE LOCKED // READY FOR COMPOSITION', cx, 915);
+        }
+      }
+
+      // =========================================================================
+      // SCENE 7: BEATS 24 - 28 (12.0s - 14.0s): END TITLE
+      // "ACADEMIC AGENT STUDIO"
+      // =========================================================================
+      else if (t < 14.0) {
+        const localT = t - 12.0;
+        const p = clamp(localT / 1.0, 0, 1);
+        const f = easeOutExpo(p);
+
+        const cx = 960;
+        const cy = 480;
+
+        // 4-pointed Star Logo
+        ctx.save();
+        ctx.translate(cx, cy - 90);
+        ctx.scale(f, f);
+        ctx.fillStyle = COLOR_WHITE;
+        ctx.beginPath();
+        ctx.moveTo(0, -32);
+        ctx.quadraticCurveTo(0, 0, 32, 0);
+        ctx.quadraticCurveTo(0, 0, 0, 32);
+        ctx.quadraticCurveTo(0, 0, -32, 0);
+        ctx.quadraticCurveTo(0, 0, 0, -32);
+        ctx.fill();
+        ctx.restore();
+
+        // Main Title
+        ctx.font = '900 86px Inter, sans-serif';
+        ctx.fillStyle = COLOR_WHITE;
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText('ACADEMIC AGENT STUDIO', cx, cy + 20);
+
+        // Gradient Tagline
+        ctx.font = '700 24px monospace';
+        ctx.fillStyle = COLOR_BLUE;
+        ctx.fillText('THE AI RESEARCH & MANUSCRIPT ENGINE', cx, cy + 100);
+
+        // Feature Pill Badges
+        const badges = ['FT UNP 2025 COMPLIANT', 'DIKTI STANDARDS', '12 COGNITIVE MODES', 'DOCX / PPTX EXPORT'];
+        const totalW = badges.length * 220;
+        const startX = cx - totalW / 2 + 110;
+
+        badges.forEach((b, i) => {
+          const bx = startX + i * 220;
+          const by = cy + 180;
+          ctx.strokeStyle = '#334155';
+          ctx.lineWidth = 1.5;
+          ctx.strokeRect(bx - 100, by - 16, 200, 32);
+
+          ctx.font = '700 11px monospace';
+          ctx.fillStyle = COLOR_MUTED;
+          ctx.fillText(b, bx, by + 4);
+        });
+      }
+
+      // =========================================================================
+      // SCENE 8: BEATS 28 - 30 (14.0s - 15.0s): SEAMLESS LOOP TRANSITION
+      // Compresses back into the starting white spark
+      // =========================================================================
+      else {
+        const localT = t - 14.0; // 0.0 to 1.0s
+        const p = clamp(localT / 1.0, 0, 1);
+        const cx = 960;
+        const cy = 540;
+
+        const f = easeInOutCubic(p);
+        const radius = lerp(40, 4, f);
+
+        ctx.fillStyle = COLOR_WHITE;
+        ctx.beginPath();
+        ctx.arc(cx, cy, radius, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Reticle lines collapsing to origin
+        const lineLen = lerp(80, 0, f);
+        ctx.strokeStyle = COLOR_BLUE;
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.moveTo(cx - lineLen, cy); ctx.lineTo(cx + lineLen, cy);
+        ctx.moveTo(cx, cy - lineLen); ctx.lineTo(cx, cy + lineLen);
+        ctx.stroke();
+      }
+
+      ctx.restore();
+    };
+
+    // Initial render at t = 0
+    window.seek(0);
+  </script>
+</body>
+</html>
