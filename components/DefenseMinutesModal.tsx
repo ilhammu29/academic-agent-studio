@@ -1,4 +1,5 @@
 "use client";
+import { aiFetch } from "@/lib/aiClient";
 
 import React, { useState } from "react";
 import { X, FileText, Check, Sparkles, Plus, Trash2, Award, UserCheck, Calendar } from "lucide-react";
@@ -25,42 +26,10 @@ export const DefenseMinutesModal: React.FC<DefenseMinutesModalProps> = ({
   minutes: initialMinutes,
   onSave
 }) => {
-  const [minutes, setMinutes] = useState<DefenseMinutesInfo>(() => {
-    if (initialMinutes) {
-      return {
-        ...initialMinutes,
-        examiners: initialMinutes.examiners || [
-          { role: "Ketua Dewan Penguji", name: "Prof. Dr. Ir. Budi Santoso, M.Sc.", nip: "197203151998021001", attendance: "hadir" },
-          { role: "Sekretaris Penguji / Pembimbing I", name: "Dr. Ir. Hendro Prabowo, M.T.", nip: "197805122003121002", attendance: "hadir" },
-          { role: "Anggota Penguji Utama", name: "Ratna Kusuma Dewi, S.T., M.Sc.", nip: "198509142010122004", attendance: "hadir" }
-        ],
-        revisionNotes: initialMinutes.revisionNotes || [
-          "Perjelas batasan sampel dan teknik pengambilan data pada Bab III Sub-bab 3.2.",
-          "Mutakhirkan rujukan landasan teori primer di Bab II dengan publikasi 5 tahun terakhir.",
-          "Tambahkan matriks mitigasi risiko operasional pada Bab V."
-        ]
-      };
-    }
-    return {
-      id: `minutes-${Date.now()}`,
-      sessionType: "seminar_proposal",
-      date: new Date().toISOString().split("T")[0],
-      time: "09:30 - 11:30 WIB",
-      roomOrPlatform: "Ruang Sidang Senat Akademik / Daring Zoom",
-      examiners: [
-        { role: "Ketua Dewan Penguji", name: "Prof. Dr. Ir. Budi Santoso, M.Sc.", nip: "197203151998021001", attendance: "hadir" },
-        { role: "Sekretaris Penguji / Pembimbing I", name: "Dr. Ir. Hendro Prabowo, M.T.", nip: "197805122003121002", attendance: "hadir" },
-        { role: "Anggota Penguji Utama", name: "Ratna Kusuma Dewi, S.T., M.Sc.", nip: "198509142010122004", attendance: "hadir" }
-      ],
-      candidateScore: 86.5,
-      gradeResult: "Lulus dengan Revisi Minor",
-      revisionNotes: [
-        "Perjelas batasan sampel dan teknik pengambilan data pada Bab III Sub-bab 3.2.",
-        "Mutakhirkan rujukan landasan teori primer di Bab II dengan publikasi 5 tahun terakhir.",
-        "Tambahkan matriks mitigasi risiko operasional pada Bab V."
-      ],
-      signatureReady: true
-    };
+  const [minutes, setMinutes] = useState<DefenseMinutesInfo>(() => initialMinutes || {
+    id: `minutes-${Date.now()}`, sessionType: "seminar_proposal",
+    date: "", time: "", roomOrPlatform: "", examiners: [], revisionNotes: [],
+    gradeResult: "", signatureReady: false
   });
 
   const [isGeneratingAi, setIsGeneratingAi] = useState(false);
@@ -95,7 +64,7 @@ export const DefenseMinutesModal: React.FC<DefenseMinutesModalProps> = ({
   const handleGenerateAiNotes = async () => {
     setIsGeneratingAi(true);
     try {
-      const res = await fetch("/api/gemini", {
+      const res = await aiFetch("/api/gemini", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -123,6 +92,7 @@ Format JSON:
       });
 
       const data = await res.json();
+      if (!res.ok || !data.text) throw new Error(data.error || "AI belum tersedia");
       if (data.text) {
         let clean = data.text.trim();
         if (clean.includes("```json")) {
@@ -133,13 +103,12 @@ Format JSON:
         const parsed = JSON.parse(clean);
         setMinutes({
           ...minutes,
-          gradeResult: parsed.gradeResult || minutes.gradeResult,
-          candidateScore: parsed.candidateScore || minutes.candidateScore,
-          revisionNotes: parsed.revisionNotes || minutes.revisionNotes
+          revisionNotes: Array.isArray(parsed.revisionNotes) ? parsed.revisionNotes : minutes.revisionNotes
         });
       }
     } catch (err) {
       console.warn("AI defense minutes failed:", err);
+      alert("Saran AI tidak tersedia. Hubungkan Gemini dan coba lagi.");
     } finally {
       setIsGeneratingAi(false);
     }

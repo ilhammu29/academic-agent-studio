@@ -25,6 +25,26 @@ export async function generateAcademicProposalPptx(
   pptx.company = doc.institution;
   pptx.title = doc.title;
 
+  // Export the actual editable deck so edits, additions and deletions are preserved.
+  if (doc.slides?.length) {
+    doc.slides.forEach((item, index) => {
+      const slide = pptx.addSlide();
+      slide.background = { color: "090D15" };
+      slide.addText(item.kicker || `SLIDE ${index + 1}`, { x: 0.7, y: 0.45, w: 11.8, h: 0.3, fontFace: "Arial", fontSize: 10, color: "7C9CFF", bold: true });
+      slide.addText(item.title || "", { x: 0.7, y: 1, w: 11.8, h: 0.8, fontFace: "Arial", fontSize: 27, color: "F8FAFC", bold: true, fit: "shrink" });
+      if (item.subtitle) slide.addText(item.subtitle, { x: 0.7, y: 1.8, w: 11.8, h: 0.4, fontFace: "Arial", fontSize: 13, color: "A4B1C7", fit: "shrink" });
+      const visual = slideVisualMap?.[index];
+      const points = (item.keyPoints || []).map(point => `• ${point}`).join("\n");
+      slide.addText(points, { x: 0.8, y: 2.45, w: visual ? 5.3 : 11.5, h: 4.1, fontFace: "Arial", fontSize: 18, color: "F8FAFC", breakLine: false, valign: "top", fit: "shrink" });
+      if (visual && (visual.startsWith("data:") || /^https?:\/\//.test(visual))) {
+        slide.addImage(visual.startsWith("data:") ? { data: visual, x: 6.6, y: 2.4, w: 5.8, h: 3.6 } : { path: visual, x: 6.6, y: 2.4, w: 5.8, h: 3.6 });
+      }
+      if (item.speakerNotes) slide.addNotes(item.speakerNotes);
+    });
+    await pptx.writeFile({ fileName: `Slide_${doc.category.toUpperCase()}_${doc.candidateName.replace(/\s+/g, "_")}.pptx` });
+    return;
+  }
+
   // Color Tokens
   const BG_COLOR = "090D15";
   const CARD_BG = "121824";

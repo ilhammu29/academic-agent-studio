@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { 
   X, 
   Folder, 
@@ -13,9 +13,10 @@ import {
   Search, 
   Calendar,
   Clock,
-  ArrowUpRight
+  ArrowUpRight,
+  Upload
 } from 'lucide-react';
-import { SavedProjectRecord, getSavedProjects, deleteProjectRecord } from '@/lib/supabase';
+import { SavedProjectRecord, getSavedProjects, deleteProjectRecord, saveProjectRecord, importProjectFromJson } from '@/lib/supabase';
 
 interface DatabaseDrawerProps {
   isOpen: boolean;
@@ -36,6 +37,62 @@ export default function DatabaseDrawer({
   const [filterCategory, setFilterCategory] = useState<'all' | 'magang' | 'skripsi' | 'penelitian'>('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [saveSuccessMsg, setSaveSuccessMsg] = useState(false);
+  const [importStatusMsg, setImportStatusMsg] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const handleImportJson = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    try {
+      const text = await file.text();
+      const parsed = JSON.parse(text);
+
+      if (Array.isArray(parsed)) {
+        let count = 0;
+        for (const item of parsed) {
+          if (item && item.title && item.category) {
+            await saveProjectRecord(item);
+            count++;
+          }
+        }
+        setImportStatusMsg(`✓ Berhasil memulihkan ${count} proyek dari cadangan!`);
+      } else if (parsed && parsed.title && parsed.category) {
+        const imported = importProjectFromJson(text);
+        await saveProjectRecord(imported);
+        setImportStatusMsg(`✓ Berhasil memulihkan proyek: "${imported.title.slice(0, 30)}..."`);
+      } else if (parsed && parsed.documentData) {
+        // DocumentStudio single export format
+        const docRecord: SavedProjectRecord = {
+          id: `proj-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`,
+          title: parsed.title || parsed.documentData?.title || 'Proyek Impor',
+          category: parsed.category || parsed.documentData?.category || 'skripsi',
+          targetEntity: parsed.targetEntity || parsed.documentData?.targetEntity || '',
+          durationMonths: parsed.documentData?.durationMonths || 6,
+          stage: 'result',
+          answers: parsed.answers || {},
+          documentData: parsed.documentData,
+          treeGraph: parsed.treeGraph,
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString()
+        };
+        await saveProjectRecord(docRecord);
+        setImportStatusMsg(`✓ Berhasil memulihkan proyek dari naskah!`);
+      } else {
+        alert('Format file JSON tidak dikenali. Pastikan file adalah hasil ekspor cadangan dari Academic Studio.');
+        return;
+      }
+
+      await fetchProjects();
+      setTimeout(() => setImportStatusMsg(null), 4000);
+    } catch (err: any) {
+      alert(`Gagal membaca file JSON: ${err?.message || 'Format tidak valid'}`);
+    } finally {
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
+    }
+  };
 
   const fetchProjects = async () => {
     setIsLoading(true);
@@ -134,6 +191,23 @@ export default function DatabaseDrawer({
           </button>
 
           <div className="flex items-center gap-2">
+            <input
+              type="file"
+              ref={fileInputRef}
+              onChange={handleImportJson}
+              accept=".json,application/json"
+              className="hidden"
+            />
+
+            <button
+              onClick={() => fileInputRef.current?.click()}
+              className="py-2 px-3 rounded-lg border border-zinc-200 dark:border-zinc-800 hover:bg-zinc-100 dark:hover:bg-zinc-900 text-zinc-700 dark:text-zinc-300 text-xs font-medium transition-colors flex items-center justify-center gap-1.5 cursor-pointer"
+              title="Pulihkan proyek dari file cadangan .json"
+            >
+              <Upload className="w-3.5 h-3.5 text-zinc-400" />
+              <span>Pulihkan (.json)</span>
+            </button>
+
             <button
               onClick={() => {
                 const jsonStr = JSON.stringify(projects, null, 2);
@@ -162,6 +236,14 @@ export default function DatabaseDrawer({
             </button>
           </div>
         </div>
+
+        {/* Import Notification Banner */}
+        {importStatusMsg && (
+          <div className="mx-4 mt-3 p-3 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800 text-emerald-800 dark:text-emerald-300 text-xs flex items-center gap-2 animate-in fade-in">
+            <CheckCircle2 className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
+            <span>{importStatusMsg}</span>
+          </div>
+        )}
 
         {/* 3. Search & Filter Category Pills */}
         <div className="p-4 border-b border-zinc-200 dark:border-zinc-800 space-y-3 bg-zinc-50/50 dark:bg-zinc-900/30">

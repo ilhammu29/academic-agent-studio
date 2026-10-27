@@ -1,3 +1,4 @@
+import { getRequestAiKey } from "@/lib/serverAiConfig";
 import { NextResponse } from "next/server";
 import { CampusGuideline } from "@/types/studio";
 import { callGeminiApi } from "@/lib/geminiApi";
@@ -16,8 +17,7 @@ export async function POST(req: Request) {
       );
     }
 
-    const customKey = req.headers.get("x-gemini-key");
-    const apiKey = customKey || process.env.GEMINI_API_KEY || process.env.NEXT_PUBLIC_GEMINI_API_KEY || "";
+    const apiKey = getRequestAiKey(req);
 
     // 1. Try Live Gemini 3.5 Flash Lite AI Scanning
     if (apiKey && trimmedText.length > 20) {

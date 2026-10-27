@@ -1,4 +1,5 @@
 'use client';
+import { aiFetch } from '@/lib/aiClient';
 
 import React, { useState, useEffect, useRef } from 'react';
 import { ProposalDocument } from '@/types/studio';
@@ -108,7 +109,7 @@ Format output HARUS JSON murni tanpa markdown:
   }
 ]`;
 
-      const res = await fetch('/api/gemini', {
+      const res = await aiFetch('/api/gemini', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ prompt }),
@@ -133,7 +134,9 @@ Format output HARUS JSON murni tanpa markdown:
           return;
         }
       }
+      alert('Pertanyaan AI belum tersedia. Hubungkan Gemini dan coba lagi.');
     } catch (err) {
+      alert('Pertanyaan AI belum tersedia. Hubungkan Gemini dan coba lagi.');
       console.warn('Failed to generate AI defense questions:', err);
     } finally {
       setIsGeneratingQuestions(false);
@@ -246,7 +249,7 @@ Evaluasi ketahanan argumen secara ketat:
 Format dalam JSON:
 {"score": 85, "strengths": ["..."], "weaknesses": ["..."], "idealRebuttal": "...", "thinkingModeAdvice": "..."}`;
 
-      const res = await fetch('/api/gemini', {
+      const res = await aiFetch('/api/gemini', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ prompt }),
@@ -268,25 +271,8 @@ Format dalam JSON:
       // fallback
     }
 
-    // High-rigor fallback evaluation
-    setTimeout(() => {
-      const calculatedScore = Math.min(95, Math.max(70, Math.floor(currentInput.length / 10) + 65));
-      const fallbackCritique = {
-        strengths: [
-          'Menjawab langsung inti permasalahan tanpa berbelit-belit.',
-          `Menunjukkan pemahaman terhadap konteks studi di ${doc.targetEntity}.`,
-        ],
-        weaknesses: [
-          'Kurang menyertakan metrik kuantitatif spesifik (misal: persentase latensi atau estimasi error rate).',
-          'Belum menyitir rujukan literatur primer pendukung untuk memperkuat justifikasi metode.',
-        ],
-        idealRebuttal: `Izin menjawab Dewan Penguji. Pemilihan pendekatan ini didasarkan pada analisis perbandingan efisiensi dan prinsip First-Principles. Keterbatasan sistem sebelumnya terletak pada bottleneck integrasi data, di mana metode usulan ini mampu mereduksi redundansi komputasi secara signifikan. Hal ini selaras dengan publikasi primer terdahulu bahwa optimasi modularitas meningkatkan reliabilitas operasional di ${doc.targetEntity}.`,
-        thinkingModeAdvice: 'Terapkan First-Principles Thinking & Critical Falsification: Selalu sebutkan metrik pembanding dan sitasi saat diserang.',
-      };
-
-      updateExchange(activeExchange.id, currentInput, calculatedScore, fallbackCritique);
-      setIsEvaluating(false);
-    }, 1200);
+    setIsEvaluating(false);
+    alert('Penilaian AI tidak tersedia. Hubungkan kunci Gemini dan coba lagi; jawaban belum diberi nilai.');
   };
 
   const updateExchange = (id: string, ans: string, score: number, critique: any) => {

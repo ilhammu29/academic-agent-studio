@@ -1,3 +1,5 @@
+import { getRequestAiKey } from "@/lib/serverAiConfig";
+import { GEMINI_MODELS } from "@/lib/geminiApi";
 import { NextResponse } from "next/server";
 import { ProposalDocument, ProposalCategory, ReportType, CampusGuideline } from "@/types/studio";
 import { buildDenseAcademicDocument, planDocumentOutline, scaleAcademicDocumentDepth } from "@/lib/longDocumentGenerator";
@@ -7,17 +9,17 @@ import { sanitizeAcademicText } from "@/lib/textSanitizer";
  * Resilient JSON fetcher across available Gemini models
  */
 async function fetchGeminiJson(apiKey: string, prompt: string, maxTokens = 8192, timeoutMs = 28000): Promise<any | null> {
-  const models = ["gemini-2.5-flash", "gemini-2.0-flash", "gemini-1.5-flash"];
+  const models = GEMINI_MODELS;
   for (const model of models) {
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), timeoutMs);
     try {
-      const controller = new AbortController();
-      const timer = setTimeout(() => controller.abort(), timeoutMs);
 
       const res = await fetch(
-        `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`,
+        `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`,
         {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
+          headers: { "Content-Type": "application/json", "x-goog-api-key": apiKey },
           body: JSON.stringify({
             contents: [{ parts: [{ text: prompt }] }],
             generationConfig: {
@@ -29,8 +31,6 @@ async function fetchGeminiJson(apiKey: string, prompt: string, maxTokens = 8192,
           signal: controller.signal
         }
       );
-      clearTimeout(timer);
-
       if (res.ok) {
         const data = await res.json();
         const rawText = data?.candidates?.[0]?.content?.parts?.[0]?.text;
@@ -40,6 +40,8 @@ async function fetchGeminiJson(apiKey: string, prompt: string, maxTokens = 8192,
       }
     } catch (e: any) {
       console.warn(`Worker call on model ${model} skipped:`, e?.message);
+    } finally {
+      clearTimeout(timer);
     }
   }
   return null;
@@ -48,8 +50,7 @@ async function fetchGeminiJson(apiKey: string, prompt: string, maxTokens = 8192,
 export async function POST(req: Request) {
   try {
     const body = await req.json();
-    const customKey = req.headers.get("x-gemini-key");
-    const apiKey = customKey || process.env.GEMINI_API_KEY || process.env.NEXT_PUBLIC_GEMINI_API_KEY || "";
+    const apiKey = getRequestAiKey(req);
 
     const {
       title = "Usulan Proposal Akademik",
@@ -104,6 +105,8 @@ Tugas Anda adalah merumuskan BLUEPRINT MASTER NASKAH AKADEMIK untuk usulan berik
 - Jumlah Landasan Teori Wajib: TEPAT ${theoryCount} Teori Pokok
 - Konteks Diagnostik Lapangan:
 ${JSON.stringify(answers, null, 2)}
+
+Jangan mengarang hasil, data lapangan, DOI, maupun referensi. Tandai informasi yang belum diketahui untuk ditinjau pengguna.
 
 OUTPUT WAJIB JSON: Balas HANYA dengan objek JSON valid tanpa markdown fence:
 {
@@ -191,6 +194,7 @@ OUTPUT WAJIB JSON: Balas HANYA dengan objek JSON valid tanpa markdown fence:
 `;
 
         const parsedMasterDoc: Partial<ProposalDocument> | null = await fetchGeminiJson(apiKey, masterPrompt, 8192);
+        if (!parsedMasterDoc) throw new Error("Gemini tidak menghasilkan dokumen yang dapat dibaca.");
 
         let deepBab1 = parsedMasterDoc?.bab1 || baseDoc.bab1;
         let deepBab2 = parsedMasterDoc?.bab2 || baseDoc.bab2;
@@ -386,7 +390,7 @@ OUTPUT HANYA JSON:
         return NextResponse.json({
           success: true,
           document: sanitizeAcademicText(finalDoc),
-          approximatePageCount: targetDepthPages || 45,
+          approximatePageCount: null,
           engine: isDeepTarget ? "gemini-multi-worker-parallel-engine" : "gemini-flash-dense-hybrid"
         });
 
@@ -403,7 +407,7 @@ OUTPUT HANYA JSON:
     return NextResponse.json({
       success: true,
       document: sanitizeAcademicText(finalBaseDoc),
-      approximatePageCount: targetDepthPages || 40,
+      approximatePageCount: null,
       engine: "academic-dense-engine"
     });
 

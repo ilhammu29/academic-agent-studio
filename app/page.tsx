@@ -1,8 +1,10 @@
 "use client";
+import { aiFetch } from "@/lib/aiClient";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import { ProposalCategory, ReportType, StudioStage, DiagnosticQuestion, ProposalDocument, TreeNode, CampusGuideline } from "@/types/studio";
 import AppShell from "@/components/AppShell";
+import { AiKeySettings } from "@/components/AiKeySettings";
 import { LandingPageView } from "@/components/LandingPageView";
 import { HeroInputView } from "@/components/HeroInputView";
 import { DiagnosticInterview } from "@/components/DiagnosticInterview";
@@ -41,6 +43,14 @@ import {
 } from "@/lib/supabase";
 
 export default function Home() {
+  const activeProjectId = useRef<string | null>(null);
+  const [editorInstance, setEditorInstance] = useState(0);
+  const [persistedProjectId, setPersistedProjectId] = useState<string | null>(null);
+  const handleUpdateDocument = useCallback((doc: ProposalDocument) => {
+    setGeneratedDoc(doc);
+    setTreeData(buildVisualTreeGraph(doc));
+  }, []);
+  const [sessionSaveFailed, setSessionSaveFailed] = useState(false);
   const [showSplash, setShowSplash] = useState(true);
   const [forceShowreel, setForceShowreel] = useState(false);
   const [currentUser, setCurrentUser] = useState<UserProfile>(() => getStoredUser());
@@ -57,14 +67,19 @@ export default function Home() {
   const [targetEntity, setTargetEntity] = useState("");
   const [institution, setInstitution] = useState(currentUser.institution || "Universitas Sebelas Maret (UNS)");
   const [facultyMajor, setFacultyMajor] = useState("Informatika & Sains Data");
-  const [candidateName, setCandidateName] = useState(currentUser.name || "Ilham Maulana");
-  const [candidateId, setCandidateId] = useState("NIM-2026-AKAD");
+  const [candidateName, setCandidateName] = useState(currentUser.name || "");
+  const [candidateId, setCandidateId] = useState("");
   const [durationMonths, setDurationMonths] = useState<number>(6);
   const [targetDepthPages, setTargetDepthPages] = useState<number>(45);
 
   // Interview Stage State
   const [questions, setQuestions] = useState<DiagnosticQuestion[]>([]);
   const [answers, setAnswers] = useState<Record<string, string>>({});
+  const answersRef = useRef(answers);
+  answersRef.current = answers;
+  const interviewRequestId = useRef(0);
+  const stageRef = useRef(stage);
+  stageRef.current = stage;
 
   // Generated Result State
   const [generatedDoc, setGeneratedDoc] = useState<ProposalDocument | null>(null);
@@ -89,6 +104,8 @@ export default function Home() {
 
     const savedSession = getActiveSession();
     if (savedSession) {
+      activeProjectId.current = savedSession.projectId || null;
+      setPersistedProjectId(savedSession.projectId || null);
       if (savedSession.title) setTitle(savedSession.title);
       if (savedSession.category) setCategory(savedSession.category);
       if (savedSession.reportType) setReportType(savedSession.reportType);
@@ -123,7 +140,8 @@ export default function Home() {
 
     const safeStage = stage === "orchestration" ? (generatedDoc ? "result" : "interview") : stage;
 
-    saveActiveSession({
+    const saved = saveActiveSession({
+      projectId: persistedProjectId || undefined,
       stage: safeStage,
       category,
       reportType,
@@ -142,6 +160,7 @@ export default function Home() {
       campusGuideline,
       lastSavedAt: new Date().toISOString()
     });
+    setSessionSaveFailed(!saved);
   }, [
     stage,
     category,
@@ -158,7 +177,8 @@ export default function Home() {
     answers,
     generatedDoc,
     treeData,
-    campusGuideline
+    campusGuideline,
+    persistedProjectId
   ]);
 
   // Check Supabase status on mount
@@ -179,13 +199,14 @@ export default function Home() {
       alert("Harap tentukan judul proposal terlebih dahulu.");
       return;
     }
+    const requestId = ++interviewRequestId.current;
     const adaptiveList = getAdaptiveDiagnosticQuestions(title, category, targetEntity, reportType);
     setQuestions(adaptiveList);
     setStage("interview");
 
     // Fetch dynamic questions from Gemini in background to upgrade suggestions
     try {
-      const res = await fetch("/api/interview/generate", {
+      const res = await aiFetch("/api/interview/generate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -196,7 +217,7 @@ export default function Home() {
         })
       });
       const data = await res.json();
-      if (data.success && data.questions && Array.isArray(data.questions) && data.questions.length > 0) {
+      if (requestId === interviewRequestId.current && stageRef.current === "interview" && !Object.values(answersRef.current).some(value => value.trim()) && data.success && Array.isArray(data.questions) && data.questions.length > 0) {
         setQuestions(data.questions);
       }
     } catch (err) {
@@ -270,6 +291,9 @@ export default function Home() {
   };
 
   const handleResetSession = () => {
+    interviewRequestId.current++;
+    activeProjectId.current = null;
+    setPersistedProjectId(null);
     clearActiveSession();
     setStage("input");
     setAnswers({});
@@ -384,8 +408,8 @@ export default function Home() {
   };
 
   // Save current proposal into database (Supabase / Local)
-  const handleSaveCurrentProject = async () => {
-    const docToSave = generatedDoc || buildGeneratedDocument(
+  const handleSaveCurrentProject = async (editedDoc?: ProposalDocument) => {
+    const docToSave = editedDoc || generatedDoc || buildGeneratedDocument(
       title,
       category,
       answers,
@@ -401,7 +425,7 @@ export default function Home() {
     const treeToSave = treeData || buildVisualTreeGraph(docToSave);
 
     const record: SavedProjectRecord = {
-      id: `proj-${Date.now()}`,
+      id: activeProjectId.current || `proj-${Date.now()}`,
       userId: currentUser.id,
       title,
       category,
@@ -416,10 +440,16 @@ export default function Home() {
     };
 
     await saveProjectRecord(record);
+    activeProjectId.current = record.id;
+    setPersistedProjectId(record.id);
   };
 
   // Load a saved project from Drive or Database drawer
   const handleLoadProject = (project: SavedProjectRecord) => {
+    interviewRequestId.current++;
+    activeProjectId.current = project.id;
+    setPersistedProjectId(project.id);
+    setEditorInstance(value => value + 1);
     setTitle(project.title);
     setCategory(project.category);
     setTargetEntity(project.targetEntity || "");
@@ -473,6 +503,8 @@ export default function Home() {
 
   return (
     <>
+      <AiKeySettings />
+      {sessionSaveFailed && <div role="alert" className="fixed left-4 right-4 top-4 z-[110] mx-auto max-w-xl rounded-xl border border-red-300 bg-red-50 p-4 text-sm text-red-900 shadow-lg">Penyimpanan otomatis gagal. Ekspor dokumen sekarang dan periksa ruang atau izin penyimpanan browser.</div>}
       {/* Full-Bleed Desktop & Mobile Responsive App Shell / Landing View */}
       {stage === "landing" ? (
         <>
@@ -609,9 +641,12 @@ export default function Home() {
         {/* Stage 4: Document Studio & Visual Tree Graph */}
         {stage === "result" && generatedDoc && (
           <DocumentStudio
+            key={`${generatedDoc.id}-${editorInstance}`}
             doc={generatedDoc}
             treeData={treeData || buildVisualTreeGraph(generatedDoc)}
             onReset={handleResetSession}
+            onUpdateDoc={handleUpdateDocument}
+            onSaveProject={handleSaveCurrentProject}
             onOpenPresentationStudio={() => setStage("slides")}
           />
         )}
@@ -622,7 +657,7 @@ export default function Home() {
             <PresentationStudio
               doc={generatedDoc}
               onBackToDocument={() => setStage("result")}
-              onUpdateDoc={(updatedDoc) => setGeneratedDoc(updatedDoc)}
+              onUpdateDoc={handleUpdateDocument}
             />
           ) : (
             <div className="flex-1 flex flex-col items-center justify-center p-8 text-center bg-white dark:bg-zinc-950 rounded-2xl border border-zinc-200 dark:border-zinc-850">
@@ -690,7 +725,7 @@ export default function Home() {
         isOpen={isDatabaseDrawerOpen}
         onClose={() => setIsDatabaseDrawerOpen(false)}
         onLoadProject={handleLoadProject}
-        onSaveCurrentProject={handleSaveCurrentProject}
+        onSaveCurrentProject={() => handleSaveCurrentProject()}
       />
 
       {/* 6. Campus Formatting & Guidelines Scanner Modal */}

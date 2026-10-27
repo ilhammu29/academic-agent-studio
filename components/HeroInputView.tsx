@@ -1,4 +1,5 @@
 "use client";
+import { aiFetch } from "@/lib/aiClient";
 
 import React, { useState, useEffect } from "react";
 import { ProposalCategory, ReportType, ProposalDocument, StudioStage } from "@/types/studio";
@@ -157,6 +158,8 @@ export const HeroInputView: React.FC<HeroInputViewProps> = ({
   const [internetRecs, setInternetRecs] = useState<TitleRecommendation[]>([]);
   const [isLoadingAi, setIsLoadingAi] = useState(false);
   const [isLoadingInternet, setIsLoadingInternet] = useState(false);
+  const [aiMessage, setAiMessage] = useState("");
+  const [internetMessage, setInternetMessage] = useState("");
 
   // Recent Projects from Supabase / LocalStorage
   const [recentProjects, setRecentProjects] = useState<SavedProjectRecord[]>([]);
@@ -182,52 +185,60 @@ export const HeroInputView: React.FC<HeroInputViewProps> = ({
     setRecommenderKeyword(target);
     setIsLoadingAi(true);
     setIsLoadingInternet(true);
+    setAiMessage("");
+    setInternetMessage("");
+    setAiRecs([]);
+    setInternetRecs([]);
 
     // 1. Fetch AI pure recommendations
     (async () => {
       try {
-        const res = await fetch("/api/academic/recommend-titles", {
+        const res = await aiFetch("/api/academic/recommend-titles", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ query: target, mode: "ai-pure" })
         });
+        const data = await res.json();
         if (res.ok) {
-          const data = await res.json();
           if (data.success && Array.isArray(data.recommendations) && data.recommendations.length > 0) {
+            setAiMessage(data.engine === "domain-aware-synthesizer" ? "Gemini belum tersedia. Berikut contoh judul lokal; periksa dan sesuaikan sebelum digunakan." : "Saran dibuat dengan Gemini. Periksa judul, data, dan referensi sebelum digunakan.");
             setAiRecs(data.recommendations);
             setIsLoadingAi(false);
             return;
           }
         }
+        setAiMessage(data.error || "Judul belum dapat dibuat. Periksa pengaturan AI lalu coba lagi.");
       } catch (e) {
-        console.warn("AI title recs error, fallback local:", e);
+        setAiMessage("Tidak dapat menghubungi layanan judul. Periksa koneksi lalu coba lagi.");
+        console.warn("AI title recs error:", e);
       }
-      const local = await getAiTitleRecommendations(target, "ai-pure");
-      setAiRecs(local);
+      setAiRecs([]);
       setIsLoadingAi(false);
     })();
 
     // 2. Fetch Internet literature recommendations
     (async () => {
       try {
-        const res = await fetch("/api/academic/recommend-titles", {
+        const res = await aiFetch("/api/academic/recommend-titles", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ query: target, mode: "literature" })
         });
+        const data = await res.json();
         if (res.ok) {
-          const data = await res.json();
           if (data.success && Array.isArray(data.recommendations) && data.recommendations.length > 0) {
+            setInternetMessage("Saran berbasis hasil pencarian; periksa kecocokan setiap publikasi dan referensi.");
             setInternetRecs(data.recommendations);
             setIsLoadingInternet(false);
             return;
           }
         }
+        setInternetMessage(data.error || "Pencarian literatur belum tersedia. Coba lagi.");
       } catch (e) {
-        console.warn("Internet title recs error, fallback local:", e);
+        setInternetMessage("Tidak dapat menghubungi pencarian literatur. Periksa koneksi lalu coba lagi.");
+        console.warn("Internet title recs error:", e);
       }
-      const local = await getAiTitleRecommendations(target, "literature");
-      setInternetRecs(local);
+      setInternetRecs([]);
       setIsLoadingInternet(false);
     })();
   };
@@ -288,13 +299,8 @@ export const HeroInputView: React.FC<HeroInputViewProps> = ({
 
   const handleSubmit = () => {
     if (!title.trim()) {
-      const first = TOPIC_CHIPS[0];
-      setTitle(first.title);
-      setTargetEntity(first.entity);
-      setCategory(first.category);
-      if (setReportType && first.reportType) {
-        setReportType(first.reportType);
-      }
+      alert("Harap tentukan judul proposal terlebih dahulu.");
+      return;
     }
     onSubmit();
   };
@@ -419,7 +425,7 @@ export const HeroInputView: React.FC<HeroInputViewProps> = ({
             Perumusan Usulan Proposal &amp; Karya Ilmiah
           </h1>
           <p className="text-sm sm:text-base text-[#475569] dark:text-[#A4B1C7] mt-2 max-w-xl mx-auto leading-relaxed font-normal">
-            Ketikkan judul usulan Anda atau cari inspirasi topik. Agen AI memandu wawancara diagnostik sebelum naskah proposal terverifikasi disusun.
+            Ketikkan judul usulan Anda atau cari inspirasi topik. Agen AI memandu wawancara diagnostik sebelum draf proposal disusun untuk Anda tinjau.
           </p>
         </div>
 
@@ -455,7 +461,7 @@ export const HeroInputView: React.FC<HeroInputViewProps> = ({
               type="button"
               onClick={onOpenGuidelineModal}
               className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white dark:bg-[#111827] border border-[#CBD5E1] dark:border-[#253149] hover:border-[#7C9CFF] text-[#0F172A] dark:text-[#F3F6FC] font-medium transition-all shadow-2xs cursor-pointer hover:bg-[#F8FAFC] dark:hover:bg-[#172033]"
-              title="Pindai PDF panduan kampus atau pilih template format kampus Anda"
+              title="Pilih format kampus atau tempelkan teks pedoman"
             >
               <Landmark className="w-3.5 h-3.5 text-[#9B8CFF]" />
               <span>{activeCampusName ? activeCampusName.split("(")[0].trim() : "Format Kampus"}</span>
@@ -677,6 +683,7 @@ export const HeroInputView: React.FC<HeroInputViewProps> = ({
         <div className="w-full max-w-3xl mt-5 bg-white dark:bg-[#111827] border border-[#CBD5E1] dark:border-[#253149] rounded-2xl p-2 pl-4 pr-2.5 flex items-center gap-2.5 shadow-md shadow-zinc-200/50 dark:shadow-none hover:border-[#7C9CFF]/60 dark:hover:border-[#7C9CFF]/60 transition-all focus-within:border-[#7C9CFF] focus-within:ring-2 focus-within:ring-[#7C9CFF]/20">
           <input
             type="text"
+            aria-label="Judul atau topik usulan"
             value={title}
             onChange={(e) => setTitle(e.target.value)}
             onKeyDown={handleKeyDown}
@@ -712,7 +719,7 @@ export const HeroInputView: React.FC<HeroInputViewProps> = ({
             type="button"
             onClick={handleSubmit}
             title="Mulai Wawancara Diagnostik"
-            className="w-10 h-10 rounded-xl bg-[#0F172A] dark:bg-[#7C9CFF] text-white dark:text-[#080B12] flex items-center justify-center hover:scale-105 active:scale-95 transition-all flex-shrink-0 cursor-pointer shadow-sm group"
+            className="w-10 h-10 rounded-xl bg-[#0F172A] dark:bg-[#7C9CFF] text-white dark:text-[#080B12] flex items-center justify-center hover:scale-105 active:scale-95 transition-all flex-shrink-0 cursor-pointer shadow-sm group" aria-label="Mulai wawancara diagnostik"
           >
             <ArrowRight className="w-4 h-4 stroke-[2.5] group-hover:translate-x-0.5 transition-transform" />
           </button>
@@ -762,7 +769,7 @@ export const HeroInputView: React.FC<HeroInputViewProps> = ({
                     } else {
                       setTitle(p.title);
                       setCategory(p.category as ProposalCategory);
-                      setTargetEntity(p.targetEntity);
+                      setTargetEntity(p.targetEntity || "");
                     }
                   }}
                   className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-white dark:bg-[#111827] hover:bg-[#F8FAFC] dark:hover:bg-[#172033] border border-[#E2E8F0] dark:border-[#253149] hover:border-[#7C9CFF]/50 text-xs text-[#0F172A] dark:text-[#F3F6FC] transition-all cursor-pointer shadow-2xs group max-w-[200px] truncate"
@@ -814,7 +821,7 @@ export const HeroInputView: React.FC<HeroInputViewProps> = ({
               className="inline-flex items-center gap-1.5 hover:text-[#0F172A] dark:hover:text-[#F3F6FC] transition-colors cursor-pointer"
             >
               <FolderOpen className="w-3.5 h-3.5 text-[#9B8CFF]" />
-              <span>Penyimpanan Google Drive</span>
+              <span>File lokal</span>
             </button>
           )}
         </div>
@@ -823,7 +830,7 @@ export const HeroInputView: React.FC<HeroInputViewProps> = ({
         <div className="flex items-center gap-2 text-[11px] font-mono text-[#64748B] dark:text-[#A4B1C7]">
           <span>SN-Dikti 2024 &amp; Pedoman Institusi</span>
           <span>•</span>
-          <span className="text-[#34D399]">4-Spesialis AI Agent Siap</span>
+          <span className="text-[#34D399]">Draf dan referensi perlu ditinjau</span>
         </div>
 
       </div>
@@ -846,7 +853,7 @@ export const HeroInputView: React.FC<HeroInputViewProps> = ({
                     Dual-Engine Generator Judul Akademik
                   </h3>
                   <p className="text-[11px] text-[#64748B] dark:text-[#A4B1C7]">
-                    Kombinasi penalaran AI dan verifikasi literatur CrossRef &amp; OpenAlex
+                    Saran AI dan pencarian literatur untuk ditinjau kembali
                   </p>
                 </div>
               </div>
@@ -935,6 +942,7 @@ export const HeroInputView: React.FC<HeroInputViewProps> = ({
 
             {/* Recommendations Content Body */}
             <div className="flex-1 overflow-y-auto p-4 space-y-3 bg-[#F8FAFC] dark:bg-[#0B101A]">
+              {(recommenderTab === "ai" ? aiMessage : internetMessage) && <p role="status" className="rounded-lg border border-blue-200 dark:border-blue-900 bg-blue-50 dark:bg-blue-950/40 px-3 py-2 text-xs leading-relaxed text-blue-900 dark:text-blue-200">{recommenderTab === "ai" ? aiMessage : internetMessage}</p>}
               {/* Tab 1: AI Pure Recommendations */}
               {recommenderTab === "ai" && (
                 <>

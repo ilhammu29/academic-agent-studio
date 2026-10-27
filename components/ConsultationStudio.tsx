@@ -1,4 +1,5 @@
 "use client";
+import { aiFetch } from "@/lib/aiClient";
 
 import React, { useState, useRef, useEffect } from "react";
 import { ProposalCategory } from "@/types/studio";
@@ -329,7 +330,7 @@ Ceritakan situasi atau bidang yang sedang Anda hadapi di bawah, dan kita akan be
     setIsLoading(true);
 
     try {
-      const res = await fetch("/api/academic/consultation", {
+      const res = await aiFetch("/api/academic/consultation", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

@@ -1,4 +1,5 @@
 "use client";
+import { aiFetch } from "@/lib/aiClient";
 
 import React, { useState } from "react";
 import { ProposalDocument } from "@/types/studio";
@@ -120,7 +121,7 @@ Hasilkan format JSON murni:
   ]
 }`;
 
-      const res = await fetch("/api/gemini", {
+      const res = await aiFetch("/api/gemini", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ prompt })

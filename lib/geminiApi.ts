@@ -4,10 +4,9 @@
  */
 
 export const GEMINI_MODELS = [
-  "gemini-2.5-flash",
-  "gemini-2.0-flash",
-  "gemini-1.5-flash",
-  "gemini-1.5-pro"
+  "gemini-3.5-flash-lite",
+  "gemini-3.1-flash-lite",
+  "gemini-2.5-flash"
 ];
 
 export interface GeminiApiOptions {
@@ -30,9 +29,9 @@ export async function callGeminiApi({
   if (!apiKey) return null;
 
   for (const model of GEMINI_MODELS) {
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), timeoutMs);
     try {
-      const controller = new AbortController();
-      const timer = setTimeout(() => controller.abort(), timeoutMs);
 
       const generationConfig: Record<string, any> = {
         temperature,
@@ -43,10 +42,10 @@ export async function callGeminiApi({
       }
 
       const res = await fetch(
-        `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`,
+        `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`,
         {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
+          headers: { "Content-Type": "application/json", "x-goog-api-key": apiKey },
           body: JSON.stringify({
             contents: [{ parts: [{ text: prompt }] }],
             generationConfig,
@@ -54,8 +53,6 @@ export async function callGeminiApi({
           signal: controller.signal
         }
       );
-      clearTimeout(timer);
-
       if (res.ok) {
         const data = await res.json();
         const text = data?.candidates?.[0]?.content?.parts?.[0]?.text;
@@ -68,6 +65,8 @@ export async function callGeminiApi({
       }
     } catch (e: any) {
       console.warn(`Gemini fetch error on model ${model}:`, e?.message);
+    } finally {
+      clearTimeout(timer);
     }
   }
 

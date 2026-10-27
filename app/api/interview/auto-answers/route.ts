@@ -1,3 +1,4 @@
+import { getRequestAiKey } from "@/lib/serverAiConfig";
 import { NextResponse } from "next/server";
 import { DiagnosticQuestion, ProposalCategory } from "@/types/studio";
 import { callGeminiApi } from "@/lib/geminiApi";
@@ -97,8 +98,7 @@ export async function POST(req: Request) {
     }
 
     const domain = detectDomain(title, category, targetEntity);
-    const customKey = req.headers.get("x-gemini-key");
-    const apiKey = customKey || process.env.GEMINI_API_KEY || process.env.NEXT_PUBLIC_GEMINI_API_KEY || "";
+    const apiKey = getRequestAiKey(req);
 
     if (apiKey) {
       try {
@@ -125,18 +125,11 @@ Jawaban wawancara HARUS 100% DISESUAIKAN DENGAN RUMPUN ILMU:
 - Jika BISNIS: Gunakan rasio keuangan, ROA, audited report, EViews.
 - Jika TEKNIK/IT: Gunakan rekayasa perangkat lunak, sistem, infrastruktur.
 
-Rumuskan jawaban akademis yang formal, komprehensif, kaya fakta, dan tajam untuk 4 field wawancara berikut:
+Berikan saran awal untuk setiap field yang tercantum. Jangan mengarang fakta lapangan, hasil, data, atau persetujuan; tandai detail yang belum diketahui untuk dikonfirmasi pengguna:
 ${questionPrompts}
 
-Format balasan HARUS JSON VALID tanpa markdown (\`\`\`json):
-{
-  "answers": {
-    "targetDepartment": "Uraian divisi/unit atau populasi subjek sasaran spesifik...",
-    "problemStatement": "Uraian kesenjangan masalah nyata di lapangan berbasis fakta objektif...",
-    "toolsSkillset": "Daftar instrumen, metodologi, dan perangkat analisis yang relevan dengan rumpun ilmu...",
-    "deliverables": "Uraian produk luaran konkret, laporan ilmiah, dan draf artikel publikasi..."
-  }
-}
+Format balasan HARUS JSON VALID tanpa markdown. Gunakan tepat nama field yang tertera pada setiap pertanyaan, tanpa menambah field lain:
+{ "answers": { "nama_field_pertanyaan": "saran jawaban yang perlu dikonfirmasi" } }
 `;
 
         const geminiResult = await callGeminiApi({
@@ -165,7 +158,9 @@ Format balasan HARUS JSON VALID tanpa markdown (\`\`\`json):
     }
 
     // Smart Domain-Aware Fallback
-    const fallbackAnswers = getFallbackAnswers(domain, title, category, targetEntity);
+    const fallbackAnswers = questions.length > 0
+      ? Object.fromEntries(questions.filter(q => q.field && q.aiSuggestion).map(q => [q.field, q.aiSuggestion]))
+      : getFallbackAnswers(domain, title, category, targetEntity);
     return NextResponse.json({
       success: true,
       engine: "domain-heuristics",

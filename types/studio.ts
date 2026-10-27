@@ -304,6 +304,7 @@ export interface ProposalDocument {
   isLocked?: boolean;
   isRestrictedPreview?: boolean;
   bibliography?: BibliographyItem[];
+  revisionItems?: { id: string; examinerName: string; examinerRole: string; feedbackNote: string; sectionRef: string; actionTaken: string; status: "SELESAI" | "DIPROSES" }[];
   slides: SlideDeckItem[];
   auditLog: {
     rule: string;

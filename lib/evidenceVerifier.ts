@@ -1,13 +1,5 @@
-/**
- * OXID ACADEMIC STUDIO — RESEARCH EVIDENCE & CITATION INTEGRITY VERIFIER
- * 
- * Verifies academic claims against primary literature (OpenAlex, Crossref, Semantic Scholar).
- * Enforces:
- * 1. Metadata Verification & Retraction Checks
- * 2. Multi-tier Claim-to-Source Mapping (Level 0 to Level 3)
- * 3. Bidirectional Citation Integrity (In-text vs Bibliography Reconciliation)
- * 4. APA 7th / IEEE Format Discrepancy Audits
- */
+/** Pemeriksaan lokal format dan konsistensi sitasi. Tidak memverifikasi metadata,
+ * akses terbuka, pencabutan, atau isi sumber terhadap basis data eksternal. */
 
 import type { BibliographyItem, ProposalDocument } from '../types/studio.ts';
 
@@ -151,16 +143,9 @@ export function auditCitationIntegrity(doc: ProposalDocument): EvidenceAuditRepo
     const cleanDoi = extractCleanDoi(item.doiUrl);
     const hasValidDoi = isValidDoiSyntax(cleanDoi || undefined);
 
-    let verificationLevel: EvidenceVerificationLevel = 'LEVEL_0_UNVERIFIED';
-    let confidenceScore = 0.5;
-
-    if (hasValidDoi) {
-      verificationLevel = 'LEVEL_1_METADATA_VERIFIED';
-      confidenceScore = 0.9;
-    } else if (item.source && item.source.length > 5 && item.year) {
-      verificationLevel = 'LEVEL_1_METADATA_VERIFIED';
-      confidenceScore = 0.75;
-    }
+    // Syntax checks do not establish that a source or its metadata exists.
+    const verificationLevel: EvidenceVerificationLevel = 'LEVEL_0_UNVERIFIED';
+    const confidenceScore = 0;
 
     if (item.doiUrl && !hasValidDoi) {
       issues.push({

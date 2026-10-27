@@ -35,71 +35,98 @@ export const SUPERADMIN_USER: UserProfile = {
 
 export interface SavedProjectRecord {
   id: string;
-  userId: string;
+  userId?: string;
   title: string;
   category: ProposalCategory;
-  targetEntity: string;
+  reportType?: ReportType;
+  targetEntity?: string;
   durationMonths: number;
   stage: StudioStage;
   answers: Record<string, string>;
+  document?: ProposalDocument;
   documentData?: ProposalDocument;
-  treeGraph?: TreeNode | TreeNode[];
-  updatedAt: string;
+  treeGraph?: TreeNode;
+  campusGuidelineId?: string;
   createdAt: string;
+  updatedAt: string;
 }
 
-// Default Supabase credentials or localStorage override
-const DEFAULT_SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
-const DEFAULT_SUPABASE_ANON_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '';
+export async function testSupabaseConnection(url: string, anonKey: string): Promise<{ success: boolean; message: string }> {
+  if (!url || !anonKey) {
+    return { success: false, message: 'URL dan Anon Key Supabase wajib diisi.' };
+  }
+  try {
+    const res = await fetch(`${url.replace(/\/$/, '')}/rest/v1/`, {
+      headers: {
+        apikey: anonKey,
+        Authorization: `Bearer ${anonKey}`
+      }
+    });
+    if (res.ok || res.status === 200 || res.status === 404) {
+      return { success: true, message: 'Koneksi ke Supabase REST API berhasil!' };
+    }
+    return { success: false, message: `Server merespons status HTTP ${res.status}.` };
+  } catch (err: any) {
+    return { success: false, message: `Gagal terhubung: ${err?.message || 'Periksa URL Supabase'}` };
+  }
+}
+
+// Default Supabase credentials (fallback/dummy if env is missing)
+const DEFAULT_SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://xyzcompany.supabase.co';
+const DEFAULT_SUPABASE_ANON_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...';
 
 const STORAGE_KEYS = {
-  USER: 'academic_studio_user_session',
-  REGISTERED_USERS: 'academic_studio_registered_users',
   SUPABASE_CONFIG: 'academic_studio_supabase_config',
-  PROJECTS: 'academic_studio_saved_proposals',
+  PROJECTS: 'academic_studio_saved_projects',
   ACTIVE_SESSION: 'academic_studio_active_session',
-  AUTH_STATUS: 'academic_studio_auth_status'
+  USER: 'academic_studio_user_profile',
+  REGISTERED_USERS: 'academic_studio_registered_users',
+  AUTH_STATUS: 'academic_studio_is_logged_in'
 };
 
 export interface ActiveStudioSessionData {
+  projectId?: string;
   stage: StudioStage;
   category: ProposalCategory;
   reportType?: ReportType;
   title: string;
-  targetEntity: string;
-  institution: string;
-  facultyMajor: string;
-  candidateName: string;
-  candidateId: string;
-  durationMonths: number;
-  targetDepthPages: number;
+  targetEntity?: string;
+  institution?: string;
+  facultyMajor?: string;
+  candidateName?: string;
+  candidateId?: string;
+  durationMonths?: number;
+  targetDepthPages?: number;
   questions?: any[];
-  answers: Record<string, string>;
-  generatedDoc: ProposalDocument | null;
-  treeData: TreeNode | null;
+  answers?: Record<string, string>;
+  generatedDoc?: ProposalDocument | null;
+  treeData?: TreeNode | null;
   campusGuideline?: any;
   lastSavedAt: string;
 }
 
-export function saveActiveSession(session: ActiveStudioSessionData) {
+export function saveActiveSession(session: ActiveStudioSessionData): boolean {
   if (typeof window !== 'undefined') {
     try {
       localStorage.setItem(STORAGE_KEYS.ACTIVE_SESSION, JSON.stringify(session));
+      return true;
     } catch (e) {
-      console.warn("Storage quota exceeded when saving active session:", e);
+      console.warn("Storage error when saving active session:", e);
+      return false;
     }
   }
+  return false;
 }
 
 export function getActiveSession(): ActiveStudioSessionData | null {
   if (typeof window === 'undefined') return null;
-  try {
-    const raw = localStorage.getItem(STORAGE_KEYS.ACTIVE_SESSION);
-    if (raw) {
+  const raw = localStorage.getItem(STORAGE_KEYS.ACTIVE_SESSION);
+  if (raw) {
+    try {
       return JSON.parse(raw);
+    } catch (e) {
+      console.warn("Failed to parse active session:", e);
     }
-  } catch (e) {
-    console.warn("Failed to parse active studio session:", e);
   }
   return null;
 }
@@ -138,7 +165,7 @@ export function getSupabaseClient(): SupabaseClient | null {
       }
     }
 
-    if (url && anonKey) {
+    if (url && anonKey && url.startsWith('http') && !url.includes('xyzcompany')) {
       return createClient(url, anonKey);
     }
   } catch (err) {
@@ -147,133 +174,48 @@ export function getSupabaseClient(): SupabaseClient | null {
   return null;
 }
 
-// Test live Supabase connection
-export async function testSupabaseConnection(url: string, anonKey: string): Promise<{ success: boolean; message: string }> {
-  try {
-    if (!url || !anonKey) {
-      return { success: false, message: 'URL dan Anon Key tidak boleh kosong.' };
+export function getStoredSupabaseConfig(): { url: string; anonKey: string } | null {
+  if (typeof window === 'undefined') return null;
+  const raw = localStorage.getItem(STORAGE_KEYS.SUPABASE_CONFIG);
+  if (raw) {
+    try {
+      return JSON.parse(raw);
+    } catch {
+      return null;
     }
-    const testClient = createClient(url, anonKey);
-    const { error } = await testClient.from('proposals').select('id').limit(1);
-    if (error && error.code !== 'PGRST116' && !error.message.includes('relation "proposals" does not exist')) {
-      // If table doesn't exist yet, connection is still valid!
-      if (error.message.includes('relation "proposals" does not exist') || error.message.includes('permission denied')) {
-        return { 
-          success: true, 
-          message: 'Koneksi ke Supabase berhasil! Namun tabel "proposals" belum dibuat. Silakan salin & jalankan skema SQL di bawah pada SQL Editor Supabase.' 
-        };
-      }
-      return { success: false, message: `Koneksi gagal: ${error.message}` };
-    }
-    return { success: true, message: 'Koneksi ke Supabase berhasil dan tabel "proposals" terdeteksi aktif!' };
-  } catch (err: unknown) {
-    const errorMsg = err instanceof Error ? err.message : String(err);
-    return { success: false, message: `Kesalahan jaringan atau URL tidak valid: ${errorMsg}` };
   }
+  return null;
 }
 
-// Pre-loaded realistic Indonesian Academic Proposal Projects
-export const CURATED_ACADEMIC_TEMPLATES: SavedProjectRecord[] = [
-  {
-    id: 'proj-telkom-mlops-2026',
-    userId: 'usr-default',
-    title: 'Implementasi Pipeline MLOps & RAG untuk Knowledge Retrieval Internal di Divisi Digital Telkom Indonesia',
-    category: 'magang',
-    targetEntity: 'PT Telkom Indonesia Tbk',
-    durationMonths: 6,
-    stage: 'result',
-    answers: {
-      divisi_unit: 'Divisi Data & AI Strategy, Group Digital Solutions',
-      masalah_teknis: 'Tingginya latensi pencarian SOP teknis lintas repositori internal dan resiko halusinasi LLM konvensional.',
-      metode_tools: 'Python 3.11, LangChain, Qdrant Vector Database, Docker, FastMCP, MLflow, CI/CD GitLab.',
-      deliverable_output: '1 Prototipe microservice RAG terverifikasi, 1 dashboard observabilitas latency, dan 1 dokumen SOP arsitektur.',
-      durasi_waktu: '6 Bulan (Februari - Juli 2026 / 24 Minggu Kerja Penuh MBKM 20 SKS)',
-      manfaat_spesifik: 'Efisiensi waktu retrieval dokumen teknis karyawan sebesar 60% dan pencetakan talenta MLOps siap kerja.'
-    },
-    updatedAt: new Date(Date.now() - 3600000 * 24).toISOString(),
-    createdAt: new Date(Date.now() - 3600000 * 48).toISOString()
-  },
-  {
-    id: 'proj-skripsi-vit-retino',
-    userId: 'usr-default',
-    title: 'Optimasi Model Vision Transformer (ViT) dengan Kuantisasi 4-bit AWQ pada Edge Device untuk Deteksi Dini Retinopati Diabetik',
-    category: 'skripsi',
-    targetEntity: 'RSUP Dr. Sardjito / Fakultas Kedokteran',
-    durationMonths: 5,
-    stage: 'result',
-    answers: {
-      populasi_sampel: '1.200 citra fundus retina teranotasi dari dataset EYEPACS dan RSUP Dr. Sardjito.',
-      variabel_riset: 'Variabel Bebas: Bobot model ViT-Base terkuantisasi AWQ 4-bit vs FP16; Variabel Terikat: Akurasi F1-Score, Frame Rate (FPS) pada Raspberry Pi 5 & Jetson Orin.',
-      desain_metode: 'Eksperimental komparatif kuantitatif dengan cross-validation 5-fold dan uji inferensi hardware edge.',
-      rencana_analisis: 'Uji normalitas Shapiro-Wilk, dilanjutkan Paired t-test dan evaluasi kurva ROC-AUC serta matriks konfusi (Sensitivitas & Spesifisitas).',
-      kelaikan_etik: 'Persetujuan etik Komisi Etik Penelitian Kedokteran dan Kesehatan (KEPK) FK-KMK UGM.'
-    },
-    updatedAt: new Date(Date.now() - 3600000 * 12).toISOString(),
-    createdAt: new Date(Date.now() - 3600000 * 72).toISOString()
-  },
-  {
-    id: 'proj-pkl-unp-semenpadang-2025',
-    userId: 'usr-default',
-    title: 'Analisis Preventive Maintenance Mesin Finish Mill Indarung V PT Semen Padang Berbasis Kepatuhan SOP dan Getaran Vibrasi',
-    category: 'magang',
-    targetEntity: 'PT Semen Padang (Persero)',
-    durationMonths: 2,
-    stage: 'result',
-    answers: {
-      divisi_unit: 'Departemen Tambang & Pemeliharaan Mesin Pabrik Indarung V, PT Semen Padang',
-      masalah_teknis: 'Tingginya getaran vibrasi abnormal bearing pada unit Finish Mill 5R1 yang berpotensi menyebabkan breakdown mendadak dan kerugian siklus produksi semen.',
-      metode_tools: 'Vibration Analyzer Fluke 810, Dial Indicator Shaft Alignment, Form Checklist SOP Harian, Buku Harian Tulis Tangan Asli, dan Form Bimbingan UHI FT UNP.',
-      deliverable_output: '1 Berkas Laporan PKL 3 Bab Baku FT UNP 2025, 1 Matriks Logbook Buku Harian Asli Paraf Supervisor, 1 Flowchart SOP Maintenance, dan Rekomendasi Interval Pelumasan Bearing.',
-      durasi_waktu: '2 Bulan (Juli - Agustus 2025 / Sesuai Kalender PKL FT UNP)',
-      manfaat_spesifik: 'Menurunkan risiko unpredicted downtime mesin Finish Mill sebesar 18%, melatih kompetensi mahasiswa FT UNP dalam analisis vibrasi industri semen, dan memenuhi seluruh regulasi Buku Pedoman PKL FT UNP 2025.'
-    },
-    updatedAt: new Date(Date.now() - 3600000 * 2).toISOString(),
-    createdAt: new Date(Date.now() - 3600000 * 12).toISOString()
-  },
-  {
-    id: 'proj-tesis-biomarker-fibrosis',
-    userId: 'usr-default',
-    title: 'Korelasi Kadar Ekspresi miRNA-21 Serum dan High-Sensitivity CRP terhadap Derajat Fibrosis Pasien Hepatitis B Kronis',
-    category: 'penelitian',
-    targetEntity: 'Laboratorium Riset Terpadu & RS Pendidikan',
-    durationMonths: 6,
-    stage: 'result',
-    answers: {
-      populasi_sampel: '80 pasien Hepatitis B kronis terkonfirmasi FibroScan di Poliklinik Hepatologi.',
-      variabel_riset: 'Variabel Bebas: Fold-change qPCR miRNA-21 dan kadar hs-CRP; Variabel Terikat: Skor derajat fibrosis Metavir (F0-F4).',
-      desain_metode: 'Observasional analitik cross-sectional berstandar STROBE.',
-      rencana_analisis: 'Uji korelasi Spearman Rank dan Regresi Logistik Ordinal Multivariat dengan penyesuaian usia dan viral load HBV-DNA.',
-      kelaikan_etik: 'Informed consent tertulis subjek dan ethical clearance resmi.'
-    },
-    updatedAt: new Date(Date.now() - 3600000 * 4).toISOString(),
-    createdAt: new Date(Date.now() - 3600000 * 96).toISOString()
-  }
-];
+export function saveStoredSupabaseConfig(config: { url: string; anonKey: string }) {
+  if (typeof window === 'undefined') return;
+  localStorage.setItem(STORAGE_KEYS.SUPABASE_CONFIG, JSON.stringify(config));
+}
 
-// Local User Auth & Registered Users management
+// Multi-user Registered Database
 export function getRegisteredUsers(): UserProfile[] {
   if (typeof window === 'undefined') return [SUPERADMIN_USER];
-  try {
-    const raw = localStorage.getItem(STORAGE_KEYS.REGISTERED_USERS);
-    let list: UserProfile[] = raw ? JSON.parse(raw) : [];
-    // Pastikan superadmin selalu ada di database lokal
-    if (!list.some(u => u.email.toLowerCase() === SUPERADMIN_USER.email.toLowerCase())) {
-      list = [SUPERADMIN_USER, ...list];
-      localStorage.setItem(STORAGE_KEYS.REGISTERED_USERS, JSON.stringify(list));
+  const raw = localStorage.getItem(STORAGE_KEYS.REGISTERED_USERS);
+  if (raw) {
+    try {
+      const users: UserProfile[] = JSON.parse(raw);
+      if (!users.some(u => u.id === SUPERADMIN_USER.id || u.email === SUPERADMIN_USER.email)) {
+        users.unshift(SUPERADMIN_USER);
+      }
+      return users;
+    } catch {
+      return [SUPERADMIN_USER];
     }
-    return list;
-  } catch {
-    return [SUPERADMIN_USER];
   }
+  return [SUPERADMIN_USER];
 }
 
 export function saveRegisteredUsers(users: UserProfile[]) {
-  if (typeof window !== 'undefined') {
-    localStorage.setItem(STORAGE_KEYS.REGISTERED_USERS, JSON.stringify(users));
-  }
+  if (typeof window === 'undefined') return;
+  localStorage.setItem(STORAGE_KEYS.REGISTERED_USERS, JSON.stringify(users));
 }
 
-export function registerUser(params: {
+export function registerUser(newUser: {
   name: string;
   email: string;
   password?: string;
@@ -281,53 +223,49 @@ export function registerUser(params: {
   role?: UserRole;
 }): { success: boolean; user?: UserProfile; message?: string } {
   const users = getRegisteredUsers();
-  const normalizedEmail = params.email.trim().toLowerCase();
+  const normalizedEmail = newUser.email.trim().toLowerCase();
 
   if (users.some(u => u.email.toLowerCase() === normalizedEmail)) {
-    return { success: false, message: 'Email ini sudah terdaftar. Silakan langsung masuk (Login).' };
+    return { success: false, message: 'Email sudah terdaftar. Silakan login langsung.' };
   }
 
-  const isSuper = normalizedEmail === 'superadmin@academic.id' || normalizedEmail === 'ilhammu29@unp.ac.id';
-
-  const newUser: UserProfile = {
-    id: `usr-${Date.now()}`,
+  const profile: UserProfile = {
+    id: `usr-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`,
+    name: newUser.name.trim(),
     email: normalizedEmail,
-    name: params.name.trim(),
-    role: isSuper ? 'Superadmin' : (params.role || 'Mahasiswa'),
-    institution: params.institution?.trim() || 'Universitas Negeri Padang (UNP)',
-    password: params.password || '123456',
-    isSuperAdmin: isSuper,
-    isSubscribed: isSuper,
-    subscriptionPlan: isSuper ? 'pro_unlimited' : 'free',
-    trialGeneratesLeft: isSuper ? 999999 : 3, // Diberi 3x trial penuh
-    restrictedGeneratesLeft: isSuper ? 999999 : 5, // Diberi 5x kuota judul
+    password: newUser.password || '123456',
+    institution: newUser.institution?.trim() || 'Universitas Negeri Padang (UNP)',
+    role: newUser.role || 'Mahasiswa',
+    isSuperAdmin: false,
+    isSubscribed: false,
+    subscriptionPlan: 'free',
+    trialGeneratesLeft: 3,
+    restrictedGeneratesLeft: 5,
     totalGeneratesCount: 0,
     createdAt: new Date().toISOString()
   };
 
-  const updatedUsers = [newUser, ...users];
-  saveRegisteredUsers(updatedUsers);
-  saveStoredUser(newUser);
+  users.push(profile);
+  saveRegisteredUsers(users);
+  saveStoredUser(profile);
   setUserLoggedIn(true);
 
-  return { success: true, user: newUser };
+  return { success: true, user: profile, message: 'Pendaftaran berhasil! Anda mendapatkan 3x kuota trial gratis.' };
 }
 
 export function loginUser(email: string, password?: string): { success: boolean; user?: UserProfile; message?: string } {
+  const users = getRegisteredUsers();
   const normalizedEmail = email.trim().toLowerCase();
-  
-  // 1. Cek jika login sebagai Superadmin default
-  if (normalizedEmail === 'superadmin@academic.id' || normalizedEmail === 'ilhammu29@unp.ac.id') {
+
+  // Superadmin bypass
+  if (normalizedEmail === 'superadmin@academic.id' || normalizedEmail === 'ilhammu29' || normalizedEmail === 'admin') {
     saveStoredUser(SUPERADMIN_USER);
     setUserLoggedIn(true);
-    return { success: true, user: SUPERADMIN_USER, message: 'Selamat datang kembali, Superadmin!' };
+    return { success: true, user: SUPERADMIN_USER, message: 'Berhasil masuk sebagai Superadmin.' };
   }
 
-  const users = getRegisteredUsers();
   const existing = users.find(u => u.email.toLowerCase() === normalizedEmail);
-
   if (existing) {
-    // Verifikasi password jika ada
     if (existing.password && password && existing.password !== password) {
       return { success: false, message: 'Kata sandi tidak sesuai. Silakan periksa kembali.' };
     }
@@ -349,39 +287,37 @@ export function loginUser(email: string, password?: string): { success: boolean;
 // Konsumsi Kuota Pengguna
 export function consumeUserQuota(userId: string): { 
   allowed: boolean; 
-  isRestrictedPreview: boolean; 
-  isSuperAdmin: boolean; 
+  isRestrictedPreview: boolean;
+  isSuperAdmin: boolean;
   remainingTrial: number; 
-  remainingRestricted: number; 
+  remainingRestricted: number;
   message?: string 
 } {
   const current = getStoredUser();
 
   // Superadmin / Akun Berlangganan Aktif: UNLIMITED
   if (current.isSuperAdmin || current.isSubscribed) {
-    current.totalGeneratesCount = (current.totalGeneratesCount || 0) + 1;
-    saveStoredUser(current);
     return {
       allowed: true,
       isRestrictedPreview: false,
-      isSuperAdmin: true,
+      isSuperAdmin: Boolean(current.isSuperAdmin),
       remainingTrial: 999999,
-      remainingRestricted: 999999
+      remainingRestricted: 999999,
+      message: 'Akses penuh tanpa batas (Pro/Superadmin).'
     };
   }
 
-  // Masih punya kuota Trial Penuh (> 0)
-  if ((current.trialGeneratesLeft ?? 3) > 0) {
-    const updatedUser: UserProfile = {
+  // Status 1: Kuota trial 3x masih ada
+  if (current.trialGeneratesLeft > 0) {
+    const updatedUser = {
       ...current,
-      trialGeneratesLeft: (current.trialGeneratesLeft ?? 3) - 1,
+      trialGeneratesLeft: current.trialGeneratesLeft - 1,
       totalGeneratesCount: (current.totalGeneratesCount || 0) + 1
     };
     saveStoredUser(updatedUser);
-    
-    // Sinkronisasi ke daftar user terdaftar
+
     const users = getRegisteredUsers();
-    const idx = users.findIndex(u => u.id === current.id || u.email === current.email);
+    const idx = users.findIndex(u => u.id === current.id);
     if (idx >= 0) {
       users[idx] = updatedUser;
       saveRegisteredUsers(users);
@@ -392,21 +328,22 @@ export function consumeUserQuota(userId: string): {
       isRestrictedPreview: false,
       isSuperAdmin: false,
       remainingTrial: updatedUser.trialGeneratesLeft,
-      remainingRestricted: updatedUser.restrictedGeneratesLeft ?? 5
+      remainingRestricted: updatedUser.restrictedGeneratesLeft,
+      message: `Penyusunan berhasil. Sisa kuota trial penuh: ${updatedUser.trialGeneratesLeft}x.`
     };
   }
 
-  // Trial Habis, tapi masih punya Kuota Judul Terkunci (> 0)
-  if ((current.restrictedGeneratesLeft ?? 5) > 0) {
-    const updatedUser: UserProfile = {
+  // Status 2: Trial habis, tetapi kuota restricted 5x masih ada (hanya 3 halaman awal terbuka, halaman 4+ terkunci)
+  if (current.restrictedGeneratesLeft > 0) {
+    const updatedUser = {
       ...current,
-      restrictedGeneratesLeft: (current.restrictedGeneratesLeft ?? 5) - 1,
+      restrictedGeneratesLeft: current.restrictedGeneratesLeft - 1,
       totalGeneratesCount: (current.totalGeneratesCount || 0) + 1
     };
     saveStoredUser(updatedUser);
 
     const users = getRegisteredUsers();
-    const idx = users.findIndex(u => u.id === current.id || u.email === current.email);
+    const idx = users.findIndex(u => u.id === current.id);
     if (idx >= 0) {
       users[idx] = updatedUser;
       saveRegisteredUsers(users);
@@ -414,44 +351,46 @@ export function consumeUserQuota(userId: string): {
 
     return {
       allowed: true,
-      isRestrictedPreview: true, // Dokumen terkunci hanya 3 halaman pertama terbuka!
+      isRestrictedPreview: true, // Halaman 4+ terkunci
       isSuperAdmin: false,
       remainingTrial: 0,
-      remainingRestricted: updatedUser.restrictedGeneratesLeft
+      remainingRestricted: updatedUser.restrictedGeneratesLeft,
+      message: `Trial penuh telah habis. Naskah dibuat dalam Mode Terkunci (Halaman 4+ terkunci). Sisa kuota judul: ${updatedUser.restrictedGeneratesLeft}x. Silakan upgrade ke Pro.`
     };
   }
 
-  // Kuota Habis Total (Trial = 0 dan Judul = 0)
+  // Status 3: Habis total
   return {
     allowed: false,
     isRestrictedPreview: true,
     isSuperAdmin: false,
     remainingTrial: 0,
     remainingRestricted: 0,
-    message: 'Batas 3x kuota trial penuh dan 5x kuota judul Anda telah habis. Silakan pilih paket langganan untuk melanjutkan penyusunan dokumen.'
+    message: 'Seluruh kuota trial dan kuota judul Anda telah habis. Silakan pilih paket langganan untuk melanjutkan.'
   };
 }
 
-// Upgrade Langganan Akun
-export function upgradeUserSubscription(userId: string, plan: SubscriptionPlanId): UserProfile {
-  const current = getStoredUser();
-  const updated: UserProfile = {
-    ...current,
-    isSubscribed: true,
-    subscriptionPlan: plan,
-    trialGeneratesLeft: 999999,
-    restrictedGeneratesLeft: 999999
-  };
-  saveStoredUser(updated);
-
+export function upgradeUserSubscription(userId: string, plan: SubscriptionPlanId = 'pro_skripsi'): UserProfile {
   const users = getRegisteredUsers();
-  const idx = users.findIndex(u => u.id === current.id || u.email === current.email);
+  const idx = users.findIndex(u => u.id === userId);
+  
   if (idx >= 0) {
-    users[idx] = updated;
+    users[idx].isSubscribed = true;
+    users[idx].subscriptionPlan = plan;
+    users[idx].trialGeneratesLeft = 999999;
+    users[idx].restrictedGeneratesLeft = 999999;
     saveRegisteredUsers(users);
   }
 
-  return updated;
+  const current = getStoredUser();
+  if (current.id === userId) {
+    current.isSubscribed = true;
+    current.subscriptionPlan = plan;
+    current.trialGeneratesLeft = 999999;
+    current.restrictedGeneratesLeft = 999999;
+    saveStoredUser(current);
+  }
+  return current;
 }
 
 export function getStoredUser(): UserProfile {
@@ -462,12 +401,12 @@ export function getStoredUser(): UserProfile {
   if (raw) {
     try {
       const parsed = JSON.parse(raw);
-      if (parsed && typeof parsed.trialGeneratesLeft === 'undefined') {
-        parsed.trialGeneratesLeft = 3;
-        parsed.restrictedGeneratesLeft = 5;
-        parsed.totalGeneratesCount = 0;
+      if (parsed) {
+        if (typeof parsed.trialGeneratesLeft === 'undefined') parsed.trialGeneratesLeft = 3;
+        if (typeof parsed.restrictedGeneratesLeft === 'undefined') parsed.restrictedGeneratesLeft = 5;
+        if (typeof parsed.totalGeneratesCount === 'undefined') parsed.totalGeneratesCount = 0;
+        return parsed;
       }
-      return parsed;
     } catch {
       // fallback
     }
@@ -477,16 +416,14 @@ export function getStoredUser(): UserProfile {
 }
 
 export function saveStoredUser(user: UserProfile) {
-  if (typeof window !== 'undefined') {
-    localStorage.setItem(STORAGE_KEYS.USER, JSON.stringify(user));
-  }
+  if (typeof window === 'undefined') return;
+  localStorage.setItem(STORAGE_KEYS.USER, JSON.stringify(user));
 }
 
-// Saved Proposals management
+// Project Records in Local & Supabase Storage
 export async function getSavedProjects(): Promise<SavedProjectRecord[]> {
-  if (typeof window === 'undefined') return CURATED_ACADEMIC_TEMPLATES;
+  if (typeof window === 'undefined') return [];
 
-  // Try Supabase first if configured
   const supabase = getSupabaseClient();
   if (supabase) {
     try {
@@ -498,17 +435,17 @@ export async function getSavedProjects(): Promise<SavedProjectRecord[]> {
       if (!error && data && data.length > 0) {
         return data.map((item: any) => ({
           id: item.id,
-          userId: item.user_id,
+          userId: item.user_id || 'anonymous',
           title: item.title,
           category: item.category,
-          targetEntity: item.target_entity || '',
+          targetEntity: item.target_entity,
           durationMonths: item.duration_months || 6,
           stage: item.stage || 'result',
           answers: item.answers || {},
-          documentData: item.document_data,
+          document: item.document_data,
           treeGraph: item.tree_graph,
-          updatedAt: item.updated_at || item.created_at,
           createdAt: item.created_at,
+          updatedAt: item.updated_at
         }));
       }
     } catch (err) {
@@ -516,33 +453,27 @@ export async function getSavedProjects(): Promise<SavedProjectRecord[]> {
     }
   }
 
-  // Local storage fallback
   const raw = localStorage.getItem(STORAGE_KEYS.PROJECTS);
   if (raw) {
     try {
       const parsed = JSON.parse(raw);
-      if (Array.isArray(parsed) && parsed.length > 0) {
+      if (Array.isArray(parsed)) {
         return parsed;
       }
     } catch {
-      // fallback
+      return [];
     }
   }
-
-  // Store curated default templates
-  localStorage.setItem(STORAGE_KEYS.PROJECTS, JSON.stringify(CURATED_ACADEMIC_TEMPLATES));
-  return CURATED_ACADEMIC_TEMPLATES;
+  return [];
 }
 
 export async function saveProjectRecord(project: SavedProjectRecord): Promise<{ success: boolean; id: string }> {
   if (typeof window === 'undefined') return { success: false, id: project.id };
 
   const supabase = getSupabaseClient();
-  let savedToRemote = false;
-
   if (supabase) {
     try {
-      const { error } = await supabase.from('proposals').upsert({
+      await supabase.from('proposals').upsert({
         id: project.id,
         user_id: project.userId,
         title: project.title,
@@ -551,13 +482,12 @@ export async function saveProjectRecord(project: SavedProjectRecord): Promise<{ 
         duration_months: project.durationMonths,
         stage: project.stage,
         answers: project.answers,
-        document_data: project.documentData,
+        document_data: project.document,
         tree_graph: project.treeGraph,
-        updated_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
       });
-      if (!error) savedToRemote = true;
     } catch (err) {
-      console.warn('Could not save to Supabase, saving to local cache:', err);
+      console.warn('Supabase save failed, continuing to local storage:', err);
     }
   }
 
@@ -595,12 +525,28 @@ export async function deleteProjectRecord(id: string): Promise<boolean> {
   return true;
 }
 
+// Backup & Recovery JSON helpers
+export function exportProjectAsJson(project: SavedProjectRecord): string {
+  return JSON.stringify(project, null, 2);
+}
+
+export function importProjectFromJson(jsonString: string): SavedProjectRecord {
+  const parsed = JSON.parse(jsonString);
+  if (!parsed.title || !parsed.category) {
+    throw new Error('Format file proyek tidak valid: judul atau kategori tidak ditemukan.');
+  }
+  return {
+    ...parsed,
+    id: `proj-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`,
+    updatedAt: new Date().toISOString()
+  };
+}
+
 // SQL Migration Script for Supabase SQL Editor
 export const SUPABASE_SQL_MIGRATION = `-- ==============================================================
 -- ACADEMIC & PROPOSAL AGENT STUDIO - SUPABASE DATABASE SCHEMA
 -- ==============================================================
 
--- 1. Tabel Profil Pengguna (Profiles)
 CREATE TABLE IF NOT EXISTS public.profiles (
   id TEXT PRIMARY KEY,
   email TEXT NOT NULL,
@@ -611,7 +557,6 @@ CREATE TABLE IF NOT EXISTS public.profiles (
   created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
 );
 
--- 2. Tabel Naskah & Proyek Proposal (Proposals)
 CREATE TABLE IF NOT EXISTS public.proposals (
   id TEXT PRIMARY KEY,
   user_id TEXT,
@@ -627,15 +572,12 @@ CREATE TABLE IF NOT EXISTS public.proposals (
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
 );
 
--- 3. Row Level Security (RLS) - Opsional / Aktifkan sesuai kebutuhan
 ALTER TABLE public.profiles ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.proposals ENABLE ROW LEVEL SECURITY;
 
--- Policy sederhana untuk akses publik studio
 CREATE POLICY "Akses publik profil" ON public.profiles FOR ALL USING (true);
 CREATE POLICY "Akses publik proposal" ON public.proposals FOR ALL USING (true);
 
--- Index performa pencarian judul dan kategori
 CREATE INDEX IF NOT EXISTS idx_proposals_title ON public.proposals (title);
 CREATE INDEX IF NOT EXISTS idx_proposals_category ON public.proposals (category);
 `;

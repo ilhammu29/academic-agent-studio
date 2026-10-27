@@ -1,4 +1,5 @@
 "use client";
+import { aiFetch } from "@/lib/aiClient";
 
 import React, { useState, useRef, useEffect } from "react";
 import { ProposalCategory } from "@/types/studio";
@@ -122,7 +123,7 @@ export const AcademicConsultationModal: React.FC<AcademicConsultationModalProps>
     setMessages([userMsg]);
 
     try {
-      const res = await fetch("/api/academic/consultation", {
+      const res = await aiFetch("/api/academic/consultation", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -188,7 +189,7 @@ export const AcademicConsultationModal: React.FC<AcademicConsultationModalProps>
     setMessages([userMsg]);
 
     try {
-      const res = await fetch("/api/academic/consultation", {
+      const res = await aiFetch("/api/academic/consultation", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -251,7 +252,7 @@ export const AcademicConsultationModal: React.FC<AcademicConsultationModalProps>
     setIsLoading(true);
 
     try {
-      const res = await fetch("/api/academic/consultation", {
+      const res = await aiFetch("/api/academic/consultation", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

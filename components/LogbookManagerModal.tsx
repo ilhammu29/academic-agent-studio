@@ -1,4 +1,5 @@
 "use client";
+import { aiFetch } from "@/lib/aiClient";
 
 import React, { useState } from "react";
 import { X, CalendarDays, Plus, Trash2, Check, Sparkles, Download, Clock, CheckCircle2 } from "lucide-react";
@@ -25,40 +26,7 @@ export const LogbookManagerModal: React.FC<LogbookManagerModalProps> = ({
   entries: initialEntries,
   onSave
 }) => {
-  const [entries, setEntries] = useState<LogbookEntry[]>(() => {
-    if (initialEntries && initialEntries.length > 0) return initialEntries;
-    // Generate initial sample logbook based on schedule matrix or default
-    const now = new Date();
-    return [
-      {
-        id: "log-1",
-        date: new Date(now.getTime() - 14 * 86400000).toISOString().split("T")[0],
-        timeRange: "08:00 - 16:30",
-        activity: `Orientasi instansi mitra di ${targetEntity || "lokus"}, perkenalan dengan mentor lapangan, dan penandatanganan pakta integritas kerahasiaan data.`,
-        output: "Dokumen komitmen kerja & pemahaman profil divisi",
-        mentorFeedback: "Pelajari SOP internal unit operasional.",
-        status: "verified"
-      },
-      {
-        id: "log-2",
-        date: new Date(now.getTime() - 7 * 86400000).toISOString().split("T")[0],
-        timeRange: "08:30 - 16:00",
-        activity: `Observasi langsung alur sistem eksisting, wawancara mendalam dengan user lapangan, dan identifikasi bottleneck operasional.`,
-        output: "Catatan temuan masalah lapangan & data awal",
-        mentorFeedback: "Fokuskan pada variabel penentu utama.",
-        status: "verified"
-      },
-      {
-        id: "log-3",
-        date: new Date().toISOString().split("T")[0],
-        timeRange: "08:00 - 17:00",
-        activity: `Penyusunan arsitektur usulan pemecahan masalah "${title}" dan persiapan instrumen validasi berbasis bukti.`,
-        output: "Draf dokumen proposal kerja & matriks kegiatan",
-        mentorFeedback: "Konsultasikan dengan pembimbing akademik kampus.",
-        status: "pending"
-      }
-    ];
-  });
+  const [entries, setEntries] = useState<LogbookEntry[]>(() => initialEntries || []);
 
   const [isGeneratingAi, setIsGeneratingAi] = useState(false);
 
@@ -91,7 +59,7 @@ export const LogbookManagerModal: React.FC<LogbookManagerModalProps> = ({
   const handleAutoFillAi = async () => {
     setIsGeneratingAi(true);
     try {
-      const res = await fetch("/api/gemini", {
+      const res = await aiFetch("/api/gemini", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -109,8 +77,8 @@ Format JSON:
       "timeRange": "08:00 - 16:30",
       "activity": "Uraian tugas teknis formal...",
       "output": "Luaran konkret...",
-      "mentorFeedback": "Catatan evaluasi mentor...",
-      "status": "verified"
+      "mentorFeedback": "",
+      "status": "pending"
     }
   ]
 }
@@ -119,6 +87,7 @@ Format JSON:
       });
 
       const data = await res.json();
+      if (!res.ok || !data.text) throw new Error(data.error || "AI belum tersedia");
       if (data.text) {
         let clean = data.text.trim();
         if (clean.includes("```json")) {
@@ -132,16 +101,17 @@ Format JSON:
             id: `log-ai-${Date.now()}-${i}`,
             date: l.date || new Date().toISOString().split("T")[0],
             timeRange: l.timeRange || "08:00 - 16:00",
-            activity: l.activity || "Aktivitas penugasan lapangan...",
+            activity: `[Draf saran, perlu dikonfirmasi] ${l.activity || "Aktivitas penugasan lapangan..."}`,
             output: l.output || "Dokumen luaran",
-            mentorFeedback: l.mentorFeedback || "Disetujui.",
-            status: (l.status as any) || "verified"
+            mentorFeedback: "",
+            status: "pending"
           }));
           setEntries(formatted);
         }
       }
     } catch (err) {
       console.warn("AI Logbook autofill failed:", err);
+      alert("Saran AI tidak tersedia. Hubungkan Gemini dan coba lagi.");
     } finally {
       setIsGeneratingAi(false);
     }

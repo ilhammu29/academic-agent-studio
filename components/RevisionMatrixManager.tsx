@@ -1,4 +1,5 @@
 "use client";
+import { aiFetch } from "@/lib/aiClient";
 
 import React, { useState } from "react";
 import { ProposalDocument } from "@/types/studio";
@@ -30,34 +31,16 @@ export interface RevisionItem {
 
 interface RevisionMatrixManagerProps {
   doc: ProposalDocument;
+  onChange: (items: RevisionItem[]) => void;
 }
 
-export const RevisionMatrixManager: React.FC<RevisionMatrixManagerProps> = ({ doc }) => {
-  const [items, setItems] = useState<RevisionItem[]>([
-    {
-      id: "rev-1",
-      examinerName: "Dr. Ir. Suharyanto, M.Sc.",
-      examinerRole: "Penguji 1 (Metodologi)",
-      feedbackNote: "Perjelas batasan masalah agar tidak meluas ke pengujian hardware, fokuskan pada optimasi algoritma dan validasi data.",
-      sectionRef: "Bab I: Subbab 1.3 Batasan Masalah",
-      actionTaken: "Telah ditambahkan butir batasan operasional yang menegaskan ruang lingkup studi hanya pada pemrosesan dataset dan evaluasi metrik F1-score tanpa modifikasi perangkat keras fisik.",
-      status: "SELESAI"
-    },
-    {
-      id: "rev-2",
-      examinerName: "Prof. Dr. Med. Ratna Sari, Ph.D.",
-      examinerRole: "Penguji 2 (Novelty & Teori)",
-      feedbackNote: "Lengkapi tabel perbandingan penelitian terdahulu dengan menyertakan publikasi terindeks Scopus tahun 2024.",
-      sectionRef: "Bab II: Matriks Research Gap",
-      actionTaken: "Telah diintegrasikan 3 rujukan jurnal primer internasional terbaru (2024) serta dipertegas letak pembeda (novelty) pada mekanisme imputasi adaptif.",
-      status: "SELESAI"
-    }
-  ]);
+export const RevisionMatrixManager: React.FC<RevisionMatrixManagerProps> = ({ doc, onChange }) => {
+  const items = doc.revisionItems || [];
 
   const [examinerName, setExaminerName] = useState("");
-  const [examinerRole, setExaminerRole] = useState("Penguji 1 (Metodologi)");
+  const [examinerRole, setExaminerRole] = useState("Dosen Pembimbing Utama");
   const [feedbackNote, setFeedbackNote] = useState("");
-  const [sectionRef, setSectionRef] = useState("Bab I: Pendahuluan");
+  const [sectionRef, setSectionRef] = useState("Bab I: Latar Belakang Masalah");
   const [actionTaken, setActionTaken] = useState("");
   const [isGeneratingAi, setIsGeneratingAi] = useState(false);
   const [copied, setCopied] = useState(false);
@@ -68,7 +51,7 @@ export const RevisionMatrixManager: React.FC<RevisionMatrixManagerProps> = ({ do
     if (!feedbackNote.trim()) return;
     setIsGeneratingAi(true);
     try {
-      const res = await fetch("/api/gemini", {
+      const res = await aiFetch("/api/gemini", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -85,11 +68,10 @@ Tuliskan 1-2 kalimat formal yang menjelaskan perbaikan naskah yang telah dilakuk
       if (data.success && data.text) {
         setActionTaken(data.text.trim());
       } else {
-        // Fallback
-        setActionTaken(`Telah dilakukan penyesuaian pada ${sectionRef} sesuai arahan dosen pembimbing/penguji guna memperkuat validitas argumen ilmiah dan ketepatan metodologi.`);
+        alert("Saran AI tidak tersedia. Hubungkan Gemini atau isi tindak lanjut secara manual.");
       }
     } catch {
-      setActionTaken(`Telah disempurnakan pada bagian ${sectionRef} sesuai arahan revisi.`);
+      alert("Saran AI tidak tersedia. Isi tindak lanjut secara manual.");
     } finally {
       setIsGeneratingAi(false);
     }
@@ -105,18 +87,18 @@ Tuliskan 1-2 kalimat formal yang menjelaskan perbaikan naskah yang telah dilakuk
       examinerRole,
       feedbackNote: feedbackNote.trim(),
       sectionRef: sectionRef.trim() || "Bab Naskah",
-      actionTaken: actionTaken.trim() || `Telah disesuaikan pada naskah ${sectionRef}.`,
-      status: "SELESAI"
+      actionTaken: actionTaken.trim(),
+      status: actionTaken.trim() ? "SELESAI" : "DIPROSES"
     };
 
-    setItems([...items, newItem]);
+    onChange([...items, newItem]);
     setFeedbackNote("");
     setActionTaken("");
     setExaminerName("");
   };
 
   const handleDeleteItem = (id: string) => {
-    setItems(items.filter((item) => item.id !== id));
+    onChange(items.filter((item) => item.id !== id));
   };
 
   const handleCopyMarkdown = () => {

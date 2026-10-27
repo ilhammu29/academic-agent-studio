@@ -1,3 +1,4 @@
+import { getRequestAiKey } from "@/lib/serverAiConfig";
 import { NextResponse } from "next/server";
 import { callGeminiApi } from "@/lib/geminiApi";
 
@@ -9,8 +10,7 @@ export async function POST(req: Request) {
     const fieldDetails = body.fieldDetails || body.context || {};
     const mode = body.mode || "conversational";
 
-    const customKey = req.headers.get("x-gemini-key");
-    const apiKey = customKey || process.env.GEMINI_API_KEY || process.env.NEXT_PUBLIC_GEMINI_API_KEY || "";
+    const apiKey = getRequestAiKey(req);
 
     const targetEntity = fieldDetails.targetEntity || fieldDetails.entity || "";
     const major = fieldDetails.major || fieldDetails.programStudi || "";
@@ -250,7 +250,7 @@ Jangan langsung melompat ke alat atau tools. Jelaskan dulu apa kendala nyata yan
     return NextResponse.json({
       success: true,
       engine: "academic-mentor-heuristic",
-      reply: fallbackReply,
+      reply: "Saran berikut berasal dari template lokal, bukan analisis AI. Sesuaikan dengan fakta di lapangan.\n\n" + fallbackReply,
       card: fallbackCard
     });
 

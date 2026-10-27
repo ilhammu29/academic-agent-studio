@@ -131,30 +131,10 @@ export const TurnitinPreCheckModal: React.FC<TurnitinPreCheckModalProps> = ({
 
     const totalClichés = findings.reduce((sum, f) => sum + f.count, 0);
 
-    // Calculate Estimated Similarity Risk
-    const estimatedSimilarity = Math.min(
-      24,
-      Math.max(7, Math.round(8 + (totalClichés * 1.5) - ((doc.bibliography?.length || 0) * 0.3)))
-    );
-
-    let riskLevel: "Rendah (Aman)" | "Sedang (Waspada)" | "Tinggi (Perlu Revisi)" = "Rendah (Aman)";
-    if (estimatedSimilarity > 20) {
-      riskLevel = "Tinggi (Perlu Revisi)";
-    } else if (estimatedSimilarity > 14) {
-      riskLevel = "Sedang (Waspada)";
-    }
-
-    const citationRatio = totalWords > 0 
-      ? Math.round(((doc.bibliography?.length || 5) * 1000) / totalWords) 
-      : 10;
-
     return {
       totalWords,
       totalClichés,
       findings,
-      estimatedSimilarity,
-      riskLevel,
-      citationRatio,
       totalReferences: doc.bibliography?.length || 0
     };
   }, [doc]);
@@ -176,16 +156,16 @@ export const TurnitinPreCheckModal: React.FC<TurnitinPreCheckModalProps> = ({
           venue: p.venue,
           year: p.year,
           doi: p.doi,
-          similarityNote: "Rumpun ilmu bersinggungan, namun konstruksi kalimat dan lokus spesifik pengusul berbeda."
+          similarityNote: "Hasil pencarian berdasarkan sebagian judul; periksa relevansi secara manual."
         }));
         setVerifiedPapers(mapped);
-        setVerificationSummary(`Berhasil memindai 250M+ karya ilmiah OpenAlex & CrossRef. Terdeteksi ${mapped.length} publikasi primer relevan sebagai komparator state-of-the-art. Tidak ditemukan kalimat naskah yang terindikasi plagiat 100%.`);
+        setVerificationSummary(`Ditemukan ${mapped.length} hasil pencarian terkait. Periksa relevansi dan sumbernya secara manual; naskah tidak dibandingkan untuk plagiarisme.`);
       } else {
         setVerifiedPapers([]);
-        setVerificationSummary("Tidak ditemukan publikasi dengan kesamaan judul atau kalimat identik di indeks terbuka. Novelty topik terverifikasi tinggi.");
+        setVerificationSummary("Pencarian tidak menghasilkan data atau layanan tidak tersedia. Kebaruan dan kemiripan naskah belum dapat disimpulkan.");
       }
     } catch {
-      setVerificationSummary("Pemeriksaan indeks lokal selesai: Naskah memiliki kepadatan sitasi dan struktur frasa orisinal.");
+      setVerificationSummary("Pencarian gagal. Periksa koneksi lalu coba lagi.");
     } finally {
       setIsVerifying(false);
     }
@@ -205,7 +185,7 @@ export const TurnitinPreCheckModal: React.FC<TurnitinPreCheckModalProps> = ({
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <h3 className="text-sm font-bold text-zinc-900 dark:text-zinc-100">Audit Turnitin & Integritas Orisinalitas</h3>
+                <h3 className="text-sm font-bold text-zinc-900 dark:text-zinc-100">Pemeriksaan awal tulisan</h3>
                 <span className="text-[10px] font-mono px-2 py-0.5 rounded-md bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 border border-zinc-200 dark:border-zinc-700">
                   AKREDITASI
                 </span>
@@ -272,7 +252,7 @@ export const TurnitinPreCheckModal: React.FC<TurnitinPreCheckModalProps> = ({
                 : "border-transparent text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-200"
             }`}
           >
-            Kaidah Lolos Turnitin
+            Panduan penulisan
           </button>
         </div>
 
@@ -282,76 +262,12 @@ export const TurnitinPreCheckModal: React.FC<TurnitinPreCheckModalProps> = ({
           {/* TAB 1: RINGKASAN */}
           {activeTab === "ringkasan" && (
             <div className="space-y-4">
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                <div className="p-3.5 rounded-xl bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800">
-                  <div className="text-[11px] text-zinc-500 dark:text-zinc-400 mb-1 flex items-center justify-between">
-                    <span>Estimasi Similarity:</span>
-                    <TrendingUp className="w-3.5 h-3.5 text-zinc-400" />
-                  </div>
-                  <div className="text-2xl font-bold font-mono text-zinc-900 dark:text-zinc-100">
-                    ~{analysis.estimatedSimilarity}%
-                  </div>
-                  <div className="text-[10px] text-zinc-500 dark:text-zinc-400 mt-1">
-                    Ambang aman kampus: &lt; 20-25%
-                  </div>
-                </div>
-
-                <div className="p-3.5 rounded-xl bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800">
-                  <div className="text-[11px] text-zinc-500 dark:text-zinc-400 mb-1 flex items-center justify-between">
-                    <span>Status Risiko:</span>
-                    <ShieldCheck className="w-3.5 h-3.5 text-zinc-400" />
-                  </div>
-                  <div className="text-sm font-bold text-zinc-900 dark:text-zinc-200 mt-1 flex items-center gap-1.5">
-                    {analysis.riskLevel === "Rendah (Aman)" ? (
-                      <CheckCircle2 className="w-4 h-4 text-emerald-500" />
-                    ) : (
-                      <AlertTriangle className="w-4 h-4 text-amber-500" />
-                    )}
-                    <span>{analysis.riskLevel}</span>
-                  </div>
-                  <div className="text-[10px] text-zinc-500 dark:text-zinc-400 mt-1.5">
-                    Tingkat orisinalitas tinggi
-                  </div>
-                </div>
-
-                <div className="p-3.5 rounded-xl bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800">
-                  <div className="text-[11px] text-zinc-500 dark:text-zinc-400 mb-1 flex items-center justify-between">
-                    <span>Total Kata Naskah:</span>
-                    <FileText className="w-3.5 h-3.5 text-zinc-400" />
-                  </div>
-                  <div className="text-2xl font-bold font-mono text-zinc-900 dark:text-zinc-100">
-                    {analysis.totalWords.toLocaleString()}
-                  </div>
-                  <div className="text-[10px] text-zinc-500 dark:text-zinc-400 mt-1">
-                    {analysis.totalReferences} Pustaka primer
-                  </div>
-                </div>
+              <div className="rounded-xl border border-amber-300 dark:border-amber-800 bg-amber-50 dark:bg-amber-950/30 p-4 text-amber-950 dark:text-amber-100 leading-relaxed">
+                Pemeriksaan ini menemukan frasa klise dan membantu mencari literatur terkait. Hasilnya tidak mengukur kemiripan naskah, tidak memeriksa plagiarisme, dan tidak menentukan kebaruan penelitian. Periksa sumber dan gunakan layanan resmi kampus untuk uji kemiripan.
               </div>
-
-              {/* Quality Criteria */}
-              <div className="p-4 rounded-xl bg-zinc-50 dark:bg-zinc-900/60 border border-zinc-200 dark:border-zinc-800 space-y-2.5">
-                <div className="font-semibold text-zinc-900 dark:text-zinc-200 text-xs flex items-center gap-1.5">
-                  <CheckCircle2 className="w-3.5 h-3.5 text-zinc-500 dark:text-zinc-300" />
-                  <span>Kriteria Verifikasi Anti-Plagiarisme:</span>
-                </div>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-[11px]">
-                  <div className="flex items-center gap-2 p-2 rounded-lg bg-white dark:bg-zinc-950/60 border border-zinc-200 dark:border-zinc-800/80">
-                    <span className="w-2 h-2 rounded-md bg-emerald-500"></span>
-                    <span className="text-zinc-800 dark:text-zinc-300">Struktur argumen berbasis First-Principles</span>
-                  </div>
-                  <div className="flex items-center gap-2 p-2 rounded-lg bg-white dark:bg-zinc-950/60 border border-zinc-200 dark:border-zinc-800/80">
-                    <span className="w-2 h-2 rounded-md bg-emerald-500"></span>
-                    <span className="text-zinc-800 dark:text-zinc-300">Format sitasi baku terstandarisasi</span>
-                  </div>
-                  <div className="flex items-center gap-2 p-2 rounded-lg bg-white dark:bg-zinc-950/60 border border-zinc-200 dark:border-zinc-800/80">
-                    <span className={`w-2 h-2 rounded-md ${analysis.totalClichés === 0 ? "bg-emerald-500" : "bg-amber-500"}`}></span>
-                    <span className="text-zinc-800 dark:text-zinc-300">{analysis.totalClichés} Frasa klise terdeteksi</span>
-                  </div>
-                  <div className="flex items-center gap-2 p-2 rounded-lg bg-white dark:bg-zinc-950/60 border border-zinc-200 dark:border-zinc-800/80">
-                    <span className="w-2 h-2 rounded-md bg-emerald-500"></span>
-                    <span className="text-zinc-800 dark:text-zinc-300">Matriks Research Gap terdokumentasi</span>
-                  </div>
-                </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div className="p-4 rounded-xl bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800"><div className="text-zinc-500">Kata yang diperiksa</div><div className="text-xl font-bold mt-1">{analysis.totalWords.toLocaleString()}</div></div>
+                <div className="p-4 rounded-xl bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800"><div className="text-zinc-500">Frasa klise ditemukan</div><div className="text-xl font-bold mt-1">{analysis.totalClichés}</div></div>
               </div>
             </div>
           )}
@@ -455,7 +371,7 @@ export const TurnitinPreCheckModal: React.FC<TurnitinPreCheckModalProps> = ({
             <div className="space-y-3">
               <div className="p-4 rounded-xl border border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900/50 space-y-2">
                 <h4 className="font-semibold text-zinc-900 dark:text-zinc-200 text-xs">
-                  5 Aturan Emas Lolos Cek Turnitin Kampus:
+                  Panduan penulisan dan sitasi:
                 </h4>
                 <ul className="space-y-2 text-[11px] text-zinc-600 dark:text-zinc-400">
                   <li className="flex items-start gap-2">

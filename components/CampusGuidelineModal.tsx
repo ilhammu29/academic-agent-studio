@@ -1,4 +1,5 @@
 "use client";
+import { aiFetch } from "@/lib/aiClient";
 
 import React, { useState, useRef } from "react";
 import { CampusGuideline } from "@/types/studio";
@@ -65,24 +66,24 @@ export const CampusGuidelineModal: React.FC<CampusGuidelineModalProps> = ({
       setPastedText(text);
     } else {
       // For PDF / docx, we inform the user to scan or paste excerpts
-      setScanStatusMessage(`Berkas "${file.name}" siap dipindai oleh AI.`);
+      setScanStatusMessage("PDF dan DOCX belum dapat dibaca langsung. Salin teks pedoman dan tempelkan di bawah.");
     }
   };
 
   const handleScanGuideline = async () => {
-    if (!uploadedFile && !pastedText.trim()) {
-      alert("Mohon pilih berkas atau tempelkan potongan teks buku pedoman kampus Anda.");
+    if (!pastedText.trim()) {
+      alert("Tempelkan teks pedoman kampus. Isi PDF dan DOCX belum dapat dibaca langsung.");
       return;
     }
 
     setIsScanning(true);
-    setScanStatusMessage("Menghubungkan ke Gemini 3.5 AI Guideline Scanner...");
+    setScanStatusMessage("Menganalisis teks pedoman…");
 
     try {
       const filename = uploadedFile ? uploadedFile.name : "Kutipan_Pedoman_Kampus.txt";
-      const textPayload = pastedText.trim() || `Analisis berkas ${filename} untuk penulisan skripsi/magang perguruan tinggi.`;
+      const textPayload = pastedText.trim();
 
-      const res = await fetch("/api/academic/scan-guideline", {
+      const res = await aiFetch("/api/academic/scan-guideline", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -95,7 +96,7 @@ export const CampusGuidelineModal: React.FC<CampusGuidelineModalProps> = ({
       if (data.success && data.guideline) {
         setActiveGuideline(data.guideline);
         setActiveTab("custom");
-        setScanStatusMessage(`Ekstraksi berhasil! Format ${data.guideline.campusName} telah dipetakan.`);
+        setScanStatusMessage(`Saran format ${data.guideline.campusName} tersedia. Periksa setiap nilai terhadap pedoman asli sebelum menerapkan.`);
       } else {
         alert("Gagal memindai pedoman: " + (data.error || "Format tidak dikenali"));
       }
@@ -306,7 +307,7 @@ export const CampusGuidelineModal: React.FC<CampusGuidelineModalProps> = ({
                 <button
                   type="button"
                   onClick={handleScanGuideline}
-                  disabled={isScanning || (!uploadedFile && !pastedText.trim())}
+                  disabled={isScanning || !pastedText.trim()}
                   className="px-5 py-2.5 rounded-xl bg-zinc-900 hover:bg-black text-white dark:bg-zinc-100 dark:hover:bg-white dark:text-black font-semibold text-xs flex items-center gap-2 cursor-pointer disabled:opacity-40 transition-all shadow-xs"
                 >
                   {isScanning ? (

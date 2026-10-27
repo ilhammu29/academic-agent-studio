@@ -95,3 +95,10 @@ test('Citation Integrity Auditor detects orphan references and missing bibliogra
   assert.ok(missingIssue, 'Must flag missing bibliography for LeCun');
   assert.ok(missingIssue.location.includes('LeCun'));
 });
+
+
+test('valid DOI syntax alone does not verify source metadata', () => {
+  const report = auditCitationIntegrity({ title: 'Test', bibliography: [{ id: 1, author: 'Smith', year: '2024', title: 'Example', source: 'Journal', doiUrl: '10.1000/182' }] } as ProposalDocument);
+  assert.equal(report.verifiedCount, 0);
+  assert.equal(report.references[0].verificationLevel, 'LEVEL_0_UNVERIFIED');
+});

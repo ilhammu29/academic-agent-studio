@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { 
   Home, 
   MessageSquare, 
@@ -68,15 +68,21 @@ export default function AppShell({
   const [searchQuery, setSearchQuery] = useState('');
   const [showSearchDropdown, setShowSearchDropdown] = useState(false);
   const { theme, toggleTheme } = useTheme();
+  useEffect(() => {
+    if (!mobileMenuOpen) return;
+    const close = (e: KeyboardEvent) => { if (e.key === 'Escape') setMobileMenuOpen(false); };
+    window.addEventListener('keydown', close);
+    return () => window.removeEventListener('keydown', close);
+  }, [mobileMenuOpen]);
 
   // User initials (e.g. "IM" for "Ilham Maulana")
-  const userInitials = (currentUser.name || 'Ilham Maulana')
+  const userInitials = (currentUser.name || 'Pengguna lokal')
     .split(' ')
     .filter(Boolean)
     .map((part) => part[0])
     .join('')
     .slice(0, 2)
-    .toUpperCase() || 'IM';
+    .toUpperCase() || 'PL';
 
   const navMenuItems = [
     {
@@ -99,7 +105,7 @@ export default function AppShell({
       icon: Plus,
       isActive: false,
       onClick: () => {
-        if (confirm("Mulai sesi usulan baru? Draf naskah Anda tetap tersimpan otomatis di Arsip Proyek.")) {
+        if (confirm("Mulai sesi usulan baru? Simpan proyek aktif ke arsip atau ekspor dokumen terlebih dahulu.")) {
           onResetSession();
         }
       }
@@ -136,7 +142,7 @@ export default function AppShell({
     },
     {
       id: 'drive',
-      label: 'Penyimpanan File Drive',
+      label: 'File Lokal',
       icon: Cloud,
       isActive: currentStage === 'drive',
       onClick: () => onNavigateStage('drive')
@@ -180,6 +186,8 @@ export default function AppShell({
             return (
               <button
                 key={item.id}
+                aria-label={item.label}
+                aria-current={isActive ? 'page' : undefined}
                 onClick={item.onClick}
                 className={`relative w-11 h-11 rounded-xl flex items-center justify-center transition-all cursor-pointer group ${
                   isActive
@@ -225,12 +233,12 @@ export default function AppShell({
           {/* User Profile Avatar with Initials */}
           <button
             onClick={onOpenAuth}
-            title={`${currentUser.name || 'Ilham Maulana'} (${currentUser.role || 'Mahasiswa'})`}
+            title={`${currentUser.name || 'Pengguna lokal'} (${currentUser.role || 'Mahasiswa'})`}
             className="relative w-9 h-9 rounded-full bg-[#0F172A] dark:bg-[#172033] border border-[#E2E8F0] dark:border-[#253149] text-white dark:text-[#7C9CFF] font-bold text-xs flex items-center justify-center cursor-pointer shadow-xs hover:border-[#7C9CFF] hover:scale-105 active:scale-95 transition-all group"
           >
             <span>{userInitials}</span>
             <div className="absolute left-16 px-2.5 py-1.5 rounded-lg bg-[#0F172A] dark:bg-[#1C263A] border border-transparent dark:border-[#253149] text-white dark:text-[#F3F6FC] text-[11px] font-medium whitespace-nowrap opacity-0 pointer-events-none group-hover:opacity-100 transition-opacity shadow-xl z-50 flex items-center gap-1.5">
-              <span>{currentUser.name || 'Ilham Maulana'}</span>
+              <span>{currentUser.name || 'Pengguna lokal'}</span>
               <span className="w-1.5 h-1.5 rounded-full bg-[#34D399]" />
             </div>
           </button>
@@ -357,12 +365,12 @@ export default function AppShell({
               <span>Upgrade Pro (QRIS)</span>
             </button>
           )}
-          
+
           {/* New Proposal / Sesi Baru CTA Button */}
           <button
             type="button"
             onClick={() => {
-              if (confirm("Mulai sesi usulan baru? Draf naskah Anda tetap tersimpan otomatis di Arsip Proyek.")) {
+              if (confirm("Mulai sesi usulan baru? Simpan proyek aktif ke arsip atau ekspor dokumen terlebih dahulu.")) {
                 onResetSession();
               }
             }}
@@ -402,7 +410,7 @@ export default function AppShell({
           {/* User Avatar Circle Badge */}
           <button
             onClick={onOpenAuth}
-            title={`${currentUser.name || 'Ilham Maulana'} (${currentUser.role || 'Mahasiswa'})`}
+            title={`${currentUser.name || 'Pengguna lokal'} (${currentUser.role || 'Mahasiswa'})`}
             className="w-8 h-8 rounded-lg bg-[#0F172A] dark:bg-[#172033] border border-[#E2E8F0] dark:border-[#253149] text-white dark:text-[#7C9CFF] font-bold text-xs flex items-center justify-center cursor-pointer shadow-xs hover:border-[#7C9CFF] hover:scale-105 active:scale-95 transition-transform"
           >
             {userInitials}
@@ -411,6 +419,8 @@ export default function AppShell({
           {/* Mobile Menu Toggle Button */}
           <button
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            aria-label={mobileMenuOpen ? 'Tutup menu' : 'Buka menu'}
+            aria-expanded={mobileMenuOpen}
             className="md:hidden p-2 rounded-lg text-[#475569] dark:text-[#A4B1C7] hover:text-[#0F172A] dark:hover:text-[#F3F6FC] hover:bg-[#F1F5F9] dark:hover:bg-[#172033] transition-colors"
           >
             {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}

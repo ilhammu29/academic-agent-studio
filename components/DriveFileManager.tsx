@@ -79,7 +79,7 @@ export default function DriveFileManager({
   const filtered = projects.filter((p) => {
     const matchSearch =
       p.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      p.targetEntity.toLowerCase().includes(searchQuery.toLowerCase());
+      (p.targetEntity || "").toLowerCase().includes(searchQuery.toLowerCase());
     return matchSearch;
   });
 

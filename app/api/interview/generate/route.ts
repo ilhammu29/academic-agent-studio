@@ -1,3 +1,4 @@
+import { getRequestAiKey } from "@/lib/serverAiConfig";
 import { NextResponse } from "next/server";
 import { DiagnosticQuestion, ProposalCategory } from "@/types/studio";
 import { generateDiagnosticQuestions } from "@/lib/questions";
@@ -14,8 +15,7 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Judul harus diisi." }, { status: 400 });
     }
 
-    const customKey = req.headers.get("x-gemini-key");
-    const apiKey = customKey || process.env.GEMINI_API_KEY || process.env.NEXT_PUBLIC_GEMINI_API_KEY || "";
+    const apiKey = getRequestAiKey(req);
 
     if (apiKey) {
       try {

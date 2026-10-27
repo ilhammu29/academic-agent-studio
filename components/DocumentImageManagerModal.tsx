@@ -1,4 +1,5 @@
 "use client";
+import { aiFetch } from "@/lib/aiClient";
 
 import React, { useState } from "react";
 import { X, Image as ImageIcon, Upload, Plus, Trash2, Check, Sparkles, Layers, ArrowRight } from "lucide-react";
@@ -89,7 +90,7 @@ export const DocumentImageManagerModal: React.FC<DocumentImageManagerModalProps>
     setAiRationale(null);
 
     try {
-      const res = await fetch("/api/gemini", {
+      const res = await aiFetch("/api/gemini", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

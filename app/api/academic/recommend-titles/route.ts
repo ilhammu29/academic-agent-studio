@@ -1,3 +1,4 @@
+import { getRequestAiKey } from "@/lib/serverAiConfig";
 import { NextResponse } from "next/server";
 import { TitleRecommendation } from "@/lib/titleGenerator";
 import { ProposalCategory } from "@/types/studio";
@@ -74,8 +75,10 @@ export async function POST(req: Request) {
     }
 
     const papers = mode === "literature" ? await fetchRealScholarlyPapers(query, 5) : [];
-    const customKey = req.headers.get("x-gemini-key");
-    const apiKey = customKey || process.env.GEMINI_API_KEY || process.env.NEXT_PUBLIC_GEMINI_API_KEY || "";
+    if (mode === "literature" && papers.length === 0) {
+      return NextResponse.json({ success: false, error: "Literatur belum ditemukan atau layanan pencarian tidak tersedia. Coba kata kunci lain atau ulangi nanti." }, { status: 503 });
+    }
+    const apiKey = getRequestAiKey(req);
 
     // 1. Try Gemini generation if API key is provided
     if (apiKey) {
@@ -160,11 +163,24 @@ Keluarkan *hanya* format JSON valid:
           const cleanJson = rawText.replace(/```json/g, "").replace(/```/g, "").trim();
           const parsed = JSON.parse(cleanJson);
           if (parsed.recommendations && Array.isArray(parsed.recommendations) && parsed.recommendations.length > 0) {
+            const recommendations = parsed.recommendations
+              .filter((item: any) => item && typeof item.title === "string" && item.title.trim())
+              .map((item: any, index: number) => ({
+                ...item,
+                id: typeof item.id === "string" ? item.id : `rec-${index + 1}`,
+                category: ["magang", "penelitian", "skripsi"].includes(item.category) ? item.category : "skripsi",
+                entity: typeof item.entity === "string" ? item.entity : "",
+                durationMonths: Number.isFinite(Number(item.durationMonths)) && Number(item.durationMonths) > 0 ? Number(item.durationMonths) : 6,
+                referenceJournal: typeof item.referenceJournal === "string" ? item.referenceJournal : "",
+                researchGap: typeof item.researchGap === "string" ? item.researchGap : "",
+                thinkingMode: typeof item.thinkingMode === "string" ? item.thinkingMode : ""
+              }));
+            if (!recommendations.length) throw new Error("Respons AI tidak memiliki judul yang valid.");
             return NextResponse.json({
               success: true,
               engine: geminiResult.model,
               mode,
-              recommendations: sanitizeAcademicText(parsed.recommendations),
+              recommendations: sanitizeAcademicText(recommendations),
               papersCount: papers.length
             });
           }
@@ -180,7 +196,7 @@ Keluarkan *hanya* format JSON valid:
       success: true,
       engine: "domain-aware-synthesizer",
       mode,
-      recommendations: sanitizeAcademicText(synthesized),
+      recommendations: sanitizeAcademicText(synthesized.map(item => ({ ...item, referenceJournal: "Belum diverifikasi", researchGap: "Usulan awal; tinjau literatur dan verifikasi celah penelitian secara manual." }))),
       papersCount: papers.length
     });
 

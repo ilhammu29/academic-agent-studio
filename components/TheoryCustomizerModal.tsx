@@ -1,4 +1,5 @@
 "use client";
+import { aiFetch } from "@/lib/aiClient";
 
 import React, { useState } from "react";
 import { X, Sparkles, BookOpen, Plus, Trash2, Check, RefreshCw, Layers } from "lucide-react";
@@ -46,7 +47,7 @@ export const TheoryCustomizerModal: React.FC<TheoryCustomizerModalProps> = ({
   const handleGenerateTheories = async (targetCount: number) => {
     setIsExpanding(true);
     try {
-      const res = await fetch("/api/academic/expand-theories", {
+      const res = await aiFetch("/api/academic/expand-theories", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -72,7 +73,9 @@ export const TheoryCustomizerModal: React.FC<TheoryCustomizerModalProps> = ({
           });
           setBibItems(mergedBib);
         }
-        showToast(`Berhasil menyusun ${data.theories.length} landasan teori & sinkron ke Daftar Pustaka!`);
+        showToast(`${data.theories.length} saran teori disusun. Periksa seluruh sumber sebelum digunakan.`);
+      } else {
+        showToast(data.error || "Perluasan teori tidak tersedia. Hubungkan Gemini dan coba lagi.");
       }
     } catch (err) {
       console.error("Gagal memperluas teori:", err);

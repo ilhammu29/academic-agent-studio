@@ -402,7 +402,7 @@ export const Hero3DOrb: React.FC<Hero3DOrbProps> = ({
         <img 
           src="/hero-orb-final-3d.png" 
           alt="Academic Agent Studio Glass Holographic Orb" 
-          className="w-full h-full object-contain drop-shadow-2xl select-none pointer-events-none"
+          className="absolute inset-0 w-full h-full object-contain drop-shadow-2xl select-none pointer-events-none rounded-full"
         />
       )}
     </div>

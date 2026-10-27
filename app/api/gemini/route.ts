@@ -1,3 +1,4 @@
+import { getRequestAiKey } from "@/lib/serverAiConfig";
 import { NextResponse } from "next/server";
 import { buildGeneratedDocument } from "@/lib/agentEngine";
 import { ProposalCategory, ProposalDocument } from "@/types/studio";
@@ -7,8 +8,7 @@ export async function POST(req: Request) {
   try {
     const body = await req.json();
 
-    const customKey = req.headers.get("x-gemini-key");
-    const apiKey = customKey || process.env.GEMINI_API_KEY || process.env.NEXT_PUBLIC_GEMINI_API_KEY || "";
+    const apiKey = getRequestAiKey(req);
 
     // 0. Direct Prompt Completion Mode (Academic Copilot, Defense Q&A Evaluator, Chat Assistants)
     if (body.prompt && typeof body.prompt === "string" && !body.title && !body.answers) {
@@ -27,11 +27,7 @@ export async function POST(req: Request) {
           });
         }
       }
-      return NextResponse.json({
-        success: true,
-        engine: "academic-heuristic",
-        text: "Kajian usulan proposal Anda menunjukkan urgensi metodologis yang kuat. Pastikan keselarasan antara rumusan masalah Bab I dan instrumen verifikasi Bab III."
-      });
+      return NextResponse.json({ success: false, error: "Asisten AI belum tersedia. Periksa konfigurasi layanan." }, { status: 503 });
     }
 
     const { 

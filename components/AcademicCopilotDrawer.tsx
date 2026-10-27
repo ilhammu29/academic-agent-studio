@@ -1,4 +1,5 @@
 "use client";
+import { aiFetch } from "@/lib/aiClient";
 
 import React, { useState, useRef, useEffect } from "react";
 import { ProposalDocument } from "@/types/studio";
@@ -86,7 +87,7 @@ Pertanyaan/Kebutuhan Mahasiswa:
 
 Jawablah dengan nada membimbing, suportif, kritis, bernas, dan terstruktur akademis (gunakan poin-poin konkret jika diperlukan). Hindari klise kosong AI.`;
 
-      const res = await fetch("/api/gemini", {
+      const res = await aiFetch("/api/gemini", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ prompt })
@@ -95,7 +96,7 @@ Jawablah dengan nada membimbing, suportif, kritis, bernas, dan terstruktur akade
       const data = await res.json();
       const replyText = data.success && data.text
         ? data.text.trim()
-        : `Berdasarkan kajian draf proposal "${doc.title}", poin krusial yang perlu ditegaskan adalah konsistensi kausalitas antara rumusan masalah Bab I dengan metrik verifikasi di Bab III. Pastikan data empiris di ${doc.targetEntity} terdokumentasi dengan instrumen valid.`;
+        : "Asisten AI belum tersedia. Hubungkan Gemini dan kirim pertanyaan kembali.";
 
       const botMsg: ChatMessage = {
         id: `bot-${Date.now()}`,

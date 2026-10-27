@@ -1,4 +1,6 @@
 "use client";
+import { aiFetch } from "@/lib/aiClient";
+import { fillMissingInterviewAnswers } from "@/lib/interviewAnswers";
 
 import React, { useState, useRef, useEffect, useMemo } from "react";
 import { DiagnosticQuestion, ProposalCategory } from "@/types/studio";
@@ -224,7 +226,7 @@ export const DiagnosticInterview: React.FC<DiagnosticInterviewProps> = ({
   const handleAutoGenerateAIAnswers = async () => {
     setIsGeneratingAll(true);
     try {
-      const res = await fetch("/api/interview/auto-answers", {
+      const res = await aiFetch("/api/interview/auto-answers", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -237,27 +239,24 @@ export const DiagnosticInterview: React.FC<DiagnosticInterviewProps> = ({
 
       const data = await res.json();
       if (data.success && data.answers) {
-        setAnswers(prev => ({
-          ...prev,
-          ...data.answers
-        }));
-        showToast("Seluruh parameter berhasil dirumuskan AI secara akademis.");
+        setAnswers(prev => fillMissingInterviewAnswers(prev, questions.map(q => q.field), data.answers));
+        showToast(data.engine === "domain-heuristics" ? "Saran lokal untuk kolom kosong telah diisi. Periksa dan sesuaikan dengan kondisi Anda." : "Saran AI untuk kolom kosong telah diisi. Periksa dan sesuaikan dengan kondisi Anda.");
       } else {
         const updated: Record<string, string> = { ...answers };
         questions.forEach(q => {
-          updated[q.field] = q.aiSuggestion;
+          if (!updated[q.field]?.trim()) updated[q.field] = q.aiSuggestion;
         });
         setAnswers(updated);
-        showToast("Parameter terisi menggunakan rekomendasi AI.");
+        showToast("Saran lokal untuk kolom kosong telah diisi. Periksa dan sesuaikan dengan kondisi Anda.");
       }
     } catch (err: any) {
       console.warn("Auto generate answers error:", err);
       const updated: Record<string, string> = { ...answers };
       questions.forEach(q => {
-        updated[q.field] = q.aiSuggestion;
+        if (!updated[q.field]?.trim()) updated[q.field] = q.aiSuggestion;
       });
       setAnswers(updated);
-      showToast("Parameter terisi menggunakan rekomendasi AI.");
+      showToast("Saran lokal untuk kolom kosong telah diisi. Periksa dan sesuaikan dengan kondisi Anda.");
     } finally {
       setIsGeneratingAll(false);
     }
@@ -274,7 +273,7 @@ export const DiagnosticInterview: React.FC<DiagnosticInterviewProps> = ({
 
     setIsRefiningCurrent(true);
     try {
-      const res = await fetch("/api/gemini/refine", {
+      const res = await aiFetch("/api/gemini/refine", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -285,13 +284,13 @@ export const DiagnosticInterview: React.FC<DiagnosticInterviewProps> = ({
       });
       if (res.ok) {
         const data = await res.json();
-        if (data.refinedContent) {
-          handleAnswerChange(currentQuestion.field, data.refinedContent);
+        if (data.success && data.revisedContent) {
+          handleAnswerChange(currentQuestion.field, data.revisedContent);
           showToast("Jawaban berhasil disempurnakan dengan standar diksi akademis.");
           return;
         }
       }
-      showToast("Penyempurnaan otomatis selesai.");
+      showToast("Penyempurnaan belum tersedia. Periksa koneksi dan pengaturan AI.");
     } catch (e) {
       console.warn("Refine error:", e);
       showToast("Gagal menghubungi agen refiner. Periksa koneksi Anda.");

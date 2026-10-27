@@ -31,14 +31,14 @@ export async function GET(req: Request) {
           paperId: r.id ? r.id.replace("https://openalex.org/", "") : `oa-${Math.random().toString(36).substring(7)}`,
           title: r.title || "Publikasi Akademik Terindeks",
           authors: (r.authorships || []).map((a: any) => ({ name: a.author?.display_name || "Peneliti" })).slice(0, 4),
-          year: r.publication_year || 2024,
+          year: r.publication_year || 0,
           venue: r.primary_location?.source?.display_name || "Jurnal Ilmiah Terindeks Internasional",
-          abstract: r.abstract || "Kajian literatur peer-reviewed mengenai variabel metodologis dan analisis empiris.",
+          abstract: r.abstract || "",
           citationCount: r.cited_by_count || 0,
           isOpenAccess: r.open_access?.is_oa || false,
           doi: r.doi || undefined,
           url: r.doi || r.primary_location?.landing_page_url || undefined,
-          researchGap: `Kebutuhan pengujian pada parameter riil dan validasi empiris komprehensif pada domain ${cleanQuery}.`
+          researchGap: ""
         }));
 
         return NextResponse.json({
@@ -69,14 +69,14 @@ export async function GET(req: Request) {
           paperId: item.DOI || `cr-${Math.random().toString(36).substring(7)}`,
           title: Array.isArray(item.title) ? item.title[0] : (item.title || "Kajian Ilmiah Terindeks"),
           authors: (item.author || []).map((a: any) => ({ name: `${a.given || ""} ${a.family || ""}`.trim() || "Peneliti" })).slice(0, 4),
-          year: item.created?.["date-parts"]?.[0]?.[0] || 2024,
+          year: item.published?.["date-parts"]?.[0]?.[0] || 0,
           venue: item["container-title"]?.[0] || item.publisher || "Publikasi Jurnal Ilmiah",
-          abstract: item.abstract ? item.abstract.replace(/<[^>]*>/g, "") : "Analisis studi literatur primer terindeks DOI.",
+          abstract: item.abstract ? item.abstract.replace(/<[^>]*>/g, "") : "",
           citationCount: item["is-referenced-by-count"] || 0,
-          isOpenAccess: true,
+          isOpenAccess: false,
           doi: item.DOI ? `https://doi.org/${item.DOI}` : undefined,
           url: item.DOI ? `https://doi.org/${item.DOI}` : undefined,
-          researchGap: `Keterbatasan dataset komparatif dan perlunya evaluasi implementasi sistemik pada ${cleanQuery}.`
+          researchGap: ""
         }));
 
         return NextResponse.json({

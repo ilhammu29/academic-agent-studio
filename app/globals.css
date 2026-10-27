@@ -271,3 +271,12 @@ html.light ::-webkit-scrollbar-thumb:hover {
     border-bottom: 1px solid black !important;
   }
 }
+
+/* Keyboard access and motion preferences */
+:where(button, a, input, select, textarea):focus-visible {
+  outline: 3px solid #4f7df3;
+  outline-offset: 3px;
+}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; scroll-behavior: auto !important; }
+}

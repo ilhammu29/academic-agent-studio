@@ -78,7 +78,7 @@ export const PresentationStudio: React.FC<PresentationStudioProps> = ({
   // Keyboard navigation during fullscreen or normal mode
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (isEditModalOpen) return;
+      if (isEditModalOpen || (e.target instanceof HTMLElement && (e.target.isContentEditable || /^(INPUT|TEXTAREA|SELECT|BUTTON)$/.test(e.target.tagName)))) return;
       if (e.key === "ArrowRight" || e.key === "PageDown" || e.key === " ") {
         e.preventDefault();
         setActiveSlideIndex((prev) => Math.min(currentDoc.slides.length - 1, prev + 1));
@@ -141,9 +141,8 @@ export const PresentationStudio: React.FC<PresentationStudioProps> = ({
       showToast("Visual AI berhasil digenerate!");
     };
     img.onerror = () => {
-      setSlideAiImageMap((prev) => ({ ...prev, [slideIdx]: generatedUrl }));
       setIsGeneratingSlideVisual(false);
-      showToast("Visual AI siap ditampilkan.");
+      showToast("Visual gagal dimuat. Periksa koneksi dan coba lagi.");
     };
   };
 
@@ -165,14 +164,14 @@ export const PresentationStudio: React.FC<PresentationStudioProps> = ({
     setSlideAiImageMap(newMap);
     setSlideVisualMode("ai-concept");
     setIsBatchGeneratingSlides(false);
-    showToast(`Berhasil men-generate ${currentDoc.slides.length} ilustrasi slide!`);
+    showToast("Permintaan visual disiapkan. Gambar dimuat saat slide dibuka; hasil ekspor bergantung pada ketersediaan gambar.");
   };
 
   // Download PPTX
   const handleDownloadPptx = async () => {
     setIsExportingPptx(true);
     try {
-      await generateAcademicProposalPptx(currentDoc);
+      await generateAcademicProposalPptx(currentDoc, slideAiImageMap);
       showToast("Slide PPTX eksekutif 16:9 berhasil diunduh!");
     } catch (err) {
       console.error("Gagal mengunduh berkas PPTX:", err);
@@ -266,6 +265,7 @@ export const PresentationStudio: React.FC<PresentationStudioProps> = ({
       };
       setCurrentDoc(updatedDoc);
       if (onUpdateDoc) onUpdateDoc(updatedDoc);
+      setSlideAiImageMap(previous => Object.fromEntries(Object.entries(previous).filter(([key]) => Number(key) !== idx).map(([key, value]) => [Number(key) > idx ? Number(key) - 1 : Number(key), value])));
       setActiveSlideIndex(Math.max(0, idx - 1));
       showToast("Slide berhasil dihapus.");
     }

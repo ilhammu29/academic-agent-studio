@@ -1,4 +1,5 @@
 "use client";
+import { aiFetch } from "@/lib/aiClient";
 
 import React, { useState, useEffect, useRef } from "react";
 import { ProposalDocument, TreeNode } from "@/types/studio";
@@ -82,6 +83,8 @@ interface DocumentStudioProps {
   doc: ProposalDocument;
   treeData: TreeNode;
   onReset: () => void;
+  onUpdateDoc: (doc: ProposalDocument) => void;
+  onSaveProject: (doc: ProposalDocument) => Promise<void>;
   onOpenPresentationStudio?: () => void;
 }
 
@@ -89,9 +92,12 @@ export const DocumentStudio: React.FC<DocumentStudioProps> = ({
   doc,
   treeData,
   onReset,
+  onUpdateDoc,
+  onSaveProject,
   onOpenPresentationStudio
 }) => {
   const [currentDoc, setCurrentDoc] = useState<ProposalDocument>(() => sanitizeAcademicText(doc));
+  useEffect(() => { onUpdateDoc(currentDoc); }, [currentDoc, onUpdateDoc]);
   const [activeTab, setActiveTab] = useState<"naskah" | "flowchart" | "tree" | "jadwal" | "slides" | "audit" | "defense" | "revisionMatrix">("naskah");
   const [workspaceCategory, setWorkspaceCategory] = useState<"naskah" | "metodologi" | "sidang" | "kualitas">("naskah");
   const [naskahSection, setNaskahSection] = useState<"all" | "frontmatter" | "bab1" | "bab2" | "bab3" | "bab4" | "bab5" | "backmatter">("all");
@@ -157,7 +163,7 @@ export const DocumentStudio: React.FC<DocumentStudioProps> = ({
     setInspectorCopilotLoading(true);
 
     try {
-      const res = await fetch("/api/gemini", {
+      const res = await aiFetch("/api/gemini", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -176,7 +182,7 @@ Jawablah dengan ringkas, tajam, bernas, berstandar akademik tinggi, tanpa klise 
         })
       });
       const data = await res.json();
-      const replyText = data.success && data.text ? data.text : "Konsistensi antara rumusan masalah Bab I dan variabel Bab III adalah kunci utama validitas naskah ini. Pastikan instrumen telah tervalidasi.";
+      const replyText = data.success && data.text ? data.text : "Asisten AI belum tersedia. Hubungkan Gemini dan kirim pertanyaan kembali.";
       setInspectorCopilotMessages(prev => [...prev, {
         id: `copilot-${Date.now()}`,
         sender: "copilot",
@@ -383,7 +389,7 @@ Jawablah dengan ringkas, tajam, bernas, berstandar akademik tinggi, tanpa klise 
     const activeFrontPages = frontmatterKeys.filter(k => !disabledSections.includes(k)).length;
     const bodyWords = totalWordsCount;
     // ~250 words per academic page with 1.5 line spacing and standard margins
-    const bodyPages = Math.max(isUNPPkl ? 14 : 18, Math.ceil(bodyWords / 250));
+    const bodyPages = Math.max(1, Math.ceil(bodyWords / 250));
     const pustakaPages = !disabledSections.includes("section-pustaka") ? Math.max(1, Math.ceil((currentDoc.bibliography?.length || 15) / 10)) : 0;
     const lampiranPages = !disabledSections.includes("section-lampiran") ? Math.max(1, Math.ceil((currentDoc.logbookEntries?.length || 8) / 6)) : 0;
 
@@ -391,7 +397,7 @@ Jawablah dengan ringkas, tajam, bernas, berstandar akademik tinggi, tanpa klise 
   }, [totalWordsCount, disabledSections, isUNPPkl, currentDoc]);
 
   const estimatedPageCount = Math.max(
-    currentDoc.targetDepthPages || 35,
+    1,
     estimatedPhysicalPages
   );
 
@@ -411,23 +417,9 @@ Jawablah dengan ringkas, tajam, bernas, berstandar akademik tinggi, tanpa klise 
       pushToHistory(scaled);
       setCurrentDoc(scaled);
 
-      const activeRecord: SavedProjectRecord = {
-        id: scaled.id || `proj-${Date.now().toString(36)}`,
-        userId: getStoredUser()?.id || 'usr-default',
-        title: scaled.title,
-        category: scaled.category,
-        targetEntity: scaled.targetEntity,
-        durationMonths: scaled.durationMonths,
-        stage: 'result',
-        answers: {},
-        documentData: scaled,
-        updatedAt: new Date().toISOString(),
-        createdAt: new Date().toISOString(),
-      };
-      saveProjectRecord(activeRecord);
 
       setToastMessage(
-        `✅ Target berhasil diskalakan ke ${targetPages} Halaman! Konten diperdalam secara substansial.`
+        `Target perencanaan diubah menjadi ${targetPages} halaman. Jumlah halaman aktual dan kedalaman isi perlu ditinjau.`
       );
     } catch (err) {
       console.error("Gagal melakukan penskalaan kedalaman dokumen:", err);
@@ -546,6 +538,54 @@ Jawablah dengan ringkas, tajam, bernas, berstandar akademik tinggi, tanpa klise 
   // 7-Phase Academic QA Pipeline live report
   const [qaReport, setQaReport] = useState<QAPipelineReport>(() => runAcademicQAPipeline(doc));
 
+  // Live Citation Verification State (Crossref & OpenAlex)
+  const [isVerifyingCitations, setIsVerifyingCitations] = useState(false);
+  const [verifiedCitationsMap, setVerifiedCitationsMap] = useState<Record<string | number, {
+    level: string;
+    source: string;
+    doi?: string;
+    isOpenAccess?: boolean;
+    isRetracted?: boolean;
+    confidenceScore?: number;
+  }>>({});
+
+  const handleVerifyAllCitations = async () => {
+    if (!currentDoc.bibliography || currentDoc.bibliography.length === 0) {
+      setToastMessage("Daftar pustaka kosong.");
+      return;
+    }
+    setIsVerifyingCitations(true);
+    try {
+      const res = await fetch("/api/academic/verify-citations", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ references: currentDoc.bibliography })
+      });
+      const data = await res.json();
+      if (data.success && Array.isArray(data.verified)) {
+        const map: Record<string | number, any> = {};
+        data.verified.forEach((v: any) => {
+          map[v.id] = {
+            level: v.verificationLevel,
+            source: v.providerSource,
+            doi: v.doi || v.cleanDoi,
+            isOpenAccess: v.isOpenAccess,
+            isRetracted: v.isRetracted,
+            confidenceScore: v.confidenceScore
+          };
+        });
+        setVerifiedCitationsMap(map);
+        setToastMessage(`✓ ${data.verifiedCount} dari ${data.totalChecked} referensi berhasil dicocokkan ke Crossref/OpenAlex.`);
+      } else {
+        setToastMessage(data.message || "Gagal memverifikasi referensi.");
+      }
+    } catch {
+      setToastMessage("Gagal terhubung ke API verifikasi akademik.");
+    } finally {
+      setIsVerifyingCitations(false);
+    }
+  };
+
   useEffect(() => {
     setQaReport(runAcademicQAPipeline(currentDoc));
   }, [currentDoc]);
@@ -565,37 +605,16 @@ Jawablah dengan ringkas, tajam, bernas, berstandar akademik tinggi, tanpa klise 
   const handleSaveToArchive = async () => {
     setIsSavingArchive(true);
     try {
-      const user = getStoredUser();
-      const record: SavedProjectRecord = {
-        id: currentDoc.id || `proj-${Date.now()}`,
-        userId: user.id || "usr-default",
-        title: currentDoc.title,
-        category: currentDoc.category,
-        targetEntity: currentDoc.targetEntity,
-        durationMonths: currentDoc.durationMonths,
-        stage: "result",
-        answers: {},
-        documentData: currentDoc,
-        treeGraph: treeData,
-        updatedAt: new Date().toISOString(),
-        createdAt: new Date().toISOString()
-      };
-      await saveProjectRecord(record);
+      await onSaveProject(currentDoc);
       setToastMessage("✓ Naskah berhasil disimpan ke Arsip Proyek!");
       setTimeout(() => setToastMessage(null), 3000);
     } catch (err) {
       console.error("Gagal menyimpan ke arsip:", err);
+      setToastMessage("Gagal menyimpan arsip. Periksa ruang penyimpanan browser.");
     } finally {
       setIsSavingArchive(false);
     }
   };
-
-  useEffect(() => {
-    const cleanDoc = sanitizeAcademicText(doc);
-    setCurrentDoc(cleanDoc);
-    setHistory([cleanDoc]);
-    setHistoryIndex(0);
-  }, [doc]);
 
   // Auto-Save effect to localStorage
   useEffect(() => {
@@ -698,7 +717,7 @@ Jawablah dengan ringkas, tajam, bernas, berstandar akademik tinggi, tanpa klise 
     setIsRefining(true);
     setRefineError(null);
     try {
-      const res = await fetch("/api/gemini/refine", {
+      const res = await aiFetch("/api/gemini/refine", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -1038,21 +1057,7 @@ NIP / NIK.
     setCurrentDoc(updatedDoc);
     setToastMessage(`Gaya penomoran diubah ke standar: ${newStyle === 'decimal' ? 'Desimal (1.1, 1.2)' : newStyle === 'alphanumeric' ? 'Alfanumerik (A., B.)' : 'Romawi (I.A, I.B)'}`);
     
-    // Auto sync to saved project cache
-    const projectRecord: SavedProjectRecord = {
-      id: updatedDoc.id,
-      userId: getStoredUser()?.id || 'usr-default',
-      title: updatedDoc.title,
-      category: updatedDoc.category,
-      targetEntity: updatedDoc.targetEntity,
-      durationMonths: updatedDoc.durationMonths,
-      stage: 'result',
-      answers: {},
-      documentData: updatedDoc,
-      updatedAt: new Date().toISOString(),
-      createdAt: new Date().toISOString(),
-    };
-    saveProjectRecord(projectRecord);
+
   };
 
   const handlePrint = () => {
@@ -1151,6 +1156,7 @@ NIP / NIK.
   return (
     <div className="w-full h-[calc(100vh-4rem)] max-h-[calc(100vh-4rem)] flex flex-col overflow-hidden bg-[#F8FAFC] dark:bg-[#080B12] text-[#0F172A] dark:text-[#F3F6FC]">
       
+      <div role="note" className="no-print border-b border-amber-300 bg-amber-50 px-4 py-2 text-xs leading-relaxed text-amber-950 dark:border-amber-900 dark:bg-amber-950 dark:text-amber-100">Draf otomatis dapat memuat data, hasil, atau referensi yang belum diverifikasi. Periksa dan ganti dengan bukti serta sumber asli sebelum digunakan.</div>
       {/* Toast Notification */}
       {toastMessage && (
         <div className="fixed bottom-6 right-6 z-50 flex items-center gap-2 px-4 py-3 bg-zinc-900 border border-zinc-700 text-zinc-100 text-xs rounded-xl shadow-2xl animate-in slide-in-from-bottom-5">
@@ -1227,7 +1233,7 @@ NIP / NIK.
           >
             <FileText className="w-3.5 h-3.5 text-[#7C9CFF]" />
             <span className="font-semibold text-[#0F172A] dark:text-[#F3F6FC]">
-              ~{estimatedPhysicalPages} Hal Riil (Target: {currentDoc.targetDepthPages || 35} Hal) ▾
+              ~{estimatedPhysicalPages} halaman perkiraan (Target: {currentDoc.targetDepthPages || 35} Hal) ▾
             </span>
             <span className="opacity-40">•</span>
             <span>~{totalWordsCount.toLocaleString("id-ID")} Kata</span>
@@ -1357,6 +1363,40 @@ NIP / NIK.
                   <div>
                     <p className="font-semibold text-[#0F172A] dark:text-[#F3F6FC]">Kutipan RIS (.ris)</p>
                     <p className="text-[10px] text-[#475569] dark:text-[#A4B1C7]">Untuk EndNote &amp; RefWorks</p>
+                  </div>
+                </button>
+
+                <div className="my-1 border-t border-[#E2E8F0] dark:border-[#253149]"></div>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsExportDropdownOpen(false);
+                    const backup = {
+                      title: currentDoc.title,
+                      category: currentDoc.category,
+                      targetEntity: currentDoc.targetEntity,
+                      stage: "result",
+                      answers: {},
+                      documentData: currentDoc,
+                      treeGraph: treeData,
+                      exportedAt: new Date().toISOString()
+                    };
+                    const blob = new Blob([JSON.stringify(backup, null, 2)], { type: "application/json" });
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement("a");
+                    a.href = url;
+                    a.download = `Cadangan_${currentDoc.category}_${(currentDoc.title || "naskah").slice(0, 25).replace(/[^a-zA-Z0-9]/g, "_")}.json`;
+                    a.click();
+                    URL.revokeObjectURL(url);
+                    setToastMessage("✓ File cadangan naskah (.json) berhasil diunduh.");
+                  }}
+                  className="w-full flex items-center gap-2.5 px-3 py-1.5 rounded-lg text-xs font-medium text-[#0F172A] dark:text-[#F3F6FC] hover:bg-[#F1F5F9] dark:hover:bg-[#172033] transition-colors text-left cursor-pointer"
+                >
+                  <FileCheck2 className="w-4 h-4 text-[#34D399] flex-shrink-0" />
+                  <div>
+                    <p className="font-semibold text-[#0F172A] dark:text-[#F3F6FC]">Cadangan Proyek (.json)</p>
+                    <p className="text-[10px] text-[#475569] dark:text-[#A4B1C7]">Simpan berkas lengkap agar aman</p>
                   </div>
                 </button>
 
@@ -1683,7 +1723,7 @@ NIP / NIK.
               }`}
             >
               <ShieldCheck className="w-3.5 h-3.5 text-[#34D399]" />
-              <span>Audit Turnitin &amp; QA</span>
+              <span>Pemeriksaan tulisan &amp; QA</span>
             </button>
           </div>
         )}
@@ -1861,7 +1901,7 @@ NIP / NIK.
                   {[
                     { id: "defense", label: "Simulasi Tanya Jawab Sidang", icon: ShieldAlert, color: "text-[#FBBF24]" },
                     { id: "revisionMatrix", label: "Matriks Revisi Dosen", icon: Layers, color: "text-[#9B8CFF]" },
-                    { id: "audit", label: "Audit Kepatuhan & Turnitin", icon: ShieldCheck, color: "text-[#34D399]" }
+                    { id: "audit", label: "Pemeriksaan tulisan", icon: ShieldCheck, color: "text-[#34D399]" }
                   ].map((s) => {
                     const isActive = activeTab === s.id;
                     const IconComp = s.icon;
@@ -4020,32 +4060,79 @@ NIP / NIK.
                     DAFTAR PUSTAKA
                   </h2>
                 </div>
-                <div className="no-print mt-2 sm:mt-0 sm:absolute sm:right-0 sm:top-1/2 sm:-translate-y-1/2">
+                <div className="no-print mt-2 sm:mt-0 sm:absolute sm:right-0 sm:top-1/2 sm:-translate-y-1/2 flex items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={handleVerifyAllCitations}
+                    disabled={isVerifyingCitations}
+                    className="text-[10px] font-semibold px-2.5 py-1 rounded-md bg-[#7C9CFF]/10 text-[#7C9CFF] hover:bg-[#7C9CFF]/20 border border-[#7C9CFF]/30 transition-all cursor-pointer flex items-center gap-1.5 disabled:opacity-50"
+                    title="Cocokkan DOI dan metadata naskah langsung ke Crossref & OpenAlex"
+                  >
+                    <RefreshCw className={`w-3 h-3 ${isVerifyingCitations ? 'animate-spin' : ''}`} />
+                    <span>{isVerifyingCitations ? "Memeriksa Crossref/OpenAlex..." : "Verifikasi Silang DOI"}</span>
+                  </button>
                   <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-[#F8FAFC] dark:bg-[#111827] text-[#64748B] dark:text-[#A4B1C7] border border-[#E2E8F0] dark:border-[#253149]">
                     {citationStyle === "apa" ? "STANDAR APA 7TH EDITION" : "STANDAR IEEE"}
                   </span>
                 </div>
               </div>
-              <div className="space-y-3 text-xs sm:text-sm text-[#334155] dark:text-[#CBD5E1] print:text-black">
-                {currentDoc.bibliography.map((bib, bIdx) => (
-                  <p key={bib.id} className="pl-6 -indent-6 leading-relaxed">
-                    {citationStyle === "ieee" ? (
-                      <>
-                        <span className="font-mono font-bold text-[#0F172A] dark:text-[#F3F6FC] mr-1.5">[{bIdx + 1}]</span>
-                        <span className="text-[#334155] dark:text-[#CBD5E1] print:text-black">{bib.author}</span>, "{bib.title}," <em>{bib.source}</em>, {bib.year}.
-                      </>
-                    ) : (
-                      <>
-                        <span className="font-medium text-[#334155] dark:text-[#CBD5E1] print:text-black">{bib.author}</span> ({bib.year}). <em>{bib.title}</em>. {bib.source}
-                      </>
-                    )}
-                    {bib.doiUrl && (
-                      <span className="block pl-0 font-mono text-[10px] text-[#64748B] dark:text-[#A4B1C7] print:text-gray-600 mt-0.5">
-                        DOI/URL: {bib.doiUrl}
-                      </span>
-                    )}
-                  </p>
-                ))}
+              <div className="space-y-4 text-xs sm:text-sm text-[#334155] dark:text-[#CBD5E1] print:text-black">
+                {currentDoc.bibliography.map((bib, bIdx) => {
+                  const verified = verifiedCitationsMap[bib.id];
+                  const cleanDoi = bib.doiUrl ? bib.doiUrl.replace(/^https?:\/\/doi\.org\//, "") : "";
+                  return (
+                    <div key={bib.id} className="pl-6 -indent-6 leading-relaxed">
+                      <p>
+                        {citationStyle === "ieee" ? (
+                          <>
+                            <span className="font-mono font-bold text-[#0F172A] dark:text-[#F3F6FC] mr-1.5">[{bIdx + 1}]</span>
+                            <span className="text-[#334155] dark:text-[#CBD5E1] print:text-black">{bib.author}</span>, "{bib.title}," <em>{bib.source}</em>, {bib.year}.
+                          </>
+                        ) : (
+                          <>
+                            <span className="font-medium text-[#334155] dark:text-[#CBD5E1] print:text-black">{bib.author}</span> ({bib.year}). <em>{bib.title}</em>. {bib.source}
+                          </>
+                        )}
+                      </p>
+                      <div className="indent-0 pl-0 mt-1 flex items-center gap-2 flex-wrap">
+                        {bib.doiUrl && (
+                          <a
+                            href={bib.doiUrl.startsWith("http") ? bib.doiUrl : `https://doi.org/${cleanDoi}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="font-mono text-[10px] text-[#7C9CFF] hover:underline flex items-center gap-1 print:text-gray-600"
+                          >
+                            <span>DOI: {cleanDoi || bib.doiUrl}</span>
+                            <ExternalLink className="w-2.5 h-2.5" />
+                          </a>
+                        )}
+                        {verified ? (
+                          verified.isRetracted ? (
+                            <span className="no-print inline-flex items-center gap-1 text-[9px] font-mono px-1.5 py-0.5 rounded bg-red-500/10 text-red-600 dark:text-red-400 border border-red-500/30">
+                              ⚠️ Dicabut (Retracted)
+                            </span>
+                          ) : verified.level !== "LEVEL_0_UNVERIFIED" ? (
+                            <span className="no-print inline-flex items-center gap-1 text-[9px] font-mono px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30">
+                              ✓ Terverifikasi {verified.source} {verified.isOpenAccess ? "• Open Access" : ""}
+                            </span>
+                          ) : (
+                            <span className="no-print inline-flex items-center gap-1 text-[9px] font-mono px-1.5 py-0.5 rounded bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/30">
+                              🔍 Belum Terindeks / Perlu Review
+                            </span>
+                          )
+                        ) : bib.doiUrl ? (
+                          <span className="no-print inline-flex items-center gap-1 text-[9px] font-mono px-1.5 py-0.5 rounded bg-zinc-100 dark:bg-zinc-800 text-zinc-500 border border-zinc-200 dark:border-zinc-700">
+                            DOI Tercatat
+                          </span>
+                        ) : (
+                          <span className="no-print inline-flex items-center gap-1 text-[9px] font-mono px-1.5 py-0.5 rounded bg-zinc-100 dark:bg-zinc-800 text-zinc-500 border border-zinc-200 dark:border-zinc-700">
+                            Sitasi Lokal
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })}
               </div>
             </section>
           )}
@@ -4531,7 +4618,7 @@ NIP / NIK.
                   Audit Kepatuhan &amp; Integritas Naskah
                 </h2>
                 <p className="text-xs text-zinc-600 dark:text-zinc-400 max-w-xl">
-                  Evaluasi deterministik terhadap standar Dikti, pedoman {currentDoc.campusGuideline?.campusName || "institusi"}, integritas sitasi DOI, serta konsistensi rumusan masalah dan kesimpulan.
+                  Pemeriksaan otomatis terbatas terhadap struktur dan konsistensi teks. Hasil bukan verifikasi sumber atau jaminan kepatuhan pedoman kampus.
                 </p>
               </div>
 
@@ -4548,6 +4635,7 @@ NIP / NIK.
                   </span>
                 </div>
 
+                <button type="button" onClick={() => setIsTurnitinModalOpen(true)} className="px-3 py-2 rounded-xl border border-blue-300 text-blue-700 dark:text-blue-300 text-xs font-semibold">Periksa tulisan</button>
                 <button
                   type="button"
                   onClick={() => {
@@ -4684,10 +4772,10 @@ NIP / NIK.
               <div className="p-8 rounded-xl bg-emerald-50/50 dark:bg-emerald-950/20 border border-emerald-200 dark:border-emerald-900 text-center space-y-2">
                 <CheckCircle2 className="w-8 h-8 text-emerald-500 mx-auto" />
                 <h4 className="text-sm font-bold text-emerald-900 dark:text-emerald-200">
-                  Seluruh Validator Akademik Lolos (100% Verified)
+                  Tidak ada temuan pada pemeriksaan otomatis
                 </h4>
                 <p className="text-xs text-emerald-700 dark:text-emerald-400 max-w-md mx-auto">
-                  Naskah telah mematuhi struktur bab Dikti, integritas sitasi DOI dua arah, serta konsistensi penuh antara rumusan masalah, tujuan, dan poin kesimpulan.
+                  Pemeriksaan ini terbatas pada aturan yang tersedia. Tinjau struktur, sumber, sitasi, dan kesesuaian pedoman kampus secara manual.
                 </p>
               </div>
             )}
@@ -4702,7 +4790,7 @@ NIP / NIK.
 
       {/* TAB 7: MATRIKS REVISI DOSEN */}
       {activeTab === "revisionMatrix" && (
-        <RevisionMatrixManager doc={currentDoc} />
+        <RevisionMatrixManager doc={currentDoc} onChange={(items) => setCurrentDoc(prev => ({ ...prev, revisionItems: items }))} />
       )}
 
           </div>
@@ -5063,7 +5151,7 @@ NIP / NIK.
             title="Klik untuk Mengatur Target Ketebalan Halaman (Dynamic Depth Scaling 100% Nyata)"
           >
             <FileText className="w-3.5 h-3.5" />
-            <span>~{estimatedPhysicalPages} Hal Riil / Target {currentDoc.targetDepthPages || 35} Hal ▾</span>
+            <span>~{estimatedPhysicalPages} halaman perkiraan / Target {currentDoc.targetDepthPages || 35} Hal ▾</span>
           </button>
 
           <div className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-[#F1F5F9] dark:bg-[#111827] border border-[#E2E8F0] dark:border-[#253149] text-[#0F172A] dark:text-[#F3F6FC]">
@@ -5296,8 +5384,8 @@ NIP / NIK.
                   <div className="p-3 rounded-xl border border-emerald-500/30 bg-emerald-500/10 text-emerald-800 dark:text-emerald-300 text-[11px] leading-relaxed flex items-start gap-2">
                     <CheckCircle2 className="w-4 h-4 shrink-0 text-emerald-500 mt-0.5" />
                     <div>
-                      <strong className="block font-semibold mb-0.5">100% Real Substantive Expansion Engine:</strong>
-                      Target halaman ini bukan sekadar angka pajangan. Ketika diterapkan, sistem secara otomatis mengekspansi kajian latar belakang makro-meso-mikro Bab I, menambah hingga 12 landasan teori &amp; matriks State-of-the-Art Bab II, mempertajam instrumen Bab III, dan melengkapi logbook 16 minggu sehingga ekspor DOCX &amp; cetak PDF Anda benar-benar mencapai ketebalan target!
+                      <strong className="block font-semibold mb-0.5">Target perencanaan</strong>
+                      Target ini membantu merencanakan panjang naskah. Jumlah halaman aktual bergantung pada isi dan format dokumen; penambahan fakta dan sumber memerlukan peninjauan Anda.
                     </div>
                   </div>
 
@@ -5312,12 +5400,12 @@ NIP / NIK.
                       {isScalingDepth ? (
                         <>
                           <RefreshCw className="w-4 h-4 animate-spin" />
-                          <span>Mengekspansi &amp; Meregenerasi Densitas Naskah...</span>
+                          <span>Menyimpan target...</span>
                         </>
                       ) : (
                         <>
                           <Sparkles className="w-4 h-4" />
-                          <span>⚡ Terapkan &amp; Skalakan Naskah ke {tempTargetPages} Halaman (100% Nyata)</span>
+                          <span>Simpan target {tempTargetPages} halaman</span>
                         </>
                       )}
                     </button>

@@ -28,6 +28,7 @@ export default function LiteratureSearchModal({
 }: LiteratureSearchModalProps) {
   const [query, setQuery] = useState(initialQuery);
   const [papers, setPapers] = useState<AcademicPaper[]>([]);
+  const [searchError, setSearchError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [copiedBibtex, setCopiedBibtex] = useState(false);
   const [addedIds, setAddedIds] = useState<Record<string, boolean>>({});
@@ -36,11 +37,13 @@ export default function LiteratureSearchModal({
     const targetQuery = (kw !== undefined ? kw : query).trim();
     if (!targetQuery) return;
     setIsLoading(true);
+    setSearchError("");
     try {
       const results = await searchSemanticScholarPapers(targetQuery, 6);
       setPapers(results);
     } catch (e) {
-      console.warn("Search papers failed:", e);
+      setPapers([]);
+      setSearchError("Pencarian tidak tersedia. Periksa koneksi dan coba lagi.");
     } finally {
       setIsLoading(false);
     }
@@ -73,7 +76,8 @@ export default function LiteratureSearchModal({
     <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-5 bg-black/50 backdrop-blur-xs animate-in fade-in duration-200">
       <div className="w-full max-w-4xl bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh] animate-in zoom-in-95 duration-150">
         
-        {/* Header */}
+        {searchError && <p role="alert" className="mx-4 my-2 rounded-lg bg-amber-50 p-3 text-sm text-amber-900">{searchError}</p>}
+      {/* Header */}
         <div className="px-6 py-4 border-b border-zinc-200 dark:border-zinc-850 flex items-center justify-between bg-zinc-50/50 dark:bg-zinc-900/50">
           <div className="flex items-center gap-3">
             <div className="w-9 h-9 rounded-xl bg-zinc-900 text-white dark:bg-zinc-100 dark:text-zinc-950 flex items-center justify-center shadow-xs">
