@@ -42,6 +42,7 @@ import {
 
 export default function Home() {
   const [showSplash, setShowSplash] = useState(true);
+  const [forceShowreel, setForceShowreel] = useState(false);
   const [currentUser, setCurrentUser] = useState<UserProfile>(() => getStoredUser());
   const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
   const [isSupabaseConfigured, setIsSupabaseConfigured] = useState(false);
@@ -474,7 +475,13 @@ export default function Home() {
     <>
       {/* 1. Cinematic Screen Loader Animation on Initial Mount */}
       {showSplash && (
-        <FirstTimeLoadingScreen onComplete={() => setShowSplash(false)} />
+        <FirstTimeLoadingScreen 
+          forceShow={forceShowreel}
+          onComplete={() => {
+            setShowSplash(false);
+            setForceShowreel(false);
+          }} 
+        />
       )}
 
       {/* 2. Full-Bleed Desktop & Mobile Responsive App Shell / Landing View */}
@@ -484,6 +491,10 @@ export default function Home() {
           onOpenAuth={() => setIsAuthModalOpen(true)}
           onOpenPayment={() => setIsPaymentModalOpen(true)}
           onOpenSuperadmin={() => setIsSuperadminModalOpen(true)}
+          onReplayShowreel={() => {
+            setForceShowreel(true);
+            setShowSplash(true);
+          }}
           currentUser={currentUser}
           isLoggedIn={isLoggedIn}
         />

@@ -26,7 +26,8 @@ import {
   ExternalLink,
   ChevronDown,
   Zap,
-  Crown
+  Crown,
+  Play
 } from "lucide-react";
 
 // Client-only Dynamic Import for Interactive 3D WebGL Glass Orb
@@ -56,6 +57,7 @@ interface LandingPageViewProps {
   onOpenAuth: () => void;
   onOpenPayment?: () => void;
   onOpenSuperadmin?: () => void;
+  onReplayShowreel?: () => void;
   currentUser: UserProfile;
   isLoggedIn: boolean;
 }
@@ -65,6 +67,7 @@ export const LandingPageView: React.FC<LandingPageViewProps> = ({
   onOpenAuth,
   onOpenPayment,
   onOpenSuperadmin,
+  onReplayShowreel,
   currentUser,
   isLoggedIn,
 }) => {
@@ -256,6 +259,17 @@ export const LandingPageView: React.FC<LandingPageViewProps> = ({
               >
                 Docs
               </a>
+              {onReplayShowreel && (
+                <button
+                  type="button"
+                  onClick={onReplayShowreel}
+                  className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-blue-50 dark:bg-blue-950/40 text-blue-600 dark:text-blue-400 border border-blue-200 dark:border-blue-900/60 hover:bg-blue-100 transition-colors cursor-pointer text-[11px] font-mono font-bold"
+                  title="Putar Animasi Motion Showreel 15 Detik (120 BPM)"
+                >
+                  <Play className="w-2.5 h-2.5 fill-current" />
+                  <span>Showreel (15s)</span>
+                </button>
+              )}
             </nav>
 
             {/* Subtle Vertical Divider */}

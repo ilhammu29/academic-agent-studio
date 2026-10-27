@@ -246,10 +246,10 @@ export const Hero3DOrb: React.FC<Hero3DOrbProps> = ({
         manualRotationRef.current.y += velocityRef.current.y;
       }
 
-      // Smooth multi-axis 3D rotation & tilt
-      const autoRotateY = Math.sin(elapsedTime * 0.4) * 0.18;
-      const autoRotateX = Math.cos(elapsedTime * 0.35) * 0.12;
-      const autoRollZ = Math.sin(elapsedTime * 0.25) * 0.08;
+      // Smooth continuous multi-axis 3D rotation & floating tilt
+      const autoRotateY = elapsedTime * 0.45; // Visible 360-degree continuous revolution
+      const autoRotateX = Math.sin(elapsedTime * 0.35) * 0.14;
+      const autoRollZ = Math.cos(elapsedTime * 0.25) * 0.08;
 
       const targetParallaxX = (mouseParallaxRef.current.y || 0) * 0.32;
       const targetParallaxY = (mouseParallaxRef.current.x || 0) * 0.42;

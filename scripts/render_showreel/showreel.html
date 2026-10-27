@@ -545,6 +545,17 @@
 
     // Initial render at t = 0
     window.seek(0);
+
+    // Continuous 60 FPS live playback loop for browser preview
+    let startTime = performance.now();
+    function livePlaybackLoop(now) {
+      if (!window.isHeadlessCapture) {
+        const elapsed = (now - startTime) / 1000;
+        window.seek(elapsed);
+      }
+      requestAnimationFrame(livePlaybackLoop);
+    }
+    requestAnimationFrame(livePlaybackLoop);
   </script>
 </body>
 </html>
