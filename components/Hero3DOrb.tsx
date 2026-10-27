@@ -20,6 +20,12 @@ export const Hero3DOrb: React.FC<Hero3DOrbProps> = ({
   const velocityRef = useRef<{ x: number; y: number }>({ x: 0, y: 0 });
   const isHoveredRef = useRef<boolean>(false);
 
+  // Use ref for mouse parallax so Three.js scene NEVER re-initializes or glitches on mouse move
+  const mouseParallaxRef = useRef<{ x: number; y: number }>(mouseParallax);
+  useEffect(() => {
+    mouseParallaxRef.current = mouseParallax;
+  }, [mouseParallax.x, mouseParallax.y]);
+
   useEffect(() => {
     const container = mountRef.current;
     if (!container) return;
@@ -220,8 +226,8 @@ export const Hero3DOrb: React.FC<Hero3DOrbProps> = ({
       // Update uniforms
       orbShaderMat.uniforms.uTime.value = elapsedTime;
       orbShaderMat.uniforms.uMouse.value.set(
-        mouseParallax.x || 0,
-        mouseParallax.y || 0
+        mouseParallaxRef.current.x || 0,
+        mouseParallaxRef.current.y || 0
       );
 
       // Smooth hover interpolation
@@ -245,8 +251,8 @@ export const Hero3DOrb: React.FC<Hero3DOrbProps> = ({
       const autoRotateX = Math.cos(elapsedTime * 0.35) * 0.12;
       const autoRollZ = Math.sin(elapsedTime * 0.25) * 0.08;
 
-      const targetParallaxX = (mouseParallax.y || 0) * 0.32;
-      const targetParallaxY = (mouseParallax.x || 0) * 0.42;
+      const targetParallaxX = (mouseParallaxRef.current.y || 0) * 0.32;
+      const targetParallaxY = (mouseParallaxRef.current.x || 0) * 0.42;
 
       orbPivot.rotation.x = THREE.MathUtils.lerp(
         orbPivot.rotation.x,
@@ -377,7 +383,7 @@ export const Hero3DOrb: React.FC<Hero3DOrbProps> = ({
       normalTexture.dispose();
       renderer.dispose();
     };
-  }, [mouseParallax.x, mouseParallax.y]);
+  }, []);
 
   return (
     <div 

@@ -72,7 +72,6 @@ export const LandingPageView: React.FC<LandingPageViewProps> = ({
 
   // 3D Mouse Parallax & Gyro Tilt State
   const [mouseOffset, setMouseOffset] = useState({ x: 0, y: 0 });
-  const [isHoveringOrb, setIsHoveringOrb] = useState(false);
   const heroContainerRef = useRef<HTMLDivElement>(null);
 
   const handleHeroMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
@@ -85,7 +84,6 @@ export const LandingPageView: React.FC<LandingPageViewProps> = ({
 
   const handleHeroMouseLeave = () => {
     setMouseOffset({ x: 0, y: 0 });
-    setIsHoveringOrb(false);
   };
 
   const handleQuickStart = (e: React.FormEvent) => {
@@ -318,8 +316,6 @@ export const LandingPageView: React.FC<LandingPageViewProps> = ({
             {/* Center: Real Interactive 3D WebGL Holographic Glass Orb */}
             <div 
               className="relative my-2 lg:my-0 flex-shrink-0 flex flex-col items-center justify-center w-56 h-56 sm:w-64 sm:h-64 lg:w-76 lg:h-76 xl:w-84 xl:h-84"
-              onMouseEnter={() => setIsHoveringOrb(true)}
-              onMouseLeave={() => setIsHoveringOrb(false)}
             >
               {/* Layer 1: Ambient Colored Halo Glow Behind Sphere */}
               <div 
@@ -330,12 +326,7 @@ export const LandingPageView: React.FC<LandingPageViewProps> = ({
               />
 
               {/* Layer 2: Real 3D Three.js WebGL Interactive Floating Sphere */}
-              <div 
-                className="anim-orb-float relative z-10 w-full h-full flex items-center justify-center transition-transform duration-200 ease-out"
-                style={{
-                  transform: `translateZ(${isHoveringOrb ? 20 : 0}px)`,
-                }}
-              >
+              <div className="anim-orb-float relative z-10 w-full h-full flex items-center justify-center">
                 <Hero3DOrb 
                   mouseParallax={mouseOffset} 
                   className="w-full h-full"
@@ -362,13 +353,8 @@ export const LandingPageView: React.FC<LandingPageViewProps> = ({
             </div>
           </div>
 
-          {/* Subtitle Description Paragraph */}
-          <p className="mt-8 sm:mt-10 text-sm sm:text-base text-[#475569] dark:text-[#94A3B8] max-w-xl mx-auto text-center leading-relaxed font-normal">
-            Academic Agent Studio is your AI-powered assistant for creating high-quality academic documents — from skripsi and final projects to research papers and internship reports.
-          </p>
-
           {/* Call to Action Buttons */}
-          <div className="mt-8 sm:mt-10 flex flex-wrap items-center justify-center gap-4">
+          <div className="mt-10 sm:mt-14 flex flex-wrap items-center justify-center gap-4">
             {/* Start Creating -> Button (Black Pill) */}
             <button
               type="button"
