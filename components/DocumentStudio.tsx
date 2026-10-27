@@ -273,9 +273,12 @@ Jawablah dengan ringkas, tajam, bernas, berstandar akademik tinggi, tanpa klise 
       });
     }
     if (currentDoc.bab2?.conceptualFramework) count += currentDoc.bab2.conceptualFramework.split(/\s+/).length;
+    if (currentDoc.bab2?.hypotheses) count += currentDoc.bab2.hypotheses.join(" ").split(/\s+/).length;
 
     // Bab 3
     if (currentDoc.bab3?.metodePelaksanaan) count += currentDoc.bab3.metodePelaksanaan.split(/\s+/).length;
+    if (currentDoc.bab3?.populationSample) count += currentDoc.bab3.populationSample.split(/\s+/).length;
+    if (currentDoc.bab3?.ethicalConsiderations) count += currentDoc.bab3.ethicalConsiderations.split(/\s+/).length;
     if (currentDoc.bab3?.operationalDefinitions) {
       currentDoc.bab3.operationalDefinitions.forEach(d => {
         count += (d.variable + " " + d.definition + " " + d.parameterTool).split(/\s+/).length;
@@ -285,6 +288,12 @@ Jawablah dengan ringkas, tajam, bernas, berstandar akademik tinggi, tanpa klise 
 
     // Bab 4
     if (currentDoc.bab4?.penutup) count += currentDoc.bab4.penutup.split(/\s+/).length;
+    if (currentDoc.bab4?.disseminationPlan) count += currentDoc.bab4.disseminationPlan.split(/\s+/).length;
+    if (currentDoc.bab4?.budgetPlan) {
+      currentDoc.bab4.budgetPlan.forEach(b => {
+        count += (b.item + " " + b.category).split(/\s+/).length;
+      });
+    }
     if (currentDoc.bab4?.jadwalMatriks) {
       currentDoc.bab4.jadwalMatriks.forEach(j => {
         count += (j.phase + " " + j.output + " " + j.activities.join(" ")).split(/\s+/).length;
@@ -292,15 +301,19 @@ Jawablah dengan ringkas, tajam, bernas, berstandar akademik tinggi, tanpa klise 
     }
 
     // Bab 5
+    if (currentDoc.bab5?.kesimpulanUmum) count += currentDoc.bab5.kesimpulanUmum.split(/\s+/).length;
     if (currentDoc.bab5?.kesimpulanUsulan) count += currentDoc.bab5.kesimpulanUsulan.join(" ").split(/\s+/).length;
+    if (currentDoc.bab5?.kontribusiTeoretis) count += currentDoc.bab5.kontribusiTeoretis.split(/\s+/).length;
     if (currentDoc.bab5?.kontribusiPraktis) count += currentDoc.bab5.kontribusiPraktis.join(" ").split(/\s+/).length;
+    if (currentDoc.bab5?.saranPraktis) count += currentDoc.bab5.saranPraktis.join(" ").split(/\s+/).length;
+    if (currentDoc.bab5?.sustainabilityPlan) count += currentDoc.bab5.sustainabilityPlan.split(/\s+/).length;
     if (currentDoc.bab5?.mitigasiRisiko) {
       currentDoc.bab5.mitigasiRisiko.forEach(m => {
         count += (m.risiko + " " + m.mitigasi).split(/\s+/).length;
       });
     }
 
-    // Front & Back Matter
+    // Front, Back Matter & Appendices
     if (currentDoc.executiveSummary) count += currentDoc.executiveSummary.split(/\s+/).length;
     if (currentDoc.preface) count += currentDoc.preface.split(/\s+/).length;
     if (currentDoc.abstractId) count += currentDoc.abstractId.split(/\s+/).length;
@@ -308,6 +321,11 @@ Jawablah dengan ringkas, tajam, bernas, berstandar akademik tinggi, tanpa klise 
     if (currentDoc.bibliography) {
       currentDoc.bibliography.forEach(b => {
         count += (b.author + " " + b.title + " " + b.source).split(/\s+/).length;
+      });
+    }
+    if (currentDoc.appendices) {
+      currentDoc.appendices.forEach(a => {
+        count += (a.title + " " + a.content).split(/\s+/).length;
       });
     }
     if (currentDoc.logbookEntries) {
@@ -326,7 +344,13 @@ Jawablah dengan ringkas, tajam, bernas, berstandar akademik tinggi, tanpa klise 
   const [tempTargetPages, setTempTargetPages] = useState<number>(currentDoc.targetDepthPages || 35);
   const [isScalingDepth, setIsScalingDepth] = useState<boolean>(false);
   const [disabledSections, setDisabledSections] = useState<string[]>([]);
-  const isUNPPkl = currentDoc.reportType === "laporan_pkl_unp" || currentDoc.campusGuideline?.id === "unp";
+  
+  // UNP PKL applies ONLY if the document is actually a Magang / PKL report
+  const isMagangDoc = currentDoc.category === "magang" || 
+    currentDoc.reportType === "magang" || 
+    currentDoc.reportType === "laporan_magang" || 
+    currentDoc.reportType === "laporan_pkl_unp";
+  const isUNPPkl = isMagangDoc && (currentDoc.reportType === "laporan_pkl_unp" || currentDoc.campusGuideline?.id === "unp");
 
   // Synchronize target pages whenever doc updates
   useEffect(() => {

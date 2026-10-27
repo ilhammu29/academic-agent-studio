@@ -51,8 +51,12 @@ export function planDocumentOutline(
   reportType?: string,
   targetEntity?: string
 ): DocumentOutlinePlan {
-  const isUNPPkl = reportType === 'laporan_pkl_unp' || 
-    ((category === 'magang' || reportType === 'magang') && (/unp|universitas negeri padang|ft unp/i.test(title) || /unp|universitas negeri padang|ft unp/i.test(targetEntity || '')));
+  const isMagang = category === 'magang' || reportType === 'magang' || reportType === 'laporan_magang' || reportType === 'laporan_pkl_unp';
+  const isUNPPkl = isMagang && (
+    reportType === 'laporan_pkl_unp' || 
+    /unp|universitas negeri padang|ft unp/i.test(title) || 
+    /unp|universitas negeri padang|ft unp/i.test(targetEntity || '')
+  );
 
   const docType: AcademicDocumentType = 
     isUNPPkl ? 'laporan_pkl_unp' :
@@ -179,18 +183,29 @@ export function buildDenseAcademicDocument(
   targetDepthPages?: number
 ): ProposalDocument {
   const plan = planDocumentOutline(title, category, reportType, targetEntity);
-  const isUNPPkl = plan.documentType === 'laporan_pkl_unp' || 
+  const isMagangDoc = category === 'magang' || 
+    reportType === 'laporan_pkl_unp' || 
+    reportType === 'magang' || 
+    reportType === 'laporan_magang' || 
+    plan.documentType === 'laporan_pkl_unp' || 
+    plan.documentType === 'laporan_magang' || 
+    plan.documentType === 'proposal_magang';
+
+  const isUNPPkl = isMagangDoc && (
+    plan.documentType === 'laporan_pkl_unp' || 
+    reportType === 'laporan_pkl_unp' ||
     campusGuideline?.id === 'unp' || 
     /unp|universitas negeri padang|ft unp/i.test(institution || '') || 
-    /unp|universitas negeri padang|ft unp/i.test(facultyMajor || '');
+    /unp|universitas negeri padang|ft unp/i.test(facultyMajor || '')
+  );
 
-  const isMagang = category === 'magang' || isUNPPkl;
-  const isSkripsiOrTesis = (category === 'skripsi' || category === 'penelitian' || reportType === 'skripsi' || reportType === 'tesis' || reportType === 'tugas_akhir') && !isUNPPkl;
+  const isMagang = isMagangDoc;
+  const isSkripsiOrTesis = (category === 'skripsi' || category === 'penelitian' || reportType === 'skripsi' || reportType === 'tesis' || reportType === 'tugas_akhir') && !isMagang;
   const entity = targetEntity || (isUNPPkl ? 'PT Semen Padang (Persero)' : 'Instansi Mitra Sasaran');
-  const campus = isUNPPkl && (!institution || institution.toLowerCase().includes('nasional')) 
+  const campus = (campusGuideline?.id === 'unp' || /unp|universitas negeri padang|ft unp/i.test(institution || ''))
     ? 'Universitas Negeri Padang (UNP)' 
     : (institution || 'Universitas Nasional');
-  const faculty = isUNPPkl && (!facultyMajor || facultyMajor.toLowerCase().includes('terkait')) 
+  const faculty = (campusGuideline?.id === 'unp' || /unp|universitas negeri padang|ft unp/i.test(facultyMajor || ''))
     ? 'Fakultas Teknik (FT UNP)' 
     : (facultyMajor || 'Fakultas Terkait');
   const author = candidateName || (isUNPPkl ? 'M. Ilham Pratama' : 'Peneliti Akademik');
@@ -640,6 +655,10 @@ Penulis menyadari laporan ini masih memiliki keterbatasan. Oleh karena itu, sara
     ]
   };
 
+  if (effectiveTargetPages > 25) {
+    return scaleAcademicDocumentDepth(finalDoc, effectiveTargetPages);
+  }
+
   return sanitizeAcademicText(finalDoc);
 }
 
@@ -660,14 +679,28 @@ export function scaleAcademicDocumentDepth(
   requestedPages: number
 ): ProposalDocument {
   const targetPages = Math.max(15, Math.min(150, Math.round(requestedPages)));
-  const isUNPPkl = baseDoc.reportType === 'laporan_pkl_unp' || 
+  
+  const isMagangDoc = baseDoc.category === 'magang' || 
+    baseDoc.reportType === 'laporan_pkl_unp' || 
+    baseDoc.reportType === 'magang' || 
+    baseDoc.reportType === 'laporan_magang';
+
+  const isUNPPkl = isMagangDoc && (
+    baseDoc.reportType === 'laporan_pkl_unp' || 
     baseDoc.campusGuideline?.id === 'unp' || 
-    /unp|universitas negeri padang|ft unp/i.test(baseDoc.institution || '');
+    /unp|universitas negeri padang|ft unp/i.test(baseDoc.institution || '')
+  );
 
   const entity = baseDoc.targetEntity || (isUNPPkl ? 'PT Semen Padang (Persero)' : 'Instansi Mitra Sasaran');
-  const campus = baseDoc.institution || (isUNPPkl ? 'Universitas Negeri Padang (UNP)' : 'Perguruan Tinggi');
+  const campus = (baseDoc.campusGuideline?.id === 'unp' || /unp|universitas negeri padang|ft unp/i.test(baseDoc.institution || ''))
+    ? 'Universitas Negeri Padang (UNP)'
+    : (baseDoc.institution || 'Perguruan Tinggi');
   const title = baseDoc.title;
-  const faculty = baseDoc.facultyMajor || 'Fakultas Terkait';
+  const author = baseDoc.candidateName || (isUNPPkl ? 'M. Ilham Pratama' : 'Peneliti Akademik');
+  const nim = baseDoc.candidateId || (isUNPPkl ? '21063045 / TM. 2021' : 'NIM-2026-AKAD');
+  const faculty = (baseDoc.campusGuideline?.id === 'unp' || /unp|universitas negeri padang|ft unp/i.test(baseDoc.facultyMajor || ''))
+    ? 'Fakultas Teknik (FT UNP)'
+    : (baseDoc.facultyMajor || 'Fakultas Terkait');
 
   // Deep clone to ensure immutability
   const doc: ProposalDocument = JSON.parse(JSON.stringify(baseDoc));
@@ -680,23 +713,40 @@ export function scaleAcademicDocumentDepth(
     const existingLatar = [...(doc.bab1.latarBelakang || [])];
 
     const deepMacroMesoMicroParagraphs = [
-      `Tinjauan pada tataran makro menunjukkan bahwa transformasi pendidikan tinggi dan ekosistem riset nasional, sebagaimana diamanatkan dalam Permendikbudristek No. 53 Tahun 2023 tentang Penjaminan Mutu Pendidikan Tinggi, menuntut adanya integrasi yang kokoh antara keunggulan akademis dan relevansi industri. Dalam kerangka Rencana Induk Riset Nasional (RIRN), perguruan tinggi dituntut untuk menghasilkan karya ilmiah terapan yang tidak hanya berhenti pada publikasi teoritis di jurnal ilmiah, melainkan mampu memberikan intervensi nyata dalam memecahkan kendala sistemik pada sektor-sektor strategis masyarakat dan dunia usaha.`,
-      `Pada dimensi meso industri dan kelembagaan, dinamika operasional pada ${entity} menghadapi gelombang disrupsi teknologi dan peningkatan standar akuntabilitas yang semakin ketat. Pola kerja tradisional yang mengandalkan intuisi manajerial atau penanganan manual terbukti mengakibatkan timbulnya deviasi proses yang mencapai 20% hingga 35% dari batas toleransi yang diizinkan. Ketiadaan standardisasi berbasis data objektif ini menciptakan inefisiensi yang berdampak langsung pada peningkatan biaya operasional serta memperpanjang durasi siklus layanan (*cycle time*).`,
+      `Tinjauan pada tataran makro menunjukkan bahwa transformasi pendidikan tinggi dan ekosistem riset nasional, sebagaimana diamanatkan dalam Permendikbudristek No. 53 Tahun 2023 tentang Penjaminan Mutu Pendidikan Tinggi, menuntut adanya integrasi yang kokoh antara keunggulan akademis dan relevansi industri. Dalam kerangka Rencana Induk Riset Nasional (RIRN 2020–2045), perguruan tinggi dituntut untuk menghasilkan karya ilmiah terapan yang tidak hanya berhenti pada publikasi teoritis di jurnal ilmiah, melainkan mampu memberikan intervensi nyata dalam memecahkan kendala sistemik pada sektor-sektor strategis masyarakat dan dunia usaha. Standar kompetensi lulusan diarahkan pada kemampuan rekayasa nilai (*value engineering*) yang berbasis pada bukti empiris terukur dan validitas metodologis yang dapat dipertanggungjawabkan di hadapan komunitas saintifik internasional.`,
+      `Pada dimensi meso industri dan kelembagaan, dinamika operasional pada ${entity} menghadapi gelombang disrupsi teknologi dan peningkatan standar akuntabilitas yang semakin ketat. Pola kerja tradisional yang mengandalkan intuisi manajerial atau penanganan manual terbukti mengakibatkan timbulnya deviasi proses yang mencapai 20% hingga 35% dari batas toleransi yang diizinkan. Ketiadaan standardisasi berbasis data objektif ini menciptakan inefisiensi yang berdampak langsung pada peningkatan biaya operasional serta memperpanjang durasi siklus layanan (*cycle time*). Fenomena ini menegaskan bahwa modernisasi tata kelola proses bukan lagi sekadar pilihan inovatif, melainkan prasyarat mutlak untuk mempertahankan keandalan sistem dan kepercayaan pemangku kepentingan.`,
       `Pada tataran mikro di unit kerja sasaran, data pra-survei diagnostik yang dihimpun selama observasi pendahuluan mengindikasikan adanya kesenjangan (*empirical gap*) yang signifikan antara rancangan Standar Prosedur Operasional (SOP) dengan implementasi faktual di lapangan. Wawancara awal dengan personil pelaksana mengungkapkan bahwa lebih dari 60% hambatan disebabkan oleh ketiadaan sistem pendukung keputusan yang adaptif serta instrumen pengukuran performa yang belum terkalibrasi secara saintifik. Kondisi ini menuntut hadirnya kajian sistematis yang menggabungkan metode analisis mutakhir dengan bukti empiris yang dapat dipertanggungjawabkan.`,
       `Kesenjangan teoretis (*theoretical gap*) semakin mempertegas urgensi penelitian ini. Meskipun literatur internasional telah banyak membahas konsep mitigasi deviasi operasional, sebagian besar publikasi berfokus pada lingkungan industri berteknologi tinggi di negara maju dengan asumsi ketersediaan data yang sempurna (*idealized conditions*). Sangat sedikit penelitian yang membedah efektivitas intervensi sistemik pada lokus negara berkembang dengan keterbatasan infrastruktur seperti yang dihadapi ${entity}. Dengan demikian, penelitian ini memiliki posisi strategis (*strategic positioning*) untuk mengisi kekosongan literatur sekaligus menyediakan model replikasi bagi perguruan tinggi lain.`,
-      `Sistematika penulisan naskah akademik ini disusun secara runtut ke dalam lima bab utama guna menjamin koherensi logika berpikir ilmiah: Bab I Pendahuluan menyajikan urgensi masalah, rumusan, batasan, tujuan, dan manfaat penelitian; Bab II Tinjauan Pustaka membedah landasan teori mutakhir, kerangka konseptual, dan sintesis State-of-the-Art; Bab III Metodologi menguraikan desain operasional, populasi-sampel, instrumen, dan uji statistik inferensial; Bab IV Jadwal Pelaksanaan & Anggaran merinci matriks WBS 16 minggu kerja dan alokasi biaya; serta Bab V Penutup merangkum kesimpulan, kontribusi, dan mitigasi risiko komprehensif.`
+      `Ditinjau dari perspektif epistemologis, penelitian ini dirancang untuk menguji batas keberlakuan teori-teori mapan ketika dihadapkan pada variabilitas parameter lapangan yang dinamis. Pendekatan positivistik kuantitatif yang diadopsi memastikan bahwa setiap klaim inferensial didasarkan pada data terukur dengan tingkat signifikansi statistik yang ketat (alpha = 0,05). Melalui perancangan instrumen ukur yang tervalidasi secara psikometris dan pengujian empiris berulang, penelitian ini memberikan sumbangsih metodologis dalam menjembatani abstraksi teori ke dalam instrumen praktis yang dapat langsung dieksekusi oleh praktisi di lapangan.`,
+      `Sistematika penulisan naskah akademik ini disusun secara runtut ke dalam lima bab utama guna menjamin koherensi logika berpikir ilmiah: Bab I Pendahuluan menyajikan urgensi masalah, identifikasi, batasan, rumusan, tujuan, manfaat, dan sistematika penulisan; Bab II Tinjauan Pustaka membedah landasan teori mutakhir, kerangka konseptual, sintesis State-of-the-Art PRISMA 2020, dan hipotesis penelitian; Bab III Metodologi Penelitian menguraikan desain operasional, populasi dan penentuan sampel rumus Slovin, definisi operasional variabel, kalibrasi instrumen Aiken's V, uji reliabilitas Cronbach's Alpha, serta uji asumsi klasik dan analisis inferensial; Bab IV Jadwal Pelaksanaan & Anggaran merinci matriks WBS 16 minggu kerja dan alokasi biaya standar SBM Dikti; serta Bab V Penutup merangkum kesimpulan komprehensif, implikasi teoretis-praktis, dan matriks mitigasi risiko 5x5.`
+    ];
+
+    const deepParagraphsBatch2 = [
+      `Analisis tren bibliometrik dalam lima tahun terakhir (2020–2025) menunjukkan peningkatan minat riset global terhadap otomatisasi proses berbasis bukti sebesar 42% per tahun. Namun, meta-analisis terhadap 150 artikel terindeks Scopus membuktikan bahwa mayoritas penelitian terdahulu memiliki keterbatasan pada aspek validitas eksternal, di mana model yang dikembangkan hanya diuji coba dalam skala simulasi laboratorium atau dataset sintetik tertutup. Ketiadaan pengujian pada lingkungan operasional aktif (*live operational environment*) menyebabkan tingkat keberhasilan adopsi di industri nyata masih berada di bawah angka 50%. Penelitian ini secara sadar mengatasi keterbatasan tersebut dengan mengintegrasikan pengujian langsung pada ekosistem operasional ${entity}.`,
+      `Urgensi pemecahan masalah ini juga berkaitan erat dengan agenda mitigasi risiko kelembagaan. Keterlambatan dalam mengidentifikasi dan menangani anomali sistemik berpotensi menimbulkan kerugian finansial yang signifikan serta penurunan reputasi institusi di mata pengguna layanan. Berdasarkan data historis tiga tahun terakhir pada unit penempatan, akumulasi kerugian waktu produktif (*downtime*) akibat galat manual mencapai rata-rata 180 jam kerja per tahun. Melalui perancangan model intervensi berbasis kaidah saintifik yang diusulkan dalam penelitian "${title}", potensi waktu henti tersebut diproyeksikan dapat direduksi hingga lebih dari 65%.`,
+      `Ditinjau dari aspek kemanfaatan epistemologis jangka panjang, keberhasilan usulan penelitian "${title}" ini diproyeksikan menjadi tonggak penting dalam memperkaya kurikulum berbasis luaran (*Outcome-Based Education / OBE*) pada ${faculty} ${campus}. Melalui pembuktian empiris yang terdokumentasi rapi, luaran studi ini tidak hanya bermanfaat secara praktis bagi ${entity}, melainkan juga menjadi rujukan otoritatif bagi para akademisi dan peneliti masa depan dalam memformulasikan solusi rekayasa nilai yang berkelanjutan.`,
+      `Sebagai sintesis dari keseluruhan latar belakang tersebut, penelitian ini memformulasikan sebuah kerangka kerja terpadu yang memadukan keunggulan teoritis dengan ketajaman analisis empiris. Keberadaan instrumen yang terstandarisasi, kejelasan batasan operasional, serta keterlacakan data yang transparan menjadi fondasi utama yang membedakan penelitian ini dari karya-karya terdahulu. Dengan demikian, pelaksanaan penelitian ini memiliki landasan ilmiah, yuridis, dan praktis yang sangat kuat untuk direalisasikan secara tuntas.`
     ];
 
     if (targetPages >= 45 && existingLatar.length < 9) {
       existingLatar.splice(3, 0, ...deepMacroMesoMicroParagraphs.slice(0, 3));
     }
-    if (targetPages >= 65 && existingLatar.length < 12) {
+    if (targetPages >= 65 && existingLatar.length < 13) {
       existingLatar.splice(existingLatar.length - 1, 0, ...deepMacroMesoMicroParagraphs.slice(3));
     }
-    if (targetPages >= 85 && existingLatar.length < 15) {
-      existingLatar.push(
-        `Ditinjau dari aspek kemanfaatan epistemologis jangka panjang, keberhasilan usulan penelitian "${title}" ini diproyeksikan menjadi tonggak penting dalam memperkaya kurikulum berbasis luaran (*Outcome-Based Education / OBE*) pada ${faculty} ${campus}. Melalui pembuktian empiris yang terdokumentasi rapi, luaran studi ini tidak hanya bermanfaat secara praktis bagi ${entity}, melainkan juga menjadi rujukan otoritatif bagi para akademisi dan peneliti masa depan dalam memformulasikan solusi rekayasa nilai yang berkelanjutan.`
-      );
+    if (targetPages >= 85 && existingLatar.length < 17) {
+      existingLatar.splice(existingLatar.length - 2, 0, ...deepParagraphsBatch2);
+    }
+    if (targetPages >= 95 && existingLatar.length < 23) {
+      const deepParagraphsBatch3 = [
+        `Kajian komparatif terhadap standar penjaminan mutu internasional, seperti akreditasi keteknikan dan komputasi ABET / IABEE serta siklus penjaminan mutu ISO 9001:2015, mengamanatkan bahwa setiap perancangan sistem intervensi wajib melalui uji kelayakan bertingkat yang mencakup aspek keandalan, keselamatan, serta dampak lingkungan kerja. Pada ${entity}, evaluasi pendahuluan menunjukkan bahwa ketiadaan sistem pemantauan yang terintegrasi secara otomatis menyebabkan beban pelaporan berkala menjadi terfragmentasi dan lambat disintesis oleh pengambil kebijakan.`,
+        `Ditinjau dari aspek kelayakan ekonomi dan operasional (*economic and operational feasibility*), inefisiensi alur kerja saat ini menimbulkan estimasi kerugian oportunitas (*opportunity loss*) yang cukup besar akibat lamanya waktu tunggu (*lead time*) penyelesaian siklus kerja. Melalui model intervensi yang diusulkan dalam penelitian "${title}", proses verifikasi yang sebelumnya berlangsung secara manual dapat diotomatisasi hingga 70%, yang diproyeksikan mampu meningkatkan throughput layanan dan mereduksi deviasi kesalahan hingga taraf signifikansi alpha = 0,05.`,
+        `Aspek kesiapan budaya organisasi (*organizational change readiness*) juga menjadi fokus perhatian utama dalam perancangan penelitian ini. Transformasi metodologis tidak akan mampu bertahan lama apabila personil pelaksana di lini depan mengalami resistensi psikologis atau kesulitan operasional. Oleh karena itu, pendekatan penelitian ini mengintegrasikan strategi pendampingan partisipatif dan perancangan instrumen yang ergonomis guna menjamin tercapainya transisi budaya kerja yang mulus dan berkelanjutan di ${entity}.`,
+        `Secara filosofis dan epistemologis, karya ilmiah ini meletakkan dasar pemikiran bahwa kebenaran saintifik harus dapat diverifikasi melalui data empiris yang dapat diuji ulang (*replicable*). Kerangka positivistik yang memayungi penelitian ini menolak asumsi-asumsi spekulatif dan menuntut adanya keterlacakan hubungan kausal yang kokoh antara perlakuan variabel bebas terhadap perubahan pada variabel terikat, sehingga luaran yang dihasilkan memiliki bobot kontribusi yang tinggi bagi khazanah keilmuan nasional.`,
+        `Analisis data runtun waktu (*time-series baseline analysis*) yang dihimpun selama tiga tahun terakhir di ${entity} mengonfirmasi adanya pola fluktuasi kinerja musiman yang berulang. Tanpa adanya model prediktif berbasis bukti yang adaptif, manajemen sering kali terjebak dalam pola penanganan reaktif (*firefighting management*) yang menyedot alokasi anggaran pemeliharaan darurat. Penelitian ini merumuskan instrumen monitoring prediktif untuk memutus siklus reaktif tersebut secara permanen.`,
+        `Sebagai komitmen terhadap keberlanjutan hasil riset, seluruh instrumen, modul Standard Operating Procedure (SOP), dan rekomendasi teknis yang dihasilkan akan diintegrasikan ke dalam kerangka Continuous Quality Improvement (CQI) di ${campus} dan ${entity}. Hal ini menjamin bahwa manfaat dari penelitian "${title}" tidak bersifat sesaat, melainkan menjadi aset pengetahuan institusional yang dapat terus dikembangkan oleh generasi peneliti berikutnya.`
+      ];
+      existingLatar.splice(existingLatar.length - 1, 0, ...deepParagraphsBatch3);
     }
     doc.bab1.latarBelakang = existingLatar;
 
@@ -706,18 +756,32 @@ export function scaleAcademicDocumentDepth(
         `Bagaimana formulasi model mitigasi risiko dan keberlanjutan intervensi sistem agar dapat diintegrasikan secara permanen ke dalam Standard Operating Procedure di ${entity}?`
       );
     }
+    if (targetPages >= 80 && doc.bab1.rumusanMasalah.length < 5) {
+      doc.bab1.rumusanMasalah.push(
+        `Sejauh mana dampak implementasi model terhadap peningkatan efisiensi biaya operasional dan kepuasan pemangku kepentingan dalam jangka menengah (1-3 tahun ke depan)?`
+      );
+    }
+
     if (targetPages >= 50 && doc.bab1.batasanMasalah.length < 5) {
       doc.bab1.batasanMasalah.push(
-        `Pengujian instrumen dan validitas konstruksi dibatasi pada parameter reliabilitas internal dengan tingkat signifikansi alpha = 0,05.`
+        `Pengujian instrumen dan validitas konstruksi dibatasi pada parameter reliabilitas internal dengan tingkat signifikansi alpha = 0,05.`,
+        `Populasi target dibatasi pada unit kerja utama di ${entity} yang terlibat langsung dalam alur proses topik penelitian.`
+      );
+    }
+
+    if (targetPages >= 60 && doc.bab1.tujuanKhusus.length < 4) {
+      doc.bab1.tujuanKhusus.push(
+        `Merumuskan protokol mitigasi risiko operasional dan panduan Standard Operating Procedure (SOP) berbasis temuan empiris.`,
+        `Menganalisis dampak efisiensi biaya dan kelayakan implementasi jangka panjang bagi keberlanjutan sistem di ${entity}.`
       );
     }
   } else {
     // UNP FT PKL specific expansion
     const existingLatar = [...(doc.bab1.latarBelakang || [])];
     const unpDeepParagraphs = [
-      `Fakultas Teknik Universitas Negeri Padang (FT UNP) melalui kurikulum berbasis kompetensi industri memposisikan mata kuliah Pengalaman Kerja Lapangan (PKL) sebagai wahana strategis untuk menjembatani kesenjangan antara teori rancang-bangun keteknikan di kampus dengan fakta dinamis di lini produksi industri modern. Melalui penempatan di ${entity}, mahasiswa dilatih untuk mengamati secara kritis interaksi mesin, material, manusia, dan metode (4M) sesuai standar keteknikan internasional.`,
-      `Kawasan industri penempatan kerja di ${entity} memiliki kompleksitas operasional tinggi dengan integrasi peralatan berat, kontrol otomatis berbasis PLC/SCADA, serta penerapan Standard Operating Procedure (SOP) dan Sistem Manajemen Keselamatan dan Kesehatan Kerja (SMK3 PP No. 50/2012) yang ketat. Pemahaman mendalam mengenai alur proses produksi dan sistem proteksi peralatan menjadi kompetensi mutlak yang wajib dikuasai mahasiswa selama 16 minggu masa penugasan.`,
-      `Pengamatan teknis mendalam terhadap topik bahasan "${title}" membuktikan bahwa optimalisasi sistem membutuhkan sinergi pemeliharaan preventif (*preventive maintenance*), analisis keandalan komponen, serta manajemen risiko bahaya lingkungan kerja. Laporan PKL ini mendokumentasikan setiap tahapan kegiatan secara akuntabel, membandingkan efektivitas teori perkuliahan terhadap kondisi nyata pabrik, dan merumuskan saran perbaikan sistem yang aplikatif bagi keandalan operasional ${entity}.`
+      `Fakultas Teknik Universitas Negeri Padang (FT UNP) melalui kurikulum berbasis kompetensi industri memposisikan mata kuliah Pengalaman Kerja Lapangan (PKL) sebagai wahana strategis untuk menjembatani kesenjangan antara teori rancang-bangun keteknikan di kampus dengan fakta dinamis di lini produksi industri modern. Melalui penempatan di ${entity}, mahasiswa dilatih untuk mengamati secara kritis interaksi mesin, material, manusia, dan metode (4M) sesuai standar keteknikan internasional. Pembelajaran berbasis industri ini memperkaya kemampuan mahasiswa dalam menganalisis fenomena kegagalan mekanikal/elektrikal serta merancang perbaikan sistem nyata.`,
+      `Kawasan industri penempatan kerja di ${entity} memiliki kompleksitas operasional tinggi dengan integrasi peralatan berat, kontrol otomatis berbasis PLC/SCADA, serta penerapan Standard Operating Procedure (SOP) dan Sistem Manajemen Keselamatan dan Kesehatan Kerja (SMK3 PP No. 50/2012) yang ketat. Pemahaman mendalam mengenai alur proses produksi dan sistem proteksi peralatan menjadi kompetensi mutlak yang wajib dikuasai mahasiswa selama 16 minggu masa penugasan. Setiap personil diwajibkan mematuhi matriks Job Safety Analysis (JSA) guna memastikan tercapainya target nihil kecelakaan (*zero accident policy*).`,
+      `Pengamatan teknis mendalam terhadap topik bahasan "${title}" membuktikan bahwa optimalisasi sistem membutuhkan sinergi pemeliharaan preventif (*preventive maintenance*), analisis keandalan komponen, serta manajemen risiko bahaya lingkungan kerja. Laporan PKL ini mendokumentasikan setiap tahapan kegiatan secara akuntabel, membandingkan efektivitas teori perkuliahan terhadap kondisi nyata pabrik, dan merumuskan saran perbaikan sistem yang aplikatif bagi keandalan operasional ${entity}. Rekomendasi teknis disusun berdasarkan data observasi lapangan terverifikasi dan diskusi berkala bersama mentor praktisi industri.`
     ];
 
     if (targetPages >= 40 && existingLatar.length < 6) {
@@ -732,62 +796,72 @@ export function scaleAcademicDocumentDepth(
   const additionalTheoriesPool = isUNPPkl ? [
     {
       topic: "Total Productive Maintenance (TPM) & Overall Equipment Effectiveness (OEE)",
-      elaboration: `Konsep Total Productive Maintenance (TPM) yang dikembangkan oleh Japan Institute of Plant Maintenance (JIPM) memposisikan pemeliharaan mesin bukan sekadar tanggung jawab departemen perawatan (*maintenance department*), melainkan melibatkan seluruh operator lini produksi. Parameter Overall Equipment Effectiveness (OEE) yang mengukur Availability, Performance Rate, dan Quality Rate menjadi metrik sentral dalam mengevaluasi efisiensi peralatan industri pada ${entity}. Kajian literatur menunjukkan bahwa implementasi autonomous maintenance mampu mereduksi six big losses hingga 35% dan memperpanjang Mean Time Between Failures (MTBF).`,
+      elaboration: `Konsep Total Productive Maintenance (TPM) yang dikembangkan oleh Japan Institute of Plant Maintenance (JIPM) memposisikan pemeliharaan mesin bukan sekadar tanggung jawab departemen perawatan (*maintenance department*), melainkan melibatkan seluruh operator lini produksi secara terintegrasi.\n\nParameter Overall Equipment Effectiveness (OEE) yang mengukur Availability, Performance Rate, dan Quality Rate menjadi metrik sentral dalam mengevaluasi efisiensi peralatan industri pada ${entity}. Kajian literatur menunjukkan bahwa implementasi autonomous maintenance mampu mereduksi six big losses hingga 35% dan memperpanjang Mean Time Between Failures (MTBF).\n\nDalam konteks penerapan di pabrik, pengukuran OEE dilakukan secara berkala setiap shift kerja. Deviasi nilai OEE di bawah standar dunia (world-class benchmark > 85%) dianalisis menggunakan diagram pareto untuk menemukan komponen kritis yang menjadi penyebab utama penurunan kapasitas produksi.`,
       citation: `(Nakajima, 2023; JIPM Standards)`
     },
     {
       topic: "Standar Keselamatan Kerja & Job Safety Analysis (JSA - ISO 45001)",
-      elaboration: `Sistem Manajemen Keselamatan dan Kesehatan Kerja (SMK3) berbasis ISO 45001 dan regulasi ketenagakerjaan mewajibkan analisis potensi bahaya secara terstruktur melalui instrumen Job Safety Analysis (JSA) dan Hazard Identification, Risk Assessment, and Determining Control (HIRADC). Setiap tahapan operasional pada ${entity} wajib dilengkapi dengan prosedur Lockout-Tagout (LOTO), penggunaan alat pelindung diri (APD) terstandar, serta zona isolasi energi guna mencegah insiden fatalitas kerja (*zero accident policy*).`,
+      elaboration: `Sistem Manajemen Keselamatan dan Kesehatan Kerja (SMK3) berbasis ISO 45001 dan regulasi ketenagakerjaan mewajibkan analisis potensi bahaya secara terstruktur melalui instrumen Job Safety Analysis (JSA) dan Hazard Identification, Risk Assessment, and Determining Control (HIRADC).\n\nSetiap tahapan operasional pada ${entity} wajib dilengkapi dengan prosedur Lockout-Tagout (LOTO), penggunaan alat pelindung diri (APD) terstandar, serta zona isolasi energi guna mencegah insiden fatalitas kerja (*zero accident policy*).\n\nImplementasi JSA pada area mesin kritis mencakup identifikasi bahaya mekanis (terjepit, tertimpa), bahaya termal (suhu tinggi, radiasi panas), dan bahaya kimia (debu, gas buang). Dokumen JSA ini ditinjau ulang secara berkala bersama supervisor keselamatan kerja sebelum pekerjaan pemeliharaan dimulai.`,
       citation: `(OHSAS & ISO 45001:2024 Guidelines)`
     },
     {
       topic: "Metodologi Analisis Kegagalan Komponen (Root Cause Analysis & Fishbone)",
-      elaboration: `Investigasi keteknikan terhadap anomali kerja sistem menuntut penerapan Root Cause Failure Analysis (RCFA) yang mengombinasikan diagram Ishikawa (Fishbone) dan metode 5-Whys. Melalui pendekatan ini, akar permasalahan teknis tidak hanya dilihat dari gejala permukaan (*symptom*), melainkan ditelusuri hingga kelemahan desain material, degradasi termal-mekanis, kontaminasi pelumas, atau deviasi kepatuhan terhadap manual operasi pabrikan.`,
+      elaboration: `Investigasi keteknikan terhadap anomali kerja sistem menuntut penerapan Root Cause Failure Analysis (RCFA) yang mengombinasikan diagram Ishikawa (Fishbone) dan metode 5-Whys.\n\nMelalui pendekatan ini, akar permasalahan teknis tidak hanya dilihat dari gejala permukaan (*symptom*), melainkan ditelusuri hingga kelemahan desain material, degradasi termal-mekanis, kontaminasi pelumas, atau deviasi kepatuhan terhadap manual operasi pabrikan.\n\nPenerapan diagram sebab-akibat memetakan enam faktor determinan: Manusia (kompetensi, kelelahan), Mesin (keausan komponen, kalibrasi), Metode (kepatuhan SOP), Material (kualitas suku cadang), Lingkungan (suhu, kelembapan), dan Pengukuran (akurasi sensor). Sintesis faktor-faktor ini menghasilkan tindakan korektif dan preventif yang tepat sasaran.`,
       citation: `(Mobley, 2022; Engineering Maintenance Principles)`
     },
     {
       topic: "Standar Instrumentasi & Otomasi Industri (PLC, SCADA, & Sensor Kalibrasi)",
-      elaboration: `Sistem kontrol industri modern mengandalkan arsitektur otomasi terintegrasi berbasis Programmable Logic Controller (PLC) dan Supervisory Control and Data Acquisition (SCADA). Keandalan akuisisi data lapangan sangat ditentukan oleh kalibrasi rutin transduser tekanan, temperatur, dan getaran sesuai protokol standar internasional (ISA/IEC). Pengendalian umpan balik (*closed-loop feedback*) menjamin stabilitas parameter proses operasional pada batas set-point optimal.`,
+      elaboration: `Sistem kontrol industri modern mengandalkan arsitektur otomasi terintegrasi berbasis Programmable Logic Controller (PLC) dan Supervisory Control and Data Acquisition (SCADA).\n\nKeandalan akuisisi data lapangan sangat ditentukan oleh kalibrasi rutin transduser tekanan, temperatur, dan getaran sesuai protokol standar internasional (ISA/IEC). Pengendalian umpan balik (*closed-loop feedback*) menjamin stabilitas parameter proses operasional pada batas set-point optimal.\n\nArsitektur SCADA pada ${entity} memfasilitasi monitoring kondisi mesin secara real-time melalui Human-Machine Interface (HMI). Sistem alarm otomatis akan aktif ketika parameter getaran bantalan (*bearing vibration*) atau temperatur motor melampaui batas ambang batas aman (*threshold limit*).`,
       citation: `(Bolton, 2023; Industrial Automation Standards)`
     }
   ] : [
     {
       topic: "Model Penerimaan Teknologi Terintegrasi (UTAUT2 & Extended TAM)",
-      elaboration: `Unified Theory of Acceptance and Use of Technology (UTAUT2) yang dirumuskan oleh Venkatesh et al. membuktikan bahwa niat perilaku (*behavioral intention*) dan penggunaan aktual teknologi dipengaruhi secara simultan oleh tujuh konstruk utama: Ekspektasi Kinerja (*Performance Expectancy*), Ekspektasi Usaha (*Effort Expectancy*), Pengaruh Sosial (*Social Influence*), Kondisi yang Memfasilitasi (*Facilitating Conditions*), Motivasi Hedonis, Nilai Harga, dan Kebiasaan. Dalam konteks pengujian sistem pada ${entity}, model ini menjadi kerangka ukur yang sangat valid untuk mengevaluasi kesiapan adaptasi pengguna akhir terhadap sistem intervensi baru.`,
+      elaboration: `Unified Theory of Acceptance and Use of Technology (UTAUT2) yang dirumuskan oleh Venkatesh et al. membuktikan bahwa niat perilaku (*behavioral intention*) dan penggunaan aktual teknologi dipengaruhi secara simultan oleh tujuh konstruk utama: Ekspektasi Kinerja (*Performance Expectancy*), Ekspektasi Usaha (*Effort Expectancy*), Pengaruh Sosial (*Social Influence*), Kondisi yang Memfasilitasi (*Facilitating Conditions*), Motivasi Hedonis, Nilai Harga, dan Kebiasaan.\n\nDalam konteks pengujian sistem pada ${entity}, model ini menjadi kerangka ukur yang sangat valid untuk mengevaluasi kesiapan adaptasi pengguna akhir terhadap sistem intervensi baru. Variabel ekspektasi kinerja secara konsisten menjadi prediktor paling dominan terhadap intensi penggunaan berkelanjutan.\n\nIntegrasi konsep ini dengan Technology Acceptance Model (TAM Extended) memungkinkan identifikasi faktor resistensi internal organisasi secara dini. Hasil evaluasi empiris menunjukkan bahwa ketersediaan modul pendampingan teknis dan kemudahan antarmuka pengguna mampu meningkatkan indeks adopsi sistem hingga di atas 82%.`,
       citation: `(Venkatesh et al., 2023; Information Systems Journal)`
     },
     {
       topic: "Kerangka Manajemen Kualitas Perangkat Lunak & Sistem (ISO/IEC 25010 SQuaRE)",
-      elaboration: `Standar internasional ISO/IEC 25010 mendefinisikan delapan karakteristik kualitas sistem dan perangkat lunak: Functional Suitability, Performance Efficiency, Compatibility, Usability, Reliability, Security, Maintainability, dan Portability. Masing-masing karakteristik diuraikan ke dalam sub-karakteristik terukur dengan metrik kuantitatif terkalibrasi. Penerapan kerangka ini memastikan bahwa luaran dari penelitian "${title}" tidak hanya bekerja secara fungsional di tataran prototipe, melainkan memenuhi kriteria keandalan industri skala penuh.`,
+      elaboration: `Standar internasional ISO/IEC 25010 (Systems and software Quality Requirements and Evaluation - SQuaRE) mendefinisikan delapan karakteristik kualitas sistem: Functional Suitability, Performance Efficiency, Compatibility, Usability, Reliability, Security, Maintainability, dan Portability.\n\nMasing-masing karakteristik diuraikan ke dalam sub-karakteristik terukur dengan metrik kuantitatif terkalibrasi. Penerapan kerangka ini memastikan bahwa luaran dari penelitian "${title}" tidak hanya bekerja secara fungsional di tataran prototipe, melainkan memenuhi kriteria keandalan industri skala penuh.\n\nPengujian karakteristik keandalan (*reliability*) mencakup evaluasi fault tolerance dan recoverability ketika terjadi gangguan tak terduga. Sistem dirancang untuk mampu memulihkan status operasi normal dalam waktu kurang dari 30 detik tanpa kehilangan integritas data transaksi.`,
       citation: `(ISO/IEC Standards Board, 2024; IEEE Software Quality Guidelines)`
     },
     {
       topic: "Metodologi Rekayasa Keandalan & Robustness Testing Sistem Terdistribusi",
-      elaboration: `Prinsip-prinsip reliability engineering menekankan pentingnya pengukuran Mean Time Between Failures (MTBF), Mean Time to Recovery (MTTR), dan ketersediaan sistem (*system availability*) di bawah kondisi stres dan beban puncak (*stress testing*). Dengan mengadopsi pola arsitektur fault-tolerant dan mekanisme sirkuit-pemutus (*circuit breaker*), sistem dirancang untuk tetap mampu memberikan respons yang dapat diprediksi tanpa mengalami kegagalan berantai (*cascading failure*) saat terjadi anomali transmisi data.`,
+      elaboration: `Prinsip-prinsip reliability engineering menekankan pentingnya pengukuran Mean Time Between Failures (MTBF), Mean Time to Recovery (MTTR), dan ketersediaan sistem (*system availability*) di bawah kondisi stres dan beban puncak (*stress testing*).\n\nDengan mengadopsi pola arsitektur fault-tolerant dan mekanisme sirkuit-pemutus (*circuit breaker*), sistem dirancang untuk tetap mampu memberikan respons yang dapat diprediksi tanpa mengalami kegagalan berantai (*cascading failure*) saat terjadi anomali transmisi data.\n\nPengujian ketahanan (*robustness testing*) dilakukan dengan menginjeksikan beban lalu lintas data simulasi hingga 300% dari kapasitas normal. Observasi metrik latensi dan tingkat keberhasilan request membuktikan bahwa arsitektur yang diusulkan memiliki stabilitas yang unggul dengan tingkat keberhasilan transaksi 99,85%.`,
       citation: `(Bass & Kazman, 2023; Software Architecture in Practice)`
     },
     {
       topic: "Pemodelan Persamaan Struktural Berbasis Varian (Partial Least Squares SEM-PLS)",
-      elaboration: `Structural Equation Modeling berbasis PLS (SEM-PLS) merupakan teknik analisis multivariat generasi kedua yang mampu mengestimasi model pengukuran (*outer model*) dan model struktural (*inner model*) secara simultan tanpa mensyaratkan asumsi distribusi normal multivariat yang ketat. Penggunaan parameter penilaian seperti Composite Reliability, Average Variance Extracted (AVE > 0,50), serta koefisien determinasi (R-Square) memberikan landasan matematis yang sangat kokoh dalam menguji hipotesis asosiatif antara variabel intervensi dengan kinerja operasional di ${entity}.`,
+      elaboration: `Structural Equation Modeling berbasis PLS (SEM-PLS) merupakan teknik analisis multivariat generasi kedua yang mampu mengestimasi model pengukuran (*outer model*) dan model struktural (*inner model*) secara simultan tanpa mensyaratkan asumsi distribusi normal multivariat yang ketat.\n\nPenggunaan parameter penilaian seperti Composite Reliability, Average Variance Extracted (AVE > 0,50), serta koefisien determinasi (R-Square) memberikan landasan matematis yang sangat kokoh dalam menguji hipotesis asosiatif antara variabel intervensi dengan kinerja operasional di ${entity}.\n\nModel struktural dievaluasi melalui uji signifikansi koefisien jalur (*path coefficients*) menggunakan prosedur bootstrapping 5.000 subsampel. Nilai t-statistik di atas 1,96 pada taraf signifikansi 5% membuktikan adanya pengaruh kausal yang signifikan antara variabel bebas terhadap variabel terikat.`,
       citation: `(Hair, Ringle, & Sarstedt, 2024; Multivariate Data Analysis)`
     },
     {
       topic: "Prinsip Lean Six Sigma & Manajemen Deviasi Operasional (DMAIC Framework)",
-      elaboration: `Metodologi Lean Six Sigma mengombinasikan eliminasi pemborosan (*waste elimination*) dari prinsip Lean dengan reduksi variasi proses menggunakan siklus DMAIC (Define, Measure, Analyze, Improve, Control). Dengan menetapkan batas spesifikasi atas dan bawah (*upper/lower specification limits*), setiap tahapan alur kerja dievaluasi indeks kapabilitas prosesnya (Cpk > 1,33). Pendekatan ini menjamin bahwa model perbaikan yang dirumuskan mampu mereduksi galat operasional hingga mendekati standar keandalan 99,99966%.`,
+      elaboration: `Metodologi Lean Six Sigma mengombinasikan eliminasi pemborosan (*waste elimination*) dari prinsip Lean dengan reduksi variasi proses menggunakan siklus DMAIC (Define, Measure, Analyze, Improve, Control).\n\nDengan menetapkan batas spesifikasi atas dan bawah (*upper/lower specification limits*), setiap tahapan alur kerja dievaluasi indeks kapabilitas prosesnya (Cpk > 1,33). Pendekatan ini menjamin bahwa model perbaikan yang dirumuskan mampu mereduksi galat operasional hingga mendekati standar keandalan 99,99966%.\n\nFase pengendalian (*Control*) diperkuat dengan penyusunan Statistical Process Control (SPC) chart yang memantau variabilitas proses secara real-time. Hal ini memastikan bahwa perbaikan yang dicapai dapat dipertahankan secara berkelanjutan tanpa mengalami degradasi performa.`,
       citation: `(George & Rowlands, 2023; Operational Excellence Handbook)`
     },
     {
       topic: "Teori Agensi & Tata Kelola Teknologi Informasi Berkelanjutan (COBIT 2019)",
-      elaboration: `Agency Theory membedah dinamika keselarasan kepentingan antara pemilik modal (*principal*) dan pengelola sistem (*agent*). Kerangka kerja tata kelola COBIT 2019 melengkapi teori ini dengan menyediakan 40 sasaran tata kelola dan manajemen yang terbagi dalam lima domain utama: Evaluate, Direct, and Monitor (EDM); Align, Plan, and Organize (APO); Build, Acquire, and Implement (BAI); Deliver, Service, and Support (DSS); serta Monitor, Evaluate, and Assess (MEA). Integrasi domain ini menjamin akuntabilitas audit dan kepatuhan regulasi di ${entity}.`,
+      elaboration: `Agency Theory membedah dinamika keselarasan kepentingan antara pemilik modal (*principal*) dan pengelola sistem (*agent*). Asimetri informasi yang terjadi antar-pihak berpotensi memicu timbulnya moral hazard dan keputusan yang tidak optimal bagi efisiensi organisasi secara keseluruhan.\n\nKerangka kerja tata kelola COBIT 2019 melengkapi teori ini dengan menyediakan 40 sasaran tata kelola dan manajemen yang terbagi dalam lima domain utama: Evaluate, Direct, and Monitor (EDM); Align, Plan, and Organize (APO); Build, Acquire, and Implement (BAI); Deliver, Service, and Support (DSS); serta Monitor, Evaluate, and Assess (MEA).\n\nIntegrasi domain-domain tersebut pada ${entity} menjamin akuntabilitas audit, transparansi alokasi sumber daya teknologi, dan kepatuhan terhadap regulasi penjaminan mutu nasional secara konsisten.`,
       citation: `(ISACA, 2023; Enterprise Governance of IT)`
+    },
+    {
+      topic: "Teori Difusi Inovasi (Diffusion of Innovations Theory - E.M. Rogers)",
+      elaboration: `Teori Difusi Inovasi yang dirumuskan oleh Everett M. Rogers menjelaskan proses bagaimana sebuah ide, praktik, atau objek baru dikomunikasikan melalui saluran-saluran tertentu dalam suatu sistem sosial dari waktu ke waktu.\n\nLima karakteristik atribut inovasi yang menentukan kecepatan adopsi adalah: Keunggulan Relatif (*Relative Advantage*), Kesesuaian (*Compatibility*), Kerumitan (*Complexity*), Ketercobaan (*Trialability*), dan Keteramatan (*Observability*). Penelitian ini mengoptimalkan kelima atribut tersebut agar solusi yang dibangun mudah diintegrasikan oleh para pengguna di ${entity}.\n\nSegmentasi pengguna ke dalam kategori Innovators, Early Adopters, Early Majority, Late Majority, dan Laggards memungkinkan perancangan strategi sosialisasi dan pendampingan bertingkat yang efektif mereduksi resistensi perubahan teknologi di lingkungan kerja.`,
+      citation: `(Rogers, 2022; Diffusion of Innovations 5th Ed.)`
+    },
+    {
+      topic: "Model Kesuksesan Sistem Informasi (DeLone & McLean IS Success Model)",
+      elaboration: `Model Kesuksesan DeLone & McLean merupakan kerangka teoritis multidimensi yang mengukur keberhasilan implementasi sistem informasi melalui enam dimensi yang saling terkait: Kualitas Sistem (*System Quality*), Kualitas Informasi (*Information Quality*), Kualitas Layanan (*Service Quality*), Penggunaan (*System Use*), Kepuasan Pengguna (*User Satisfaction*), dan Manfaat Bersih (*Net Benefits*).\n\nKualitas sistem merefleksikan performa teknis seperti keandalan, kecepatan respons, dan kemudahan navigasi. Kualitas informasi mengukur akurasi, kelengkapan, dan ketepatan waktu output data yang dihasilkan. Kualitas layanan berfokus pada responsivitas dukungan teknis bagi pengguna akhir.\n\nDalam penelitian ini, keenam dimensi tersebut diterjemahkan ke dalam indikator empiris pada kuesioner evaluasi sistem guna mengukur dampak implementasi terhadap peningkatan produktivitas kerja di ${entity}.`,
+      citation: `(DeLone & McLean, 2023; Journal of Management Information Systems)`
     }
   ];
 
   // Determine how many theories to include based on target pages
   const targetTheoryCount = 
-    targetPages >= 85 ? 12 :
-    targetPages >= 65 ? 9 :
-    targetPages >= 45 ? 7 : 5;
+    targetPages >= 85 ? 14 :
+    targetPages >= 65 ? 10 :
+    targetPages >= 45 ? 8 : 5;
 
   const currentTheories = [...(doc.bab2.landasanTeori || [])];
   while (currentTheories.length < targetTheoryCount && additionalTheoriesPool.length > 0) {
@@ -799,6 +873,16 @@ export function scaleAcademicDocumentDepth(
         citation: nextTheory.citation
       });
     }
+  }
+
+  // Deepen theoretical elaboration for higher targets
+  if (targetPages >= 60) {
+    currentTheories.forEach((t) => {
+      if (!t.elaboration.includes("Secara epistemologis dan operasional")) {
+        t.elaboration += 
+          `\n\nSecara epistemologis dan operasional, kerangka ini diuraikan ke dalam empat pilar indikator terukur: (1) Parameter sensitivitas input yang mengukur stabilitas data dasar, (2) Efisiensi mekanisme pemrosesan dan eliminasi deviasi, (3) Keandalan output terhadap batas toleransi kesalahan yang diizinkan (error tolerance threshold < 2,5%), serta (4) Akuntabilitas audit dan keterlacakan luaran sistem.\n\nDalam konteks pengujian empiris pada ${entity}, penerapan teori ini difokuskan untuk menginvestigasi bagaimana variabel-variabel kunci saling berinteraksi di bawah tekanan beban kerja dinamis. Data historis dan observasi lapangan menunjukkan bahwa ketiadaan model berbasis bukti sering kali memicu timbulnya distorsi interpretasi hingga 28% pada level teknis. Melalui implementasi instrumen terkalibrasi yang dirancang dalam penelitian "${title}", potensi distorsi tersebut dapat dieliminasi secara sistematis.\n\nLebih lanjut, analisis komparatif terhadap publikasi ilmiah primer membuktikan bahwa integrasi model teoretis ini menghasilkan daya tahan sistem yang lebih tangguh terhadap anomali eksternal, sekaligus mempercepat proses adaptasi personil pelaksana hingga taraf kematangan prima.`;
+      }
+    });
   }
   doc.bab2.landasanTeori = currentTheories;
 
@@ -831,11 +915,29 @@ export function scaleAcademicDocumentDepth(
         variables: "Latensi proses, tingkat ketahanan gangguan, akurasi klasifikasi",
         findingsEffect: "Model mencapai akurasi prediksi keandalan 94,6% dengan tingkat konvergensi stabil.",
         gapDifference: "Fokus hanya pada simulasi komputasi murni tanpa implementasi lapangan; penelitian ini menguji validitas instrumen pada ekosistem operasional aktif mitra."
+      },
+      {
+        no: 7,
+        authorYear: "Kusuma, A. & Wijayanti, S. (2024)",
+        titleJournal: "Evaluasi Skalabilitas dan Interoperabilitas Sistem Informasi Layanan Publik, Jurnal Ilmu Komputer & Informatika Terapan, Vol. 11(3)",
+        designSample: "Mixed Methods Eksplanatori Sekuensial, n = 280 partisipan",
+        variables: "Waktu respon transaksi, integritas data, kepuasan pengguna akhir",
+        findingsEffect: "Penerapan arsitektur asinkron meningkatkan kecepatan transaksi hingga 48,2% dengan margin of error < 1,5%.",
+        gapDifference: "Hanya menguji aspek arsitektur perangkat lunak; penelitian ini mengombinasikan faktor kepatuhan pengguna dan pengendalian proses bisnis."
+      },
+      {
+        no: 8,
+        authorYear: "Prasetya, B. & Hidayat, M. (2023)",
+        titleJournal: "Pengukuran Kematangan Tata Kelola TI dan Efisiensi Operasional Organisasi, Jurnal Sistem Informasi & Manajemen Nasional, Vol. 14(2)",
+        designSample: "Survei Cross-Sectional Multi-Sektor, n = 310 organisasi",
+        variables: "Tingkat kematangan COBIT, indeks risiko operasional, kepatuhan audit",
+        findingsEffect: "Kematangan tata kelola berkorelasi positif kuat terhadap reduksi insiden keamanan data (r = 0,68; p = 0,000).",
+        gapDifference: "Studi berskala makro tanpa intervensi mikro; penelitian ini merancang instrumen kalibrasi dan modul operasional yang langsung diuji di unit kerja."
       }
     ];
 
     const currentGaps = [...doc.bab2.researchGapMatrix];
-    const targetGapsCount = targetPages >= 65 ? 6 : targetPages >= 45 ? 5 : 3;
+    const targetGapsCount = targetPages >= 85 ? 8 : targetPages >= 65 ? 6 : targetPages >= 45 ? 5 : 3;
     while (currentGaps.length < targetGapsCount && additionalGaps.length > 0) {
       const nextGap = additionalGaps.shift();
       if (nextGap) {
@@ -846,67 +948,262 @@ export function scaleAcademicDocumentDepth(
     doc.bab2.researchGapMatrix = currentGaps;
   }
 
+  // Conceptual Framework narrative expansion
+  if (!isUNPPkl && targetPages >= 60) {
+    let frameworkText = 
+      `Kerangka konseptual penelitian ini dibangun di atas sintesis antara grand theory penjaminan mutu sistem, middle-range theory penerimaan teknologi (UTAUT2 & TAM), dan applied theory manajemen keandalan operasional.\n\n` +
+      `Secara sistematis, alur berpikir penelitian digambarkan dalam kerangka Input-Process-Output-Outcome (IPOO):\n` +
+      `1. Dimensi Input: Mengidentifikasi kondisi eksisting, deviasi proses, dan kebutuhan data empiris pada ${entity}.\n` +
+      `2. Dimensi Process: Menerapkan intervensi metodologis terstandar melalui pengembangan instrumen terkalibrasi, perancangan modul SOP, dan monitoring berbasis bukti.\n` +
+      `3. Dimensi Output: Menghasilkan model sistem yang tervalidasi secara psikometris (Aiken's V >= 0,78) dan reliabel (Cronbach's Alpha > 0,70).\n` +
+      `4. Dimensi Outcome: Mencapai efisiensi operasional nyata, reduksi latensi dan waktu henti sistem, serta peningkatan kepuasan pemangku kepentingan.\n\n` +
+      `Hubungan antarvariabel bebas (intervensi metodologis terstandar), variabel kontrol (beban kerja, stabilitas infrastruktur), dan variabel terikat (kinerja operasional dan kepatuhan standar) diuji secara inferensial menggunakan pemodelan persamaan struktural guna membuktikan signifikansi hubungan sebab-akibat.`;
+
+    if (targetPages >= 75) {
+      frameworkText += 
+        `\n\nSintesis State-of-the-Art penelitian terdahulu disusun menggunakan protokol Preferred Reporting Items for Systematic Reviews and Meta-Analyses (PRISMA 2020) guna menjamin objektivitas seleksi literatur rujukan.\n\n` +
+        `Dari 150 artikel yang diidentifikasi melalui basis data Scopus, Web of Science, dan Sinta, sebanyak 8 studi empiris paling relevan dipilih untuk dievaluasi secara mendalam. Hasil meta-sintesis menunjukkan adanya konvergensi temuan bahwa standarisasi instrumen dan otomatisasi alur kerja berkorelasi positif kuat terhadap penurunan deviasi kesalahan (rata-rata koefisien korelasi r = 0,65; p < 0,001).\n\n` +
+        `Meskipun demikian, telaah kritis terhadap keterbatasan penelitian-penelitian terdahulu mengidentifikasi tiga kelemahan metodologis utama: (1) Sebagian besar studi terdahulu (misalnya Setiawan & Siregar, 2024; Alamsyah et al., 2023) hanya berfokus pada pengujian simulasi komputasi atau survei persepsi subjektif tanpa memverifikasi performa sistem pada lingkungan operasional aktif yang menghadapi variabilitas beban kerja nyata; (2) Ketiadaan integrasi protokol mitigasi risiko harian berbasis Standard Operating Procedure (SOP) terkalibrasi; dan (3) Belum adanya model analitis terpadu yang memadukan pengujian validitas psikometri Aiken's V dengan pemodelan persamaan struktural (SEM-PLS).\n\n` +
+        `Posisi dan kebaruan ilmiah (*scientific novelty*) dari penelitian "${title}" ini terletak pada perumusan kerangka kerja holistik yang menjembatani ketiga kelemahan tersebut. Melalui kombinasi eksperimen lapangan kuasi-faktorial selama 16 minggu kerja di ${entity}, pengujian instrumen terstandar, serta perumusan matriks mitigasi risiko adaptif, penelitian ini menghasilkan luaran yang tidak hanya memiliki validitas internal yang kuat, melainkan juga memiliki keterterapan praktis yang tinggi (*high ecological validity*) bagi ekosistem industri dan penjaminan mutu akademik.`;
+    }
+    doc.bab2.conceptualFramework = frameworkText;
+  }
+
+  // Hypotheses formulation
+  if (!isUNPPkl && targetPages >= 50 && (!doc.bab2.hypotheses || doc.bab2.hypotheses.length < 3)) {
+    doc.bab2.hypotheses = [
+      `H1: Terdapat pengaruh positif dan signifikan dari penerapan standarisasi instrumen terkalibrasi terhadap penurunan deviasi operasional di ${entity}.`,
+      `H2: Terdapat pengaruh positif dan signifikan dari kemudahan penggunaan sistem terhadap niat perilaku adopsi teknologi oleh personil operasional.`,
+      `H3: Kepatuhan terhadap Standard Operating Procedure (SOP) memediasi hubungan antara kompetensi teknis personil dengan keandalan luaran sistem.`,
+      `H4: Terdapat perbedaan signifikan dalam efisiensi waktu siklus kerja sebelum dan sesudah penerapan model intervensi terstandar.`,
+      `H5: Model mitigasi risiko yang dirancang secara simultan meningkatkan stabilitas sistem dan kepuasan pemangku kepentingan pada taraf signifikansi alpha = 0,05.`
+    ];
+  }
+
   // --------------------------------------------------------------------------
   // 3. BAB III METHODOLOGICAL RIGOR & OPERATIONALIZATION
   // --------------------------------------------------------------------------
   if (!isUNPPkl) {
     if (targetPages >= 45) {
-      doc.bab3.metodePelaksanaan = 
-        `Penelitian ini menerapkan paradigma kuasi-eksperimental dengan pendekatan kuantitatif inferensial dan analitik terstruktur. Desain operasional dirancang sedemikian rupa untuk menjamin validitas internal (keabsahan hubungan sebab-akibat antar-variabel intervensi) dan validitas eksternal (keterterapan dan generalisasi model pada ekosistem serupa). Tahapan penelitian dilaksanakan secara metodis melalui empat fase berkelanjutan:\n\n` +
-        `1. Tahap Pra-Eksperimen & Kalibrasi Diagnostik: Meliputi studi literatur komparatif, penentuan kerangka definisi operasional, perancangan kisi-kisi instrumen pengukuran, pengurusan ethical clearance, serta perolehan izin resmi pelaksanaan riset dari pimpinan ${entity}.\n` +
-        `2. Tahap Uji Validitas & Reliabilitas Konstruk: Instrumen pengukuran awal diuji validitas isinya oleh dewan pakar menggunakan koefisien Aiken's V (ambang batas penerimaan V >= 0,78). Selanjutnya dilakukan uji coba instrumen (*pilot test*) pada 30 responden di luar sampel utama untuk memastikan konsistensi internal dengan nilai Cronbach's Alpha > 0,70.\n` +
-        `3. Tahap Eksekusi Lapangan & Akuisisi Data Empiris: Pengumpulan data primer dilakukan secara berkesinambungan melalui instrumen observasi terstruktur, pencatatan logbook operasional harian, serta pengukuran indikator performa utama (KPI) secara real-time pada unit kerja sasaran.\n` +
-        `4. Tahap Pemodelan Inferensial & Uji Hipotesis: Data mentah dibersihkan (*data cleaning*) dan diuji memenuhi asumsi klasik (uji normalitas Kolmogorov-Smirnov, uji homogenitas varians Levene, dan multikolinearitas VIF < 5). Selanjutnya dilakukan analisis regresi multivariat atau Partial Least Squares SEM untuk menguji signifikansi statistik pengaruh intervensi (t-statistik > 1,96; p-value < 0,05) serta menyusun naskah rekomendasi kebijakan akhir.`;
+      let metodeText = 
+        `Penelitian ini menerapkan paradigma kuasi-eksperimental dengan pendekatan kuantitatif inferensial dan analitik terstruktur. Desain operasional dirancang sedemikian rupa untuk menjamin validitas internal (keabsahan hubungan sebab-akibat antar-variabel intervensi) dan validitas eksternal (keterterapan dan generalisasi model pada ekosistem serupa).\n\n` +
+        `Tahapan penelitian dilaksanakan secara metodis melalui delapan fase berkelanjutan:\n\n` +
+        `1. Tahap Pra-Eksperimen & Kalibrasi Diagnostik: Meliputi studi literatur komparatif terhadap publikasi ilmiah primer, penentuan kerangka definisi operasional, perancangan kisi-kisi instrumen pengukuran, pengurusan ethical clearance, serta perolehan izin resmi pelaksanaan riset dari pimpinan ${entity}. Pada tahap ini dilakukan studi pendahuluan untuk memetakan baseline kinerja operasional eksisting.\n\n` +
+        `2. Tahap Uji Validitas & Reliabilitas Konstruk: Instrumen pengukuran awal diuji validitas isinya oleh dewan pakar menggunakan koefisien Aiken's V terhadap minimal 3 orang ahli (ambang batas penerimaan V >= 0,78). Selanjutnya dilakukan uji coba instrumen (*pilot test*) pada 30 responden di luar sampel utama untuk memastikan konsistensi internal dengan nilai Cronbach's Alpha > 0,70 dan validitas butir menggunakan korelasi Product Moment Pearson (r_hitung > r_tabel).\n\n` +
+        `3. Tahap Eksekusi Lapangan & Akuisisi Data Empiris: Pengumpulan data primer dilakukan secara berkesinambungan selama 16 minggu kerja melalui instrumen observasi terstruktur, pencatatan logbook operasional harian, kuesioner skala Likert 5 poin, serta pengukuran indikator performa utama (KPI) secara real-time pada unit kerja sasaran di ${entity}.\n\n` +
+        `4. Tahap Pemodelan Inferensial & Uji Hipotesis: Data mentah dibersihkan (*data cleaning*) dan diuji memenuhi asumsi klasik: uji normalitas menggunakan uji Kolmogorov-Smirnov (p > 0,05), uji homogenitas varians menggunakan uji Levene, uji multikolinearitas dengan nilai Variance Inflation Factor (VIF < 5), dan uji heteroskedastisitas menggunakan uji Glejser. Selanjutnya dilakukan analisis regresi linear berganda atau Partial Least Squares SEM untuk menguji signifikansi statistik pengaruh intervensi (t-statistik > 1,96; p-value < 0,05) serta menyusun naskah rekomendasi kebijakan akhir.`;
+
+      if (targetPages >= 65) {
+        metodeText += 
+          `\n\n5. Tahap Kalibrasi Instrumen Pengukuran & Uji Validitas Pakar: Kisi-kisi instrumen disusun berdasarkan operasionalisasi variabel terukur. Validitas isi (*content validity*) dievaluasi oleh tiga orang pakar independen (dua akademisi bergelar Doktor dan satu praktisi industri senior pada ${entity}) menggunakan koefisien Aiken's V dengan rumus V = ∑s / [n(c - 1)]. Seluruh butir pernyataan yang memperoleh nilai V >= 0,78 dinyatakan valid dan diikutsertakan dalam uji coba lapangan.\n\n` +
+          `6. Tahap Uji Reliabilitas & Konsistensi Internal: Uji coba instrumen (*pilot testing*) dilakukan terhadap 30 responden di luar sampel utama. Konsistensi internal diuji menggunakan rumus Alpha Cronbach dengan kriteria reliabilitas tinggi (alpha > 0,70). Uji diskriminasi butir dianalisis menggunakan korelasi Product Moment Pearson dengan ketentuan r_hitung > r_tabel (r > 0,361 pada taraf signifikansi 5%).\n\n` +
+          `7. Tahap Pengujian Asumsi Klasik: Sebelum pemodelan inferensial dijalankan, dataset dibersihkan dari pencilan (*outliers*) menggunakan analisis boxplot dan z-score terstandar (|z| < 3,0). Uji normalitas residual dilakukan menggunakan Kolmogorov-Smirnov test (p > 0,05). Uji multikolinearitas memastikan ketiadaan korelasi berlebih antarvariabel bebas dengan nilai Variance Inflation Factor (VIF < 5) dan Tolerance > 0,20. Uji heteroskedastisitas dievaluasi dengan uji Glejser dan scatterplot terstandar, sedangkan uji linearitas dievaluasi melalui uji Test for Linearity pada taraf signifikansi 0,05.\n\n` +
+          `8. Tahap Analisis Inferensial & Model Struktural: Analisis data menerapkan pendekatan Structural Equation Modeling berbasis Partial Least Squares (PLS-SEM) dengan bantuan perangkat lunak SmartPLS / R-Studio. Evaluasi Outer Model mencakup Convergent Validity (Outer Loading > 0,708 dan AVE > 0,50) serta Discriminant Validity (kriteria Fornell-Larcker dan Heterotrait-Monotrait Ratio HTMT < 0,90). Evaluasi Inner Model dilakukan melalui koefisien determinasi (R²), efek f², dan relevansi prediktif Stone-Geisser (Q² > 0). Pengujian hipotesis dilakukan melalui prosedur bootstrapping dengan 5.000 subsampel untuk memperoleh nilai t-statistik dan p-value yang akurat.`;
+      }
+      doc.bab3.metodePelaksanaan = metodeText;
     }
 
     if (targetPages >= 50 && (!doc.bab3.operationalDefinitions || doc.bab3.operationalDefinitions.length < 4)) {
       const currentDefs = [...(doc.bab3.operationalDefinitions || [])];
       currentDefs.push({
-        variable: "Variabel Kontrol / Lingkungan Eksternal",
+        variable: "Variabel Kontrol / Lingkungan Eksternal (X3)",
         definition: "Faktor-faktor kondisional di lingkungan kerja yang berpotensi membiaskan hasil pengukuran bila tidak dikendalikan secara statistik.",
         parameterTool: "Log harian fluktuasi beban kerja, stabilitas daya listrik, dan daftar hadir personil",
         indicatorScale: "Kategorik Nominal: Terkendali Normal vs Terjadi Anomali Eksternal"
       });
       if (targetPages >= 70) {
         currentDefs.push({
-          variable: "Variabel Moderasi / Kesiapan Budaya Organisasi",
+          variable: "Variabel Moderasi / Kesiapan Budaya Organisasi (Z)",
           definition: "Tingkat penerimaan dan adaptasi budaya kerja terhadap transformasi digital dan metodologi baru.",
           parameterTool: "Kuesioner skala sikap adaptasi teknologi (Organizational Readiness Index)",
           indicatorScale: "Skala Interval Likert 1 (Sangat Resisten) hingga 5 (Sangat Adaptif)"
         });
+        currentDefs.push({
+          variable: "Variabel Intervening / Kepatuhan Prosedur SOP (M)",
+          definition: "Derajat konsistensi pelaksanaan seluruh tahapan kerja sesuai panduan Standard Operating Procedure yang ditetapkan.",
+          parameterTool: "Lembar audit kepatuhan checklist berkala dan log verifikasi supervisor",
+          indicatorScale: "Rasio Persentase: 0% hingga 100% Kepatuhan Eksekusi"
+        });
       }
       doc.bab3.operationalDefinitions = currentDefs;
+    }
+
+    // Population & Sample calculation using Slovin Formula
+    if (targetPages >= 55) {
+      doc.bab3.populationSample = 
+        `Populasi dalam penelitian ini mencakup seluruh personil teknis, operator lini proses, dan staf manajerial pada unit operasional ${entity} dengan total populasi teridentifikasi sebanyak N = 250 orang.\n\n` +
+        `Penentuan ukuran sampel minimum dihitung menggunakan rumus Slovin dengan batas toleransi kesalahan (margin of error) e = 5% (0,05):\n` +
+        `n = N / (1 + N(e)^2)\n` +
+        `n = 250 / (1 + 250(0,05)^2) = 250 / (1 + 0,625) = 250 / 1,625 = 153,85 ≈ 154 responden.\n\n` +
+        `Teknik pengambilan sampel menerapkan Stratified Proportional Random Sampling untuk menjamin keterwakilan proporsional dari setiap tingkatan jabatan dan divisi kerja. Kriteria inklusi mencakup: (1) Personil dengan masa kerja minimal 1 tahun di unit terkait, (2) Terlibat aktif dalam proses operasional topik penelitian, dan (3) Bersedia menandatangani lembar persetujuan (*informed consent*).`;
+    }
+
+    if (targetPages >= 60) {
+      doc.bab3.ethicalConsiderations = 
+        `Penelitian ini tunduk pada prinsip-prinsip etika penelitian akademik yang mencakup prinsip *respect for persons*, *beneficence*, dan *justice*.\n\n` +
+        `Seluruh partisipan diberikan informasi lengkap mengenai tujuan penelitian, hak untuk mengundurkan diri sewaktu-waktu tanpa konsekuensi administratif, serta jaminan kerahasiaan identitas (*anonymity*). Data yang dikumpulkan dilindungi dengan protokol enkripsi dan perjanjian kerahasiaan (*Non-Disclosure Agreement / NDA*) sesuai dengan kebijakan perlindungan data internal ${entity} dan regulasi perguruan tinggi.`;
     }
   }
 
   // --------------------------------------------------------------------------
   // 4. BAB IV WBS & BUDGET EXPANSION
   // --------------------------------------------------------------------------
-  if (doc.bab4 && doc.bab4.budgetPlan && targetPages >= 55 && doc.bab4.budgetPlan.length < 6) {
-    const currentBudget = [...doc.bab4.budgetPlan];
-    currentBudget.push(
-      { item: "Uji Stres Komputasi Server & Lisensi Cloud Monitoring Dedicated (16 Minggu)", category: "Infrastruktur & Lisensi", cost: 1750000 },
-      { item: "Honorarium Dewan Validator Pakar (3 Orang Validator Instrumen)", category: "Jasa Profesi & Validasi", cost: 1500000 }
-    );
-    doc.bab4.budgetPlan = currentBudget;
+  if (doc.bab4 && targetPages >= 55) {
+    if (doc.bab4.budgetPlan && doc.bab4.budgetPlan.length < 6) {
+      const currentBudget = [...doc.bab4.budgetPlan];
+      currentBudget.push(
+        { item: "Uji Stres Komputasi Server & Lisensi Cloud Monitoring Dedicated (16 Minggu)", category: "Infrastruktur & Lisensi", cost: 1750000 },
+        { item: "Honorarium Dewan Validator Pakar (3 Orang Validator Instrumen)", category: "Jasa Profesi & Validasi", cost: 1500000 },
+        { item: "Fasilitas Focus Group Discussion (FGD) Evaluasi Lapangan Tengah Periode", category: "Pertemuan Teknis", cost: 1200000 },
+        { item: "Penyusunan dan Penggandaan Modul Standard Operating Procedure (SOP) Jilid Keras", category: "Dokumentasi & SOP", cost: 850000 }
+      );
+      doc.bab4.budgetPlan = currentBudget;
+    }
+
+    if (targetPages >= 65) {
+      doc.bab4.penutup = 
+        `Jadwal pelaksanaan penelitian ini dirancang secara terintegrasi selama 16 minggu kerja (4 bulan kalender) dengan alokasi waktu efektif 40 jam kerja per minggu. Rincian tahapan kerja telah disinkronisasikan secara penuh dengan target luaran deliverables mingguan:\n\n` +
+        `Fase I (Minggu 1-3): Fokus pada studi literatur mendalam, telaah regulasi internal di ${entity}, wawancara eksploratif dengan pimpinan unit, dan pemetaan Work Breakdown Structure (WBS) rinci.\n` +
+        `Fase II (Minggu 4-6): Penyusunan kisi-kisi instrumen, penilaian ahli oleh 3 validator dewan pakar menggunakan koefisien Aiken's V, uji coba instrumen (pilot test) pada 30 responden, dan revisi butir ukur.\n` +
+        `Fase III (Minggu 7-11): Implementasi model intervensi di unit kerja operasional ${entity}, monitoring kestabilan proses harian, dan akuisisi data empiris primer secara real-time.\n` +
+        `Fase IV (Minggu 12-14): Pembersihan data (*data screening*), pengujian asumsi klasik, komputasi inferensial SEM-PLS, evaluasi perbandingan efisiensi kerja, dan penyusunan draf laporan Bab I - V.\n` +
+        `Fase V (Minggu 15-16): Konsultasi intensif dengan dewan pembimbing, finalisasi modul Standard Operating Procedure (SOP), penyiapan naskah artikel ilmiah untuk submit ke jurnal terindeks Sinta/Scopus, serta persiapan ujian sidang akademik.\n\n` +
+        `Seluruh pembiayaan kegiatan disusun berpedoman pada Standar Biaya Masukan (SBM) yang ditetapkan Kementerian Keuangan RI dan alokasi dana penelitian ${campus}. Pengelolaan anggaran dilaksanakan secara transparan dan akuntabel berbasis bukti riil pengeluaran.`;
+
+      doc.bab4.disseminationPlan = 
+        `Rencana diseminasi hasil penelitian mencakup tiga luaran strategis:\n` +
+        `1. Publikasi Artikel Ilmiah: Naskah hasil penelitian akan disubmit ke jurnal nasional terakreditasi Sinta (Sinta 2) atau jurnal internasional bereputasi terindeks Scopus/Web of Science dalam waktu 3 bulan pasca-sidang ujian.\n` +
+        `2. Standard Operating Procedure (SOP) Industri: Dokumen panduan implementasi teknis diserahkan secara resmi kepada manajemen ${entity} untuk diadopsi sebagai SOP operasional tetap.\n` +
+        `3. Hak Kekayaan Intelektual (HKI): Pendaftaran Hak Cipta atas modul instrumen dan karya tulis pada Direktorat Jenderal Kekayaan Intelektual (DJKI) Kementerian Hukum dan HAM RI.`;
+    }
   }
 
   // --------------------------------------------------------------------------
   // 5. BAB V CONCLUSIONS & RISK MITIGATION MATRIX
   // --------------------------------------------------------------------------
-  if (doc.bab5 && doc.bab5.mitigasiRisiko && targetPages >= 50 && doc.bab5.mitigasiRisiko.length < 5) {
-    const currentMitigation = [...doc.bab5.mitigasiRisiko];
-    currentMitigation.push(
+  if (doc.bab5 && targetPages >= 50) {
+    if (doc.bab5.mitigasiRisiko && doc.bab5.mitigasiRisiko.length < 5) {
+      const currentMitigation = [...doc.bab5.mitigasiRisiko];
+      currentMitigation.push(
+        {
+          risiko: "Keterlambatan perolehan data primer akibat rotasi personil atau kesibukan darurat unit kerja mitra",
+          mitigasi: "Menyusun nota kesepahaman (MoU/SLA) sejak awal dengan mentor lapangan serta menyiapkan instrumen akuisisi data sekunder asinkron berbasis cloud."
+        },
+        {
+          risiko: "Deviasi signifikansi hasil akibat variabel perancu lingkungan di luar kontrol peneliti",
+          mitigasi: "Menerapkan teknik analisis kovarians (ANCOVA) dan kontrol multivariat ketat pada fase pembersihan data statistik."
+        },
+        {
+          risiko: "Resistensi personil operasional terhadap pengisian instrumen kuesioner dan observasi berkala",
+          mitigasi: "Menyelenggarakan sesi pengarahan orientasi singkat (briefing 15 menit), menyederhanakan antarmuka instrumen, dan memberikan apresiasi sertifikat partisipasi."
+        },
+        {
+          risiko: "Kerusakan atau desinkronisasi alat ukur kalibrasi selama periode pengujian intensif di lapangan",
+          mitigasi: "Menyediakan instrumen cadangan (*backup unit*) terkalibrasi ganda dan melakukan re-kalibrasi mingguan sebelum pengambilan data."
+        }
+      );
+      doc.bab5.mitigasiRisiko = currentMitigation;
+    }
+
+    if (targetPages >= 60) {
+      doc.bab5.kesimpulanUmum = 
+        `Berdasarkan keseluruhan rangkaian investigasi saintifik, analisis teoritis komprehensif, dan pengujian empiris kuasi-eksperimental yang telah dilaksanakan selama 16 minggu kerja di ${entity}, dapat disimpulkan secara umum bahwa usulan penelitian dan intervensi sistemik berjudul "${title}" telah memenuhi kaidah metodologi ilmiah, memiliki kelayakan operasional tinggi, serta terbukti secara statistik mampu mereduksi deviasi proses dan meningkatkan efisiensi operasional organisasi secara nyata.`;
+
+      doc.bab5.kesimpulanUsulan = [
+        `1. Identifikasi kondisi eksisting pada unit operasional ${entity} membuktikan adanya kesenjangan (*empirical gap*) signifikan pada standardisasi alur kerja, di mana pendekatan konvensional sebelumnya memicu deviasi proses hingga 32% di atas batas toleransi yang diizinkan.`,
+        `2. Desain intervensi sistemik yang dirancang berbasis integrasi grand theory dan applied theory berhasil memformulasikan instrumen pengukuran terkalibrasi yang tervalidasi secara psikometris oleh dewan pakar dengan koefisien Aiken's V rata-rata 0,84 (kategori sangat valid) dan koefisien konsistensi internal Cronbach's Alpha sebesar 0,86 (kategori sangat reliabel).`,
+        `3. Pengujian model operasional di lapangan selama periode intervensi membuktikan terjadinya peningkatan efisiensi waktu siklus kerja (*cycle time*) sebesar 42,6% dan penurunan tingkat galat operasional (*operational error rate*) hingga di bawah 2,1% pada taraf signifikansi alpha = 0,05.`,
+        `4. Analisis inferensial SEM-PLS mengonfirmasi bahwa seluruh hipotesis penelitian yang diajukan (H1 s/d H5) diterima secara signifikan dengan nilai t-statistik > 1,96 dan p-value < 0,001, membuktikan adanya hubungan kausalitas yang kuat antara intervensi terstandar terhadap performa luaran unit kerja.`,
+        `5. Formulasi modul Standard Operating Procedure (SOP) dan matriks mitigasi risiko 5x5 terbukti aplikatif dan adaptif untuk diintegrasikan secara permanen ke dalam tata kelola penjaminan mutu berkelanjutan di ${entity}.`
+      ];
+
+      doc.bab5.kontribusiTeoretis = 
+        `Secara teoretis dan epistemologis, karya ilmiah ini memberikan kontribusi signifikan dalam memperluas keberlakuan model penerimaan teknologi dan rekayasa keandalan pada lokus organisasi di negara berkembang yang menghadapi keterbatasan infrastruktur. Temuan penelitian ini membuktikan bahwa faktor kesiapan budaya organisasi (*organizational readiness*) memoderasi secara signifikan hubungan antara kompleksitas sistem dengan adopsi aktual personil pelaksana.`;
+
+      doc.bab5.saranPraktis = [
+        `Bagi Dewan Manajemen ${entity}: Disarankan mengadopsi modul Standard Operating Procedure (SOP) yang telah tervalidasi secara permanen ke dalam sistem manajemen mutu internal dan menyelenggarakan pelatihan berkala.`,
+        `Bagi Tim Teknis / Operator Lapangan: Disarankan melakukan pengawasan rutin terhadap parameter getaran, suhu, dan stabilitas proses dengan mengisi checklist monitoring harian sebelum memulai shift kerja.`,
+        `Bagi Perguruan Tinggi ${campus}: Disarankan memperkuat mata kuliah praktikum berbasis data riil industri dan melanjutkan riset kolaboratif pada topik terkait guna mempertahankan akreditasi internasional.`,
+        `Bagi Peneliti Lanjutan: Disarankan memperluas lokus penelitian pada unit industri sejenis dengan menyertakan variabel moderasi budaya keselamatan kerja (safety climate) dan analisis biaya siklus hidup (life cycle cost).`
+      ];
+
+      doc.bab5.sustainabilityPlan = 
+        `Rencana keberlanjutan pasca-penelitian dirancang melalui pembentukan task force penjaminan mutu internal, jadwal re-kalibrasi instrumen per semester, serta tinjauan manajemen triwulanan berbasis KPI operasional terukur.`;
+    }
+  }
+
+  // --------------------------------------------------------------------------
+  // 6. COMPREHENSIVE APPENDICES (Kuesioner, Rubrik Validasi, Logbook 16 Minggu)
+  // --------------------------------------------------------------------------
+  if (targetPages >= 50) {
+    const comprehensiveAppendices = [
       {
-        risiko: "Keterlambatan perolehan data primer akibat rotasi personil atau kesibukan darurat unit kerja mitra",
-        mitigasi: "Menyusun nota kesepahaman (MoU/SLA) sejak awal dengan mentor lapangan serta menyiapkan instrumen akuisisi data sekunder asinkron berbasis cloud."
+        id: "app-1",
+        title: "Lampiran 1: Blueprint Kisi-Kisi & Butir Instrumen Angket Penelitian (Skala Likert 5 Poin)",
+        content: 
+          `PETUNJUK PENGISIAN ANGKET PENELITIAN:\n` +
+          `Bapak/Ibu/Saudara responden yang terhormat, kuesioner ini dirancang untuk mengumpulkan data empiris objektif terkait penelitian "${title}" pada ${entity}. ` +
+          `Setiap pernyataan dinilai menggunakan skala Likert 5 titik: 1 = Sangat Tidak Setuju (STS), 2 = Tidak Setuju (TS), 3 = Netral / Ragu-ragu (N), 4 = Setuju (S), 5 = Sangat Setuju (SS).\n\n` +
+          `DIMENSI I: KEMUDAHAN PENGGUNAAN & AKSESIBILITAS SISTEM (Variabel X1)\n` +
+          `1. Antarmuka dan tata letak menu sistem dirancang secara ergonomis dan mudah dipahami oleh pengguna pemula. [STS / TS / N / S / SS]\n` +
+          `2. Waktu respons pemrosesan input data berlangsung cepat tanpa mengalami jeda atau keterlambatan sistem. [STS / TS / N / S / SS]\n` +
+          `3. Petunjuk teknis dan manual penggunaan (SOP) tersedia secara lengkap dan mudah diakses saat diperlukan. [STS / TS / N / S / SS]\n` +
+          `4. Fitur pelaporan data dapat dioperasikan secara mandiri tanpa memerlukan intervensi bantuan teknis khusus. [STS / TS / N / S / SS]\n` +
+          `5. Sistem menyediakan notifikasi peringatan dini ketika terjadi kesalahan penginputan parameter operasional. [STS / TS / N / S / SS]\n\n` +
+          `DIMENSI II: STANDARISASI PROSEDUR & KEPATUHAN OPERASIONAL (Variabel X2)\n` +
+          `6. Seluruh alur pekerjaan operasional dilaksanakan secara konsisten berpedoman pada Standard Operating Procedure. [STS / TS / N / S / SS]\n` +
+          `7. Pencatatan log aktivitas harian dilakukan secara real-time dan terverifikasi oleh supervisor penanggung jawab. [STS / TS / N / S / SS]\n` +
+          `8. Kalibrasi berkala terhadap peralatan kerja dan sensor pengukuran dilakukan sesuai jadwal pemeliharaan preventif. [STS / TS / N / S / SS]\n` +
+          `9. Prosedur penanganan anomali (troubleshooting) terdokumentasi rapi dan dipatuhi oleh seluruh tim pelaksana. [STS / TS / N / S / SS]\n` +
+          `10. Standar keselamatan dan kesehatan kerja (SMK3 / ISO 45001) diterapkan secara disiplin pada area mesin kritis. [STS / TS / N / S / SS]\n\n` +
+          `DIMENSI III: KEANDALAN SISTEM & KINERJA OPERASIONAL (Variabel Y)\n` +
+          `11. Penerapan model intervensi baru secara nyata menurunkan frekuensi waktu henti tak terencana (unplanned downtime). [STS / TS / N / S / SS]\n` +
+          `12. Data luaran yang dihasilkan memiliki tingkat akurasi dan validitas tinggi yang dapat dipertanggungjawabkan. [STS / TS / N / S / SS]\n` +
+          `13. Durasi siklus penyelesaian pekerjaan (cycle time) menjadi lebih singkat dibandingkan metode konvensional sebelumnya. [STS / TS / N / S / SS]\n` +
+          `14. Beban kerja administratif personil berkurang secara signifikan berkat otomatisasi alur verifikasi data. [STS / TS / N / S / SS]\n` +
+          `15. Tingkat kepuasan pemangku kepentingan terhadap kualitas luaran layanan mengalami peningkatan konsisten. [STS / TS / N / S / SS]`
       },
       {
-        risiko: "Deviasi signifikansi hasil akibat variabel perancu lingkungan di luar kontrol peneliti",
-        mitigasi: "Menerapkan teknik analisis kovarians (ANCOVA) dan kontrol multivariat ketat pada fase pembersihan data statistik."
+        id: "app-2",
+        title: "Lampiran 2: Format Lembar Rubrik Penilaian Uji Validitas Isi Dewan Pakar (Aiken's V Rating Scale)",
+        content: 
+          `LEMBAR VERIFIKASI DAN VALIDASI INSTRUMEN PENELITIAN OLEH DEWAN PAKAR:\n\n` +
+          `Judul Penelitian : ${title}\n` +
+          `Lokus Penelitian : ${entity}\n` +
+          `Pengusul        : ${author} (NIM: ${nim})\n` +
+          `Nama Validator  : Prof. Dr. Ir. H. Sudirman, M.Eng. (Pakar Sistem & Metodologi)\n` +
+          `Jabatan / Unit  : Dewan Guru Besar & Reviewer Nasional Pendidikan Tinggi\n\n` +
+          `KRITERIA PENILAIAN BUTIR (Skala 1 - 5):\n` +
+          `1 = Sangat Tidak Relevan, 2 = Kurang Relevan, 3 = Cukup Relevan, 4 = Relevan, 5 = Sangat Relevan.\n` +
+          `Formula Koefisien Aiken's V: V = ∑s / [n(c - 1)], di mana s = r - lo (skor terendah = 1), n = jumlah penilai (3 orang), c = kategori skala (5).\n` +
+          `Ambang Batas Penerimaan: Butir dinyatakan VALID jika V >= 0,78 (p < 0,05).\n\n` +
+          `REKAPITULASI HASIL VERIFIKASI VALIDATOR PAKAR:\n` +
+          `- Butir 1 s/d 5 (Dimensi Kemudahan Penggunaan): Rata-rata Skor = 4,67; Koefisien Aiken's V = 0,92 [Kategori: SANGAT VALID]\n` +
+          `- Butir 6 s/d 10 (Dimensi Kepatuhan Standar): Rata-rata Skor = 4,33; Koefisien Aiken's V = 0,83 [Kategori: VALID]\n` +
+          `- Butir 11 s/d 15 (Dimensi Keandalan Luaran): Rata-rata Skor = 4,67; Koefisien Aiken's V = 0,92 [Kategori: SANGAT VALID]\n\n` +
+          `CATATAN REKOMENDASI DEWAN PAKAR:\n` +
+          `"Konstruksi instrumen telah disusun dengan sangat cermat, memiliki landasan teoretis yang kokoh, dan memenuhi kaidah psikometri ilmiah. ` +
+          `Instrumen dinyatakan LAYAK TANPA REVISI untuk digunakan dalam pengumpulan data empiris lapangan."`
+      },
+      {
+        id: "app-3",
+        title: "Lampiran 3: Format Pedoman Wawancara Mendalam & Lembar Observasi Lapangan Terstruktur",
+        content: 
+          `PANDUAN WAWANCARA MENDALAM DENGAN SUPERVISOR & PRAKTISI LAPANGAN:\n\n` +
+          `1. Bagaimana dinamika operasional eksisting pada unit kerja sebelum penerapan model intervensi terstandar?\n` +
+          `2. Apa saja kendala teknis dan kultural yang paling sering memicu terjadinya deviasi proses kerja harian?\n` +
+          `3. Sejauh mana efektivitas prosedur darurat (contingency plan) yang selama ini berjalan dalam menangani kegagalan sistem?\n` +
+          `4. Bagaimana persepsi personil pelaksana terhadap usulan modul Standard Operating Procedure (SOP) berbasis digital?\n` +
+          `5. Apa saja indikator keberhasilan utama yang diharapkan manajemen puncak terhadap keberlanjutan hasil penelitian ini?\n\n` +
+          `LEMBAR OBSERVASI LAPANGAN TERSTRUKTUR:\n` +
+          `- Parameter 1: Stabilitas frekuensi tegangan dan suplai daya komputasi di unit operasional (Toleransi deviasi < 2%).\n` +
+          `- Parameter 2: Tingkat kepatuhan personil terhadap penggunaan kelengkapan K3 / APD di zona operasional (Target 100%).\n` +
+          `- Parameter 3: Kecepatan penanganan keluhan teknis (Response Time Target < 15 menit).\n` +
+          `- Parameter 4: Integritas pencatatan log harian pada formulir checklist terstandar.`
       }
-    );
-    doc.bab5.mitigasiRisiko = currentMitigation;
+    ];
+
+    doc.appendices = comprehensiveAppendices;
   }
 
   // --------------------------------------------------------------------------
@@ -924,11 +1221,11 @@ export function scaleAcademicDocumentDepth(
 
       if (w <= 3) {
         phaseLabel = "Fase I: Orientasi & Diagnostik";
-        actDesc = `Melakukan studi literatur, penelusuran regulasi internal di ${entity}, wawancara mendalam dengan mentor lapangan, dan pemetaan Work Breakdown Structure (WBS) Minggu ke-${w}.`;
+        actDesc = `Melakukan studi literatur komprehensif, penelusuran regulasi internal di ${entity}, wawancara mendalam dengan mentor lapangan, dan pemetaan Work Breakdown Structure (WBS) Minggu ke-${w}.`;
         outputDeliverable = `Dokumen WBS & Catatan Observasi Awal Minggu ${w}`;
       } else if (w <= 6) {
         phaseLabel = "Fase II: Desain & Kalibrasi Instrumen";
-        actDesc = `Penyusunan blueprint instrumen pengukuran, simulasi parameter teknis, pengujian validitas isi Aiken's V, dan perbaikan indikator ukur berdasarkan masukan dosen pembimbing.`;
+        actDesc = `Penyusunan blueprint instrumen pengukuran, simulasi parameter teknis, pengujian validitas isi Aiken's V terhadap 3 validator pakar, dan perbaikan indikator ukur berdasarkan masukan dosen pembimbing.`;
         outputDeliverable = `Instrumen Ukur Terkalibrasi & Formulir Verifikasi Ahli (Mg ${w})`;
       } else if (w <= 11) {
         phaseLabel = "Fase III: Implementasi & Akuisisi Data Lapangan";
@@ -936,11 +1233,11 @@ export function scaleAcademicDocumentDepth(
         outputDeliverable = `Log Sheet Data Primer & Rekapitulasi Performa Mingguan (Mg ${w})`;
       } else if (w <= 14) {
         phaseLabel = "Fase IV: Tabulasi & Analisis Inferensial";
-        actDesc = `Pembersihan data mentah, komputasi statistik inferensial / pemodelan algoritma, analisis perbandingan teori vs praktik lapangan, serta penyusunan draf Bab I - V.`;
+        actDesc = `Pembersihan data mentah, komputasi statistik inferensial / pemodelan algoritma multivariat, pengujian asumsi klasik, analisis perbandingan teori vs praktik lapangan, serta penyusunan draf Bab I - V.`;
         outputDeliverable = `Output Sintaks Olah Data & Draf Bab Laporan (Mg ${w})`;
       } else {
         phaseLabel = "Fase V: Finalisasi, Revisi & Ujian Sidang";
-        actDesc = `Konsultasi intensif dengan dewan pembimbing, finalisasi dokumen Standard Operating Procedure (SOP), penyusunan slide presentasi sidang eksekutif, dan penyiapan berita acara ujian.`;
+        actDesc = `Konsultasi intensif dengan dewan pembimbing, finalisasi dokumen Standard Operating Procedure (SOP), penyusunan slide presentasi sidang eksekutif, dan penyiapan berita acara ujian akademik.`;
         outputDeliverable = `Naskah Final Terverifikasi & Lembar Persetujuan Sidang (Mg ${w})`;
       }
 
@@ -968,4 +1265,3 @@ export function scaleAcademicDocumentDepth(
 
   return sanitizeAcademicText(doc);
 }
-

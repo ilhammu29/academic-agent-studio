@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { ProposalDocument, ProposalCategory, ReportType, CampusGuideline } from "@/types/studio";
-import { buildDenseAcademicDocument, planDocumentOutline } from "@/lib/longDocumentGenerator";
+import { buildDenseAcademicDocument, planDocumentOutline, scaleAcademicDocumentDepth } from "@/lib/longDocumentGenerator";
 import { sanitizeAcademicText } from "@/lib/textSanitizer";
 
 export async function POST(req: Request) {
@@ -227,9 +227,13 @@ OUTPUT WAJIB: Balas HANYA dengan objek JSON valid tanpa markdown fence:
               campusLogoUrl: campusLogoUrl || baseDoc.campusLogoUrl
             };
 
+            const finalDoc = (targetDepthPages && targetDepthPages > 25)
+              ? scaleAcademicDocumentDepth(mergedDoc, targetDepthPages)
+              : mergedDoc;
+
             return NextResponse.json({
               success: true,
-              document: sanitizeAcademicText(mergedDoc),
+              document: sanitizeAcademicText(finalDoc),
               approximatePageCount: targetDepthPages || 45,
               engine: "gemini-2.5-flash-dense-hybrid"
             });
@@ -241,9 +245,13 @@ OUTPUT WAJIB: Balas HANYA dengan objek JSON valid tanpa markdown fence:
     }
 
     // 3. Resilient Full Dense Academic Document Return
+    const finalBaseDoc = (targetDepthPages && targetDepthPages > 25)
+      ? scaleAcademicDocumentDepth(baseDoc, targetDepthPages)
+      : baseDoc;
+
     return NextResponse.json({
       success: true,
-      document: sanitizeAcademicText(baseDoc),
+      document: sanitizeAcademicText(finalBaseDoc),
       approximatePageCount: targetDepthPages || 40,
       engine: "academic-dense-engine"
     });

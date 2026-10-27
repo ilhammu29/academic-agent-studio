@@ -67,10 +67,15 @@ export async function generateAcademicProposalDocx(rawDoc: ProposalDocument, dis
   const rightCm = guideline?.margins?.rightCm ?? 3;
   const bottomCm = guideline?.margins?.bottomCm ?? 3;
   const lineSpacingTwip = Math.round((guideline?.typography?.lineSpacing || 1.5) * 240);
-  const isMagang = doc.category === "magang";
-  const isUNPPkl = doc.reportType === "laporan_pkl_unp" || 
+  const isMagang = doc.category === "magang" || 
+    doc.reportType === "magang" || 
+    doc.reportType === "laporan_magang" || 
+    doc.reportType === "laporan_pkl_unp";
+  const isUNPPkl = isMagang && (
+    doc.reportType === "laporan_pkl_unp" || 
     guideline?.id === "unp" || 
-    /unp|universitas negeri padang|ft unp/i.test(doc.institution || "");
+    /unp|universitas negeri padang|ft unp/i.test(doc.institution || "")
+  );
 
   // Reusable Paragraph styling
   const createHeading1 = (text: string) => {
@@ -163,6 +168,16 @@ export async function generateAcademicProposalDocx(rawDoc: ProposalDocument, dis
         }),
       ],
     });
+
+  const createBodyParagraphs = (text: string | undefined): Paragraph[] => {
+    if (!text) return [];
+    const paragraphs = text
+      .split(/\n\s*\n|\n/)
+      .map((p) => p.trim())
+      .filter(Boolean);
+    if (paragraphs.length === 0) return [];
+    return paragraphs.map((p) => createBodyParagraph(p));
+  };
 
   const createBulletItem = (text: string) =>
     new Paragraph({
@@ -1012,19 +1027,19 @@ export async function generateAcademicProposalDocx(rawDoc: ProposalDocument, dis
           createHeading1(doc.bab2.title),
           new Paragraph({ spacing: { after: 140 } }),
 
-          createHeading2(getSectionHeading(2, 0, "Gambaran Umum & Profil Organisasi", hs)),
-          createBodyParagraph(doc.bab2.profilInstansi),
+          ...(isMagang ? [
+            createHeading2(getSectionHeading(2, 0, "Gambaran Umum & Profil Organisasi", hs)),
+            createBodyParagraph(doc.bab2.profilInstansi),
+            createHeading3("Visi dan Misi Organisasi"),
+            ...doc.bab2.visiMisi.map((v) => createBulletItem(v)),
+            createHeading3("Struktur Supervisi & Lingkup Kerja"),
+            createBodyParagraph(doc.bab2.strukturOrganisasi),
+          ] : []),
 
-          createHeading3("Visi dan Misi Organisasi"),
-          ...doc.bab2.visiMisi.map((v) => createBulletItem(v)),
-
-          createHeading3("Struktur Supervisi & Lingkup Kerja"),
-          createBodyParagraph(doc.bab2.strukturOrganisasi),
-
-          createHeading2(getSectionHeading(2, 1, "Landasan Teori & Tinjauan Pustaka Terkait", hs)),
+          createHeading2(getSectionHeading(2, isMagang ? 1 : 0, "Landasan Teori & Tinjauan Pustaka Terkait", hs)),
           ...doc.bab2.landasanTeori.flatMap((t, i) => [
-            createHeading3(getSubSectionHeading(2, 1, i, t.topic, hs)),
-            createBodyParagraph(t.elaboration),
+            createHeading3(getSubSectionHeading(2, isMagang ? 1 : 0, i, t.topic, hs)),
+            ...createBodyParagraphs(t.elaboration),
             new Paragraph({
               alignment: AlignmentType.JUSTIFIED,
               spacing: { after: 180, line: lineSpacingTwip },
@@ -1040,6 +1055,96 @@ export async function generateAcademicProposalDocx(rawDoc: ProposalDocument, dis
               ],
             }),
           ]),
+
+          // State-of-the-Art Research Gap Matrix (PRISMA 2020)
+          ...(doc.bab2.researchGapMatrix && doc.bab2.researchGapMatrix.length > 0 ? [
+            createHeading2(getSectionHeading(2, isMagang ? 2 : 1, "Sintesis Penelitian Terdahulu (State-of-the-Art)", hs)),
+            new Paragraph({
+              alignment: AlignmentType.JUSTIFIED,
+              spacing: { after: 140, line: lineSpacingTwip },
+              children: [
+                new TextRun({
+                  text: "Tabel 2.1. Matriks Sintesis Penelitian Terdahulu dan Posisi Kebaruan Riset",
+                  bold: true,
+                  font: FONT_FAMILY,
+                  size: 22,
+                }),
+              ],
+            }),
+            new Table({
+              width: { size: 100, type: WidthType.PERCENTAGE },
+              rows: [
+                new TableRow({
+                  tableHeader: true,
+                  children: [
+                    new TableCell({
+                      borders: tableHeaderBorders,
+                      width: { size: 6, type: WidthType.PERCENTAGE },
+                      children: [new Paragraph({ alignment: AlignmentType.CENTER, children: [new TextRun({ text: "No", bold: true, font: FONT_FAMILY, size: 20 })] })],
+                    }),
+                    new TableCell({
+                      borders: tableHeaderBorders,
+                      width: { size: 24, type: WidthType.PERCENTAGE },
+                      children: [new Paragraph({ alignment: AlignmentType.CENTER, children: [new TextRun({ text: "Penulis & Jurnal", bold: true, font: FONT_FAMILY, size: 20 })] })],
+                    }),
+                    new TableCell({
+                      borders: tableHeaderBorders,
+                      width: { size: 35, type: WidthType.PERCENTAGE },
+                      children: [new Paragraph({ alignment: AlignmentType.CENTER, children: [new TextRun({ text: "Fokus, Sampel & Temuan Kunci", bold: true, font: FONT_FAMILY, size: 20 })] })],
+                    }),
+                    new TableCell({
+                      borders: tableHeaderBorders,
+                      width: { size: 35, type: WidthType.PERCENTAGE },
+                      children: [new Paragraph({ alignment: AlignmentType.CENTER, children: [new TextRun({ text: "Kesenjangan & Kebaruan (Novelty)", bold: true, font: FONT_FAMILY, size: 20 })] })],
+                    }),
+                  ],
+                }),
+                ...doc.bab2.researchGapMatrix.map((gap, idx, arr) => {
+                  const borders = idx === arr.length - 1 ? tableLastRowBorders : tableRowBorders;
+                  return new TableRow({
+                    children: [
+                      new TableCell({
+                        borders,
+                        children: [new Paragraph({ alignment: AlignmentType.CENTER, children: [new TextRun({ text: String(idx + 1), font: FONT_FAMILY, size: 18 })] })],
+                      }),
+                      new TableCell({
+                        borders,
+                        children: [
+                          new Paragraph({ alignment: AlignmentType.LEFT, children: [new TextRun({ text: gap.authorYear, font: FONT_FAMILY, size: 18, bold: true })] }),
+                          new Paragraph({ alignment: AlignmentType.LEFT, children: [new TextRun({ text: gap.titleJournal, font: FONT_FAMILY, size: 16, italics: true })] }),
+                        ],
+                      }),
+                      new TableCell({
+                        borders,
+                        children: [
+                          new Paragraph({ alignment: AlignmentType.JUSTIFIED, children: [new TextRun({ text: `${gap.designSample}. ${gap.findingsEffect}`, font: FONT_FAMILY, size: 18 })] }),
+                        ],
+                      }),
+                      new TableCell({
+                        borders,
+                        children: [
+                          new Paragraph({ alignment: AlignmentType.JUSTIFIED, children: [new TextRun({ text: gap.gapDifference, font: FONT_FAMILY, size: 18 })] }),
+                        ],
+                      }),
+                    ],
+                  });
+                }),
+              ],
+            }),
+            new Paragraph({ spacing: { after: 200 } }),
+          ] : []),
+
+          // Conceptual Framework
+          ...(doc.bab2.conceptualFramework ? [
+            createHeading2(getSectionHeading(2, isMagang ? 3 : 2, "Kerangka Berpikir Konseptual (Conceptual Framework)", hs)),
+            ...createBodyParagraphs(doc.bab2.conceptualFramework),
+          ] : []),
+
+          // Hypotheses
+          ...(doc.bab2.hypotheses && doc.bab2.hypotheses.length > 0 ? [
+            createHeading2(getSectionHeading(2, isMagang ? 4 : 3, "Hipotesis Penelitian", hs)),
+            ...doc.bab2.hypotheses.map(h => createBulletItem(h)),
+          ] : []),
           ...(doc.documentFigures?.filter(f => f.chapterPlacement === 2 || f.chapterKey === "bab2") || []).flatMap(fig => {
             const figImg = parseImageData(fig.imageDataUrl || fig.imageUrl);
             const items: any[] = [
@@ -1137,10 +1242,93 @@ export async function generateAcademicProposalDocx(rawDoc: ProposalDocument, dis
           createHeading1(doc.bab3.title),
           new Paragraph({ spacing: { after: 140 } }),
 
-          createHeading2(getSectionHeading(3, 0, "Metode Pelaksanaan", hs)),
-          createBodyParagraph(doc.bab3.metodePelaksanaan),
+          createHeading2(getSectionHeading(3, 0, isMagang ? "Metode Pelaksanaan & Alur Kerja" : "Pendekatan & Desain Penelitian", hs)),
+          ...createBodyParagraphs(doc.bab3.metodePelaksanaan),
 
-          createHeading2(getSectionHeading(3, 1, "Ruang Lingkup Penugasan & Pekerjaan", hs)),
+          // Population and Sampling
+          ...(doc.bab3.populationSample ? [
+            createHeading2(getSectionHeading(3, 1, "Populasi, Sampel & Teknik Pengambilan Sampel", hs)),
+            ...createBodyParagraphs(doc.bab3.populationSample),
+          ] : []),
+
+          // Operational Definitions (DOV)
+          ...(doc.bab3.operationalDefinitions && doc.bab3.operationalDefinitions.length > 0 ? [
+            createHeading2(getSectionHeading(3, doc.bab3.populationSample ? 2 : 1, "Definisi Operasional Variabel (DOV)", hs)),
+            new Paragraph({
+              alignment: AlignmentType.JUSTIFIED,
+              spacing: { after: 140, line: lineSpacingTwip },
+              children: [
+                new TextRun({
+                  text: "Tabel 3.1. Matriks Definisi Operasional Variabel dan Alat Ukur Terkalibrasi",
+                  bold: true,
+                  font: FONT_FAMILY,
+                  size: 22,
+                }),
+              ],
+            }),
+            new Table({
+              width: { size: 100, type: WidthType.PERCENTAGE },
+              rows: [
+                new TableRow({
+                  tableHeader: true,
+                  children: [
+                    new TableCell({
+                      borders: tableHeaderBorders,
+                      width: { size: 25, type: WidthType.PERCENTAGE },
+                      children: [new Paragraph({ alignment: AlignmentType.CENTER, children: [new TextRun({ text: "Variabel Penelitian", bold: true, font: FONT_FAMILY, size: 20 })] })],
+                    }),
+                    new TableCell({
+                      borders: tableHeaderBorders,
+                      width: { size: 35, type: WidthType.PERCENTAGE },
+                      children: [new Paragraph({ alignment: AlignmentType.CENTER, children: [new TextRun({ text: "Definisi Konseptual & Operasional", bold: true, font: FONT_FAMILY, size: 20 })] })],
+                    }),
+                    new TableCell({
+                      borders: tableHeaderBorders,
+                      width: { size: 25, type: WidthType.PERCENTAGE },
+                      children: [new Paragraph({ alignment: AlignmentType.CENTER, children: [new TextRun({ text: "Parameter & Instrumen Ukur", bold: true, font: FONT_FAMILY, size: 20 })] })],
+                    }),
+                    new TableCell({
+                      borders: tableHeaderBorders,
+                      width: { size: 15, type: WidthType.PERCENTAGE },
+                      children: [new Paragraph({ alignment: AlignmentType.CENTER, children: [new TextRun({ text: "Skala Pengukuran", bold: true, font: FONT_FAMILY, size: 20 })] })],
+                    }),
+                  ],
+                }),
+                ...doc.bab3.operationalDefinitions.map((dov, idx, arr) => {
+                  const borders = idx === arr.length - 1 ? tableLastRowBorders : tableRowBorders;
+                  return new TableRow({
+                    children: [
+                      new TableCell({
+                        borders,
+                        children: [new Paragraph({ alignment: AlignmentType.LEFT, children: [new TextRun({ text: dov.variable, font: FONT_FAMILY, size: 18, bold: true })] })],
+                      }),
+                      new TableCell({
+                        borders,
+                        children: [new Paragraph({ alignment: AlignmentType.JUSTIFIED, children: [new TextRun({ text: dov.definition, font: FONT_FAMILY, size: 18 })] })],
+                      }),
+                      new TableCell({
+                        borders,
+                        children: [new Paragraph({ alignment: AlignmentType.LEFT, children: [new TextRun({ text: dov.parameterTool, font: FONT_FAMILY, size: 18 })] })],
+                      }),
+                      new TableCell({
+                        borders,
+                        children: [new Paragraph({ alignment: AlignmentType.CENTER, children: [new TextRun({ text: dov.indicatorScale, font: FONT_FAMILY, size: 18 })] })],
+                      }),
+                    ],
+                  });
+                }),
+              ],
+            }),
+            new Paragraph({ spacing: { after: 200 } }),
+          ] : []),
+
+          // Ethical Considerations
+          ...(doc.bab3.ethicalConsiderations ? [
+            createHeading2(getSectionHeading(3, (doc.bab3.populationSample ? 1 : 0) + (doc.bab3.operationalDefinitions ? 1 : 0) + 1, "Protokol Etika Penelitian & Keamanan Data", hs)),
+            ...createBodyParagraphs(doc.bab3.ethicalConsiderations),
+          ] : []),
+
+          createHeading2(getSectionHeading(3, (doc.bab3.populationSample ? 1 : 0) + (doc.bab3.operationalDefinitions ? 1 : 0) + (doc.bab3.ethicalConsiderations ? 1 : 0) + 1, "Ruang Lingkup Penugasan & Pekerjaan", hs)),
           ...doc.bab3.lingkupPekerjaan.map((l, i) =>
             new Paragraph({
               alignment: AlignmentType.JUSTIFIED,
@@ -1150,10 +1338,10 @@ export async function generateAcademicProposalDocx(rawDoc: ProposalDocument, dis
             })
           ),
 
-          createHeading2(getSectionHeading(3, 2, "Spesifikasi Perangkat Lunak & Tools", hs)),
+          createHeading2(getSectionHeading(3, (doc.bab3.populationSample ? 1 : 0) + (doc.bab3.operationalDefinitions ? 1 : 0) + (doc.bab3.ethicalConsiderations ? 1 : 0) + 2, "Spesifikasi Perangkat Lunak & Tools", hs)),
           ...doc.bab3.perangkatTools.map((p) => createBulletItem(p)),
 
-          createHeading2(getSectionHeading(3, 3, "Rencana Capaian Kompetensi", hs)),
+          createHeading2(getSectionHeading(3, (doc.bab3.populationSample ? 1 : 0) + (doc.bab3.operationalDefinitions ? 1 : 0) + (doc.bab3.ethicalConsiderations ? 1 : 0) + 3, "Rencana Capaian Kompetensi", hs)),
           ...doc.bab3.rencanaKompetensi.map((c) => createBulletItem(c)),
 
           ...(doc.documentFigures?.filter(f => f.chapterPlacement === 3 || f.chapterKey === "bab3") || []).flatMap(fig => {
@@ -1272,8 +1460,85 @@ export async function generateAcademicProposalDocx(rawDoc: ProposalDocument, dis
             ],
           }),
 
-          createHeading2(getSectionHeading(4, 1, "Penutup", hs)),
-          createBodyParagraph(doc.bab4.penutup),
+          // Rencana Anggaran Biaya (RAB)
+          ...(doc.bab4.budgetPlan && doc.bab4.budgetPlan.length > 0 ? [
+            createHeading2(getSectionHeading(4, 1, "Rencana Anggaran Biaya (RAB Standar SBM)", hs)),
+            new Paragraph({
+              alignment: AlignmentType.JUSTIFIED,
+              spacing: { after: 140, line: lineSpacingTwip },
+              children: [
+                new TextRun({
+                  text: "Tabel 4.2. Rincian Alokasi Biaya Pelaksanaan Berbasis Standar Biaya Masukan (SBM)",
+                  bold: true,
+                  font: FONT_FAMILY,
+                  size: 22,
+                }),
+              ],
+            }),
+            new Table({
+              width: { size: 100, type: WidthType.PERCENTAGE },
+              rows: [
+                new TableRow({
+                  tableHeader: true,
+                  children: [
+                    new TableCell({
+                      borders: tableHeaderBorders,
+                      width: { size: 10, type: WidthType.PERCENTAGE },
+                      children: [new Paragraph({ alignment: AlignmentType.CENTER, children: [new TextRun({ text: "No", bold: true, font: FONT_FAMILY, size: 20 })] })],
+                    }),
+                    new TableCell({
+                      borders: tableHeaderBorders,
+                      width: { size: 45, type: WidthType.PERCENTAGE },
+                      children: [new Paragraph({ alignment: AlignmentType.CENTER, children: [new TextRun({ text: "Komponen / Uraian Pembiayaan", bold: true, font: FONT_FAMILY, size: 20 })] })],
+                    }),
+                    new TableCell({
+                      borders: tableHeaderBorders,
+                      width: { size: 25, type: WidthType.PERCENTAGE },
+                      children: [new Paragraph({ alignment: AlignmentType.CENTER, children: [new TextRun({ text: "Kategori Mata Anggaran", bold: true, font: FONT_FAMILY, size: 20 })] })],
+                    }),
+                    new TableCell({
+                      borders: tableHeaderBorders,
+                      width: { size: 20, type: WidthType.PERCENTAGE },
+                      children: [new Paragraph({ alignment: AlignmentType.CENTER, children: [new TextRun({ text: "Estimasi Biaya", bold: true, font: FONT_FAMILY, size: 20 })] })],
+                    }),
+                  ],
+                }),
+                ...doc.bab4.budgetPlan.map((b, idx, arr) => {
+                  const borders = idx === arr.length - 1 ? tableLastRowBorders : tableRowBorders;
+                  return new TableRow({
+                    children: [
+                      new TableCell({
+                        borders,
+                        children: [new Paragraph({ alignment: AlignmentType.CENTER, children: [new TextRun({ text: String(idx + 1), font: FONT_FAMILY, size: 18 })] })],
+                      }),
+                      new TableCell({
+                        borders,
+                        children: [new Paragraph({ alignment: AlignmentType.LEFT, children: [new TextRun({ text: b.item, font: FONT_FAMILY, size: 18 })] })],
+                      }),
+                      new TableCell({
+                        borders,
+                        children: [new Paragraph({ alignment: AlignmentType.LEFT, children: [new TextRun({ text: b.category, font: FONT_FAMILY, size: 18, italics: true })] })],
+                      }),
+                      new TableCell({
+                        borders,
+                        children: [new Paragraph({ alignment: AlignmentType.RIGHT, children: [new TextRun({ text: `Rp ${b.cost.toLocaleString("id-ID")}`, font: FONT_FAMILY, size: 18, bold: true })] })],
+                      }),
+                    ],
+                  });
+                }),
+              ],
+            }),
+            new Paragraph({ spacing: { after: 200 } }),
+          ] : []),
+
+          // Dissemination Plan
+          ...(doc.bab4.disseminationPlan ? [
+            createHeading2(getSectionHeading(4, doc.bab4.budgetPlan ? 2 : 1, "Rencana Diseminasi & Publikasi Ilmiah", hs)),
+            ...createBodyParagraphs(doc.bab4.disseminationPlan),
+          ] : []),
+
+          createHeading2(getSectionHeading(4, (doc.bab4.budgetPlan ? 1 : 0) + (doc.bab4.disseminationPlan ? 1 : 0) + 1, "Penutup & Komitmen Pelaksanaan", hs)),
+          ...createBodyParagraphs(doc.bab4.penutup),
         ],
   };
 
@@ -1287,18 +1552,26 @@ export async function generateAcademicProposalDocx(rawDoc: ProposalDocument, dis
           createHeading1(doc.bab5?.title || (isMagang ? "BAB V: PENUTUP & REKOMENDASI" : "BAB V: KESIMPULAN & REKOMENDASI KONTRIBUSI")),
           
           createHeading2(getSectionHeading(5, 0, "Kesimpulan Rencana Usulan", hs)),
+          ...(doc.bab5?.kesimpulanUmum ? createBodyParagraphs(doc.bab5.kesimpulanUmum) : []),
           ...(doc.bab5?.kesimpulanUsulan || [
             `Usulan pelaksanaan kegiatan dengan topik "${doc.title}" pada ${doc.targetEntity} telah dirancang secara sistematis memenuhi kaidah akademik.`,
             `Seluruh tahapan kerja dan beban waktu telah diselaraskan dengan standar capaian kompetensi kurikulum.`
           ]).map(k => createBulletItem(k)),
 
-          createHeading2(getSectionHeading(5, 1, "Rekomendasi Kontribusi Strategis", hs)),
-          ...(doc.bab5?.kontribusiPraktis || [
-            `Bagi ${doc.targetEntity}: Memberikan solusi aplikatif untuk mengatasi kendala operasional.`,
-            `Bagi ${doc.institution}: Memperkuat jalinan kolaborasi dan dokumentasi studi kasus nyata.`
-          ]).map(c => createBulletItem(c)),
+          ...(doc.bab5?.kontribusiTeoretis ? [
+            createHeading2(getSectionHeading(5, 1, "Implikasi Teoretis & Kontribusi Keilmuan", hs)),
+            ...createBodyParagraphs(doc.bab5.kontribusiTeoretis),
+          ] : []),
 
-          createHeading2(getSectionHeading(5, 2, "Matriks Mitigasi Risiko Pelaksanaan", hs)),
+          createHeading2(getSectionHeading(5, doc.bab5?.kontribusiTeoretis ? 2 : 1, "Rekomendasi Praktis & Manajerial", hs)),
+          ...((doc.bab5?.saranPraktis && doc.bab5.saranPraktis.length > 0)
+            ? doc.bab5.saranPraktis
+            : (doc.bab5?.kontribusiPraktis || [
+                `Bagi ${doc.targetEntity}: Memberikan solusi aplikatif untuk mengatasi kendala operasional.`,
+                `Bagi ${doc.institution}: Memperkuat jalinan kolaborasi dan dokumentasi studi kasus nyata.`
+              ])).map(c => createBulletItem(c)),
+
+          createHeading2(getSectionHeading(5, doc.bab5?.kontribusiTeoretis ? 3 : 2, "Matriks Mitigasi Risiko Pelaksanaan (5x5 Framework)", hs)),
           new Table({
             width: { size: 100, type: WidthType.PERCENTAGE },
             rows: [
@@ -1628,11 +1901,11 @@ export async function generateAcademicProposalDocx(rawDoc: ProposalDocument, dis
                         }),
                         new TableCell({
                           borders,
-                          children: [new Paragraph({ alignment: AlignmentType.LEFT, children: [new TextRun({ text: entry.activityDescription, font: FONT_FAMILY, size: 20 })] })],
+                          children: [new Paragraph({ alignment: AlignmentType.LEFT, children: [new TextRun({ text: entry.activityDescription || entry.activity || "", font: FONT_FAMILY, size: 20 })] })],
                         }),
                         new TableCell({
                           borders,
-                          children: [new Paragraph({ alignment: AlignmentType.LEFT, children: [new TextRun({ text: entry.outputDeliverable, font: FONT_FAMILY, size: 20 })] })],
+                          children: [new Paragraph({ alignment: AlignmentType.LEFT, children: [new TextRun({ text: entry.outputDeliverable || entry.output || "", font: FONT_FAMILY, size: 20 })] })],
                         }),
                       ],
                     });
@@ -1672,6 +1945,13 @@ export async function generateAcademicProposalDocx(rawDoc: ProposalDocument, dis
               createBulletItem(`${rev.section}: ${rev.revisionPoint}`)
             ),
           ] : []),
+
+          // Lampiran Tambahan (Kuesioner, Rubrik Validasi Dewan Pakar, Pedoman Observasi)
+          ...(doc.appendices && doc.appendices.length > 0 ? doc.appendices.flatMap((app) => [
+            new Paragraph({ spacing: { before: 280, after: 140 } }),
+            createHeading2(app.title),
+            ...createBodyParagraphs(app.content),
+          ]) : []),
         ],
   };
 

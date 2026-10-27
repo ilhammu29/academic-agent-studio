@@ -201,3 +201,51 @@ test('generateAcademicProposalDocx generates DOCX blob for UNP without throwing 
   assert.ok(blob, 'Must return a Blob');
   assert.ok(blob.size > 1000, 'Blob size should be substantial');
 });
+
+test('Skripsi paired with UNP preset retains 5-Chapter Skripsi structure, dual abstracts, and applies UNP formatting guidelines', async () => {
+  const unpPreset = CAMPUS_PRESETS.find(p => p.id === 'unp')!;
+  const generated = buildDenseAcademicDocument(
+    'Pengembangan Sistem Informasi Manajemen Inventaris Aset Berbasis Web di Universitas Negeri Padang',
+    'skripsi',
+    {},
+    'M. Ilham Pratama',
+    '21063045',
+    'Universitas Negeri Padang (UNP)',
+    'Fakultas Teknik',
+    'Universitas Negeri Padang',
+    unpPreset,
+    'skripsi',
+    100
+  );
+
+  // Must retain 5-Chapter Skripsi structure
+  assert.strictEqual(generated.category, 'skripsi');
+  assert.ok(!generated.bab1.title.includes('LOKASI KERJA PKL'), 'Bab 1 must not be forced to PKL');
+  assert.strictEqual(generated.bab1.title, 'BAB I: PENDAHULUAN');
+  assert.strictEqual(generated.bab2.title, 'BAB II: TINJAUAN PUSTAKA & KERANGKA TEORETIS');
+  assert.strictEqual(generated.bab3.title, 'BAB III: METODOLOGI PENELITIAN & DESAIN KERJA');
+  assert.ok(generated.bab4, 'Bab 4 must exist for Skripsi UNP');
+  assert.strictEqual(generated.bab4.title, 'BAB IV: JADWAL PELAKSANAAN & RENCANA ANGGARAN');
+  assert.ok(generated.bab5, 'Bab 5 must exist for Skripsi UNP');
+  assert.strictEqual(generated.bab5.title, 'BAB V: KESIMPULAN USULAN & MITIGASI RISIKO');
+
+  // Must have dual abstracts
+  assert.ok(generated.abstractId, 'Abstract Indonesia must exist for Skripsi UNP');
+  assert.ok(generated.abstractEn, 'Abstract English must exist for Skripsi UNP');
+
+  // Must retain UNP campus guidelines (margins 4-4-3-3, TNR 12)
+  assert.strictEqual(generated.campusGuideline?.id, 'unp');
+  assert.strictEqual(generated.campusGuideline?.margins?.leftCm, 4);
+  assert.strictEqual(generated.campusGuideline?.margins?.topCm, 4);
+
+  // Must scale depth appropriately for 100 pages
+  assert.strictEqual(generated.targetDepthPages, 100);
+  assert.ok(generated.bab1.latarBelakang.length >= 17, 'Latar belakang should be expanded');
+  assert.ok(generated.bab2.landasanTeori.length >= 10, 'Theories should be expanded');
+  assert.ok(generated.appendices && generated.appendices.length >= 3, 'Appendices should be included');
+
+  // Generate DOCX blob
+  const blob = await generateAcademicProposalDocx(generated);
+  assert.ok(blob, 'Must return a Blob');
+  assert.ok(blob.size > 20000, 'DOCX binary size for 100 pages should be dense and substantial');
+});
