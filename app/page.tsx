@@ -52,10 +52,16 @@ export default function Home() {
   }, []);
   const [sessionSaveFailed, setSessionSaveFailed] = useState(false);
   const [showSplash, setShowSplash] = useState(true);
-  const [forceShowreel, setForceShowreel] = useState(false);
   const [currentUser, setCurrentUser] = useState<UserProfile>(() => getStoredUser());
   const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
   const [isSupabaseConfigured, setIsSupabaseConfigured] = useState(false);
+  const pendingPresetRef = useRef<{
+    title?: string;
+    category?: ProposalCategory;
+    reportType?: ReportType;
+    targetEntity?: string;
+    campusGuideline?: CampusGuideline;
+  } | null>(null);
 
   // App & Workflow Stage
   const [stage, setStage] = useState<StudioStage>("landing");
@@ -123,15 +129,10 @@ export default function Home() {
         setGeneratedDoc(savedSession.generatedDoc);
         setTreeData(savedSession.treeData || buildVisualTreeGraph(savedSession.generatedDoc));
       }
-
-      if (savedSession.stage === "orchestration") {
-        setStage(savedSession.generatedDoc ? "result" : "interview");
-      } else if (savedSession.stage) {
-        setStage(savedSession.stage);
-      }
-    } else {
-      setStage("landing");
     }
+
+    // Selalu mulai di halaman landing page terlebih dahulu
+    setStage("landing");
   }, []);
 
   // 2. Auto-Save Active Session on any change (Persistent storage against accidental refresh)
@@ -310,6 +311,15 @@ export default function Home() {
     targetEntity?: string;
     campusGuideline?: CampusGuideline;
   }) => {
+    // WAJIB LOGIN DULU: Pengguna harus login terlebih dahulu sebelum dapat menggunakan studio
+    if (!isUserLoggedIn() && !isLoggedIn) {
+      if (preset) {
+        pendingPresetRef.current = preset;
+      }
+      setIsAuthModalOpen(true);
+      return;
+    }
+
     if (preset) {
       if (preset.title) setTitle(preset.title);
       if (preset.category) setCategory(preset.category);
@@ -340,6 +350,11 @@ export default function Home() {
   const handleNavigateStage = (targetStage: StudioStage) => {
     if (targetStage === "landing") {
       setStage("landing");
+      return;
+    }
+
+    if (!isUserLoggedIn() && !isLoggedIn) {
+      setIsAuthModalOpen(true);
       return;
     }
 
@@ -499,6 +514,24 @@ export default function Home() {
     setIsLoggedIn(true);
     setCandidateName(updatedUser.name);
     setInstitution(updatedUser.institution);
+
+    // Ketika user login dari landing page, langsung buka studio
+    if (stage === "landing") {
+      if (pendingPresetRef.current) {
+        const preset = pendingPresetRef.current;
+        pendingPresetRef.current = null;
+        if (preset.title) setTitle(preset.title);
+        if (preset.category) setCategory(preset.category);
+        if (preset.reportType) setReportType(preset.reportType);
+        if (preset.targetEntity) setTargetEntity(preset.targetEntity);
+        if (preset.campusGuideline) setCampusGuideline(preset.campusGuideline);
+        setStage("input");
+      } else if (generatedDoc) {
+        setStage("result");
+      } else {
+        setStage("input");
+      }
+    }
   };
 
   return (
@@ -508,13 +541,14 @@ export default function Home() {
       {/* Full-Bleed Desktop & Mobile Responsive App Shell / Landing View */}
       {stage === "landing" ? (
         <>
-          {/* Animasi Screen Loading Showreel: Diposisikan di Awal Landing Page Saja */}
+          {/* Animasi Screen Loading Showreel: Diposisikan di Awal Landing Page Saja untuk First-Time Visit */}
           {showSplash && (
             <FirstTimeLoadingScreen 
-              forceShow={forceShowreel}
               onComplete={() => {
+                try {
+                  localStorage.setItem("academic_showreel_seen", "true");
+                } catch {}
                 setShowSplash(false);
-                setForceShowreel(false);
               }} 
             />
           )}
@@ -524,10 +558,6 @@ export default function Home() {
             onOpenAuth={() => setIsAuthModalOpen(true)}
             onOpenPayment={() => setIsPaymentModalOpen(true)}
             onOpenSuperadmin={() => setIsSuperadminModalOpen(true)}
-            onReplayShowreel={() => {
-              setForceShowreel(true);
-              setShowSplash(true);
-            }}
             currentUser={currentUser}
             isLoggedIn={isLoggedIn}
           />

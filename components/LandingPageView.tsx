@@ -26,8 +26,7 @@ import {
   ExternalLink,
   ChevronDown,
   Zap,
-  Crown,
-  Play
+  Crown
 } from "lucide-react";
 
 // Client-only Dynamic Import for Interactive 3D WebGL Glass Orb
@@ -57,7 +56,6 @@ interface LandingPageViewProps {
   onOpenAuth: () => void;
   onOpenPayment?: () => void;
   onOpenSuperadmin?: () => void;
-  onReplayShowreel?: () => void;
   currentUser: UserProfile;
   isLoggedIn: boolean;
 }
@@ -67,16 +65,9 @@ export const LandingPageView: React.FC<LandingPageViewProps> = ({
   onOpenAuth,
   onOpenPayment,
   onOpenSuperadmin,
-  onReplayShowreel,
   currentUser,
   isLoggedIn,
 }) => {
-  const [quickTitle, setQuickTitle] = useState("");
-  const [quickCategory, setQuickCategory] = useState<ProposalCategory>("skripsi");
-  const [quickReportType, setQuickReportType] = useState<ReportType>("skripsi");
-  const [quickEntity, setQuickEntity] = useState("");
-  const [selectedCampus, setSelectedCampus] = useState<CampusGuideline>(CAMPUS_PRESETS[0]);
-
   // 3D Mouse Parallax & Gyro Tilt State
   const [mouseOffset, setMouseOffset] = useState({ x: 0, y: 0 });
   const heroContainerRef = useRef<HTMLDivElement>(null);
@@ -91,17 +82,6 @@ export const LandingPageView: React.FC<LandingPageViewProps> = ({
 
   const handleHeroMouseLeave = () => {
     setMouseOffset({ x: 0, y: 0 });
-  };
-
-  const handleQuickStart = (e: React.FormEvent) => {
-    e.preventDefault();
-    onEnterStudio({
-      title: quickTitle.trim() || undefined,
-      category: quickCategory,
-      reportType: quickReportType,
-      targetEntity: quickEntity.trim() || undefined,
-      campusGuideline: selectedCampus
-    });
   };
 
   const sampleTopics = [
@@ -235,12 +215,6 @@ export const LandingPageView: React.FC<LandingPageViewProps> = ({
           <div className="flex items-center gap-5 sm:gap-7">
             <nav className="hidden md:flex items-center gap-7 text-xs font-medium text-[#475569] dark:text-[#94A3B8]">
               <a 
-                href="#product-section" 
-                className="hover:text-[#0F172A] dark:hover:text-white transition-colors cursor-pointer"
-              >
-                Product
-              </a>
-              <a 
                 href="#examples-section" 
                 className="hover:text-[#0F172A] dark:hover:text-white transition-colors cursor-pointer"
               >
@@ -259,17 +233,6 @@ export const LandingPageView: React.FC<LandingPageViewProps> = ({
               >
                 Docs
               </a>
-              {onReplayShowreel && (
-                <button
-                  type="button"
-                  onClick={onReplayShowreel}
-                  className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-blue-50 dark:bg-blue-950/40 text-blue-600 dark:text-blue-400 border border-blue-200 dark:border-blue-900/60 hover:bg-blue-100 transition-colors cursor-pointer text-[11px] font-mono font-bold"
-                  title="Putar Animasi Motion Showreel 15 Detik (120 BPM)"
-                >
-                  <Play className="w-2.5 h-2.5 fill-current" />
-                  <span>Showreel (15s)</span>
-                </button>
-              )}
             </nav>
 
             {/* Subtle Vertical Divider */}
@@ -339,24 +302,6 @@ export const LandingPageView: React.FC<LandingPageViewProps> = ({
         className="relative z-10 pt-6 sm:pt-12 pb-20 px-4 sm:px-6 lg:px-8 select-none"
       >
         <div className="max-w-6xl mx-auto text-center">
-
-          {/* Intro Motion Showreel Badge di Awal Landing Page */}
-          {onReplayShowreel && (
-            <div className="mb-6 sm:mb-8 flex justify-center">
-              <button
-                type="button"
-                onClick={onReplayShowreel}
-                className="inline-flex items-center gap-2.5 px-4 py-1.5 rounded-full bg-blue-50/80 dark:bg-blue-950/50 hover:bg-blue-100/90 dark:hover:bg-blue-900/60 border border-blue-200/80 dark:border-blue-800 text-blue-700 dark:text-blue-300 text-xs font-mono font-medium shadow-xs hover:scale-105 active:scale-95 transition-all cursor-pointer group"
-                title="Putar Animasi Screen Loading Showreel 15 Detik (120 BPM)"
-              >
-                <span className="w-2 h-2 rounded-full bg-blue-500 group-hover:animate-ping" />
-                <span className="font-bold tracking-tight">Animasi Motion Showreel 15 Detik</span>
-                <span className="text-[10px] text-blue-500 dark:text-blue-400 font-bold border-l border-blue-200 dark:border-blue-800 pl-2 flex items-center gap-1">
-                  120 BPM <Play className="w-2.5 h-2.5 fill-current" />
-                </span>
-              </button>
-            </div>
-          )}
 
           {/* MAIN 3-COLUMN HERO HEADLINE WITH 3D INTERACTIVE GLASS ORB */}
           <div className="flex flex-col lg:flex-row items-center justify-center gap-4 sm:gap-6 lg:gap-8 xl:gap-12">
@@ -487,131 +432,7 @@ export const LandingPageView: React.FC<LandingPageViewProps> = ({
       </section>
 
       {/* ========================================================================= */}
-      {/* 3. INTERACTIVE TOPIC BUILDER & QUICK LAUNCHER (Usulan Riset & Kampus)     */}
-      {/* ========================================================================= */}
-      <section id="product-section" className="relative z-10 py-16 px-4 sm:px-6 lg:px-8 border-t border-[#E2E8F0] dark:border-[#1E293B] bg-gradient-to-b from-white to-[#F8FAFC] dark:from-[#080B12] dark:to-[#0B101A]">
-        <div className="max-w-4xl mx-auto">
-          
-          <div className="text-center max-w-xl mx-auto mb-10">
-            <span className="text-xs font-mono font-semibold px-3 py-1 rounded-full bg-blue-100 dark:bg-blue-950/60 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-900 uppercase tracking-wider">
-              Quick Launcher
-            </span>
-            <h2 className="text-2xl sm:text-3xl font-extrabold text-[#0F172A] dark:text-white mt-3 tracking-tight">
-              Mulai Susun Naskah Akademik Sekarang
-            </h2>
-            <p className="text-xs sm:text-sm text-[#64748B] dark:text-[#94A3B8] mt-2">
-              Pilih format dokumen resmi, sesuaikan dengan pedoman kampus Anda, dan biarkan 12 Agen AI menyusun naskah utuh berstandar Dikti &amp; FT UNP.
-            </p>
-          </div>
-
-          {/* Quick Launcher Form Container */}
-          <div className="p-6 sm:p-8 rounded-3xl bg-white dark:bg-[#111827] border border-[#E2E8F0] dark:border-[#1F2937] shadow-xl shadow-blue-500/5">
-            <form onSubmit={handleQuickStart} className="space-y-5">
-              
-              {/* Jenis Naskah Tabs */}
-              <div>
-                <label className="block text-xs font-semibold text-[#0F172A] dark:text-[#F3F6FC] mb-2">
-                  1. Pilih Jenis Naskah Dokumen:
-                </label>
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
-                  {[
-                    { id: 'skripsi', label: 'Skripsi / Tugas Akhir', cat: 'skripsi' as ProposalCategory, rep: 'skripsi' as ReportType },
-                    { id: 'laporan_pkl_unp', label: 'Laporan PKL UNP 2025', cat: 'magang' as ProposalCategory, rep: 'laporan_pkl_unp' as ReportType },
-                    { id: 'laporan_magang', label: 'Laporan Magang Industri', cat: 'magang' as ProposalCategory, rep: 'laporan_magang' as ReportType },
-                    { id: 'penelitian', label: 'Proposal Riset & Tesis', cat: 'penelitian' as ProposalCategory, rep: 'tesis' as ReportType }
-                  ].map((t) => (
-                    <button
-                      key={t.id}
-                      type="button"
-                      onClick={() => {
-                        setQuickCategory(t.cat);
-                        setQuickReportType(t.rep);
-                      }}
-                      className={`p-3 rounded-2xl border text-left transition-all cursor-pointer ${
-                        quickReportType === t.rep
-                          ? 'border-blue-600 bg-blue-50/50 dark:bg-blue-950/40 text-blue-700 dark:text-blue-300 ring-2 ring-blue-500/20'
-                          : 'border-[#E2E8F0] dark:border-[#334155] hover:border-zinc-300 dark:hover:border-zinc-700 text-[#475569] dark:text-[#94A3B8]'
-                      }`}
-                    >
-                      <div className="text-xs font-bold leading-snug">{t.label}</div>
-                      <div className="text-[10px] text-[#64748B] dark:text-[#94A3B8] mt-0.5">
-                        {t.cat === 'magang' ? 'Sesuai Buku Pedoman' : '5 Bab Standar Dikti'}
-                      </div>
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {/* Pedoman Kampus Selector */}
-              <div>
-                <label className="block text-xs font-semibold text-[#0F172A] dark:text-[#F3F6FC] mb-2">
-                  2. Pilih Standar Pedoman Format Kampus:
-                </label>
-                <div className="relative">
-                  <select
-                    value={selectedCampus.id}
-                    onChange={(e) => {
-                      const found = CAMPUS_PRESETS.find(p => p.id === e.target.value);
-                      if (found) setSelectedCampus(found);
-                    }}
-                    className="w-full bg-[#F8FAFC] dark:bg-[#0B101A] border border-[#CBD5E1] dark:border-[#334155] rounded-xl px-4 py-2.5 text-xs text-[#0F172A] dark:text-white font-medium focus:outline-none focus:border-blue-500 transition-colors"
-                  >
-                    {CAMPUS_PRESETS.map((p) => (
-                      <option key={p.id} value={p.id}>
-                        {p.campusName} — {p.id === 'unp' ? 'Panduan Resmi FT UNP 2025' : p.id === 'dikti' ? 'Standar Nasional Dikti' : (p.guideDocTitle || p.campusName)}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-              </div>
-
-              {/* Input Judul Usulan */}
-              <div>
-                <label className="block text-xs font-semibold text-[#0F172A] dark:text-[#F3F6FC] mb-2">
-                  3. Judul Usulan / Topik Penelitian:
-                </label>
-                <input
-                  type="text"
-                  value={quickTitle}
-                  onChange={(e) => setQuickTitle(e.target.value)}
-                  placeholder="Ketik usulan judul Anda... (Contoh: Analisis Preventive Maintenance Mesin Finish Mill PT Semen Padang)"
-                  className="w-full bg-[#F8FAFC] dark:bg-[#0B101A] border border-[#CBD5E1] dark:border-[#334155] rounded-xl px-4 py-3 text-xs text-[#0F172A] dark:text-white placeholder:text-[#94A3B8] focus:outline-none focus:border-blue-500 transition-colors"
-                />
-              </div>
-
-              {/* Input Instansi Mitra */}
-              <div>
-                <label className="block text-xs font-semibold text-[#0F172A] dark:text-[#F3F6FC] mb-2">
-                  4. Instansi Mitra / Lokasi Riset (Opsional):
-                </label>
-                <input
-                  type="text"
-                  value={quickEntity}
-                  onChange={(e) => setQuickEntity(e.target.value)}
-                  placeholder="Contoh: PT Semen Padang / RSUP Dr. Sardjito / Divisi Digital Telkom"
-                  className="w-full bg-[#F8FAFC] dark:bg-[#0B101A] border border-[#CBD5E1] dark:border-[#334155] rounded-xl px-4 py-2.5 text-xs text-[#0F172A] dark:text-white placeholder:text-[#94A3B8] focus:outline-none focus:border-blue-500 transition-colors"
-                />
-              </div>
-
-              {/* Submit Button */}
-              <div className="pt-2">
-                <button
-                  type="submit"
-                  className="w-full py-3.5 rounded-full bg-[#0F172A] hover:bg-black text-white dark:bg-white dark:hover:bg-zinc-100 dark:text-[#0F172A] font-bold text-xs sm:text-sm shadow-md transition-all flex items-center justify-center gap-2 cursor-pointer"
-                >
-                  <span>Mulai Penyusunan Naskah di Workspace Studio</span>
-                  <ArrowRight className="w-4 h-4" />
-                </button>
-              </div>
-
-            </form>
-          </div>
-
-        </div>
-      </section>
-
-      {/* ========================================================================= */}
-      {/* 4. VERIFIED EXAMPLES & TEMPLATES SECTION                                   */}
+      {/* 3. VERIFIED EXAMPLES & TEMPLATES SECTION                                   */}
       {/* ========================================================================= */}
       <section id="examples-section" className="relative z-10 py-16 px-4 sm:px-6 lg:px-8 border-t border-[#E2E8F0] dark:border-[#1E293B]">
         <div className="max-w-6xl mx-auto">
@@ -817,14 +638,14 @@ export const LandingPageView: React.FC<LandingPageViewProps> = ({
               <path d="M12 0C12 6.627 6.627 12 0 12C6.627 12 12 17.373 12 24C12 17.373 17.373 12 24 12C17.373 12 12 6.627 12 0Z" />
             </svg>
             <span className="font-bold text-zinc-800 dark:text-zinc-200 lowercase">academic agent studio</span>
-            <span className="text-zinc-400">© 2026 • Standar Dikti &amp; FT UNP 2025</span>
+            <span className="text-zinc-400">powered by oxidlabs</span>
           </div>
 
           <div className="flex items-center gap-6">
             <button type="button" onClick={onOpenAuth} className="hover:text-zinc-800 dark:hover:text-zinc-200 transition-colors cursor-pointer">
               Login Superadmin
             </button>
-            <a href="#product-section" className="hover:text-zinc-800 dark:hover:text-zinc-200 transition-colors cursor-pointer">
+            <a href="#examples-section" className="hover:text-zinc-800 dark:hover:text-zinc-200 transition-colors cursor-pointer">
               Panduan Format
             </a>
             <button type="button" onClick={() => onEnterStudio()} className="hover:text-zinc-800 dark:hover:text-zinc-200 transition-colors cursor-pointer font-semibold text-blue-600 dark:text-blue-400">
