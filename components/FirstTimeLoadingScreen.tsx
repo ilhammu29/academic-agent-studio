@@ -1,12 +1,23 @@
 "use client";
 
 import React, { useState, useEffect, useRef } from "react";
-import { Volume2, VolumeX, ArrowRight, Sparkles, RefreshCw } from "lucide-react";
+import dynamic from "next/dynamic";
 import ScreenLoader from "./ScreenLoader";
+
+// Dynamic import for Three.js 3D WebGL Sphere (Identical to Landing Page)
+const Hero3DOrb = dynamic(
+  () => import("./Hero3DOrb").then((mod) => mod.Hero3DOrb),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="w-64 h-64 sm:w-80 sm:h-80 rounded-full bg-gradient-to-tr from-[#60A5FA]/30 via-[#C084FC]/25 to-[#818CF8]/20 blur-2xl animate-pulse" />
+    ),
+  }
+);
 
 interface FirstTimeLoadingScreenProps {
   onComplete: () => void;
-  forceShow?: boolean; // Allows replaying from landing page
+  forceShow?: boolean;
 }
 
 export const FirstTimeLoadingScreen: React.FC<FirstTimeLoadingScreenProps> = ({ 
@@ -15,10 +26,8 @@ export const FirstTimeLoadingScreen: React.FC<FirstTimeLoadingScreenProps> = ({
 }) => {
   const [hasCheckedStorage, setHasCheckedStorage] = useState(false);
   const [isFirstTime, setIsFirstTime] = useState(false);
-  const [isMuted, setIsMuted] = useState(true);
   const [isFadingOut, setIsFadingOut] = useState(false);
   const [currentTimeSec, setCurrentTimeSec] = useState(0);
-  const [activeSceneName, setActiveSceneName] = useState("01 // KINETIC INQUIRY");
 
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const audioCtxRef = useRef<AudioContext | null>(null);
@@ -26,14 +35,15 @@ export const FirstTimeLoadingScreen: React.FC<FirstTimeLoadingScreenProps> = ({
   const animFrameRef = useRef<number>(0);
   const startTimeRef = useRef<number>(0);
 
-  // Colors
+  // Palette: strictly maximum 3 colors + black and white
   const COLOR_BG = "#0A0D14";
   const COLOR_WHITE = "#FFFFFF";
   const COLOR_BLUE = "#2563EB";
   const COLOR_VIOLET = "#7C3AED";
+  const COLOR_SLATE = "#334155";
   const COLOR_MUTED = "#64748B";
 
-  // Easing helpers
+  // Mathematical Easing
   const easeOutExpo = (x: number) => (x === 1 ? 1 : 1 - Math.pow(2, -10 * x));
   const easeInOutCubic = (x: number) => (x < 0.5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2);
   const easeOutCubic = (x: number) => 1 - Math.pow(1 - x, 3);
@@ -68,13 +78,13 @@ export const FirstTimeLoadingScreen: React.FC<FirstTimeLoadingScreenProps> = ({
       if (AudioCtx) {
         audioCtxRef.current = new AudioCtx();
       }
-    } catch (e) {
-      console.warn("AudioContext init error:", e);
+    } catch {
+      // Audio optional
     }
   };
 
   const playSynthesizedBeat = (beatNumber: number) => {
-    if (isMuted || !audioCtxRef.current) return;
+    if (!audioCtxRef.current) return;
     try {
       const ctx = audioCtxRef.current;
       if (ctx.state === "suspended") {
@@ -83,50 +93,42 @@ export const FirstTimeLoadingScreen: React.FC<FirstTimeLoadingScreenProps> = ({
 
       const now = ctx.currentTime;
 
-      // 1. Kick drum synthesizer on every beat (120 BPM = every 0.5s)
+      // Kick drum on every beat (120 BPM = every 0.5s)
       const osc = ctx.createOscillator();
       const gain = ctx.createGain();
       osc.type = "sine";
-      osc.frequency.setValueAtTime(140, now);
-      osc.frequency.exponentialRampToValueAtTime(36, now + 0.12);
+      osc.frequency.setValueAtTime(130, now);
+      osc.frequency.exponentialRampToValueAtTime(38, now + 0.11);
 
-      gain.gain.setValueAtTime(0.4, now);
-      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.14);
+      gain.gain.setValueAtTime(0.35, now);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.13);
 
       osc.connect(gain);
       gain.connect(ctx.destination);
       osc.start(now);
-      osc.stop(now + 0.15);
+      osc.stop(now + 0.14);
 
-      // 2. Harmonic chord hit on key scene transitions (Beats 0, 4, 8, 12, 16, 24)
+      // Harmonic chords at major scene changes (Beats 0, 4, 8, 12, 16, 24)
       if ([0, 4, 8, 12, 16, 24].includes(beatNumber)) {
-        const chordFreqs = [261.63, 329.63, 392.00, 523.25]; // C Major add9
+        const chordFreqs = [261.63, 329.63, 392.00, 523.25];
         chordFreqs.forEach((freq) => {
           const chordOsc = ctx.createOscillator();
           const chordGain = ctx.createGain();
           chordOsc.type = "triangle";
           chordOsc.frequency.setValueAtTime(freq, now);
 
-          chordGain.gain.setValueAtTime(0.12, now);
-          chordGain.gain.exponentialRampToValueAtTime(0.0001, now + 0.6);
+          chordGain.gain.setValueAtTime(0.08, now);
+          chordGain.gain.exponentialRampToValueAtTime(0.0001, now + 0.55);
 
           chordOsc.connect(chordGain);
           chordGain.connect(ctx.destination);
           chordOsc.start(now);
-          chordOsc.stop(now + 0.65);
+          chordOsc.stop(now + 0.6);
         });
       }
     } catch {
       // Audio fallback without interrupting visual motion
     }
-  };
-
-  const toggleSound = () => {
-    initAudio();
-    if (audioCtxRef.current && audioCtxRef.current.state === "suspended") {
-      audioCtxRef.current.resume();
-    }
-    setIsMuted((prev) => !prev);
   };
 
   const handleFinishShowreel = () => {
@@ -141,9 +143,22 @@ export const FirstTimeLoadingScreen: React.FC<FirstTimeLoadingScreenProps> = ({
     }, 450);
   };
 
+  // Keyboard and click to proceed
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape" || e.key === " " || e.key === "Enter") {
+        handleFinishShowreel();
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, []);
+
   // Master 60 FPS Canvas Motion Render Engine
   useEffect(() => {
     if (!isFirstTime || !hasCheckedStorage) return;
+
+    initAudio();
 
     const canvas = canvasRef.current;
     if (!canvas) return;
@@ -155,24 +170,23 @@ export const FirstTimeLoadingScreen: React.FC<FirstTimeLoadingScreenProps> = ({
 
     const renderFrame = (now: number) => {
       const elapsedSec = (now - startTimeRef.current) / 1000;
-      setCurrentTimeSec(Math.min(elapsedSec, 15.0));
+      setCurrentTimeSec(elapsedSec);
 
-      // Check for completion at 15.0s
+      // Complete at 15.0 seconds
       if (elapsedSec >= 15.0) {
         handleFinishShowreel();
         return;
       }
 
       const t = elapsedSec;
-      const beat = Math.floor(t * 2.0); // 120 BPM = 2 beats per second
+      const beat = Math.floor(t * 2.0);
 
-      // Trigger Web Audio synth per beat
+      // Trigger synth per beat
       if (beat !== lastBeatFiredRef.current && beat < 30) {
         lastBeatFiredRef.current = beat;
         playSynthesizedBeat(beat);
       }
 
-      // Maintain high DPI canvas resolution
       const width = 1920;
       const height = 1080;
       if (canvas.width !== width || canvas.height !== height) {
@@ -189,46 +203,52 @@ export const FirstTimeLoadingScreen: React.FC<FirstTimeLoadingScreenProps> = ({
       const cy = 540;
 
       // =========================================================================
-      // SCENE 1: BEATS 0 - 4 (0.0s - 2.0s): HOOK & KINETIC TYPE
+      // SCENE 1: BEATS 0 - 4 (0.0s - 2.0s): HOOK & KINETIC TYPOGRAPHY
       // =========================================================================
       if (t < 2.0) {
-        if (activeSceneName !== "01 // KINETIC INQUIRY") setActiveSceneName("01 // KINETIC INQUIRY");
         const p1 = clamp(t / 0.5, 0, 1);
         const p2 = clamp((t - 0.5) / 0.5, 0, 1);
         const p3 = clamp((t - 1.0) / 0.5, 0, 1);
         const p4 = clamp((t - 1.5) / 0.5, 0, 1);
 
         if (t < 0.5) {
-          // Beat 0: Initial white spark expanding
-          const radius = lerp(4, 20, easeOutExpo(p1));
+          // Beat 0: White structural reticle spark
+          const radius = lerp(3, 16, easeOutExpo(p1));
           ctx.fillStyle = COLOR_WHITE;
           ctx.beginPath();
           ctx.arc(cx, cy, radius, 0, Math.PI * 2);
           ctx.fill();
 
-          const lineLen = lerp(0, 140, easeOutExpo(p1));
+          // Expanding crosshairs
+          const lineLen = lerp(0, 160, easeOutExpo(p1));
           ctx.strokeStyle = COLOR_BLUE;
-          ctx.lineWidth = 2.5;
+          ctx.lineWidth = 1.5;
           ctx.beginPath();
           ctx.moveTo(cx - lineLen, cy); ctx.lineTo(cx + lineLen, cy);
           ctx.moveTo(cx, cy - lineLen); ctx.lineTo(cx, cy + lineLen);
           ctx.stroke();
+
+          // Hairline coordinate labels
+          ctx.font = "600 11px monospace";
+          ctx.fillStyle = COLOR_MUTED;
+          ctx.textAlign = "center";
+          ctx.fillText("[ 00:00:00 // INITIATE ]", cx, cy + 45);
         } else if (t < 1.0) {
           // Beat 1: Kinetic Type "INQUIRY"
-          const offset = lerp(80, 0, easeOutExpo(p2));
-          ctx.font = "900 130px Inter, -apple-system, sans-serif";
+          const offset = lerp(70, 0, easeOutExpo(p2));
+          ctx.font = "900 140px Inter, -apple-system, sans-serif";
           ctx.textAlign = "center";
           ctx.textBaseline = "middle";
           ctx.fillStyle = COLOR_WHITE;
-          ctx.fillText("INQUIRY", cx, cy - offset * 0.2);
+          ctx.fillText("INQUIRY", cx, cy - offset * 0.15);
 
-          ctx.font = "700 24px monospace";
+          ctx.font = "700 18px monospace";
           ctx.fillStyle = COLOR_BLUE;
-          ctx.fillText("PHASE 01 // ONTOLOGY OF INQUIRY", cx, cy + 90);
+          ctx.fillText("PHASE 01 // ONTOLOGY OF RESEARCH", cx, cy + 95);
         } else if (t < 1.5) {
-          // Beat 2: Horizontal Slice Transform into "HYPOTHESIS"
-          const split = lerp(0, 42, easeOutExpo(p3));
-          ctx.font = "900 120px Inter, -apple-system, sans-serif";
+          // Beat 2: Kinetic shear slice into "HYPOTHESIS"
+          const split = lerp(0, 48, easeOutExpo(p3));
+          ctx.font = "900 130px Inter, -apple-system, sans-serif";
           ctx.textAlign = "center";
           ctx.textBaseline = "middle";
 
@@ -258,35 +278,34 @@ export const FirstTimeLoadingScreen: React.FC<FirstTimeLoadingScreenProps> = ({
 
           for (let i = 0; i < 4; i++) {
             const x = startX + i * spacing;
-            const h = lerp(40, 520, p);
+            const h = lerp(30, 520, p);
             const y = cy - h / 2;
 
             ctx.fillStyle = (i === 1 || i === 2) ? COLOR_BLUE : (i === 3 ? COLOR_VIOLET : COLOR_WHITE);
             ctx.fillRect(x - colW / 2, y, colW, h);
 
             if (p > 0.6) {
-              ctx.font = "700 14px monospace";
+              ctx.font = "700 13px monospace";
               ctx.fillStyle = COLOR_BG;
               ctx.textAlign = "center";
-              ctx.fillText("COL.0" + (i + 1), x, y + 30);
+              ctx.fillText("PILLAR.0" + (i + 1), x, y + 28);
             }
           }
         }
       }
 
       // =========================================================================
-      // SCENE 2: BEATS 4 - 8 (2.0s - 4.0s): SHAPE MORPHING & TOPOLOGICAL LATTICE
+      // SCENE 2: BEATS 4 - 8 (2.0s - 4.0s): 12-MODE TOPOLOGICAL LATTICE
       // =========================================================================
       else if (t < 4.0) {
-        if (activeSceneName !== "02 // 12-MODE TOPOLOGY") setActiveSceneName("02 // 12-MODE TOPOLOGY");
         const localT = t - 2.0;
         const subP = clamp((localT % 0.5) / 0.5, 0, 1);
         const subBeat = Math.floor(localT / 0.5);
 
-        ctx.lineWidth = 3;
+        ctx.lineWidth = 2.5;
 
         if (subBeat === 0) {
-          // Beat 4: Pillars compress into intersecting vector arcs
+          // Beat 4: Monoliths curve into orbital arcs
           const f = easeOutExpo(subP);
           for (let i = 0; i < 4; i++) {
             const angle = (i * Math.PI) / 2 + f * Math.PI * 0.5;
@@ -297,11 +316,11 @@ export const FirstTimeLoadingScreen: React.FC<FirstTimeLoadingScreenProps> = ({
             ctx.stroke();
           }
         } else if (subBeat === 1 || subBeat === 2) {
-          // Beats 5-6: Topological citation network & graph matrix
+          // Beats 5-6: 12-Mode Citation Network Graph
           const numNodes = 12;
           const nodeRadius = 260;
 
-          ctx.strokeStyle = "#1E293B";
+          ctx.strokeStyle = COLOR_SLATE;
           ctx.lineWidth = 1.5;
 
           for (let i = 0; i < numNodes; i++) {
@@ -321,35 +340,35 @@ export const FirstTimeLoadingScreen: React.FC<FirstTimeLoadingScreenProps> = ({
 
             ctx.fillStyle = (i % 3 === 0) ? COLOR_BLUE : (i % 3 === 1 ? COLOR_VIOLET : COLOR_WHITE);
             ctx.beginPath();
-            ctx.arc(x1, y1, 8, 0, Math.PI * 2);
+            ctx.arc(x1, y1, 7, 0, Math.PI * 2);
             ctx.fill();
           }
 
-          ctx.font = "800 32px monospace";
+          ctx.font = "900 36px Inter, sans-serif";
           ctx.fillStyle = COLOR_WHITE;
           ctx.textAlign = "center";
-          ctx.fillText("TOPOLOGY: 12 THINKING MODES", cx, cy - 20);
-          ctx.font = "500 16px monospace";
+          ctx.fillText("12 COGNITIVE MODES", cx, cy - 20);
+          ctx.font = "600 15px monospace";
           ctx.fillStyle = COLOR_BLUE;
-          ctx.fillText("RESEARCH CITATION GRAPH ACTIVE", cx, cy + 20);
+          ctx.fillText("CITATION TOPOLOGY GRAPH SYNCHRONIZED", cx, cy + 24);
         } else {
-          // Beat 7: Matrix collapses into standard A4 academic page outline
+          // Beat 7: Collapsing into standardized academic A4 page
           const f = easeOutExpo(subP);
-          const pageW = lerp(600, 480, f);
-          const pageH = lerp(600, 680, f);
+          const pageW = lerp(580, 480, f);
+          const pageH = lerp(580, 680, f);
           const px = cx - pageW / 2;
           const py = cy - pageH / 2;
 
-          ctx.fillStyle = "#0F172A";
+          ctx.fillStyle = "#0D111A";
           ctx.strokeStyle = COLOR_WHITE;
-          ctx.lineWidth = 2;
+          ctx.lineWidth = 1.5;
           ctx.fillRect(px, py, pageW, pageH);
           ctx.strokeRect(px, py, pageW, pageH);
 
-          // Simulated text paragraph lines
-          ctx.fillStyle = "#334155";
+          // Simulated paragraph text lines
+          ctx.fillStyle = "#2D3748";
           for (let l = 0; l < 8; l++) {
-            const lw = (l % 2 === 0 ? 380 : 320);
+            const lw = (l % 2 === 0 ? 380 : 310);
             ctx.fillRect(px + 50, py + 120 + l * 40, lw, 6);
           }
         }
@@ -359,7 +378,6 @@ export const FirstTimeLoadingScreen: React.FC<FirstTimeLoadingScreenProps> = ({
       // SCENE 3: BEATS 8 - 12 (4.0s - 6.0s): 2D-TO-3D ISOMETRIC CHAPTER UNFOLDING
       // =========================================================================
       else if (t < 6.0) {
-        if (activeSceneName !== "03 // ISOMETRIC CHAPTERS") setActiveSceneName("03 // ISOMETRIC CHAPTERS");
         const localT = t - 4.0;
         const p = localT / 2.0;
         const rotY = lerp(0, 0.78, easeInOutCubic(p));
@@ -390,11 +408,11 @@ export const FirstTimeLoadingScreen: React.FC<FirstTimeLoadingScreenProps> = ({
           const h = 76;
           ctx.fillStyle = "#0F172A";
           ctx.strokeStyle = chap.color;
-          ctx.lineWidth = 2;
+          ctx.lineWidth = 1.8;
           ctx.fillRect(-w / 2, -h / 2, w, h);
           ctx.strokeRect(-w / 2, -h / 2, w, h);
 
-          ctx.font = "800 18px Inter, -apple-system, sans-serif";
+          ctx.font = "800 17px Inter, -apple-system, sans-serif";
           ctx.fillStyle = chap.color;
           ctx.textAlign = "left";
           ctx.textBaseline = "middle";
@@ -405,17 +423,16 @@ export const FirstTimeLoadingScreen: React.FC<FirstTimeLoadingScreenProps> = ({
 
         ctx.restore();
 
-        ctx.font = "700 16px monospace";
+        ctx.font = "700 15px monospace";
         ctx.fillStyle = COLOR_MUTED;
         ctx.textAlign = "center";
-        ctx.fillText("ISOMETRIC STRUCTURE DECOMPOSITION // BAB I - V", cx, 980);
+        ctx.fillText("ISOMETRIC STRUCTURAL DECOMPOSITION // BAB I - V", cx, 980);
       }
 
       // =========================================================================
       // SCENE 4: BEATS 12 - 16 (6.0s - 8.0s): DATA & UI MATRIX TELEMETRY
       // =========================================================================
       else if (t < 8.0) {
-        if (activeSceneName !== "04 // COMPLIANCE MATRIX") setActiveSceneName("04 // COMPLIANCE MATRIX");
         const localT = t - 6.0;
         const p = clamp(localT / 2.0, 0, 1);
 
@@ -423,15 +440,15 @@ export const FirstTimeLoadingScreen: React.FC<FirstTimeLoadingScreenProps> = ({
         const cardH = 500;
         ctx.fillStyle = "#0B1120";
         ctx.strokeStyle = "#1E293B";
-        ctx.lineWidth = 2;
+        ctx.lineWidth = 1.5;
         ctx.strokeRect(cx - cardW / 2, cy - cardH / 2, cardW, cardH);
         ctx.fillRect(cx - cardW / 2, cy - cardH / 2, cardW, cardH);
 
         // Header bar
-        ctx.fillStyle = "#1E293B";
+        ctx.fillStyle = "#162032";
         ctx.fillRect(cx - cardW / 2, cy - cardH / 2, cardW, 52);
 
-        ctx.font = "800 16px monospace";
+        ctx.font = "800 15px monospace";
         ctx.fillStyle = COLOR_WHITE;
         ctx.textAlign = "left";
         ctx.fillText("DIKTI & CAMPUS GUIDELINE ENGINE // REAL-TIME VALIDATION", cx - cardW / 2 + 25, cy - cardH / 2 + 32);
@@ -439,107 +456,69 @@ export const FirstTimeLoadingScreen: React.FC<FirstTimeLoadingScreenProps> = ({
         const metrics = [
           { label: "DIKTI STANDARDS COMPLIANCE", val: clamp(Math.round(p * 100), 0, 100) + "%", color: COLOR_WHITE },
           { label: "STRUCTURAL CHAPTER SYMMETRY", val: "5/5 VERIFIED", color: COLOR_BLUE },
-          { label: "CITATION INTEGRITY (APA/IEEE)", val: "100% AUDITED", color: COLOR_VIOLET },
-          { label: "UNP FT 2025 REGULATORY RULE", val: "LOCKED ACTIVE", color: "#10B981" }
+          { label: "CITATION INTEGRITY (APA / IEEE)", val: "100% AUDITED", color: COLOR_VIOLET },
+          { label: "UNP FT 2025 REGULATORY PROTOCOL", val: "LOCKED ACTIVE", color: "#10B981" }
         ];
 
         metrics.forEach((m, i) => {
           const y = cy - cardH / 2 + 105 + i * 85;
-          ctx.font = "700 14px monospace";
+          ctx.font = "700 13px monospace";
           ctx.fillStyle = COLOR_MUTED;
           ctx.fillText(m.label, cx - cardW / 2 + 40, y);
 
           const barW = 540;
           ctx.fillStyle = "#1E293B";
-          ctx.fillRect(cx - cardW / 2 + 40, y + 12, barW, 10);
+          ctx.fillRect(cx - cardW / 2 + 40, y + 12, barW, 9);
 
           const fillW = barW * clamp(p * 1.2, 0, 1);
           ctx.fillStyle = m.color;
-          ctx.fillRect(cx - cardW / 2 + 40, y + 12, fillW, 10);
+          ctx.fillRect(cx - cardW / 2 + 40, y + 12, fillW, 9);
 
-          ctx.font = "800 20px monospace";
+          ctx.font = "800 18px monospace";
           ctx.textAlign = "right";
-          ctx.fillText(m.val, cx + cardW / 2 - 40, y + 22);
+          ctx.fillText(m.val, cx + cardW / 2 - 40, y + 21);
           ctx.textAlign = "left";
         });
       }
 
       // =========================================================================
-      // SCENE 5 & 6: BEATS 16 - 24 (8.0s - 12.0s): THE STRONGEST MOMENT
-      // 3D HOLOGRAPHIC GLASS ORB SYNTHESIS
+      // SCENE 5 & 6: BEATS 16 - 24 (8.0s - 12.0s): 3D SPHERE STAGE
+      // Background and rotating research titles (The 3D WebGL Orb is mounted over canvas)
       // =========================================================================
       else if (t < 12.0) {
-        if (activeSceneName !== "05 // 3D ORB SYNTHESIS") setActiveSceneName("05 // 3D ORB SYNTHESIS");
         const localT = t - 8.0;
-        const r = 210;
-        const rot = localT * 2.2;
 
-        // Shadow breathing
-        const shadowW = r * 1.6 * (1 + Math.sin(localT * 3) * 0.08);
-        const shadowH = 34 * (1 - Math.sin(localT * 3) * 0.08);
-        ctx.fillStyle = "rgba(30, 27, 75, 0.45)";
+        // Subtle ambient perspective line
+        ctx.strokeStyle = "rgba(255, 255, 255, 0.06)";
+        ctx.lineWidth = 1;
         ctx.beginPath();
-        ctx.ellipse(cx, cy + r + 50, shadowW, shadowH, 0, 0, Math.PI * 2);
-        ctx.fill();
-
-        // Radial fluid core
-        const grad = ctx.createRadialGradient(
-          cx - 40 + Math.sin(rot) * 60, cy - 40 + Math.cos(rot) * 50, 20,
-          cx, cy, r
-        );
-        grad.addColorStop(0, "#FFFFFF");
-        grad.addColorStop(0.35, COLOR_BLUE);
-        grad.addColorStop(0.75, COLOR_VIOLET);
-        grad.addColorStop(1, "#0F172A");
-
-        ctx.fillStyle = grad;
-        ctx.beginPath();
-        ctx.arc(cx, cy, r, 0, Math.PI * 2);
-        ctx.fill();
-
-        // Spiral ribs
-        ctx.lineWidth = 4;
-        for (let i = 0; i < 3; i++) {
-          const petalOffset = (i * Math.PI) / 1.5 + rot * 0.6;
-          ctx.strokeStyle = i === 1 ? COLOR_WHITE : (i === 0 ? "#60A5FA" : "#C084FC");
-          ctx.beginPath();
-          ctx.ellipse(cx, cy, r * 0.95, r * 0.42, petalOffset, 0, Math.PI * 2);
-          ctx.stroke();
-        }
-
-        // Specular highlight rim
-        ctx.strokeStyle = "rgba(255, 255, 255, 0.85)";
-        ctx.lineWidth = 6;
-        ctx.beginPath();
-        ctx.arc(cx, cy, r - 3, -Math.PI * 0.75, -Math.PI * 0.25);
+        ctx.moveTo(0, cy + 180);
+        ctx.lineTo(width, cy + 180);
         ctx.stroke();
 
-        if (localT > 1.2) {
-          const streakT = (localT - 1.2) / 2.8;
-          const words = ["SKRIPSI", "TESIS", "LAPORAN MAGANG", "JURNAL ILMIAH"];
-          const wordIdx = Math.floor(streakT * words.length) % words.length;
+        // High-speed academic keyword rotation synchronized on beats
+        const words = ["SKRIPSI & TUGAS AKHIR", "TESIS & DISERTASI", "LAPORAN PKL UNP 2025", "JURNAL ILMIAH BEREPUTASI"];
+        const wordIdx = Math.floor(localT * 1.0) % words.length;
 
-          ctx.font = "900 48px Inter, -apple-system, sans-serif";
-          ctx.fillStyle = COLOR_WHITE;
-          ctx.textAlign = "center";
-          ctx.fillText(words[wordIdx], cx, 860);
+        ctx.font = "900 44px Inter, -apple-system, sans-serif";
+        ctx.fillStyle = COLOR_WHITE;
+        ctx.textAlign = "center";
+        ctx.fillText(words[wordIdx], cx, 870);
 
-          ctx.font = "700 16px monospace";
-          ctx.fillStyle = COLOR_BLUE;
-          ctx.fillText("SYNTHESIS ENGINE LOCKED // READY FOR COMPOSITION", cx, 915);
-        }
+        ctx.font = "700 15px monospace";
+        ctx.fillStyle = COLOR_BLUE;
+        ctx.fillText("3D VOLUMETRIC SYNTHESIS // READY FOR COMPOSITION", cx, 920);
       }
 
       // =========================================================================
       // SCENE 7: BEATS 24 - 28 (12.0s - 14.0s): END TITLE
       // =========================================================================
       else if (t < 14.0) {
-        if (activeSceneName !== "06 // ACADEMIC AGENT STUDIO") setActiveSceneName("06 // ACADEMIC AGENT STUDIO");
         const localT = t - 12.0;
         const p = clamp(localT / 1.0, 0, 1);
         const f = easeOutExpo(p);
 
-        // 4-pointed Star Logo
+        // 4-pointed Star Emblem
         ctx.save();
         ctx.translate(cx, cy - 90);
         ctx.scale(f, f);
@@ -553,16 +532,19 @@ export const FirstTimeLoadingScreen: React.FC<FirstTimeLoadingScreenProps> = ({
         ctx.fill();
         ctx.restore();
 
+        // Main Title
         ctx.font = "900 86px Inter, -apple-system, sans-serif";
         ctx.fillStyle = COLOR_WHITE;
         ctx.textAlign = "center";
         ctx.textBaseline = "middle";
         ctx.fillText("ACADEMIC AGENT STUDIO", cx, cy + 20);
 
-        ctx.font = "700 24px monospace";
+        // Subtitle
+        ctx.font = "700 22px monospace";
         ctx.fillStyle = COLOR_BLUE;
-        ctx.fillText("THE AI RESEARCH & MANUSCRIPT ENGINE", cx, cy + 100);
+        ctx.fillText("THE AI RESEARCH & MANUSCRIPT ENGINE", cx, cy + 96);
 
+        // Badges
         const badges = ["FT UNP 2025 COMPLIANT", "DIKTI STANDARDS", "12 COGNITIVE MODES", "DOCX / PPTX EXPORT"];
         const totalW = badges.length * 220;
         const startX = cx - totalW / 2 + 110;
@@ -581,13 +563,13 @@ export const FirstTimeLoadingScreen: React.FC<FirstTimeLoadingScreenProps> = ({
       }
 
       // =========================================================================
-      // SCENE 8: BEATS 28 - 30 (14.0s - 15.0s): SEAMLESS LOOP TRANSITION
+      // SCENE 8: BEATS 28 - 30 (14.0s - 15.0s): SEAMLESS POINT COLLAPSE
       // =========================================================================
       else {
         const localT = t - 14.0;
         const p = clamp(localT / 1.0, 0, 1);
         const f = easeInOutCubic(p);
-        const radius = lerp(40, 4, f);
+        const radius = lerp(36, 3, f);
 
         ctx.fillStyle = COLOR_WHITE;
         ctx.beginPath();
@@ -611,9 +593,7 @@ export const FirstTimeLoadingScreen: React.FC<FirstTimeLoadingScreenProps> = ({
     animFrameRef.current = requestAnimationFrame(renderFrame);
 
     return () => {
-      if (animFrameRef.current) {
-        cancelAnimationFrame(animFrameRef.current);
-      }
+      if (animFrameRef.current) cancelAnimationFrame(animFrameRef.current);
       if (audioCtxRef.current) {
         try {
           audioCtxRef.current.close();
@@ -622,30 +602,45 @@ export const FirstTimeLoadingScreen: React.FC<FirstTimeLoadingScreenProps> = ({
         }
       }
     };
-  }, [isFirstTime, hasCheckedStorage, isMuted]);
+  }, [isFirstTime, hasCheckedStorage]);
 
-  // If storage check pending, show clean void
+  // If storage check pending, show clean dark void
   if (!hasCheckedStorage) {
     return <div className="fixed inset-0 z-50 bg-[#0A0D14]" />;
   }
 
-  // IF REFRESH / SUBSEQUENT VISIT: Show regular lightweight ScreenLoader
+  // IF REFRESH / SUBSEQUENT VISIT: Show simple, minimal ScreenLoader
   if (!isFirstTime) {
     return <ScreenLoader onComplete={onComplete} />;
   }
 
-  const currentBeat = Math.min(30, Math.floor(currentTimeSec * 2) + 1);
-  const progressPct = Math.min(100, (currentTimeSec / 15.0) * 100);
+  // Calculate 3D WebGL Orb visibility between 7.8s and 12.2s
+  let orbOpacity = 0;
+  let orbScale = 1;
+  if (currentTimeSec >= 7.8 && currentTimeSec <= 12.2) {
+    if (currentTimeSec < 8.2) {
+      orbOpacity = (currentTimeSec - 7.8) / 0.4;
+      orbScale = 0.88 + orbOpacity * 0.12;
+    } else if (currentTimeSec > 11.6) {
+      orbOpacity = Math.max(0, (12.2 - currentTimeSec) / 0.6);
+      orbScale = 0.92 + orbOpacity * 0.08;
+    } else {
+      orbOpacity = 1;
+      orbScale = 1;
+    }
+  }
 
-  // IF FIRST TIME VISIT (OR FORCE REPLAY): Show 15-second 60 FPS Canvas Motion Engine
+  // 100% CLEAN, IMMERSIVE, DISTRACTION-FREE MOTION SCREEN (NO DURATION, NO BADGES, NO BUTTONS)
   return (
     <div 
-      className={`fixed inset-0 z-50 flex items-center justify-center bg-[#0A0D14] transition-opacity duration-500 overflow-hidden select-none ${
+      onClick={handleFinishShowreel}
+      className={`fixed inset-0 z-50 flex items-center justify-center bg-[#0A0D14] transition-opacity duration-500 overflow-hidden select-none cursor-pointer ${
         isFadingOut ? "opacity-0 pointer-events-none" : "opacity-100"
       }`}
+      title="Klik untuk langsung masuk"
     >
-      <div className="relative w-full h-full flex items-center justify-center bg-[#0A0D14]">
-        {/* Real-time 60 FPS HTML5 Canvas (100% immune to browser autoplay policy blocks) */}
+      <div className="relative w-full h-full flex items-center justify-center bg-[#0A0D14] overflow-hidden">
+        {/* Real-time 60 FPS HTML5 Canvas */}
         <canvas
           ref={canvasRef}
           width={1920}
@@ -653,66 +648,25 @@ export const FirstTimeLoadingScreen: React.FC<FirstTimeLoadingScreenProps> = ({
           className="w-full h-full object-contain bg-[#0A0D14]"
         />
 
-        {/* Top Floating Control Bar */}
-        <div className="absolute top-5 left-5 right-5 flex items-center justify-between z-30 pointer-events-auto">
-          {/* Brand Badge */}
-          <div className="flex items-center gap-2.5 px-3.5 py-1.5 rounded-full bg-black/60 backdrop-blur-md border border-white/10 text-white text-xs font-mono shadow-xl">
-            <span className="w-2 h-2 rounded-full bg-blue-500 animate-pulse" />
-            <span className="font-bold tracking-wider">ACADEMIC AGENT STUDIO</span>
-            <span className="text-[10px] text-zinc-500 border-l border-zinc-700 pl-2">120 BPM SHOWREEL</span>
-          </div>
-
-          <div className="flex items-center gap-3">
-            {/* Audio Toggle */}
-            <button
-              type="button"
-              onClick={toggleSound}
-              className={`flex items-center gap-2 px-3.5 py-1.5 rounded-full backdrop-blur-md border text-xs font-mono transition-all cursor-pointer shadow-lg ${
-                isMuted 
-                  ? "bg-black/60 border-white/10 text-zinc-400 hover:text-white" 
-                  : "bg-blue-600/80 border-blue-400/50 text-white shadow-blue-500/20"
-              }`}
-              title={isMuted ? "Aktifkan Audio 120 BPM" : "Bisukan Audio"}
-            >
-              {isMuted ? <VolumeX className="w-3.5 h-3.5" /> : <Volume2 className="w-3.5 h-3.5" />}
-              <span>{isMuted ? "Sound: OFF" : "Sound: ON"}</span>
-            </button>
-
-            {/* Skip / Enter Studio Button */}
-            <button
-              type="button"
-              onClick={handleFinishShowreel}
-              className="px-4 py-1.5 rounded-full bg-white hover:bg-zinc-100 text-[#0A0D14] font-bold text-xs flex items-center gap-1.5 shadow-xl hover:scale-105 active:scale-95 transition-all cursor-pointer"
-            >
-              <span>Lewati Intro</span>
-              <ArrowRight className="w-3.5 h-3.5 stroke-[2.5]" />
-            </button>
-          </div>
-        </div>
-
-        {/* Bottom Real-time Telemetry Bar */}
-        <div className="absolute bottom-6 left-6 right-6 z-30 pointer-events-none">
-          <div className="flex items-center justify-between text-[11px] font-mono text-zinc-400 mb-2">
-            <div className="flex items-center gap-3">
-              <span className="text-blue-400 font-bold">{activeSceneName}</span>
-              <span className="text-zinc-600">|</span>
-              <span>BEAT {currentBeat} / 30</span>
-            </div>
-            <div className="flex items-center gap-3">
-              <span className="text-white font-bold">{currentTimeSec.toFixed(1)}s / 15.0s</span>
-              <span className="text-zinc-600">|</span>
-              <span className="text-emerald-400">60 FPS ENGINE</span>
+        {/* Real Three.js 3D WebGL Holographic Glass Orb (Appears seamlessly at 8.0s - 12.0s) */}
+        {currentTimeSec >= 7.6 && currentTimeSec <= 12.4 && (
+          <div 
+            className="absolute inset-0 flex items-center justify-center pointer-events-none transition-all duration-300"
+            style={{
+              opacity: orbOpacity,
+              transform: `scale(${orbScale}) translateY(-35px)`
+            }}
+          >
+            <div className="relative w-64 h-64 sm:w-72 sm:h-72 md:w-80 md:h-80 lg:w-96 lg:h-96 flex items-center justify-center">
+              {/* Colored Halo Glow Behind 3D Sphere */}
+              <div className="absolute w-56 h-56 sm:w-72 sm:h-72 md:w-84 md:h-84 rounded-full bg-gradient-to-tr from-[#60A5FA]/35 via-[#C084FC]/30 to-[#818CF8]/25 blur-3xl pointer-events-none" />
+              {/* Authentic Three.js 3D Sphere */}
+              <Hero3DOrb className="w-full h-full" />
+              {/* Floor Shadow */}
+              <div className="absolute -bottom-4 w-44 sm:w-56 h-6 rounded-full bg-blue-950/40 blur-md pointer-events-none" />
             </div>
           </div>
-
-          {/* Smooth Timeline Progress Bar */}
-          <div className="w-full h-1 bg-white/10 rounded-full overflow-hidden">
-            <div 
-              className="h-full bg-gradient-to-r from-blue-500 via-indigo-500 to-purple-500 transition-all duration-75"
-              style={{ width: `${progressPct}%` }}
-            />
-          </div>
-        </div>
+        )}
       </div>
     </div>
   );
