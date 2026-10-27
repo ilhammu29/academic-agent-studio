@@ -19,7 +19,11 @@ import {
   Sparkles,
   GraduationCap,
   Plus,
-  Presentation
+  Presentation,
+  Globe,
+  Crown,
+  Zap,
+  Lock
 } from 'lucide-react';
 import { StudioStage, ProposalCategory } from '@/types/studio';
 import { UserProfile } from '@/lib/supabase';
@@ -72,8 +76,15 @@ export default function AppShell({
 
   const navMenuItems = [
     {
+      id: 'landing',
+      label: 'Portal / Landing Page',
+      icon: Globe,
+      isActive: currentStage === 'landing',
+      onClick: () => onNavigateStage('landing')
+    },
+    {
       id: 'beranda',
-      label: 'Beranda (Usulan)',
+      label: 'Workspace Usulan (Input)',
       icon: Home,
       isActive: currentStage === 'input' || currentStage === 'interview' || currentStage === 'orchestration',
       onClick: () => onNavigateStage('input')
@@ -287,8 +298,61 @@ export default function AppShell({
           )}
         </div>
 
-        {/* Right: New Proposal Button, Theme Switcher, 12 Thinking Modes Bell, User Profile Badge */}
+        {/* Right: Quota Badge, New Proposal Button, Theme Switcher, 12 Thinking Modes Bell, User Profile Badge */}
         <div className="flex items-center gap-2 sm:gap-3">
+
+          {/* Interactive Quota Status Badge */}
+          {currentUser?.isSuperAdmin ? (
+            <button
+              type="button"
+              onClick={onOpenAuth}
+              className="hidden sm:flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/30 hover:bg-amber-500/20 transition-colors cursor-pointer"
+              title="Akun Superadmin: Akses Penuh Tanpa Batas Kuota"
+            >
+              <Crown className="w-3.5 h-3.5 text-amber-500" />
+              <span>Superadmin (∞)</span>
+            </button>
+          ) : currentUser?.isSubscribed ? (
+            <button
+              type="button"
+              onClick={onOpenAuth}
+              className="hidden sm:flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold bg-purple-500/10 text-purple-600 dark:text-purple-400 border border-purple-500/30 hover:bg-purple-500/20 transition-colors cursor-pointer"
+              title="Paket Langganan Pro Aktif (Unlimited)"
+            >
+              <Sparkles className="w-3.5 h-3.5 text-purple-500" />
+              <span>Pro (Unlimited)</span>
+            </button>
+          ) : (currentUser?.trialGeneratesLeft ?? 3) > 0 ? (
+            <button
+              type="button"
+              onClick={onOpenAuth}
+              className="hidden sm:flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30 hover:bg-emerald-500/20 transition-colors cursor-pointer"
+              title="Sisa Kuota Trial Penuh: Semua bab terbuka 100%"
+            >
+              <Zap className="w-3.5 h-3.5 text-emerald-500" />
+              <span>Trial: {currentUser?.trialGeneratesLeft ?? 3}/3</span>
+            </button>
+          ) : (currentUser?.restrictedGeneratesLeft ?? 5) > 0 ? (
+            <button
+              type="button"
+              onClick={onOpenAuth}
+              className="hidden sm:flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/30 hover:bg-amber-500/20 transition-colors cursor-pointer"
+              title="Trial Habis: Kuota Judul Terkunci (3 Halaman Terbuka)"
+            >
+              <Lock className="w-3.5 h-3.5 text-amber-500" />
+              <span>Judul: {currentUser?.restrictedGeneratesLeft ?? 5}/5</span>
+            </button>
+          ) : (
+            <button
+              type="button"
+              onClick={onOpenAuth}
+              className="hidden sm:flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold bg-red-500/10 text-red-600 dark:text-red-400 border border-red-500/30 hover:bg-red-500/20 transition-colors cursor-pointer"
+              title="Kuota Habis: Klik untuk berlangganan Paket Pro"
+            >
+              <Lock className="w-3.5 h-3.5 text-red-500" />
+              <span>Upgrade Pro</span>
+            </button>
+          )}
           
           {/* New Proposal / Sesi Baru CTA Button */}
           <button

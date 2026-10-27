@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from "react";
 import { ProposalCategory, ReportType, StudioStage, DiagnosticQuestion, ProposalDocument, TreeNode, CampusGuideline } from "@/types/studio";
 import AppShell from "@/components/AppShell";
+import { LandingPageView } from "@/components/LandingPageView";
 import { HeroInputView } from "@/components/HeroInputView";
 import { DiagnosticInterview } from "@/components/DiagnosticInterview";
 import { AgentExecutionMonitor } from "@/components/AgentExecutionMonitor";
@@ -27,12 +28,20 @@ import {
   saveStoredUser, 
   getSupabaseClient, 
   saveProjectRecord, 
-  SavedProjectRecord 
+  SavedProjectRecord,
+  getActiveSession,
+  saveActiveSession,
+  clearActiveSession,
+  isUserLoggedIn,
+  setUserLoggedIn,
+  consumeUserQuota,
+  SUPERADMIN_USER
 } from "@/lib/supabase";
 
 export default function Home() {
   const [showSplash, setShowSplash] = useState(true);
   const [currentUser, setCurrentUser] = useState<UserProfile>(() => getStoredUser());
+  const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
   const [isSupabaseConfigured, setIsSupabaseConfigured] = useState(false);
 
   // App & Workflow Stage
@@ -67,6 +76,85 @@ export default function Home() {
   const [campusGuideline, setCampusGuideline] = useState<CampusGuideline>(CAMPUS_PRESETS[0]);
   const [isGuidelineModalOpen, setIsGuidelineModalOpen] = useState(false);
   const [isConsultationModalOpen, setIsConsultationModalOpen] = useState(false);
+
+  // 1. Mount: Restore Active Session from localStorage (Zero Token Waste on Refresh)
+  useEffect(() => {
+    const loggedIn = isUserLoggedIn();
+    setIsLoggedIn(loggedIn);
+
+    const savedSession = getActiveSession();
+    if (savedSession) {
+      if (savedSession.title) setTitle(savedSession.title);
+      if (savedSession.category) setCategory(savedSession.category);
+      if (savedSession.reportType) setReportType(savedSession.reportType);
+      if (savedSession.targetEntity) setTargetEntity(savedSession.targetEntity);
+      if (savedSession.institution) setInstitution(savedSession.institution);
+      if (savedSession.facultyMajor) setFacultyMajor(savedSession.facultyMajor);
+      if (savedSession.candidateName) setCandidateName(savedSession.candidateName);
+      if (savedSession.candidateId) setCandidateId(savedSession.candidateId);
+      if (savedSession.durationMonths) setDurationMonths(savedSession.durationMonths);
+      if (savedSession.targetDepthPages) setTargetDepthPages(savedSession.targetDepthPages);
+      if (savedSession.questions && savedSession.questions.length > 0) setQuestions(savedSession.questions);
+      if (savedSession.answers) setAnswers(savedSession.answers);
+      if (savedSession.campusGuideline) setCampusGuideline(savedSession.campusGuideline);
+      if (savedSession.generatedDoc) {
+        setGeneratedDoc(savedSession.generatedDoc);
+        setTreeData(savedSession.treeData || buildVisualTreeGraph(savedSession.generatedDoc));
+      }
+
+      if (savedSession.stage === "orchestration") {
+        setStage(savedSession.generatedDoc ? "result" : "interview");
+      } else if (savedSession.stage) {
+        setStage(savedSession.stage);
+      }
+    } else if (!loggedIn) {
+      setStage("landing");
+    }
+  }, []);
+
+  // 2. Auto-Save Active Session on any change (Persistent storage against accidental refresh)
+  useEffect(() => {
+    if (stage === "landing" && !title && !generatedDoc) return;
+
+    const safeStage = stage === "orchestration" ? (generatedDoc ? "result" : "interview") : stage;
+
+    saveActiveSession({
+      stage: safeStage,
+      category,
+      reportType,
+      title,
+      targetEntity,
+      institution,
+      facultyMajor,
+      candidateName,
+      candidateId,
+      durationMonths,
+      targetDepthPages,
+      questions,
+      answers,
+      generatedDoc,
+      treeData,
+      campusGuideline,
+      lastSavedAt: new Date().toISOString()
+    });
+  }, [
+    stage,
+    category,
+    reportType,
+    title,
+    targetEntity,
+    institution,
+    facultyMajor,
+    candidateName,
+    candidateId,
+    durationMonths,
+    targetDepthPages,
+    questions,
+    answers,
+    generatedDoc,
+    treeData,
+    campusGuideline
+  ]);
 
   // Check Supabase status on mount
   useEffect(() => {
@@ -119,6 +207,18 @@ export default function Home() {
       return;
     }
 
+    // 1. Validasi & Konsumsi Kuota Pengguna
+    const quotaResult = consumeUserQuota(currentUser.id);
+    if (!quotaResult.allowed) {
+      alert(quotaResult.message || "Batas kuota trial dan kuota judul Anda telah habis. Silakan pilih paket langganan.");
+      setIsAuthModalOpen(true);
+      return;
+    }
+
+    // Update currentUser state untuk mencerminkan sisa kuota terbaru
+    const updatedUser = getStoredUser();
+    setCurrentUser(updatedUser);
+
     setStage("orchestration");
 
     // Build initial formal proposal document & tree graph purely based on user's real input
@@ -133,6 +233,16 @@ export default function Home() {
       targetEntity
     );
     doc.campusGuideline = campusGuideline;
+
+    // Tandai status gembok pada dokumen jika dalam restricted preview (kuota trial habis)
+    if (quotaResult.isRestrictedPreview) {
+      doc.isLocked = true;
+      doc.isRestrictedPreview = true;
+    } else {
+      doc.isLocked = false;
+      doc.isRestrictedPreview = false;
+    }
+
     const tree = buildVisualTreeGraph(doc);
     setGeneratedDoc(doc);
     setTreeData(tree);
@@ -143,6 +253,11 @@ export default function Home() {
       if (!doc.campusGuideline) {
         doc.campusGuideline = campusGuideline;
       }
+      // Pertahankan status gembok pada dokumen yang selesai digenerate
+      if (generatedDoc?.isLocked || generatedDoc?.isRestrictedPreview) {
+        doc.isLocked = true;
+        doc.isRestrictedPreview = true;
+      }
       setGeneratedDoc(doc);
       setTreeData(buildVisualTreeGraph(doc));
     }
@@ -150,13 +265,55 @@ export default function Home() {
   };
 
   const handleResetSession = () => {
+    clearActiveSession();
     setStage("input");
     setAnswers({});
     setGeneratedDoc(null);
     setTreeData(null);
+    setTitle("");
+    setTargetEntity("");
+  };
+
+  const handleEnterStudio = (preset?: {
+    title?: string;
+    category?: ProposalCategory;
+    reportType?: ReportType;
+    targetEntity?: string;
+    campusGuideline?: CampusGuideline;
+  }) => {
+    if (preset) {
+      if (preset.title) setTitle(preset.title);
+      if (preset.category) setCategory(preset.category);
+      if (preset.reportType) setReportType(preset.reportType);
+      if (preset.targetEntity) setTargetEntity(preset.targetEntity);
+      if (preset.campusGuideline) setCampusGuideline(preset.campusGuideline);
+    }
+    if (generatedDoc && !preset?.title) {
+      setStage("result");
+    } else {
+      setStage("input");
+    }
+  };
+
+  const handleLogout = () => {
+    setUserLoggedIn(false);
+    setIsLoggedIn(false);
+    clearActiveSession();
+    setGeneratedDoc(null);
+    setTreeData(null);
+    setTitle("");
+    setTargetEntity("");
+    setAnswers({});
+    setStage("landing");
+    setIsAuthModalOpen(false);
   };
 
   const handleNavigateStage = (targetStage: StudioStage) => {
+    if (targetStage === "landing") {
+      setStage("landing");
+      return;
+    }
+
     if (targetStage === "drive") {
       setStage("drive");
       return;
@@ -303,6 +460,8 @@ export default function Home() {
   const handleUpdateUser = (updatedUser: UserProfile) => {
     setCurrentUser(updatedUser);
     saveStoredUser(updatedUser);
+    setUserLoggedIn(true);
+    setIsLoggedIn(true);
     setCandidateName(updatedUser.name);
     setInstitution(updatedUser.institution);
   };
@@ -314,23 +473,31 @@ export default function Home() {
         <ScreenLoader onComplete={() => setShowSplash(false)} />
       )}
 
-      {/* 2. Full-Bleed Desktop & Mobile Responsive App Shell (Matching ui-referensi.png) */}
-      <AppShell
-        currentStage={stage}
-        onNavigateStage={handleNavigateStage}
-        onOpenTwelveModes={() => setIsThinkingModalOpen(true)}
-        onOpenDatabase={() => setIsDatabaseDrawerOpen(true)}
-        onOpenAuth={() => setIsAuthModalOpen(true)}
-        onOpenConsultation={() => setStage("consultation")}
-        onOpenGuidelines={() => setIsGuidelineModalOpen(true)}
-        onResetSession={handleResetSession}
-        activeCategory={category}
-        activeTitle={title}
-        currentUser={currentUser}
-        isSupabaseConfigured={isSupabaseConfigured}
-      >
-        {/* Stage 1: Hero & Command Capsule Input */}
-        {stage === "input" && (
+      {/* 2. Full-Bleed Desktop & Mobile Responsive App Shell / Landing View */}
+      {stage === "landing" ? (
+        <LandingPageView
+          onEnterStudio={handleEnterStudio}
+          onOpenAuth={() => setIsAuthModalOpen(true)}
+          currentUser={currentUser}
+          isLoggedIn={isLoggedIn}
+        />
+      ) : (
+        <AppShell
+          currentStage={stage}
+          onNavigateStage={handleNavigateStage}
+          onOpenTwelveModes={() => setIsThinkingModalOpen(true)}
+          onOpenDatabase={() => setIsDatabaseDrawerOpen(true)}
+          onOpenAuth={() => setIsAuthModalOpen(true)}
+          onOpenConsultation={() => setStage("consultation")}
+          onOpenGuidelines={() => setIsGuidelineModalOpen(true)}
+          onResetSession={handleResetSession}
+          activeCategory={category}
+          activeTitle={title}
+          currentUser={currentUser}
+          isSupabaseConfigured={isSupabaseConfigured}
+        >
+          {/* Stage 1: Hero & Command Capsule Input */}
+          {stage === "input" && (
           <HeroInputView
             category={category}
             setCategory={(newCat) => {
@@ -479,6 +646,7 @@ export default function Home() {
           />
         )}
       </AppShell>
+      )}
 
       {/* 3. 12 Thinking Modes Slide-over Drawer */}
       <TwelveModesModal
@@ -492,6 +660,8 @@ export default function Home() {
         onClose={() => setIsAuthModalOpen(false)}
         currentUser={currentUser}
         onUpdateUser={handleUpdateUser}
+        isLoggedIn={isLoggedIn}
+        onLogout={handleLogout}
       />
 
       {/* 5. Database & Proposals History Drawer */}

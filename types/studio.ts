@@ -2,7 +2,11 @@ export type ProposalCategory = 'magang' | 'skripsi' | 'penelitian';
 
 export type ReportType = 'magang' | 'skripsi' | 'tugas_akhir' | 'tesis' | 'penelitian' | 'laporan_pkl_unp' | 'laporan_magang';
 
-export type StudioStage = 'input' | 'interview' | 'orchestration' | 'result' | 'slides' | 'drive' | 'consultation';
+export type StudioStage = 'landing' | 'input' | 'interview' | 'orchestration' | 'result' | 'slides' | 'drive' | 'consultation';
+
+export type UserRole = 'Mahasiswa' | 'Dosen Pembimbing' | 'Reviewer Industri' | 'Peneliti' | 'Superadmin';
+
+export type SubscriptionPlanId = 'free' | 'pro_mahasiswa' | 'pro_skripsi' | 'pro_unlimited';
 
 export type SheetType = 'pengesahan' | 'berita_acara' | 'pernyataan_orisinalitas' | 'kata_pengantar' | 'abstrak' | 'custom_upload';
 
@@ -297,6 +301,8 @@ export interface ProposalDocument {
     tableRows?: { col1: string; col2: string; col3: string }[];
   }[];
   documentDepth?: 'proposal' | 'comprehensive';
+  isLocked?: boolean;
+  isRestrictedPreview?: boolean;
   bibliography?: BibliographyItem[];
   slides: SlideDeckItem[];
   auditLog: {

@@ -19,6 +19,8 @@ import { CustomSheetModal } from "./CustomSheetModal";
 import { DocumentImageManagerModal } from "./DocumentImageManagerModal";
 import { LogbookManagerModal } from "./LogbookManagerModal";
 import { DefenseMinutesModal } from "./DefenseMinutesModal";
+import { LockedContentOverlay } from "./LockedContentOverlay";
+import AuthModal from "./AuthModal";
 import { getCampusLogoByInstitution } from "@/lib/campusLogos";
 import { getSectionHeading, HeadingStyleType, parseChapterTitle } from "@/lib/academicNumbering";
 import { generateAcademicProposalDocx, downloadDocxBlob } from "@/lib/docxExporter";
@@ -114,6 +116,11 @@ export const DocumentStudio: React.FC<DocumentStudioProps> = ({
   const [isConsultationModalOpen, setIsConsultationModalOpen] = useState(false);
   const [watermarkType, setWatermarkType] = useState<"none" | "draft" | "plagiarisme_ok" | "siap_sidang" | "confidential">("none");
   const [isBatchGeneratingSlides, setIsBatchGeneratingSlides] = useState(false);
+  const [isSubscriptionModalOpen, setIsSubscriptionModalOpen] = useState(false);
+  const [currentUserProfile, setCurrentUserProfile] = useState(() => getStoredUser());
+  const isDocumentLocked = !currentUserProfile?.isSuperAdmin && !currentUserProfile?.isSubscribed && (
+    Boolean(currentDoc?.isLocked) || Boolean(currentDoc?.isRestrictedPreview) || ((currentUserProfile?.trialGeneratesLeft ?? 3) <= 0)
+  );
   
   // Modals for Logo, Theories, Custom Sheets, Figures, Logbook, and Defense Minutes
   const [isCampusLogoModalOpen, setIsCampusLogoModalOpen] = useState(false);
@@ -954,6 +961,11 @@ NIP / NIK.
   };
 
   const handleDownloadDocx = async () => {
+    if (isDocumentLocked) {
+      alert("🔒 Naskah dokumen terkunci (Trial Preview Mode). Kuota 3x trial penuh Anda telah habis. Silakan aktifkan Paket Pro untuk membuka seluruh bab dan mengunduh berkas Word DOCX lengkap.");
+      setIsSubscriptionModalOpen(true);
+      return;
+    }
     setIsExportingDocx(true);
     try {
       const blob = await generateAcademicProposalDocx(currentDoc, disabledSections);
@@ -3140,9 +3152,16 @@ NIP / NIK.
           )}
 
           {/* ========================================================================= */}
-          {/* BAB II: TINJAUAN PUSTAKA */}
+          {/* BAB II: TINJAUAN PUSTAKA / TOPIK BAHASAN */}
           {/* ========================================================================= */}
-          {(naskahSection === "all" || naskahSection === "bab2") && (
+          {isDocumentLocked ? (
+            <LockedContentOverlay
+              onOpenSubscription={() => setIsSubscriptionModalOpen(true)}
+              chapterTitle="Bab II s/d Bab V, Diagram WBS, RAB & Lampiran"
+            />
+          ) : (
+            <>
+              {(naskahSection === "all" || naskahSection === "bab2") && (
             <>
               {/* BAB II */}
               {!disabledSections.includes("section-bab2") && (
@@ -4254,6 +4273,8 @@ NIP / NIK.
                 </div>
               )}
             </>
+          )}
+          </>
           )}
 
         </article>
@@ -5782,6 +5803,24 @@ NIP / NIK.
         institution={currentDoc.institution}
         minutes={currentDoc.defenseMinutes}
         onSave={handleSaveDefenseMinutes}
+      />
+
+      {/* MODAL 7: UPGRADE PAKET LANGGANAN & BUKA GEMBOK DOKUMEN */}
+      <AuthModal
+        isOpen={isSubscriptionModalOpen}
+        onClose={() => setIsSubscriptionModalOpen(false)}
+        currentUser={currentUserProfile}
+        onUpdateUser={(updated) => {
+          setCurrentUserProfile(updated);
+          if (updated.isSubscribed || updated.isSuperAdmin) {
+            setCurrentDoc(prev => ({
+              ...prev,
+              isLocked: false,
+              isRestrictedPreview: false
+            }));
+          }
+        }}
+        defaultTab="pricing"
       />
 
     </div>
