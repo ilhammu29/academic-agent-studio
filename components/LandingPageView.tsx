@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useRef } from "react";
+import dynamic from "next/dynamic";
 import { 
   Sparkles, 
   ArrowRight, 
@@ -27,6 +28,19 @@ import {
   Zap,
   Crown
 } from "lucide-react";
+
+// Client-only Dynamic Import for Interactive 3D WebGL Glass Orb
+const Hero3DOrb = dynamic(
+  () => import("./Hero3DOrb").then((mod) => mod.Hero3DOrb),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="w-56 h-56 sm:w-64 sm:h-64 lg:w-76 lg:h-76 xl:w-84 xl:h-84 flex items-center justify-center">
+        <div className="w-48 h-48 rounded-full bg-gradient-to-tr from-[#60A5FA]/30 via-[#C084FC]/25 to-[#818CF8]/20 blur-2xl animate-pulse" />
+      </div>
+    ),
+  }
+);
 import { ProposalCategory, ReportType, CampusGuideline } from "@/types/studio";
 import { CAMPUS_PRESETS } from "@/lib/campusPresets";
 import { UserProfile } from "@/lib/supabase";
@@ -301,9 +315,9 @@ export const LandingPageView: React.FC<LandingPageViewProps> = ({
               <span className="block">ideas into</span>
             </div>
 
-            {/* Center: 3D Holographic Iridescent Glass Orb with Parallax Physics */}
+            {/* Center: Real Interactive 3D WebGL Holographic Glass Orb */}
             <div 
-              className="relative my-2 lg:my-0 flex-shrink-0 flex flex-col items-center justify-center w-56 h-56 sm:w-64 sm:h-64 lg:w-76 lg:h-76 xl:w-84 xl:h-84 cursor-grab active:cursor-grabbing"
+              className="relative my-2 lg:my-0 flex-shrink-0 flex flex-col items-center justify-center w-56 h-56 sm:w-64 sm:h-64 lg:w-76 lg:h-76 xl:w-84 xl:h-84"
               onMouseEnter={() => setIsHoveringOrb(true)}
               onMouseLeave={() => setIsHoveringOrb(false)}
             >
@@ -315,36 +329,20 @@ export const LandingPageView: React.FC<LandingPageViewProps> = ({
                 }}
               />
 
-              {/* Layer 2: 3D Floating Ball Entity with Dynamic Rotation & Tilt */}
+              {/* Layer 2: Real 3D Three.js WebGL Interactive Floating Sphere */}
               <div 
                 className="anim-orb-float relative z-10 w-full h-full flex items-center justify-center transition-transform duration-200 ease-out"
                 style={{
-                  transform: `perspective(1000px) rotateX(${-mouseOffset.y * 18}deg) rotateY(${mouseOffset.x * 22}deg) translateZ(${isHoveringOrb ? 30 : 0}px) scale(${isHoveringOrb ? 1.05 : 1})`,
-                  transformStyle: "preserve-3d"
+                  transform: `translateZ(${isHoveringOrb ? 20 : 0}px)`,
                 }}
               >
-                {/* 3D Glass Sphere Image */}
-                <img 
-                  src="/hero-orb.png" 
-                  alt="Academic Agent Studio 3D Glass Sphere" 
-                  className="w-full h-full object-contain drop-shadow-[0_20px_40px_rgba(59,130,246,0.22)] select-none pointer-events-none transition-transform duration-300"
-                  style={{
-                    filter: isHoveringOrb ? "brightness(1.06) contrast(1.03)" : "none"
-                  }}
+                <Hero3DOrb 
+                  mouseParallax={mouseOffset} 
+                  className="w-full h-full"
                 />
-
-                {/* Layer 3: Glass Specular Light Sheen Highlight */}
-                <div 
-                  className="absolute inset-0 rounded-full overflow-hidden pointer-events-none opacity-40 mix-blend-overlay"
-                  style={{
-                    transform: `translate(${-mouseOffset.x * 15}px, ${-mouseOffset.y * 15}px)`
-                  }}
-                >
-                  <div className="anim-specular w-full h-full bg-gradient-to-r from-transparent via-white/50 to-transparent" />
-                </div>
               </div>
 
-              {/* Layer 4: Floor Shadow That Breathes in Sync with Levitation */}
+              {/* Layer 3: Floor Shadow That Breathes in Sync with Levitation */}
               <div 
                 className="anim-orb-shadow -mt-4 w-36 sm:w-44 h-6 sm:h-7 rounded-full bg-gradient-to-r from-blue-900/20 via-indigo-950/30 to-purple-900/20 blur-md pointer-events-none"
                 style={{
