@@ -4,13 +4,13 @@ import React, { useState, useEffect, useRef } from "react";
 import dynamic from "next/dynamic";
 import ScreenLoader from "./ScreenLoader";
 
-// Dynamic import for Three.js 3D WebGL Sphere (Identical to Landing Page)
+// Dynamic import for Three.js 3D WebGL Holographic Sphere
 const Hero3DOrb = dynamic(
   () => import("./Hero3DOrb").then((mod) => mod.Hero3DOrb),
   {
     ssr: false,
     loading: () => (
-      <div className="w-64 h-64 sm:w-80 sm:h-80 rounded-full bg-gradient-to-tr from-[#60A5FA]/30 via-[#C084FC]/25 to-[#818CF8]/20 blur-2xl animate-pulse" />
+      <div className="w-64 h-64 sm:w-80 sm:h-80 rounded-full bg-gradient-to-tr from-[#60A5FA]/25 via-[#C084FC]/20 to-[#818CF8]/15 blur-2xl animate-pulse" />
     ),
   }
 );
@@ -35,15 +35,18 @@ export const FirstTimeLoadingScreen: React.FC<FirstTimeLoadingScreenProps> = ({
   const animFrameRef = useRef<number>(0);
   const startTimeRef = useRef<number>(0);
 
-  // Palette: strictly maximum 3 colors + black and white
-  const COLOR_BG = "#0A0D14";
-  const COLOR_WHITE = "#FFFFFF";
-  const COLOR_BLUE = "#2563EB";
-  const COLOR_VIOLET = "#7C3AED";
-  const COLOR_SLATE = "#334155";
-  const COLOR_MUTED = "#64748B";
+  // Thoughtful, disciplined editorial palette
+  const COLOR_BG = "#08090D";
+  const COLOR_TEXT_PRIMARY = "#F8FAFC";
+  const COLOR_TEXT_MUTED = "#64748B";
+  const COLOR_TEXT_DIM = "#334155";
+  const COLOR_ACCENT_BLUE = "#3B82F6";
+  const COLOR_ACCENT_INDIGO = "#6366F1";
+  const COLOR_ACCENT_PURPLE = "#8B5CF6";
+  const COLOR_LINE_HAIRLINE = "rgba(255, 255, 255, 0.08)";
+  const COLOR_LINE_STRONG = "rgba(255, 255, 255, 0.18)";
 
-  // Mathematical Easing
+  // Mathematical Easing Functions (Pure Functions of Time)
   const easeOutExpo = (x: number) => (x === 1 ? 1 : 1 - Math.pow(2, -10 * x));
   const easeInOutCubic = (x: number) => (x < 0.5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2);
   const easeOutCubic = (x: number) => 1 - Math.pow(1 - x, 3);
@@ -70,7 +73,7 @@ export const FirstTimeLoadingScreen: React.FC<FirstTimeLoadingScreenProps> = ({
     setHasCheckedStorage(true);
   }, [forceShow]);
 
-  // Audio Synthesizer Engine (Web Audio API)
+  // Audio Synthesizer Engine (Warm, Organic Web Audio API Synthesis)
   const initAudio = () => {
     if (audioCtxRef.current) return;
     try {
@@ -93,41 +96,41 @@ export const FirstTimeLoadingScreen: React.FC<FirstTimeLoadingScreenProps> = ({
 
       const now = ctx.currentTime;
 
-      // Kick drum on every beat (120 BPM = every 0.5s)
+      // Warm acoustic sub-kick on every beat (120 BPM = 0.5s interval)
       const osc = ctx.createOscillator();
       const gain = ctx.createGain();
       osc.type = "sine";
-      osc.frequency.setValueAtTime(130, now);
-      osc.frequency.exponentialRampToValueAtTime(38, now + 0.11);
+      osc.frequency.setValueAtTime(120, now);
+      osc.frequency.exponentialRampToValueAtTime(34, now + 0.12);
 
-      gain.gain.setValueAtTime(0.35, now);
-      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.13);
+      gain.gain.setValueAtTime(0.3, now);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.14);
 
       osc.connect(gain);
       gain.connect(ctx.destination);
       osc.start(now);
-      osc.stop(now + 0.14);
+      osc.stop(now + 0.15);
 
-      // Harmonic chords at major scene changes (Beats 0, 4, 8, 12, 16, 24)
+      // Warm harmonic chords on scene transitions (Beats 0, 4, 8, 12, 16, 24)
       if ([0, 4, 8, 12, 16, 24].includes(beatNumber)) {
-        const chordFreqs = [261.63, 329.63, 392.00, 523.25];
-        chordFreqs.forEach((freq) => {
+        const chordPitches = [220.00, 261.63, 329.63, 392.00]; // A minor 7 / C Major 6
+        chordPitches.forEach((freq) => {
           const chordOsc = ctx.createOscillator();
           const chordGain = ctx.createGain();
           chordOsc.type = "triangle";
           chordOsc.frequency.setValueAtTime(freq, now);
 
-          chordGain.gain.setValueAtTime(0.08, now);
-          chordGain.gain.exponentialRampToValueAtTime(0.0001, now + 0.55);
+          chordGain.gain.setValueAtTime(0.07, now);
+          chordGain.gain.exponentialRampToValueAtTime(0.0001, now + 0.6);
 
           chordOsc.connect(chordGain);
           chordGain.connect(ctx.destination);
           chordOsc.start(now);
-          chordOsc.stop(now + 0.6);
+          chordOsc.stop(now + 0.65);
         });
       }
     } catch {
-      // Audio fallback without interrupting visual motion
+      // Graceful fallback
     }
   };
 
@@ -172,16 +175,15 @@ export const FirstTimeLoadingScreen: React.FC<FirstTimeLoadingScreenProps> = ({
       const elapsedSec = (now - startTimeRef.current) / 1000;
       setCurrentTimeSec(elapsedSec);
 
-      // Complete at 15.0 seconds
+      // End at exactly 15.0s
       if (elapsedSec >= 15.0) {
         handleFinishShowreel();
         return;
       }
 
       const t = elapsedSec;
-      const beat = Math.floor(t * 2.0);
+      const beat = Math.floor(t * 2.0); // 120 BPM
 
-      // Trigger synth per beat
       if (beat !== lastBeatFiredRef.current && beat < 30) {
         lastBeatFiredRef.current = beat;
         playSynthesizedBeat(beat);
@@ -196,14 +198,16 @@ export const FirstTimeLoadingScreen: React.FC<FirstTimeLoadingScreenProps> = ({
 
       ctx.save();
       ctx.clearRect(0, 0, width, height);
+
+      // Deep obsidian void background
       ctx.fillStyle = COLOR_BG;
       ctx.fillRect(0, 0, width, height);
 
-      const cx = 960;
-      const cy = 540;
+      const cx = width / 2;
+      const cy = height / 2;
 
       // =========================================================================
-      // SCENE 1: BEATS 0 - 4 (0.0s - 2.0s): HOOK & KINETIC TYPOGRAPHY
+      // SCENE 1: BEATS 0 - 4 (0.0s - 2.0s): THE PREMISE (ARCHITECTURAL TYPOGRAPHY)
       // =========================================================================
       if (t < 2.0) {
         const p1 = clamp(t / 0.5, 0, 1);
@@ -211,125 +215,169 @@ export const FirstTimeLoadingScreen: React.FC<FirstTimeLoadingScreenProps> = ({
         const p3 = clamp((t - 1.0) / 0.5, 0, 1);
         const p4 = clamp((t - 1.5) / 0.5, 0, 1);
 
-        if (t < 0.5) {
-          // Beat 0: White structural reticle spark
-          const radius = lerp(3, 16, easeOutExpo(p1));
-          ctx.fillStyle = COLOR_WHITE;
-          ctx.beginPath();
-          ctx.arc(cx, cy, radius, 0, Math.PI * 2);
-          ctx.fill();
+        // Subtle typographic drafting grid
+        ctx.strokeStyle = COLOR_LINE_HAIRLINE;
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.moveTo(cx - 400, cy); ctx.lineTo(cx + 400, cy);
+        ctx.moveTo(cx, cy - 250); ctx.lineTo(cx, cy + 250);
+        ctx.stroke();
 
-          // Expanding crosshairs
-          const lineLen = lerp(0, 160, easeOutExpo(p1));
-          ctx.strokeStyle = COLOR_BLUE;
-          ctx.lineWidth = 1.5;
+        if (t < 0.5) {
+          // Beat 0: Typesetter's register mark expanding with optical weight
+          const markSize = lerp(4, 24, easeOutExpo(p1));
+          ctx.strokeStyle = COLOR_ACCENT_BLUE;
+          ctx.lineWidth = 2;
           ctx.beginPath();
-          ctx.moveTo(cx - lineLen, cy); ctx.lineTo(cx + lineLen, cy);
-          ctx.moveTo(cx, cy - lineLen); ctx.lineTo(cx, cy + lineLen);
+          // Corner register brackets
+          ctx.moveTo(cx - markSize, cy - markSize / 2);
+          ctx.lineTo(cx - markSize, cy - markSize);
+          ctx.lineTo(cx - markSize / 2, cy - markSize);
+
+          ctx.moveTo(cx + markSize, cy - markSize / 2);
+          ctx.lineTo(cx + markSize, cy - markSize);
+          ctx.lineTo(cx + markSize / 2, cy - markSize);
+
+          ctx.moveTo(cx - markSize, cy + markSize / 2);
+          ctx.lineTo(cx - markSize, cy + markSize);
+          ctx.lineTo(cx - markSize / 2, cy + markSize);
+
+          ctx.moveTo(cx + markSize, cy + markSize / 2);
+          ctx.lineTo(cx + markSize, cy + markSize);
+          ctx.lineTo(cx + markSize / 2, cy + markSize);
           ctx.stroke();
 
-          // Hairline coordinate labels
-          ctx.font = "600 11px monospace";
-          ctx.fillStyle = COLOR_MUTED;
+          // Center solid point
+          ctx.fillStyle = COLOR_TEXT_PRIMARY;
+          ctx.beginPath();
+          ctx.arc(cx, cy, 3, 0, Math.PI * 2);
+          ctx.fill();
+
+          ctx.font = "500 13px Inter, -apple-system, sans-serif";
+          ctx.fillStyle = COLOR_TEXT_MUTED;
           ctx.textAlign = "center";
-          ctx.fillText("[ 00:00:00 // INITIATE ]", cx, cy + 45);
+          ctx.fillText("§ 1.0 · ON THE FOUNDATION OF ACADEMIC INQUIRY", cx, cy + 50);
         } else if (t < 1.0) {
-          // Beat 1: Kinetic Type "INQUIRY"
-          const offset = lerp(70, 0, easeOutExpo(p2));
-          ctx.font = "900 140px Inter, -apple-system, sans-serif";
+          // Beat 1: Grand Display "INQUIRY"
+          const f = easeOutExpo(p2);
+          const yOff = lerp(40, 0, f);
+          ctx.font = "900 136px Inter, -apple-system, sans-serif";
+          ctx.letterSpacing = "-0.04em";
+          ctx.fillStyle = COLOR_TEXT_PRIMARY;
           ctx.textAlign = "center";
           ctx.textBaseline = "middle";
-          ctx.fillStyle = COLOR_WHITE;
-          ctx.fillText("INQUIRY", cx, cy - offset * 0.15);
+          ctx.fillText("INQUIRY", cx, cy - 10 + yOff * 0.1);
 
-          ctx.font = "700 18px monospace";
-          ctx.fillStyle = COLOR_BLUE;
-          ctx.fillText("PHASE 01 // ONTOLOGY OF RESEARCH", cx, cy + 95);
+          ctx.font = "500 14px Inter, -apple-system, sans-serif";
+          ctx.fillStyle = COLOR_ACCENT_BLUE;
+          ctx.fillText("THE FORMULATION OF RESEARCH QUESTIONS", cx, cy + 90);
         } else if (t < 1.5) {
-          // Beat 2: Kinetic shear slice into "HYPOTHESIS"
-          const split = lerp(0, 48, easeOutExpo(p3));
+          // Beat 2: Typographic mask shear into "EVIDENCE"
+          const split = lerp(0, 36, easeOutExpo(p3));
           ctx.font = "900 130px Inter, -apple-system, sans-serif";
+          ctx.letterSpacing = "-0.04em";
           ctx.textAlign = "center";
           ctx.textBaseline = "middle";
 
-          // Top slice
+          // Top half
           ctx.save();
           ctx.beginPath();
           ctx.rect(0, 0, width, cy);
           ctx.clip();
-          ctx.fillStyle = COLOR_BLUE;
-          ctx.fillText("HYPOTHESIS", cx - split, cy);
+          ctx.fillStyle = COLOR_ACCENT_BLUE;
+          ctx.fillText("EVIDENCE", cx - split, cy);
           ctx.restore();
 
-          // Bottom slice
+          // Bottom half
           ctx.save();
           ctx.beginPath();
           ctx.rect(0, cy, width, cy);
           ctx.clip();
-          ctx.fillStyle = COLOR_WHITE;
-          ctx.fillText("HYPOTHESIS", cx + split, cy);
+          ctx.fillStyle = COLOR_TEXT_PRIMARY;
+          ctx.fillText("EVIDENCE", cx + split, cy);
           ctx.restore();
-        } else {
-          // Beat 3: Letters collapse into 4 vertical research pillars
-          const p = easeOutCubic(p4);
-          const colW = 120;
-          const spacing = 280;
-          const startX = cx - (spacing * 1.5);
 
-          for (let i = 0; i < 4; i++) {
+          ctx.font = "500 14px Inter, -apple-system, sans-serif";
+          ctx.fillStyle = COLOR_ACCENT_PURPLE;
+          ctx.fillText("EMPIRICAL GROUNDING & RIGOROUS PROOF", cx, cy + 90);
+        } else {
+          // Beat 3: Monolithic Architectural Columns (Ontology · Methodology · Axiology)
+          const p = easeOutCubic(p4);
+          const colWidth = 140;
+          const spacing = 320;
+          const startX = cx - spacing;
+
+          const pillars = [
+            { title: "ONTOLOGI", desc: "Objek & Hakikat Riset", color: COLOR_TEXT_PRIMARY },
+            { title: "EPISTEMOLOGI", desc: "Metode Ilmiah Teruji", color: COLOR_ACCENT_BLUE },
+            { title: "AKSIOLOGI", desc: "Dampak & Kemanfaatan", color: COLOR_ACCENT_PURPLE }
+          ];
+
+          pillars.forEach((pil, i) => {
             const x = startX + i * spacing;
-            const h = lerp(30, 520, p);
+            const h = lerp(40, 520, p);
             const y = cy - h / 2;
 
-            ctx.fillStyle = (i === 1 || i === 2) ? COLOR_BLUE : (i === 3 ? COLOR_VIOLET : COLOR_WHITE);
-            ctx.fillRect(x - colW / 2, y, colW, h);
+            ctx.fillStyle = "rgba(15, 23, 42, 0.85)";
+            ctx.strokeStyle = pil.color;
+            ctx.lineWidth = 1.5;
+            ctx.fillRect(x - colWidth / 2, y, colWidth, h);
+            ctx.strokeRect(x - colWidth / 2, y, colWidth, h);
 
             if (p > 0.6) {
-              ctx.font = "700 13px monospace";
-              ctx.fillStyle = COLOR_BG;
+              ctx.font = "800 16px Inter, sans-serif";
+              ctx.fillStyle = pil.color;
               ctx.textAlign = "center";
-              ctx.fillText("PILLAR.0" + (i + 1), x, y + 28);
+              ctx.fillText(pil.title, x, y + 36);
+
+              ctx.font = "500 11px Inter, sans-serif";
+              ctx.fillStyle = COLOR_TEXT_MUTED;
+              ctx.fillText(pil.desc, x, y + 58);
             }
-          }
+          });
         }
       }
 
       // =========================================================================
-      // SCENE 2: BEATS 4 - 8 (2.0s - 4.0s): 12-MODE TOPOLOGICAL LATTICE
+      // SCENE 2: BEATS 4 - 8 (2.0s - 4.0s): THE CITATION TOPOLOGY & ACADEMIC GRID
       // =========================================================================
       else if (t < 4.0) {
         const localT = t - 2.0;
         const subP = clamp((localT % 0.5) / 0.5, 0, 1);
         const subBeat = Math.floor(localT / 0.5);
 
-        ctx.lineWidth = 2.5;
-
         if (subBeat === 0) {
-          // Beat 4: Monoliths curve into orbital arcs
+          // Beat 4: Architectural pillars rotate into concentric circular geodesics
           const f = easeOutExpo(subP);
-          for (let i = 0; i < 4; i++) {
-            const angle = (i * Math.PI) / 2 + f * Math.PI * 0.5;
-            const r = lerp(320, 240, f);
-            ctx.strokeStyle = i % 2 === 0 ? COLOR_BLUE : COLOR_VIOLET;
+          for (let i = 0; i < 3; i++) {
+            const r = lerp(340 - i * 60, 260 - i * 50, f);
+            const startAng = (i * Math.PI) / 3;
+            ctx.strokeStyle = i === 1 ? COLOR_ACCENT_BLUE : (i === 2 ? COLOR_ACCENT_PURPLE : COLOR_LINE_STRONG);
+            ctx.lineWidth = 1.5;
             ctx.beginPath();
-            ctx.arc(cx, cy, r, angle, angle + Math.PI * 0.6);
+            ctx.arc(cx, cy, r, startAng, startAng + Math.PI * 1.2 * f);
             ctx.stroke();
           }
         } else if (subBeat === 1 || subBeat === 2) {
-          // Beats 5-6: 12-Mode Citation Network Graph
-          const numNodes = 12;
+          // Beats 5-6: Dialectical Citation Graph (Real Scholarly Networks)
           const nodeRadius = 260;
+          const nodes = [
+            "Latar Belakang", "Kajian Literatur", "Metodologi", "Sampel & Data",
+            "Validasi Empiris", "Pengujian Sistem", "Analisis Temuan", "Diskusi Kritis",
+            "Keterbatasan", "Kebaharuan (Novelty)", "Implikasi Praktis", "Daftar Rujukan"
+          ];
 
-          ctx.strokeStyle = COLOR_SLATE;
-          ctx.lineWidth = 1.5;
+          ctx.strokeStyle = "rgba(255, 255, 255, 0.09)";
+          ctx.lineWidth = 1;
 
-          for (let i = 0; i < numNodes; i++) {
-            const a1 = (i / numNodes) * Math.PI * 2;
+          // Connect dialectical chords
+          for (let i = 0; i < nodes.length; i++) {
+            const a1 = (i / nodes.length) * Math.PI * 2;
             const x1 = cx + Math.cos(a1) * nodeRadius;
             const y1 = cy + Math.sin(a1) * nodeRadius;
 
-            const next = (i + 4) % numNodes;
-            const a2 = (next / numNodes) * Math.PI * 2;
+            const next = (i + 4) % nodes.length;
+            const a2 = (next / nodes.length) * Math.PI * 2;
             const x2 = cx + Math.cos(a2) * nodeRadius;
             const y2 = cy + Math.sin(a2) * nodeRadius;
 
@@ -338,251 +386,295 @@ export const FirstTimeLoadingScreen: React.FC<FirstTimeLoadingScreenProps> = ({
             ctx.lineTo(x2, y2);
             ctx.stroke();
 
-            ctx.fillStyle = (i % 3 === 0) ? COLOR_BLUE : (i % 3 === 1 ? COLOR_VIOLET : COLOR_WHITE);
+            // Scholarly Nodes
+            ctx.fillStyle = (i % 3 === 0) ? COLOR_ACCENT_BLUE : (i % 3 === 1 ? COLOR_ACCENT_PURPLE : COLOR_TEXT_PRIMARY);
             ctx.beginPath();
-            ctx.arc(x1, y1, 7, 0, Math.PI * 2);
+            ctx.arc(x1, y1, 5, 0, Math.PI * 2);
             ctx.fill();
           }
 
-          ctx.font = "900 36px Inter, sans-serif";
-          ctx.fillStyle = COLOR_WHITE;
+          ctx.font = "800 36px Inter, sans-serif";
+          ctx.fillStyle = COLOR_TEXT_PRIMARY;
           ctx.textAlign = "center";
-          ctx.fillText("12 COGNITIVE MODES", cx, cy - 20);
-          ctx.font = "600 15px monospace";
-          ctx.fillStyle = COLOR_BLUE;
-          ctx.fillText("CITATION TOPOLOGY GRAPH SYNCHRONIZED", cx, cy + 24);
+          ctx.fillText("12 MODA PENALARAN ILMIAH", cx, cy - 14);
+
+          ctx.font = "500 14px Inter, sans-serif";
+          ctx.fillStyle = COLOR_ACCENT_BLUE;
+          ctx.fillText("INTEGRASI SINTESIS SITASI & STRUKTUR LOGIKA NASKAH", cx, cy + 24);
         } else {
-          // Beat 7: Collapsing into standardized academic A4 page
+          // Beat 7: Converging into Authentic Academic A4 Document Blueprint
           const f = easeOutExpo(subP);
-          const pageW = lerp(580, 480, f);
-          const pageH = lerp(580, 680, f);
+          const pageW = lerp(560, 480, f);
+          const pageH = lerp(560, 680, f);
           const px = cx - pageW / 2;
           const py = cy - pageH / 2;
 
-          ctx.fillStyle = "#0D111A";
-          ctx.strokeStyle = COLOR_WHITE;
+          // Vellum sheet card
+          ctx.fillStyle = "#0F1420";
+          ctx.strokeStyle = COLOR_LINE_STRONG;
           ctx.lineWidth = 1.5;
           ctx.fillRect(px, py, pageW, pageH);
           ctx.strokeRect(px, py, pageW, pageH);
 
-          // Simulated paragraph text lines
-          ctx.fillStyle = "#2D3748";
-          for (let l = 0; l < 8; l++) {
-            const lw = (l % 2 === 0 ? 380 : 310);
-            ctx.fillRect(px + 50, py + 120 + l * 40, lw, 6);
-          }
+          // Real Academic Header Elements (Not generic skeleton bars!)
+          ctx.font = "800 13px Inter, sans-serif";
+          ctx.fillStyle = COLOR_TEXT_PRIMARY;
+          ctx.textAlign = "center";
+          ctx.fillText("PROPOSAL PENELITIAN & SKRIPSI", cx, py + 80);
+
+          ctx.font = "600 11px Inter, sans-serif";
+          ctx.fillStyle = COLOR_TEXT_MUTED;
+          ctx.fillText("STANDAR BAKU AKADEMIK DIKTI & FAKULTAS TEKNIK UNP", cx, py + 104);
+
+          // Horizontal rule
+          ctx.strokeStyle = COLOR_ACCENT_BLUE;
+          ctx.lineWidth = 1;
+          ctx.beginPath();
+          ctx.moveTo(px + 60, py + 125);
+          ctx.lineTo(px + pageW - 60, py + 125);
+          ctx.stroke();
+
+          // Academic outline sections
+          const sections = [
+            "BAB I · PENDAHULUAN (Latar Belakang, Identifikasi, Rumusan, Tujuan)",
+            "BAB II · KAJIAN TEORI (Tinjauan Pustaka & Kerangka Berpikir)",
+            "BAB III · METODOLOGI PENELITIAN (Prosedur, Instrumen, Analisis)",
+            "BAB IV · HASIL PENELITIAN DAN PEMBAHASAN (Data & Pengujian)",
+            "BAB V · PENUTUP (Kesimpulan Komprehensif & Saran Akademik)"
+          ];
+
+          sections.forEach((sec, idx) => {
+            const sy = py + 165 + idx * 45;
+            ctx.font = "500 11px Inter, sans-serif";
+            ctx.fillStyle = idx === 0 ? COLOR_TEXT_PRIMARY : COLOR_TEXT_MUTED;
+            ctx.textAlign = "left";
+            ctx.fillText(sec, px + 60, sy);
+          });
         }
       }
 
       // =========================================================================
-      // SCENE 3: BEATS 8 - 12 (4.0s - 6.0s): 2D-TO-3D ISOMETRIC CHAPTER UNFOLDING
+      // SCENE 3: BEATS 8 - 12 (4.0s - 6.0s): 3D ISOMETRIC CHAPTER CASCADE
       // =========================================================================
       else if (t < 6.0) {
         const localT = t - 4.0;
         const p = localT / 2.0;
-        const rotY = lerp(0, 0.78, easeInOutCubic(p));
-        const rotX = lerp(0, 0.52, easeInOutCubic(p));
+        const rotY = lerp(0, 0.75, easeInOutCubic(p));
+        const rotX = lerp(0, 0.50, easeInOutCubic(p));
 
         ctx.save();
         ctx.translate(cx, cy);
 
         const chapters = [
-          { name: "BAB I : PENDAHULUAN", color: COLOR_WHITE, z: -120 },
-          { name: "BAB II : KAJIAN PUSTAKA", color: COLOR_BLUE, z: -40 },
-          { name: "BAB III : METODE PENELITIAN", color: COLOR_VIOLET, z: 40 },
-          { name: "BAB IV : ANALISIS & DESAIN", color: COLOR_BLUE, z: 120 },
-          { name: "BAB V : PENUTUP", color: COLOR_WHITE, z: 200 }
+          { code: "BAB I", name: "PENDAHULUAN", sub: "Latar Belakang & Perumusan Masalah", color: COLOR_TEXT_PRIMARY, z: -130 },
+          { code: "BAB II", name: "KAJIAN PUSTAKA", sub: "Landasan Teori & Tinjauan Riset Terdahulu", color: COLOR_ACCENT_BLUE, z: -50 },
+          { code: "BAB III", name: "METODE PENELITIAN", sub: "Desain Prosedur & Pengumpulan Data", color: COLOR_ACCENT_PURPLE, z: 30 },
+          { code: "BAB IV", name: "HASIL & PEMBAHASAN", sub: "Komparasi Kuantitatif & Verifikasi Temuan", color: COLOR_ACCENT_BLUE, z: 110 },
+          { code: "BAB V", name: "PENUTUP & SARAN", sub: "Sintesis Akhir & Rekomendasi Terapan", color: COLOR_TEXT_PRIMARY, z: 190 }
         ];
 
         chapters.forEach((chap) => {
           ctx.save();
           const zOffset = chap.z * easeOutCubic(clamp(localT / 1.2, 0, 1));
 
+          // Isometric 2.5D skew projection
           ctx.transform(
-            Math.cos(rotY), Math.sin(rotX) * 0.4,
-            -Math.sin(rotY) * 0.4, Math.cos(rotX),
-            0, zOffset * 0.8
+            Math.cos(rotY), Math.sin(rotX) * 0.38,
+            -Math.sin(rotY) * 0.38, Math.cos(rotX),
+            0, zOffset * 0.78
           );
 
-          const w = 480;
+          const w = 520;
           const h = 76;
-          ctx.fillStyle = "#0F172A";
+          ctx.fillStyle = "rgba(15, 20, 32, 0.95)";
           ctx.strokeStyle = chap.color;
-          ctx.lineWidth = 1.8;
+          ctx.lineWidth = 1.5;
           ctx.fillRect(-w / 2, -h / 2, w, h);
           ctx.strokeRect(-w / 2, -h / 2, w, h);
 
-          ctx.font = "800 17px Inter, -apple-system, sans-serif";
+          // Chapter Code Badge
+          ctx.font = "800 13px Inter, sans-serif";
           ctx.fillStyle = chap.color;
           ctx.textAlign = "left";
           ctx.textBaseline = "middle";
-          ctx.fillText(chap.name, -w / 2 + 30, 0);
+          ctx.fillText(chap.code, -w / 2 + 28, -10);
+
+          // Chapter Name
+          ctx.font = "700 15px Inter, sans-serif";
+          ctx.fillStyle = COLOR_TEXT_PRIMARY;
+          ctx.fillText(chap.name, -w / 2 + 90, -10);
+
+          // Subtitle
+          ctx.font = "500 11px Inter, sans-serif";
+          ctx.fillStyle = COLOR_TEXT_MUTED;
+          ctx.fillText(chap.sub, -w / 2 + 28, 16);
 
           ctx.restore();
         });
 
         ctx.restore();
 
-        ctx.font = "700 15px monospace";
-        ctx.fillStyle = COLOR_MUTED;
+        ctx.font = "600 14px Inter, sans-serif";
+        ctx.fillStyle = COLOR_TEXT_MUTED;
         ctx.textAlign = "center";
-        ctx.fillText("ISOMETRIC STRUCTURAL DECOMPOSITION // BAB I - V", cx, 980);
+        ctx.fillText("STRUKTUR NASKAH LENGKAP · KETERLACAKAN BAB I HINGGA V", cx, 980);
       }
 
       // =========================================================================
-      // SCENE 4: BEATS 12 - 16 (6.0s - 8.0s): DATA & UI MATRIX TELEMETRY
+      // SCENE 4: BEATS 12 - 16 (6.0s - 8.0s): RIGOROUS ACADEMIC STANDARDS MATRIX
       // =========================================================================
       else if (t < 8.0) {
         const localT = t - 6.0;
         const p = clamp(localT / 2.0, 0, 1);
 
-        const cardW = 920;
+        const cardW = 960;
         const cardH = 500;
-        ctx.fillStyle = "#0B1120";
-        ctx.strokeStyle = "#1E293B";
+        const px = cx - cardW / 2;
+        const py = cy - cardH / 2;
+
+        ctx.fillStyle = "#0B0F19";
+        ctx.strokeStyle = COLOR_LINE_STRONG;
         ctx.lineWidth = 1.5;
-        ctx.strokeRect(cx - cardW / 2, cy - cardH / 2, cardW, cardH);
-        ctx.fillRect(cx - cardW / 2, cy - cardH / 2, cardW, cardH);
+        ctx.strokeRect(px, py, cardW, cardH);
+        ctx.fillRect(px, py, cardW, cardH);
 
-        // Header bar
-        ctx.fillStyle = "#162032";
-        ctx.fillRect(cx - cardW / 2, cy - cardH / 2, cardW, 52);
+        // Header
+        ctx.fillStyle = "#121926";
+        ctx.fillRect(px, py, cardW, 56);
 
-        ctx.font = "800 15px monospace";
-        ctx.fillStyle = COLOR_WHITE;
+        ctx.font = "800 15px Inter, sans-serif";
+        ctx.fillStyle = COLOR_TEXT_PRIMARY;
         ctx.textAlign = "left";
-        ctx.fillText("DIKTI & CAMPUS GUIDELINE ENGINE // REAL-TIME VALIDATION", cx - cardW / 2 + 25, cy - cardH / 2 + 32);
+        ctx.fillText("STANDAR REGULASI & KEPATUHAN PEDOMAN AKADEMIK", px + 30, py + 34);
 
-        const metrics = [
-          { label: "DIKTI STANDARDS COMPLIANCE", val: clamp(Math.round(p * 100), 0, 100) + "%", color: COLOR_WHITE },
-          { label: "STRUCTURAL CHAPTER SYMMETRY", val: "5/5 VERIFIED", color: COLOR_BLUE },
-          { label: "CITATION INTEGRITY (APA / IEEE)", val: "100% AUDITED", color: COLOR_VIOLET },
-          { label: "UNP FT 2025 REGULATORY PROTOCOL", val: "LOCKED ACTIVE", color: "#10B981" }
+        // Left Column: Guidelines
+        const standards = [
+          { label: "Buku Pedoman Skripsi & Tugas Akhir", spec: "Format Baku Dikti Kemendikbudristek RI" },
+          { label: "Pedoman PKL Fakultas Teknik UNP 2025", spec: "Sistematika 3 Bab Industri & Format Lampiran" },
+          { label: "Standar Sitasi Internasional", spec: "APA 7th Edition / IEEE Transactions" },
+          { label: "Format Margin & Tipografi Naskah", spec: "A4 (4cm Kiri/Atas, 3cm Kanan/Bawah), Times/Inter" }
         ];
 
-        metrics.forEach((m, i) => {
-          const y = cy - cardH / 2 + 105 + i * 85;
-          ctx.font = "700 13px monospace";
-          ctx.fillStyle = COLOR_MUTED;
-          ctx.fillText(m.label, cx - cardW / 2 + 40, y);
-
-          const barW = 540;
-          ctx.fillStyle = "#1E293B";
-          ctx.fillRect(cx - cardW / 2 + 40, y + 12, barW, 9);
-
-          const fillW = barW * clamp(p * 1.2, 0, 1);
-          ctx.fillStyle = m.color;
-          ctx.fillRect(cx - cardW / 2 + 40, y + 12, fillW, 9);
-
-          ctx.font = "800 18px monospace";
-          ctx.textAlign = "right";
-          ctx.fillText(m.val, cx + cardW / 2 - 40, y + 21);
+        standards.forEach((std, i) => {
+          const sy = py + 105 + i * 95;
+          ctx.font = "700 14px Inter, sans-serif";
+          ctx.fillStyle = COLOR_TEXT_PRIMARY;
           ctx.textAlign = "left";
+          ctx.fillText(std.label, px + 35, sy);
+
+          ctx.font = "500 12px Inter, sans-serif";
+          ctx.fillStyle = COLOR_TEXT_MUTED;
+          ctx.fillText(std.spec, px + 35, sy + 22);
+
+          // Verification indicator
+          const isVerified = p > (i * 0.25);
+          ctx.font = "700 12px Inter, sans-serif";
+          ctx.fillStyle = isVerified ? "#10B981" : COLOR_TEXT_DIM;
+          ctx.textAlign = "right";
+          ctx.fillText(isVerified ? "✓ TERVERIFIKASI" : "MEMERIKSA...", px + cardW - 40, sy + 12);
         });
       }
 
       // =========================================================================
-      // SCENE 5 & 6: BEATS 16 - 24 (8.0s - 12.0s): 3D SPHERE STAGE
-      // Background and rotating research titles (The 3D WebGL Orb is mounted over canvas)
+      // SCENE 5 & 6: BEATS 16 - 24 (8.0s - 12.0s): THE SYNTHESIS CORE (3D WEBGL ORB)
       // =========================================================================
       else if (t < 12.0) {
         const localT = t - 8.0;
 
-        // Subtle ambient perspective line
-        ctx.strokeStyle = "rgba(255, 255, 255, 0.06)";
-        ctx.lineWidth = 1;
-        ctx.beginPath();
-        ctx.moveTo(0, cy + 180);
-        ctx.lineTo(width, cy + 180);
-        ctx.stroke();
+        // Editorial publication types sequence advancing every 1 second
+        const publications = [
+          { title: "PROPOSAL SKRIPSI & TUGAS AKHIR", note: "Struktur Komprehensif BAB I – V Terintegrasi" },
+          { title: "LAPORAN PRAKTIK KERJA LAPANGAN", note: "Kepatuhan Penuh Pedoman Resmi FT UNP 2025" },
+          { title: "PROPOSAL TESIS & ARTIKEL RISET", note: "Sintesis Literatur Berbasis Bukti & Matriks Novelty" },
+          { title: "12 AGEN KOGNITIF MULTI-DISIPLIN", note: "Penyusunan Naskah Utuh, Konsistensi Logika & Ekspor DOCX" }
+        ];
 
-        // High-speed academic keyword rotation synchronized on beats
-        const words = ["SKRIPSI & TUGAS AKHIR", "TESIS & DISERTASI", "LAPORAN PKL UNP 2025", "JURNAL ILMIAH BEREPUTASI"];
-        const wordIdx = Math.floor(localT * 1.0) % words.length;
+        const pubIdx = Math.min(publications.length - 1, Math.floor(localT * 1.0));
+        const pub = publications[pubIdx];
 
-        ctx.font = "900 44px Inter, -apple-system, sans-serif";
-        ctx.fillStyle = COLOR_WHITE;
+        ctx.font = "800 38px Inter, -apple-system, sans-serif";
+        ctx.letterSpacing = "-0.03em";
+        ctx.fillStyle = COLOR_TEXT_PRIMARY;
         ctx.textAlign = "center";
-        ctx.fillText(words[wordIdx], cx, 870);
+        ctx.fillText(pub.title, cx, 875);
 
-        ctx.font = "700 15px monospace";
-        ctx.fillStyle = COLOR_BLUE;
-        ctx.fillText("3D VOLUMETRIC SYNTHESIS // READY FOR COMPOSITION", cx, 920);
+        ctx.font = "500 14px Inter, sans-serif";
+        ctx.fillStyle = COLOR_ACCENT_BLUE;
+        ctx.fillText(pub.note, cx, 915);
       }
 
       // =========================================================================
-      // SCENE 7: BEATS 24 - 28 (12.0s - 14.0s): END TITLE
+      // SCENE 7: BEATS 24 - 28 (12.0s - 14.0s): BRAND SEAL & IDENTITY LOCKUP
       // =========================================================================
       else if (t < 14.0) {
         const localT = t - 12.0;
         const p = clamp(localT / 1.0, 0, 1);
         const f = easeOutExpo(p);
 
-        // 4-pointed Star Emblem
+        // 4-pointed Star Mark with precise geometry
         ctx.save();
-        ctx.translate(cx, cy - 90);
+        ctx.translate(cx, cy - 85);
         ctx.scale(f, f);
-        ctx.fillStyle = COLOR_WHITE;
+        ctx.fillStyle = COLOR_TEXT_PRIMARY;
         ctx.beginPath();
-        ctx.moveTo(0, -32);
-        ctx.quadraticCurveTo(0, 0, 32, 0);
-        ctx.quadraticCurveTo(0, 0, 0, 32);
-        ctx.quadraticCurveTo(0, 0, -32, 0);
-        ctx.quadraticCurveTo(0, 0, 0, -32);
+        ctx.moveTo(0, -34);
+        ctx.quadraticCurveTo(0, 0, 34, 0);
+        ctx.quadraticCurveTo(0, 0, 0, 34);
+        ctx.quadraticCurveTo(0, 0, -34, 0);
+        ctx.quadraticCurveTo(0, 0, 0, -34);
         ctx.fill();
         ctx.restore();
 
-        // Main Title
-        ctx.font = "900 86px Inter, -apple-system, sans-serif";
-        ctx.fillStyle = COLOR_WHITE;
+        // Main Title (Prestigious lowercase branding)
+        ctx.font = "800 68px Inter, -apple-system, sans-serif";
+        ctx.letterSpacing = "-0.04em";
+        ctx.fillStyle = COLOR_TEXT_PRIMARY;
         ctx.textAlign = "center";
         ctx.textBaseline = "middle";
-        ctx.fillText("ACADEMIC AGENT STUDIO", cx, cy + 20);
+        ctx.fillText("academic agent studio", cx, cy + 24);
 
         // Subtitle
-        ctx.font = "700 22px monospace";
-        ctx.fillStyle = COLOR_BLUE;
-        ctx.fillText("THE AI RESEARCH & MANUSCRIPT ENGINE", cx, cy + 96);
+        ctx.font = "500 15px Inter, sans-serif";
+        ctx.fillStyle = COLOR_TEXT_MUTED;
+        ctx.fillText("THE COGNITIVE RESEARCH & MANUSCRIPT ENGINE FOR INDONESIAN ACADEMIA", cx, cy + 86);
 
-        // Badges
-        const badges = ["FT UNP 2025 COMPLIANT", "DIKTI STANDARDS", "12 COGNITIVE MODES", "DOCX / PPTX EXPORT"];
-        const totalW = badges.length * 220;
-        const startX = cx - totalW / 2 + 110;
+        // Institutional Badges
+        const markers = [
+          "STANDAR DIKTI KEMENDIKBUD",
+          "PEDOMAN FT UNP 2025",
+          "12 AGEN KOGNITIF",
+          "EKSPOR RESMI DOCX"
+        ];
 
-        badges.forEach((b, i) => {
-          const bx = startX + i * 220;
-          const by = cy + 180;
-          ctx.strokeStyle = "#334155";
-          ctx.lineWidth = 1.5;
-          ctx.strokeRect(bx - 100, by - 16, 200, 32);
+        const totalW = markers.length * 230;
+        const startX = cx - totalW / 2 + 115;
 
-          ctx.font = "700 11px monospace";
-          ctx.fillStyle = COLOR_MUTED;
-          ctx.fillText(b, bx, by + 4);
+        markers.forEach((m, i) => {
+          const bx = startX + i * 230;
+          const by = cy + 155;
+          ctx.strokeStyle = COLOR_LINE_STRONG;
+          ctx.lineWidth = 1;
+          ctx.strokeRect(bx - 105, by - 16, 210, 32);
+
+          ctx.font = "700 11px Inter, sans-serif";
+          ctx.fillStyle = COLOR_TEXT_MUTED;
+          ctx.fillText(m, bx, by + 4);
         });
       }
 
       // =========================================================================
-      // SCENE 8: BEATS 28 - 30 (14.0s - 15.0s): SEAMLESS POINT COLLAPSE
+      // SCENE 8: BEATS 28 - 30 (14.0s - 15.0s): SEAMLESS DISSOLVE
       // =========================================================================
       else {
         const localT = t - 14.0;
         const p = clamp(localT / 1.0, 0, 1);
         const f = easeInOutCubic(p);
-        const radius = lerp(36, 3, f);
+        const radius = lerp(34, 2, f);
 
-        ctx.fillStyle = COLOR_WHITE;
+        ctx.fillStyle = COLOR_TEXT_PRIMARY;
         ctx.beginPath();
         ctx.arc(cx, cy, radius, 0, Math.PI * 2);
         ctx.fill();
-
-        const lineLen = lerp(80, 0, f);
-        ctx.strokeStyle = COLOR_BLUE;
-        ctx.lineWidth = 2;
-        ctx.beginPath();
-        ctx.moveTo(cx - lineLen, cy); ctx.lineTo(cx + lineLen, cy);
-        ctx.moveTo(cx, cy - lineLen); ctx.lineTo(cx, cy + lineLen);
-        ctx.stroke();
       }
 
       ctx.restore();
@@ -606,7 +698,7 @@ export const FirstTimeLoadingScreen: React.FC<FirstTimeLoadingScreenProps> = ({
 
   // If storage check pending, show clean dark void
   if (!hasCheckedStorage) {
-    return <div className="fixed inset-0 z-50 bg-[#0A0D14]" />;
+    return <div className="fixed inset-0 z-50 bg-[#08090D]" />;
   }
 
   // IF REFRESH / SUBSEQUENT VISIT: Show simple, minimal ScreenLoader
@@ -630,28 +722,27 @@ export const FirstTimeLoadingScreen: React.FC<FirstTimeLoadingScreenProps> = ({
     }
   }
 
-  // 100% CLEAN, IMMERSIVE, DISTRACTION-FREE MOTION SCREEN (NO DURATION, NO BADGES, NO BUTTONS)
   return (
     <div 
       onClick={handleFinishShowreel}
-      className={`fixed inset-0 z-50 flex items-center justify-center bg-[#0A0D14] transition-opacity duration-500 overflow-hidden select-none cursor-pointer ${
+      className={`fixed inset-0 z-50 flex items-center justify-center bg-[#08090D] transition-opacity duration-500 overflow-hidden select-none cursor-pointer ${
         isFadingOut ? "opacity-0 pointer-events-none" : "opacity-100"
       }`}
       title="Klik untuk langsung masuk"
     >
-      <div className="relative w-full h-full flex items-center justify-center bg-[#0A0D14] overflow-hidden">
-        {/* Real-time 60 FPS HTML5 Canvas */}
+      <div className="relative w-full h-full flex items-center justify-center bg-[#08090D] overflow-hidden">
+        {/* Real-time 60 FPS HTML5 Canvas (Pure Crafted Editorial Motion) */}
         <canvas
           ref={canvasRef}
           width={1920}
           height={1080}
-          className="w-full h-full object-contain bg-[#0A0D14]"
+          className="w-full h-full object-contain bg-[#08090D]"
         />
 
-        {/* Real Three.js 3D WebGL Holographic Glass Orb (Appears seamlessly at 8.0s - 12.0s) */}
+        {/* Real Three.js 3D WebGL Holographic Glass Orb (Beats 16 - 24 / 8.0s - 12.0s) */}
         {currentTimeSec >= 7.6 && currentTimeSec <= 12.4 && (
           <div 
-            className="absolute inset-0 flex items-center justify-center pointer-events-none transition-all duration-300"
+            className="absolute inset-0 flex items-center justify-center pointer-events-none transition-all duration-300 z-20"
             style={{
               opacity: orbOpacity,
               transform: `scale(${orbScale}) translateY(-35px)`
@@ -659,7 +750,7 @@ export const FirstTimeLoadingScreen: React.FC<FirstTimeLoadingScreenProps> = ({
           >
             <div className="relative w-64 h-64 sm:w-72 sm:h-72 md:w-80 md:h-80 lg:w-96 lg:h-96 flex items-center justify-center">
               {/* Colored Halo Glow Behind 3D Sphere */}
-              <div className="absolute w-56 h-56 sm:w-72 sm:h-72 md:w-84 md:h-84 rounded-full bg-gradient-to-tr from-[#60A5FA]/35 via-[#C084FC]/30 to-[#818CF8]/25 blur-3xl pointer-events-none" />
+              <div className="absolute w-56 h-56 sm:w-72 sm:h-72 md:w-84 md:h-84 rounded-full bg-gradient-to-tr from-[#60A5FA]/30 via-[#C084FC]/25 to-[#818CF8]/20 blur-3xl pointer-events-none" />
               {/* Authentic Three.js 3D Sphere */}
               <Hero3DOrb className="w-full h-full" />
               {/* Floor Shadow */}
