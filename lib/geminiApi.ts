@@ -4,10 +4,10 @@
  */
 
 export const GEMINI_MODELS = [
-  "gemini-3.5-flash-lite",
-  "gemini-3.8-flash",
-  "gemini-3.5-flash",
-  "gemini-flash-latest"
+  "gemini-2.5-flash",
+  "gemini-2.0-flash",
+  "gemini-1.5-flash",
+  "gemini-1.5-pro"
 ];
 
 export interface GeminiApiOptions {
@@ -15,18 +15,33 @@ export interface GeminiApiOptions {
   prompt: string;
   temperature?: number;
   maxOutputTokens?: number;
+  responseMimeType?: string;
+  timeoutMs?: number;
 }
 
 export async function callGeminiApi({
   apiKey,
   prompt,
   temperature = 0.7,
-  maxOutputTokens = 4096
+  maxOutputTokens = 4096,
+  responseMimeType,
+  timeoutMs = 30000
 }: GeminiApiOptions): Promise<{ text: string; model: string } | null> {
   if (!apiKey) return null;
 
   for (const model of GEMINI_MODELS) {
     try {
+      const controller = new AbortController();
+      const timer = setTimeout(() => controller.abort(), timeoutMs);
+
+      const generationConfig: Record<string, any> = {
+        temperature,
+        maxOutputTokens,
+      };
+      if (responseMimeType) {
+        generationConfig.responseMimeType = responseMimeType;
+      }
+
       const res = await fetch(
         `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`,
         {
@@ -34,13 +49,12 @@ export async function callGeminiApi({
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             contents: [{ parts: [{ text: prompt }] }],
-            generationConfig: {
-              temperature,
-              maxOutputTokens,
-            },
+            generationConfig,
           }),
+          signal: controller.signal
         }
       );
+      clearTimeout(timer);
 
       if (res.ok) {
         const data = await res.json();

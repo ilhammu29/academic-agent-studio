@@ -542,11 +542,12 @@ Jawablah dengan ringkas, tajam, bernas, berstandar akademik tinggi, tanpa klise 
     setQaReport(runAcademicQAPipeline(currentDoc));
   }, [currentDoc]);
 
-  // AI Refinement states
+  // AI Refinement & Expansion states
   const [refineKey, setRefineKey] = useState<string | null>(null);
   const [refineSectionTitle, setRefineSectionTitle] = useState<string | null>(null);
   const [refineContent, setRefineContent] = useState("");
   const [refineInstruction, setRefineInstruction] = useState("");
+  const [refineMode, setRefineMode] = useState<"expand" | "empirical" | "citations" | "refine">("expand");
   const [revisedPreview, setRevisedPreview] = useState<string | null>(null);
   const [isRefining, setIsRefining] = useState(false);
   const [refineError, setRefineError] = useState<string | null>(null);
@@ -647,7 +648,31 @@ Jawablah dengan ringkas, tajam, bernas, berstandar akademik tinggi, tanpa klise 
     setRefineKey(key);
     setRefineSectionTitle(title);
     setRefineContent(textToRefine || "");
-    setRefineInstruction("");
+    setRefineMode("refine");
+    setRefineInstruction("Tingkatkan formalitas bahasa akademik baku dan perjelas alur logika kausalitas.");
+    setRevisedPreview(null);
+    setRefineError(null);
+  };
+
+  const handleExpandWithAI = (
+    key: string,
+    title: string,
+    textToRefine: string,
+    mode: "expand" | "empirical" | "citations" | "refine" = "expand"
+  ) => {
+    setRefineKey(key);
+    setRefineSectionTitle(title);
+    setRefineContent(textToRefine || "");
+    setRefineMode(mode);
+    setRefineInstruction(
+      mode === "expand"
+        ? "Perluas sub-bab ini secara komprehensif dengan 4-6 paragraf analitis baru (+800 s.d. 1.200 kata) menggunakan First-Principles Thinking."
+        : mode === "empirical"
+        ? "Tambahkan bukti empiris, studi kasus nyata, dan kesenjangan operasional (gap analysis) di lapangan."
+        : mode === "citations"
+        ? "Perkaya landasan konseptual dengan sintesis teori primer dan sitasi jurnal internasional Scopus/Sinta."
+        : "Tingkatkan formalitas bahasa akademik baku dan perjelas alur logika kausalitas."
+    );
     setRevisedPreview(null);
     setRefineError(null);
   };
@@ -671,7 +696,8 @@ Jawablah dengan ringkas, tajam, bernas, berstandar akademik tinggi, tanpa klise 
         body: JSON.stringify({
           sectionTitle: refineSectionTitle,
           currentContent: refineContent,
-          instruction: refineInstruction
+          instruction: refineInstruction,
+          mode: refineMode
         })
       });
       const data = await res.json();
@@ -687,44 +713,116 @@ Jawablah dengan ringkas, tajam, bernas, berstandar akademik tinggi, tanpa klise 
     }
   };
 
-  const applyRefinedContent = (finalText: string) => {
+  const applyRefinedContent = (finalText: string, action: "append" | "replace" = "replace") => {
     if (!refineKey) return;
     const cleanText = stripDoubleAsterisks(finalText);
+    const isAppend = action === "append";
+
     setCurrentDoc(prev => {
       const updated = { ...prev };
       if (refineKey === "executiveSummary") {
-        updated.executiveSummary = cleanText;
+        updated.executiveSummary = isAppend 
+          ? (updated.executiveSummary ? updated.executiveSummary + "\n\n" + cleanText : cleanText)
+          : cleanText;
       } else if (refineKey === "bab1.latarBelakang") {
         const paras = cleanText.split("\n\n").map((p: string) => p.trim()).filter(Boolean);
-        updated.bab1 = { ...updated.bab1, latarBelakang: paras.length > 0 ? paras : [cleanText] };
+        updated.bab1 = { 
+          ...updated.bab1, 
+          latarBelakang: isAppend 
+            ? [...(updated.bab1?.latarBelakang || []), ...paras]
+            : (paras.length > 0 ? paras : [cleanText]) 
+        };
       } else if (refineKey === "bab1.rumusanMasalah") {
         const items = cleanText.split("\n").map((l: string) => l.replace(/^[\d\.\-\*\•\s]+/, "").trim()).filter(Boolean);
-        updated.bab1 = { ...updated.bab1, rumusanMasalah: items.length > 0 ? items : [cleanText] };
+        updated.bab1 = { 
+          ...updated.bab1, 
+          rumusanMasalah: isAppend 
+            ? [...(updated.bab1?.rumusanMasalah || []), ...items]
+            : (items.length > 0 ? items : [cleanText]) 
+        };
       } else if (refineKey === "bab1.batasanMasalah") {
         const items = cleanText.split("\n").map((l: string) => l.replace(/^[\d\.\-\*\•\s]+/, "").trim()).filter(Boolean);
-        updated.bab1 = { ...updated.bab1, batasanMasalah: items.length > 0 ? items : [cleanText] };
+        updated.bab1 = { 
+          ...updated.bab1, 
+          batasanMasalah: isAppend
+            ? [...(updated.bab1?.batasanMasalah || []), ...items]
+            : (items.length > 0 ? items : [cleanText]) 
+        };
       } else if (refineKey === "bab1.tujuanUmum") {
-        updated.bab1 = { ...updated.bab1, tujuanUmum: cleanText };
+        updated.bab1 = { 
+          ...updated.bab1, 
+          tujuanUmum: isAppend
+            ? (updated.bab1?.tujuanUmum ? updated.bab1.tujuanUmum + " " + cleanText : cleanText)
+            : cleanText 
+        };
       } else if (refineKey === "bab2.profilInstansi") {
-        updated.bab2 = { ...updated.bab2, profilInstansi: cleanText };
+        updated.bab2 = { 
+          ...updated.bab2, 
+          profilInstansi: isAppend
+            ? (updated.bab2?.profilInstansi ? updated.bab2.profilInstansi + "\n\n" + cleanText : cleanText)
+            : cleanText 
+        };
       } else if (refineKey === "bab2.conceptualFramework") {
-        updated.bab2 = { ...updated.bab2, conceptualFramework: cleanText };
+        updated.bab2 = { 
+          ...updated.bab2, 
+          conceptualFramework: isAppend
+            ? (updated.bab2?.conceptualFramework ? updated.bab2.conceptualFramework + "\n\n" + cleanText : cleanText)
+            : cleanText 
+        };
       } else if (refineKey === "bab3.metodePelaksanaan") {
-        updated.bab3 = { ...updated.bab3, metodePelaksanaan: cleanText };
+        updated.bab3 = { 
+          ...updated.bab3, 
+          metodePelaksanaan: isAppend
+            ? (updated.bab3?.metodePelaksanaan ? updated.bab3.metodePelaksanaan + "\n\n" + cleanText : cleanText)
+            : cleanText 
+        };
       } else if (refineKey === "bab3.populationSample") {
-        updated.bab3 = { ...updated.bab3, populationSample: cleanText };
+        updated.bab3 = { 
+          ...updated.bab3, 
+          populationSample: isAppend
+            ? (updated.bab3?.populationSample ? updated.bab3.populationSample + "\n\n" + cleanText : cleanText)
+            : cleanText 
+        };
       } else if (refineKey === "bab3.ethicalConsiderations") {
-        updated.bab3 = { ...updated.bab3, ethicalConsiderations: cleanText };
+        updated.bab3 = { 
+          ...updated.bab3, 
+          ethicalConsiderations: isAppend
+            ? (updated.bab3?.ethicalConsiderations ? updated.bab3.ethicalConsiderations + "\n\n" + cleanText : cleanText)
+            : cleanText 
+        };
       } else if (refineKey === "bab4.penutup") {
-        updated.bab4 = { ...updated.bab4, penutup: cleanText };
+        updated.bab4 = { 
+          ...updated.bab4, 
+          penutup: isAppend
+            ? (updated.bab4?.penutup ? updated.bab4.penutup + "\n\n" + cleanText : cleanText)
+            : cleanText 
+        };
       } else if (refineKey === "bab4.disseminationPlan") {
-        updated.bab4 = { ...updated.bab4, disseminationPlan: cleanText };
+        updated.bab4 = { 
+          ...updated.bab4, 
+          disseminationPlan: isAppend
+            ? (updated.bab4?.disseminationPlan ? updated.bab4.disseminationPlan + "\n\n" + cleanText : cleanText)
+            : cleanText 
+        };
+      } else if (refineKey === "bab5.kesimpulanUsulan") {
+        const items = cleanText.split("\n").map((l: string) => l.replace(/^[\d\.\-\*\•\s]+/, "").trim()).filter(Boolean);
+        if (updated.bab5) {
+          updated.bab5 = {
+            ...updated.bab5,
+            kesimpulanUsulan: isAppend
+              ? [...(updated.bab5.kesimpulanUsulan || []), ...items]
+              : (items.length > 0 ? items : [cleanText])
+          };
+        }
       }
       pushToHistory(updated);
       return updated;
     });
 
-    setToastMessage(`Bagian "${refineSectionTitle}" berhasil diperbarui ke dalam naskah!`);
+    setToastMessage(isAppend
+      ? `Bagian "${refineSectionTitle}" berhasil diperluas (+Paragraf baru ditambahkan ke naskah)!`
+      : `Bagian "${refineSectionTitle}" berhasil diperbarui!`
+    );
     setTimeout(() => setToastMessage(null), 3500);
     closeRefineModal();
   };
@@ -2853,14 +2951,25 @@ NIP / NIK.
                     <h3 className="text-sm font-semibold text-[#0F172A] dark:text-[#F3F6FC] print:text-black font-serif">
                       A. Latar Belakang
                     </h3>
-                    <button
-                      type="button"
-                      onClick={() => handleRefineWithAI("bab1.latarBelakang", "A. Latar Belakang", currentDoc.bab1.latarBelakang.join("\n\n"))}
-                      className="no-print opacity-70 hover:opacity-100 text-[11px] font-mono text-[#64748B] hover:text-[#7C9CFF] dark:text-[#A4B1C7] dark:hover:text-[#7C9CFF] bg-white dark:bg-[#172033] px-2 py-0.5 rounded border border-[#E2E8F0] dark:border-[#253149] hover:border-[#7C9CFF] flex items-center gap-1 cursor-pointer transition-all shadow-2xs"
-                    >
-                      <Sparkles className="w-3 h-3 text-[#7C9CFF]" />
-                      <span>Revisi AI</span>
-                    </button>
+                    <div className="flex items-center gap-1.5 no-print">
+                      <button
+                        type="button"
+                        onClick={() => handleExpandWithAI("bab1.latarBelakang", "A. Latar Belakang", currentDoc.bab1.latarBelakang.join("\n\n"), "expand")}
+                        className="text-[11px] font-mono text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-950/40 hover:bg-blue-100 dark:hover:bg-blue-900/60 px-2.5 py-0.5 rounded border border-blue-200 dark:border-blue-900 flex items-center gap-1 cursor-pointer transition-all shadow-2xs font-medium"
+                        title="Perluas sub-bab ini (+4-6 Paragraf Baru / +1.000 Kata)"
+                      >
+                        <Plus className="w-3 h-3 text-blue-600 dark:text-blue-400" />
+                        <span>✨ Perluas (+1.000 Kata)</span>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => handleRefineWithAI("bab1.latarBelakang", "A. Latar Belakang", currentDoc.bab1.latarBelakang.join("\n\n"))}
+                        className="no-print opacity-70 hover:opacity-100 text-[11px] font-mono text-[#64748B] hover:text-[#7C9CFF] dark:text-[#A4B1C7] dark:hover:text-[#7C9CFF] bg-white dark:bg-[#172033] px-2 py-0.5 rounded border border-[#E2E8F0] dark:border-[#253149] hover:border-[#7C9CFF] flex items-center gap-1 cursor-pointer transition-all shadow-2xs"
+                      >
+                        <Sparkles className="w-3 h-3 text-[#7C9CFF]" />
+                        <span>Revisi AI</span>
+                      </button>
+                    </div>
                   </div>
                   {currentDoc.bab1.latarBelakang.map((para, i) => (
                     <p key={i} className="indent-6">{para}</p>
@@ -2907,14 +3016,25 @@ NIP / NIK.
                     <h3 className="text-sm font-semibold text-[#0F172A] dark:text-[#F3F6FC] print:text-black font-serif">
                       {getSectionHeading(1, 0, "Latar Belakang Masalah", currentDoc.campusGuideline?.headingStyle)}
                     </h3>
-                    <button
-                      type="button"
-                      onClick={() => handleRefineWithAI("bab1.latarBelakang", "1.1 Latar Belakang Masalah", currentDoc.bab1.latarBelakang.join("\n\n"))}
-                      className="no-print opacity-70 hover:opacity-100 text-[11px] font-mono text-[#64748B] hover:text-[#7C9CFF] dark:text-[#A4B1C7] dark:hover:text-[#7C9CFF] bg-white dark:bg-[#172033] px-2 py-0.5 rounded border border-[#E2E8F0] dark:border-[#253149] hover:border-[#7C9CFF] flex items-center gap-1 cursor-pointer transition-all shadow-2xs"
-                    >
-                      <Sparkles className="w-3 h-3 text-[#7C9CFF]" />
-                      <span>Revisi AI</span>
-                    </button>
+                    <div className="flex items-center gap-1.5 no-print">
+                      <button
+                        type="button"
+                        onClick={() => handleExpandWithAI("bab1.latarBelakang", "1.1 Latar Belakang Masalah", currentDoc.bab1.latarBelakang.join("\n\n"), "expand")}
+                        className="text-[11px] font-mono text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-950/40 hover:bg-blue-100 dark:hover:bg-blue-900/60 px-2.5 py-0.5 rounded border border-blue-200 dark:border-blue-900 flex items-center gap-1 cursor-pointer transition-all shadow-2xs font-medium"
+                        title="Perluas sub-bab ini (+4-6 Paragraf Baru / +1.000 Kata)"
+                      >
+                        <Plus className="w-3 h-3 text-blue-600 dark:text-blue-400" />
+                        <span>✨ Perluas (+1.000 Kata)</span>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => handleRefineWithAI("bab1.latarBelakang", "1.1 Latar Belakang Masalah", currentDoc.bab1.latarBelakang.join("\n\n"))}
+                        className="no-print opacity-70 hover:opacity-100 text-[11px] font-mono text-[#64748B] hover:text-[#7C9CFF] dark:text-[#A4B1C7] dark:hover:text-[#7C9CFF] bg-white dark:bg-[#172033] px-2 py-0.5 rounded border border-[#E2E8F0] dark:border-[#253149] hover:border-[#7C9CFF] flex items-center gap-1 cursor-pointer transition-all shadow-2xs"
+                      >
+                        <Sparkles className="w-3 h-3 text-[#7C9CFF]" />
+                        <span>Revisi AI</span>
+                      </button>
+                    </div>
                   </div>
                   {currentDoc.bab1.latarBelakang.map((para, i) => (
                     <p key={i} className="indent-6">{para}</p>
@@ -2924,14 +3044,25 @@ NIP / NIK.
                     <h3 className="text-sm font-semibold text-[#0F172A] dark:text-[#F3F6FC] print:text-black font-serif">
                       {getSectionHeading(1, 1, "Rumusan Masalah", currentDoc.campusGuideline?.headingStyle)}
                     </h3>
-                    <button
-                      type="button"
-                      onClick={() => handleRefineWithAI("bab1.rumusanMasalah", "1.2 Rumusan Masalah", currentDoc.bab1.rumusanMasalah.join("\n"))}
-                      className="no-print opacity-70 hover:opacity-100 text-[11px] font-mono text-[#64748B] hover:text-[#7C9CFF] dark:text-[#A4B1C7] dark:hover:text-[#7C9CFF] bg-white dark:bg-[#172033] px-2 py-0.5 rounded border border-[#E2E8F0] dark:border-[#253149] hover:border-[#7C9CFF] flex items-center gap-1 cursor-pointer transition-all shadow-2xs"
-                    >
-                      <Sparkles className="w-3 h-3 text-[#7C9CFF]" />
-                      <span>Revisi AI</span>
-                    </button>
+                    <div className="flex items-center gap-1.5 no-print">
+                      <button
+                        type="button"
+                        onClick={() => handleExpandWithAI("bab1.rumusanMasalah", "1.2 Rumusan Masalah", currentDoc.bab1.rumusanMasalah.join("\n"), "expand")}
+                        className="text-[11px] font-mono text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-950/40 hover:bg-blue-100 dark:hover:bg-blue-900/60 px-2.5 py-0.5 rounded border border-blue-200 dark:border-blue-900 flex items-center gap-1 cursor-pointer transition-all shadow-2xs font-medium"
+                        title="Perluas rumusan masalah (+Butir Analitis Baru)"
+                      >
+                        <Plus className="w-3 h-3 text-blue-600 dark:text-blue-400" />
+                        <span>✨ Perluas Rumusan</span>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => handleRefineWithAI("bab1.rumusanMasalah", "1.2 Rumusan Masalah", currentDoc.bab1.rumusanMasalah.join("\n"))}
+                        className="no-print opacity-70 hover:opacity-100 text-[11px] font-mono text-[#64748B] hover:text-[#7C9CFF] dark:text-[#A4B1C7] dark:hover:text-[#7C9CFF] bg-white dark:bg-[#172033] px-2 py-0.5 rounded border border-[#E2E8F0] dark:border-[#253149] hover:border-[#7C9CFF] flex items-center gap-1 cursor-pointer transition-all shadow-2xs"
+                      >
+                        <Sparkles className="w-3 h-3 text-[#7C9CFF]" />
+                        <span>Revisi AI</span>
+                      </button>
+                    </div>
                   </div>
                   <ol className="list-decimal pl-6 space-y-1.5">
                     {currentDoc.bab1.rumusanMasalah.map((r, i) => (
@@ -3064,14 +3195,25 @@ NIP / NIK.
                     <h3 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100 print:text-black font-serif">
                       A. Latar Belakang Pemilihan Topik
                     </h3>
-                    <button
-                      type="button"
-                      onClick={() => handleRefineWithAI("bab2.profilInstansi", "A. Latar Belakang Pemilihan Topik", currentDoc.bab2.profilInstansi)}
-                      className="no-print text-[11px] font-mono text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-100 bg-zinc-100 dark:bg-zinc-900 px-2 py-0.5 rounded border border-zinc-200 dark:border-zinc-800 flex items-center gap-1 cursor-pointer transition-colors shadow-xs"
-                    >
-                      <Sparkles className="w-3 h-3 text-zinc-500 dark:text-zinc-400" />
-                      <span>Revisi AI</span>
-                    </button>
+                    <div className="flex items-center gap-1.5 no-print">
+                      <button
+                        type="button"
+                        onClick={() => handleExpandWithAI("bab2.profilInstansi", "A. Latar Belakang Pemilihan Topik", currentDoc.bab2.profilInstansi, "expand")}
+                        className="text-[11px] font-mono text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-950/40 hover:bg-blue-100 dark:hover:bg-blue-900/60 px-2.5 py-0.5 rounded border border-blue-200 dark:border-blue-900 flex items-center gap-1 cursor-pointer transition-all shadow-2xs font-medium"
+                        title="Perluas sub-bab ini (+4-6 Paragraf Baru / +1.000 Kata)"
+                      >
+                        <Plus className="w-3 h-3 text-blue-600 dark:text-blue-400" />
+                        <span>✨ Perluas (+1.000 Kata)</span>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => handleRefineWithAI("bab2.profilInstansi", "A. Latar Belakang Pemilihan Topik", currentDoc.bab2.profilInstansi)}
+                        className="no-print text-[11px] font-mono text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-100 bg-zinc-100 dark:bg-zinc-900 px-2 py-0.5 rounded border border-zinc-200 dark:border-zinc-800 flex items-center gap-1 cursor-pointer transition-colors shadow-xs"
+                      >
+                        <Sparkles className="w-3 h-3 text-zinc-500 dark:text-zinc-400" />
+                        <span>Revisi AI</span>
+                      </button>
+                    </div>
                   </div>
                   <p className="indent-6">{currentDoc.bab2.profilInstansi?.replace(/^A\.\s*Latar Belakang Pemilihan Topik:\s*/i, "") || `Alasan pemilihan topik "${currentDoc.title}" sebagai fokus kajian di ${currentDoc.targetEntity} adalah relevansi teknologi dan kebutuhan efisiensi operasional.`}</p>
 
@@ -3122,14 +3264,25 @@ NIP / NIK.
                     <h3 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100 print:text-black font-serif">
                       {getSectionHeading(2, 0, "Profil Instansi Mitra", currentDoc.campusGuideline?.headingStyle)}
                     </h3>
-                    <button
-                      type="button"
-                      onClick={() => handleRefineWithAI("bab2.profilInstansi", "2.1 Profil Instansi Mitra", currentDoc.bab2.profilInstansi)}
-                      className="no-print text-[11px] font-mono text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-100 bg-zinc-100 dark:bg-zinc-900 px-2 py-0.5 rounded border border-zinc-200 dark:border-zinc-800 flex items-center gap-1 cursor-pointer transition-colors shadow-xs"
-                    >
-                      <Sparkles className="w-3 h-3 text-zinc-500 dark:text-zinc-400" />
-                      <span>Revisi AI</span>
-                    </button>
+                    <div className="flex items-center gap-1.5 no-print">
+                      <button
+                        type="button"
+                        onClick={() => handleExpandWithAI("bab2.profilInstansi", "2.1 Profil Instansi Mitra", currentDoc.bab2.profilInstansi, "expand")}
+                        className="text-[11px] font-mono text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-950/40 hover:bg-blue-100 dark:hover:bg-blue-900/60 px-2.5 py-0.5 rounded border border-blue-200 dark:border-blue-900 flex items-center gap-1 cursor-pointer transition-all shadow-2xs font-medium"
+                        title="Perluas sub-bab ini (+4-6 Paragraf Baru / +1.000 Kata)"
+                      >
+                        <Plus className="w-3 h-3 text-blue-600 dark:text-blue-400" />
+                        <span>✨ Perluas (+1.000 Kata)</span>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => handleRefineWithAI("bab2.profilInstansi", "2.1 Profil Instansi Mitra", currentDoc.bab2.profilInstansi)}
+                        className="no-print text-[11px] font-mono text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-100 bg-zinc-100 dark:bg-zinc-900 px-2 py-0.5 rounded border border-zinc-200 dark:border-zinc-800 flex items-center gap-1 cursor-pointer transition-colors shadow-xs"
+                      >
+                        <Sparkles className="w-3 h-3 text-zinc-500 dark:text-zinc-400" />
+                        <span>Revisi AI</span>
+                      </button>
+                    </div>
                   </div>
                   <p className="indent-6">{currentDoc.bab2.profilInstansi}</p>
                   
@@ -3342,14 +3495,25 @@ NIP / NIK.
                     <h3 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100 print:text-black font-serif">
                       A. Kesimpulan
                     </h3>
-                    <button
-                      type="button"
-                      onClick={() => handleRefineWithAI("bab3.metodePelaksanaan", "A. Kesimpulan", currentDoc.bab3.metodePelaksanaan)}
-                      className="no-print text-[11px] font-mono text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-100 bg-zinc-100 dark:bg-zinc-900 px-2 py-0.5 rounded border border-zinc-200 dark:border-zinc-800 flex items-center gap-1 cursor-pointer transition-colors shadow-xs"
-                    >
-                      <Sparkles className="w-3 h-3 text-zinc-500 dark:text-zinc-400" />
-                      <span>Revisi AI</span>
-                    </button>
+                    <div className="flex items-center gap-1.5 no-print">
+                      <button
+                        type="button"
+                        onClick={() => handleExpandWithAI("bab3.metodePelaksanaan", "A. Kesimpulan", currentDoc.bab3.metodePelaksanaan, "expand")}
+                        className="text-[11px] font-mono text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-950/40 hover:bg-blue-100 dark:hover:bg-blue-900/60 px-2.5 py-0.5 rounded border border-blue-200 dark:border-blue-900 flex items-center gap-1 cursor-pointer transition-all shadow-2xs font-medium"
+                        title="Perluas sub-bab ini (+4-6 Paragraf Baru / +1.000 Kata)"
+                      >
+                        <Plus className="w-3 h-3 text-blue-600 dark:text-blue-400" />
+                        <span>✨ Perluas (+1.000 Kata)</span>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => handleRefineWithAI("bab3.metodePelaksanaan", "A. Kesimpulan", currentDoc.bab3.metodePelaksanaan)}
+                        className="no-print text-[11px] font-mono text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-100 bg-zinc-100 dark:bg-zinc-900 px-2 py-0.5 rounded border border-zinc-200 dark:border-zinc-800 flex items-center gap-1 cursor-pointer transition-colors shadow-xs"
+                      >
+                        <Sparkles className="w-3 h-3 text-zinc-500 dark:text-zinc-400" />
+                        <span>Revisi AI</span>
+                      </button>
+                    </div>
                   </div>
                   <p className="indent-6">{currentDoc.bab3.metodePelaksanaan.replace(/^A\.\s*Kesimpulan:\s*/i, "")}</p>
 
@@ -3369,14 +3533,25 @@ NIP / NIK.
                     <h3 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100 print:text-black font-serif">
                       {getSectionHeading(3, 0, "Metode Pelaksanaan Kerja", currentDoc.campusGuideline?.headingStyle)}
                     </h3>
-                    <button
-                      type="button"
-                      onClick={() => handleRefineWithAI("bab3.metodePelaksanaan", "3.1 Metode Pelaksanaan Kerja", currentDoc.bab3.metodePelaksanaan)}
-                      className="no-print text-[11px] font-mono text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-100 bg-zinc-100 dark:bg-zinc-900 px-2 py-0.5 rounded border border-zinc-200 dark:border-zinc-800 flex items-center gap-1 cursor-pointer transition-colors shadow-xs"
-                    >
-                      <Sparkles className="w-3 h-3 text-zinc-500 dark:text-zinc-400" />
-                      <span>Revisi AI</span>
-                    </button>
+                    <div className="flex items-center gap-1.5 no-print">
+                      <button
+                        type="button"
+                        onClick={() => handleExpandWithAI("bab3.metodePelaksanaan", "3.1 Metode Pelaksanaan Kerja", currentDoc.bab3.metodePelaksanaan, "expand")}
+                        className="text-[11px] font-mono text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-950/40 hover:bg-blue-100 dark:hover:bg-blue-900/60 px-2.5 py-0.5 rounded border border-blue-200 dark:border-blue-900 flex items-center gap-1 cursor-pointer transition-all shadow-2xs font-medium"
+                        title="Perluas sub-bab ini (+4-6 Paragraf Baru / +1.000 Kata)"
+                      >
+                        <Plus className="w-3 h-3 text-blue-600 dark:text-blue-400" />
+                        <span>✨ Perluas (+1.000 Kata)</span>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => handleRefineWithAI("bab3.metodePelaksanaan", "3.1 Metode Pelaksanaan Kerja", currentDoc.bab3.metodePelaksanaan)}
+                        className="no-print text-[11px] font-mono text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-100 bg-zinc-100 dark:bg-zinc-900 px-2 py-0.5 rounded border border-zinc-200 dark:border-zinc-800 flex items-center gap-1 cursor-pointer transition-colors shadow-xs"
+                      >
+                        <Sparkles className="w-3 h-3 text-zinc-500 dark:text-zinc-400" />
+                        <span>Revisi AI</span>
+                      </button>
+                    </div>
                   </div>
                   <p className="indent-6">{currentDoc.bab3.metodePelaksanaan}</p>
 
@@ -3408,14 +3583,25 @@ NIP / NIK.
                     <h3 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100 print:text-black font-serif">
                       {getSectionHeading(3, 0, "Jenis dan Desain Penelitian", currentDoc.campusGuideline?.headingStyle)}
                     </h3>
-                    <button
-                      type="button"
-                      onClick={() => handleRefineWithAI("bab3.metodePelaksanaan", "3.1 Jenis dan Desain Penelitian", currentDoc.bab3.metodePelaksanaan)}
-                      className="no-print text-[11px] font-mono text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-100 bg-zinc-100 dark:bg-zinc-900 px-2 py-0.5 rounded border border-zinc-200 dark:border-zinc-800 flex items-center gap-1 cursor-pointer transition-colors shadow-xs"
-                    >
-                      <Sparkles className="w-3 h-3 text-zinc-500 dark:text-zinc-400" />
-                      <span>Revisi AI</span>
-                    </button>
+                    <div className="flex items-center gap-1.5 no-print">
+                      <button
+                        type="button"
+                        onClick={() => handleExpandWithAI("bab3.metodePelaksanaan", "3.1 Jenis dan Desain Penelitian", currentDoc.bab3.metodePelaksanaan, "expand")}
+                        className="text-[11px] font-mono text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-950/40 hover:bg-blue-100 dark:hover:bg-blue-900/60 px-2.5 py-0.5 rounded border border-blue-200 dark:border-blue-900 flex items-center gap-1 cursor-pointer transition-all shadow-2xs font-medium"
+                        title="Perluas sub-bab ini (+4-6 Paragraf Baru / +1.000 Kata)"
+                      >
+                        <Plus className="w-3 h-3 text-blue-600 dark:text-blue-400" />
+                        <span>✨ Perluas (+1.000 Kata)</span>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => handleRefineWithAI("bab3.metodePelaksanaan", "3.1 Jenis dan Desain Penelitian", currentDoc.bab3.metodePelaksanaan)}
+                        className="no-print text-[11px] font-mono text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-100 bg-zinc-100 dark:bg-zinc-900 px-2 py-0.5 rounded border border-zinc-200 dark:border-zinc-800 flex items-center gap-1 cursor-pointer transition-colors shadow-xs"
+                      >
+                        <Sparkles className="w-3 h-3 text-zinc-500 dark:text-zinc-400" />
+                        <span>Revisi AI</span>
+                      </button>
+                    </div>
                   </div>
                   <p className="indent-6">{currentDoc.bab3.metodePelaksanaan}</p>
 
@@ -3624,14 +3810,25 @@ NIP / NIK.
               <h3 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100 print:text-black font-serif">
                 {getSectionHeading(4, currentDoc.category === "magang" ? 1 : 3, "Penutup Proposal", currentDoc.campusGuideline?.headingStyle)}
               </h3>
-              <button
-                type="button"
-                onClick={() => handleRefineWithAI("bab4.penutup", "Penutup Proposal", currentDoc.bab4.penutup)}
-                className="no-print text-[11px] font-mono text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-100 bg-zinc-100 dark:bg-zinc-900 px-2 py-0.5 rounded border border-zinc-200 dark:border-zinc-800 flex items-center gap-1 cursor-pointer transition-colors shadow-xs"
-              >
-                <Sparkles className="w-3 h-3 text-zinc-500 dark:text-zinc-400" />
-                <span>Revisi AI</span>
-              </button>
+              <div className="flex items-center gap-1.5 no-print">
+                <button
+                  type="button"
+                  onClick={() => handleExpandWithAI("bab4.penutup", "Penutup Proposal", currentDoc.bab4.penutup, "expand")}
+                  className="text-[11px] font-mono text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-950/40 hover:bg-blue-100 dark:hover:bg-blue-900/60 px-2.5 py-0.5 rounded border border-blue-200 dark:border-blue-900 flex items-center gap-1 cursor-pointer transition-all shadow-2xs font-medium"
+                  title="Perluas sub-bab ini (+4-6 Paragraf Baru / +1.000 Kata)"
+                >
+                  <Plus className="w-3 h-3 text-blue-600 dark:text-blue-400" />
+                  <span>✨ Perluas (+1.000 Kata)</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleRefineWithAI("bab4.penutup", "Penutup Proposal", currentDoc.bab4.penutup)}
+                  className="no-print text-[11px] font-mono text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-100 bg-zinc-100 dark:bg-zinc-900 px-2 py-0.5 rounded border border-zinc-200 dark:border-zinc-800 flex items-center gap-1 cursor-pointer transition-colors shadow-xs"
+                >
+                  <Sparkles className="w-3 h-3 text-zinc-500 dark:text-zinc-400" />
+                  <span>Revisi AI</span>
+                </button>
+              </div>
             </div>
             <p className="text-xs sm:text-sm text-zinc-800 dark:text-zinc-300 leading-relaxed indent-6 font-sans print:text-black">
               {currentDoc.bab4.penutup}
@@ -3680,9 +3877,30 @@ NIP / NIK.
             </div>
 
             <div className="space-y-4 text-xs sm:text-sm text-[#334155] dark:text-[#CBD5E1] leading-relaxed text-justify print:text-black">
-              <h3 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100 print:text-black font-serif pt-1">
-                {getSectionHeading(5, 0, "Kesimpulan Rencana Usulan", currentDoc.campusGuideline?.headingStyle)}
-              </h3>
+              <div className="flex items-center justify-between pt-1">
+                <h3 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100 print:text-black font-serif">
+                  {getSectionHeading(5, 0, "Kesimpulan Rencana Usulan", currentDoc.campusGuideline?.headingStyle)}
+                </h3>
+                <div className="flex items-center gap-1.5 no-print">
+                  <button
+                    type="button"
+                    onClick={() => handleExpandWithAI("bab5.kesimpulanUsulan", "5.1 Kesimpulan Rencana Usulan", (currentDoc.bab5?.kesimpulanUsulan || []).join("\n"), "expand")}
+                    className="text-[11px] font-mono text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-950/40 hover:bg-blue-100 dark:hover:bg-blue-900/60 px-2.5 py-0.5 rounded border border-blue-200 dark:border-blue-900 flex items-center gap-1 cursor-pointer transition-all shadow-2xs font-medium"
+                    title="Perluas kesimpulan (+Poin Elaborasi Baru)"
+                  >
+                    <Plus className="w-3 h-3 text-blue-600 dark:text-blue-400" />
+                    <span>✨ Perluas (+1.000 Kata)</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => handleRefineWithAI("bab5.kesimpulanUsulan", "5.1 Kesimpulan Rencana Usulan", (currentDoc.bab5?.kesimpulanUsulan || []).join("\n"))}
+                    className="no-print text-[11px] font-mono text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-100 bg-zinc-100 dark:bg-zinc-900 px-2 py-0.5 rounded border border-zinc-200 dark:border-zinc-800 flex items-center gap-1 cursor-pointer transition-colors shadow-xs"
+                  >
+                    <Sparkles className="w-3 h-3 text-zinc-500 dark:text-zinc-400" />
+                    <span>Revisi AI</span>
+                  </button>
+                </div>
+              </div>
               <ul className="list-disc pl-6 space-y-1.5">
                 {(currentDoc.bab5?.kesimpulanUsulan || [
                   `Usulan pelaksanaan kegiatan dengan topik "${currentDoc.title}" pada ${currentDoc.targetEntity} telah dirancang secara sistematis berbasis kebutuhan lapangan dan kaidah ilmiah yang ketat.`,
@@ -5260,7 +5478,7 @@ NIP / NIK.
         doc={currentDoc}
       />
 
-      {/* FLOATING ACADEMIC AI REVISION MODAL DIALOG */}
+      {/* FLOATING ACADEMIC AI EXPANSION & REVISION MODAL DIALOG */}
       {refineSectionTitle && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 dark:bg-black/80 backdrop-blur-md animate-in fade-in duration-150">
           <div className="w-full max-w-2xl bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh] animate-in zoom-in-95 duration-150">
@@ -5268,15 +5486,16 @@ NIP / NIK.
             {/* Modal Header */}
             <div className="p-4 sm:p-5 border-b border-zinc-200 dark:border-zinc-800 flex items-center justify-between bg-zinc-50 dark:bg-zinc-900/60">
               <div className="flex items-center gap-2.5">
-                <div className="w-8 h-8 rounded-lg bg-zinc-900 dark:bg-zinc-100 text-white dark:text-black flex items-center justify-center">
+                <div className="w-8 h-8 rounded-lg bg-blue-600 dark:bg-blue-500 text-white flex items-center justify-center shadow-xs">
                   <Sparkles className="w-4 h-4" />
                 </div>
                 <div>
-                  <h3 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">
-                    Revisi AI Akademik: <span className="font-normal text-zinc-600 dark:text-zinc-400">{refineSectionTitle}</span>
+                  <h3 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100 flex items-center gap-2">
+                    <span>Ekspansi &amp; Revisi AI:</span>
+                    <span className="font-normal text-zinc-600 dark:text-zinc-400">{refineSectionTitle}</span>
                   </h3>
                   <p className="text-[11px] text-zinc-500 font-mono">
-                    Didukung Google Gemini 3.5 & SOP 12 Metode Berpikir
+                    Didukung Mesin Gemini Paralel &amp; 12 Metode Berpikir Ilmiah
                   </p>
                 </div>
               </div>
@@ -5299,30 +5518,80 @@ NIP / NIK.
                 </div>
               )}
 
+              {/* Mode Selection Tabs */}
+              <div>
+                <label className="block text-xs font-medium text-zinc-700 dark:text-zinc-300 mb-1.5">
+                  Pilih Mode Kerja AI:
+                </label>
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-1.5 p-1 bg-zinc-100 dark:bg-zinc-900 rounded-xl border border-zinc-200 dark:border-zinc-800 text-xs">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setRefineMode("expand");
+                      setRefineInstruction("Perluas sub-bab ini secara komprehensif dengan 4-6 paragraf analitis baru (+800 s.d. 1.200 kata) menggunakan First-Principles Thinking.");
+                    }}
+                    className={`py-2 px-2 rounded-lg font-medium transition-all cursor-pointer flex flex-col items-center justify-center gap-1 text-center ${
+                      refineMode === "expand"
+                        ? "bg-white dark:bg-zinc-800 text-blue-600 dark:text-blue-400 shadow-xs border border-blue-200 dark:border-blue-900/50"
+                        : "text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100"
+                    }`}
+                  >
+                    <Plus className="w-3.5 h-3.5" />
+                    <span className="text-[11px] font-semibold leading-tight">Perluas (+1.000 Kata)</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setRefineMode("empirical");
+                      setRefineInstruction("Tambahkan bukti empiris, studi kasus nyata, dan kesenjangan operasional (gap analysis) di lapangan.");
+                    }}
+                    className={`py-2 px-2 rounded-lg font-medium transition-all cursor-pointer flex flex-col items-center justify-center gap-1 text-center ${
+                      refineMode === "empirical"
+                        ? "bg-white dark:bg-zinc-800 text-emerald-600 dark:text-emerald-400 shadow-xs border border-emerald-200 dark:border-emerald-900/50"
+                        : "text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100"
+                    }`}
+                  >
+                    <Activity className="w-3.5 h-3.5" />
+                    <span className="text-[11px] font-semibold leading-tight">Data Empiris</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setRefineMode("citations");
+                      setRefineInstruction("Perkaya landasan konseptual dengan sintesis teori primer dan sitasi jurnal internasional Scopus/Sinta.");
+                    }}
+                    className={`py-2 px-2 rounded-lg font-medium transition-all cursor-pointer flex flex-col items-center justify-center gap-1 text-center ${
+                      refineMode === "citations"
+                        ? "bg-white dark:bg-zinc-800 text-purple-600 dark:text-purple-400 shadow-xs border border-purple-200 dark:border-purple-900/50"
+                        : "text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100"
+                    }`}
+                  >
+                    <BookOpen className="w-3.5 h-3.5" />
+                    <span className="text-[11px] font-semibold leading-tight">Sitasi Jurnal</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setRefineMode("refine");
+                      setRefineInstruction("Tingkatkan formalitas bahasa akademik baku dan perjelas alur logika kausalitas.");
+                    }}
+                    className={`py-2 px-2 rounded-lg font-medium transition-all cursor-pointer flex flex-col items-center justify-center gap-1 text-center ${
+                      refineMode === "refine"
+                        ? "bg-white dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 shadow-xs border border-zinc-300 dark:border-zinc-700"
+                        : "text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100"
+                    }`}
+                  >
+                    <Sparkles className="w-3.5 h-3.5" />
+                    <span className="text-[11px] font-semibold leading-tight">Poles Diksi</span>
+                  </button>
+                </div>
+              </div>
+
               {/* Revision Instructions */}
               <div>
                 <label className="block text-xs font-medium text-zinc-700 dark:text-zinc-300 mb-1.5">
-                  Pilih Arahan Cepat atau Masukkan Instruksi Khusus:
+                  Instruksi Khusus untuk AI:
                 </label>
-                <div className="flex flex-wrap gap-1.5 mb-2.5">
-                  {[
-                    "Perdalam analisis teoritis & rujukan primer",
-                    "Perjelas metodologi kuantitatif & indikator",
-                    "Tingkatkan formalitas bahasa akademik baku",
-                    "Pertegas urgensi rumusan & kesenjangan masalah",
-                    "Ringkas & padatkan narasi agar lebih tajam"
-                  ].map((chip, idx) => (
-                    <button
-                      key={idx}
-                      type="button"
-                      onClick={() => setRefineInstruction(chip)}
-                      className="text-[11px] px-2.5 py-1 rounded-full bg-zinc-100 dark:bg-zinc-900 hover:bg-zinc-200 dark:hover:bg-zinc-800 text-zinc-700 dark:text-zinc-300 border border-zinc-200 dark:border-zinc-800 transition-colors cursor-pointer"
-                    >
-                      + {chip}
-                    </button>
-                  ))}
-                </div>
-
                 <div className="relative">
                   <textarea
                     rows={2}
@@ -5335,31 +5604,33 @@ NIP / NIK.
                     type="button"
                     disabled={isRefining || !refineInstruction.trim()}
                     onClick={submitAiRefinement}
-                    className="absolute right-2.5 bottom-2.5 px-3 py-1 rounded-lg bg-zinc-900 dark:bg-zinc-100 text-white dark:text-black font-semibold text-xs hover:opacity-90 disabled:opacity-40 transition-all cursor-pointer flex items-center gap-1.5 shadow-sm"
+                    className="absolute right-2.5 bottom-2.5 px-3 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-semibold text-xs disabled:opacity-40 transition-all cursor-pointer flex items-center gap-1.5 shadow-sm"
                   >
                     {isRefining ? <RefreshCw className="w-3.5 h-3.5 animate-spin" /> : <Sparkles className="w-3.5 h-3.5" />}
-                    <span>{isRefining ? "Merumuskan AI..." : "Jalankan Revisi AI"}</span>
+                    <span>{isRefining ? "Merumuskan AI..." : (refineMode === "expand" ? "Jalankan Perluasan AI" : "Jalankan Revisi AI")}</span>
                   </button>
                 </div>
               </div>
 
               {/* AI Generated Preview (if available) */}
               {revisedPreview ? (
-                <div className="space-y-2 p-3.5 rounded-xl border border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900/40 animate-in fade-in">
+                <div className="space-y-3 p-3.5 rounded-xl border border-blue-200 dark:border-blue-900/60 bg-blue-50/40 dark:bg-blue-950/20 animate-in fade-in">
                   <div className="flex items-center justify-between">
                     <span className="text-xs font-semibold text-zinc-900 dark:text-zinc-100 flex items-center gap-1.5">
-                      <Sparkles className="w-3.5 h-3.5 text-zinc-500" />
-                      Hasil Rumusan Revisi AI:
+                      <Sparkles className="w-3.5 h-3.5 text-blue-600 dark:text-blue-400" />
+                      Hasil Rumusan AI ({refineMode === "expand" ? "Ekspansi +Paragraf Baru" : "Revisi Akademik"}):
                     </span>
-                    <span className="text-[10px] font-mono text-zinc-400">Siap Diterapkan</span>
+                    <span className="text-[10px] font-mono text-blue-600 dark:text-blue-400 bg-blue-100/60 dark:bg-blue-900/40 px-2 py-0.5 rounded">
+                      ~{revisedPreview.split(/\s+/).filter(Boolean).length} Kata Baru
+                    </span>
                   </div>
                   <textarea
-                    rows={6}
+                    rows={8}
                     value={revisedPreview}
                     onChange={(e) => setRevisedPreview(e.target.value)}
                     className="w-full p-3 rounded-lg bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 text-xs text-zinc-900 dark:text-zinc-100 focus:outline-none font-sans leading-relaxed resize-y"
                   />
-                  <div className="flex justify-end gap-2 pt-1">
+                  <div className="flex flex-wrap items-center justify-end gap-2 pt-1">
                     <button
                       type="button"
                       onClick={() => setRevisedPreview(null)}
@@ -5369,11 +5640,20 @@ NIP / NIK.
                     </button>
                     <button
                       type="button"
-                      onClick={() => applyRefinedContent(revisedPreview)}
-                      className="px-4 py-1.5 rounded-lg bg-zinc-900 dark:bg-zinc-100 text-white dark:text-black font-semibold text-xs hover:opacity-90 transition-all cursor-pointer shadow-sm flex items-center gap-1.5"
+                      onClick={() => applyRefinedContent(revisedPreview, "append")}
+                      className="px-3.5 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-semibold text-xs transition-all cursor-pointer shadow-sm flex items-center gap-1.5"
+                      title="Menambahkan paragraf baru ke naskah sehingga jumlah halaman fisik bertambah tebal"
+                    >
+                      <Plus className="w-3.5 h-3.5" />
+                      <span>➕ Sambungkan ke Naskah (+Tambah Paragraf)</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => applyRefinedContent(revisedPreview, "replace")}
+                      className="px-3 py-1.5 rounded-lg bg-zinc-900 dark:bg-zinc-100 text-white dark:text-black font-semibold text-xs hover:opacity-90 transition-all cursor-pointer shadow-sm flex items-center gap-1.5"
                     >
                       <Check className="w-3.5 h-3.5" />
-                      <span>Terapkan ke Naskah Proposal</span>
+                      <span>Gantikan Naskah Saat Ini</span>
                     </button>
                   </div>
                 </div>
