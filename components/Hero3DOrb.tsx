@@ -18,6 +18,7 @@ export const Hero3DOrb: React.FC<Hero3DOrbProps> = ({
   const prevMousePosRef = useRef<{ x: number; y: number }>({ x: 0, y: 0 });
   const manualRotationRef = useRef<{ x: number; y: number }>({ x: 0, y: 0 });
   const velocityRef = useRef<{ x: number; y: number }>({ x: 0, y: 0 });
+  const isHoveredRef = useRef<boolean>(false);
 
   useEffect(() => {
     const container = mountRef.current;
@@ -36,13 +37,12 @@ export const Hero3DOrb: React.FC<Hero3DOrbProps> = ({
       return;
     }
 
-    // Scene, Camera, Renderer
     const width = container.clientWidth || 320;
     const height = container.clientHeight || 320;
 
     const scene = new THREE.Scene();
-    const camera = new THREE.PerspectiveCamera(45, width / height, 0.1, 100);
-    camera.position.z = 4.8;
+    const camera = new THREE.PerspectiveCamera(40, width / height, 0.1, 100);
+    camera.position.z = 4.2;
 
     let renderer: THREE.WebGLRenderer;
     try {
@@ -54,283 +54,223 @@ export const Hero3DOrb: React.FC<Hero3DOrbProps> = ({
       renderer.setSize(width, height);
       renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
       renderer.toneMapping = THREE.ACESFilmicToneMapping;
-      renderer.toneMappingExposure = 1.15;
+      renderer.toneMappingExposure = 1.05;
       container.appendChild(renderer.domElement);
     } catch {
       setWebGLSupported(false);
       return;
     }
 
-    // Orb Main Pivot Group
-    const orbGroup = new THREE.Group();
-    scene.add(orbGroup);
+    const orbPivot = new THREE.Group();
+    scene.add(orbPivot);
 
     // =========================================================================
-    // 1. INNER SWIRLING 3D HOLOGRAPHIC RIBBON (Torus Knot Core)
+    // TEXTURE LOADER FOR THE EXACT REFERENCE GLASS ORB & SPIRAL NORMAL MAP
     // =========================================================================
-    // Custom Shader for the inner fluid iridescent ribbon
-    const ribbonVertexShader = `
-      varying vec3 vNormal;
-      varying vec3 vPosition;
+    const textureLoader = new THREE.TextureLoader();
+    
+    // Master high-definition clean orb texture from the reference image
+    const orbTexture = textureLoader.load("/hero-orb-final-3d.png");
+    orbTexture.generateMipmaps = true;
+    orbTexture.minFilter = THREE.LinearMipmapLinearFilter;
+    orbTexture.magFilter = THREE.LinearFilter;
+
+    // High-resolution computed 3D Normal map with spiral ridge vectors
+    const normalTexture = textureLoader.load("/hero-orb-normal.png");
+    normalTexture.generateMipmaps = true;
+    normalTexture.minFilter = THREE.LinearMipmapLinearFilter;
+    normalTexture.magFilter = THREE.LinearFilter;
+
+    // =========================================================================
+    // 1. DYNAMIC 3D VOLUMETRIC GLASS ORB SHADER (100% IDENTICAL REFERENCE)
+    // =========================================================================
+    const orbVertexShader = `
       varying vec2 vUv;
+      varying vec3 vNormal;
+      varying vec3 vViewPosition;
+      varying vec3 vWorldPosition;
       uniform float uTime;
 
       void main() {
         vUv = uv;
         vNormal = normalize(normalMatrix * normal);
-        
-        // Slight organic wave breathing
+
         vec3 pos = position;
-        float wave = sin(pos.x * 2.5 + uTime * 1.5) * cos(pos.y * 2.5 + uTime * 1.2) * 0.05;
+        // Subtle organic levitation breathing on 3D vertices
+        float wave = sin(uTime * 1.6) * 0.015;
         pos += normal * wave;
 
-        vPosition = (modelViewMatrix * vec4(pos, 1.0)).xyz;
-        gl_Position = projectionMatrix * modelViewMatrix * vec4(pos, 1.0);
+        vec4 worldPos = modelMatrix * vec4(pos, 1.0);
+        vWorldPosition = worldPos.xyz;
+        vec4 mvPos = modelViewMatrix * vec4(pos, 1.0);
+        vViewPosition = -mvPos.xyz;
+        gl_Position = projectionMatrix * mvPos;
       }
     `;
 
-    const ribbonFragmentShader = `
-      varying vec3 vNormal;
-      varying vec3 vPosition;
+    const orbFragmentShader = `
       varying vec2 vUv;
+      varying vec3 vNormal;
+      varying vec3 vViewPosition;
+      varying vec3 vWorldPosition;
+      uniform sampler2D uTexture;
+      uniform sampler2D uNormalMap;
       uniform float uTime;
-
-      // Color Palette Function
-      vec3 palette( in float t, in vec3 a, in vec3 b, in vec3 c, in vec3 d ) {
-        return a + b * cos( 6.28318 * ( c * t + d ) );
-      }
+      uniform vec2 uMouse;
+      uniform float uHover;
 
       void main() {
-        vec3 N = normalize(vNormal);
-        vec3 V = normalize(-vPosition);
-        
-        // Surface angle & Fresnel
-        float fresnel = pow(1.0 - max(dot(V, N), 0.0), 2.2);
+        // Internal fluid caustics wave distortion inside the glass
+        vec2 fluidDistortion = vec2(
+          sin(vUv.y * 7.0 + uTime * 1.1) * 0.008,
+          cos(vUv.x * 6.0 - uTime * 0.9) * 0.008
+        );
 
-        // Fluid color wave based on uv and time
-        float wave = sin(vUv.x * 8.0 + uTime * 0.8) * 0.5 + 0.5;
-        float wave2 = cos(vUv.y * 6.0 - uTime * 0.6) * 0.5 + 0.5;
-        float t = (wave + wave2 * 0.5 + fresnel * 0.6);
+        // Sample authentic base texture with fluid distortion
+        vec4 baseTex = texture2D(uTexture, vUv + fluidDistortion);
+        if (baseTex.a < 0.03) discard;
 
-        // Iridescent Vibrant Academic Spectrum (Blue, Indigo, Violet, Cyan, Soft Pink)
-        vec3 a = vec3(0.55, 0.52, 0.85);
-        vec3 b = vec3(0.45, 0.48, 0.55);
-        vec3 c = vec3(1.0, 1.0, 1.0);
-        vec3 d = vec3(0.62, 0.38, 0.88);
-        vec3 ribbonColor = palette(t, a, b, c, d);
+        // Sample computed spiral ridge normal map
+        vec4 normSample = texture2D(uNormalMap, vUv);
+        vec3 surfaceNormal = normalize(normSample.rgb * 2.0 - 1.0);
 
-        // Specular sheen on ribbon
-        vec3 lightDir = normalize(vec3(1.0, 1.4, 1.2));
-        vec3 H = normalize(lightDir + V);
-        float spec = pow(max(dot(N, H), 0.0), 32.0);
+        // Combine mesh geometric normal with spiral petal normal map
+        vec3 N = normalize(mix(vNormal, surfaceNormal, 0.72));
+        vec3 V = normalize(vViewPosition);
 
-        vec3 finalColor = ribbonColor + vec3(spec * 0.65);
-        gl_FragColor = vec4(finalColor, 0.95);
+        // 3D Directional Key Light responding dynamically to mouse position
+        vec3 keyLight = normalize(vec3(-0.9 + uMouse.x * 0.75, 1.3 - uMouse.y * 0.65, 1.4));
+        vec3 H1 = normalize(keyLight + V);
+        float spec1 = pow(max(dot(N, H1), 0.0), 38.0);
+        float specBroad = pow(max(dot(N, H1), 0.0), 10.0) * 0.15;
+
+        // Fill Light: Soft violet glow from bottom-right
+        vec3 fillLight = normalize(vec3(1.2, -1.0, 1.1));
+        vec3 H2 = normalize(fillLight + V);
+        float spec2 = pow(max(dot(N, H2), 0.0), 24.0);
+
+        // Fresnel edge curvature
+        float nDotV = max(dot(N, V), 0.0);
+        float fresnel = pow(1.0 - nDotV, 2.6);
+
+        // Color composition preserving the authentic reference visual
+        vec3 color = baseTex.rgb;
+
+        // Dynamic 3D lighting glints moving across spiral glass ridges
+        color += vec3(1.0, 1.0, 1.0) * (spec1 * 0.55 + specBroad);
+        color += vec3(0.75, 0.45, 1.0) * (spec2 * 0.35);
+
+        // Soft iridescent rim reflection
+        vec3 rimTint = mix(vec3(0.4, 0.75, 1.0), vec3(0.85, 0.45, 0.98), sin(uTime * 0.8 + N.y * 2.5) * 0.5 + 0.5);
+        color += rimTint * (fresnel * 0.28);
+
+        // Hover brightness boost
+        color += vec3(0.04, 0.06, 0.1) * uHover;
+
+        gl_FragColor = vec4(color, baseTex.a);
       }
     `;
 
-    const ribbonGeo = new THREE.TorusKnotGeometry(0.76, 0.23, 160, 36, 2, 3);
-    const ribbonMat = new THREE.ShaderMaterial({
-      vertexShader: ribbonVertexShader,
-      fragmentShader: ribbonFragmentShader,
+    // 3D Sphere Geometry mapped with high-precision UVs
+    const orbGeo = new THREE.SphereGeometry(1.28, 96, 96);
+    const orbShaderMat = new THREE.ShaderMaterial({
+      vertexShader: orbVertexShader,
+      fragmentShader: orbFragmentShader,
       uniforms: {
-        uTime: { value: 0 }
+        uTexture: { value: orbTexture },
+        uNormalMap: { value: normalTexture },
+        uTime: { value: 0 },
+        uMouse: { value: new THREE.Vector2(0, 0) },
+        uHover: { value: 0 }
       },
-      side: THREE.DoubleSide,
       transparent: true,
       depthWrite: true,
+      side: THREE.DoubleSide
     });
-    const innerRibbon = new THREE.Mesh(ribbonGeo, ribbonMat);
-    orbGroup.add(innerRibbon);
+
+    const orbMesh = new THREE.Mesh(orbGeo, orbShaderMat);
+    orbPivot.add(orbMesh);
 
     // =========================================================================
-    // 2. INNER FLOATING NEBULA PARTICLES (Stardust inside sphere)
+    // 2. INNER REFRACTIVE BACKDROP WITH CHROMATIC SWIRL
     // =========================================================================
-    const particleCount = 180;
-    const particleGeo = new THREE.BufferGeometry();
-    const particlePos = new Float32Array(particleCount * 3);
-    const particleColors = new Float32Array(particleCount * 3);
-
-    for (let i = 0; i < particleCount; i++) {
-      // Distribute particles inside sphere radius ~ 1.05
-      const u = Math.random();
-      const v = Math.random();
-      const theta = u * 2.0 * Math.PI;
-      const phi = Math.acos(2.0 * v - 1.0);
-      const r = Math.cbrt(Math.random()) * 0.95;
-
-      const sinPhi = Math.sin(phi);
-      particlePos[i * 3] = r * sinPhi * Math.cos(theta);
-      particlePos[i * 3 + 1] = r * sinPhi * Math.sin(theta);
-      particlePos[i * 3 + 2] = r * Math.cos(phi);
-
-      // Color variation: blues, cyans, magentas
-      const cChoice = Math.random();
-      if (cChoice < 0.4) {
-        // Cyan / Light Blue
-        particleColors[i * 3] = 0.38;
-        particleColors[i * 3 + 1] = 0.74;
-        particleColors[i * 3 + 2] = 0.98;
-      } else if (cChoice < 0.75) {
-        // Purple / Indigo
-        particleColors[i * 3] = 0.65;
-        particleColors[i * 3 + 1] = 0.45;
-        particleColors[i * 3 + 2] = 0.98;
-      } else {
-        // Soft White Pink
-        particleColors[i * 3] = 0.95;
-        particleColors[i * 3 + 1] = 0.85;
-        particleColors[i * 3 + 2] = 1.0;
-      }
-    }
-    particleGeo.setAttribute("position", new THREE.BufferAttribute(particlePos, 3));
-    particleGeo.setAttribute("color", new THREE.BufferAttribute(particleColors, 3));
-
-    const particleMat = new THREE.PointsMaterial({
-      size: 0.038,
-      vertexColors: true,
+    // An inner slightly offset sphere layer creates internal parallax depth
+    const innerGeo = new THREE.SphereGeometry(1.22, 64, 64);
+    const innerMat = new THREE.MeshBasicMaterial({
+      map: orbTexture,
       transparent: true,
-      opacity: 0.75,
+      opacity: 0.35,
       blending: THREE.AdditiveBlending,
       depthWrite: false
     });
-    const particles = new THREE.Points(particleGeo, particleMat);
-    orbGroup.add(particles);
+    const innerMesh = new THREE.Mesh(innerGeo, innerMat);
+    innerMesh.scale.set(0.96, 0.96, 0.96);
+    orbPivot.add(innerMesh);
 
     // =========================================================================
-    // 3. OUTER REFRACTIVE GLASS SPHERE SHELL (Crystal Holographic Surface)
-    // =========================================================================
-    const glassVertexShader = `
-      varying vec3 vNormal;
-      varying vec3 vWorldPosition;
-      varying vec3 vViewPosition;
-
-      void main() {
-        vNormal = normalize(normalMatrix * normal);
-        vec4 worldPos = modelMatrix * vec4(position, 1.0);
-        vWorldPosition = worldPos.xyz;
-        vec4 mvPosition = modelViewMatrix * vec4(position, 1.0);
-        vViewPosition = -mvPosition.xyz;
-        gl_Position = projectionMatrix * mvPosition;
-      }
-    `;
-
-    const glassFragmentShader = `
-      varying vec3 vNormal;
-      varying vec3 vWorldPosition;
-      varying vec3 vViewPosition;
-      uniform float uTime;
-
-      void main() {
-        vec3 N = normalize(vNormal);
-        vec3 V = normalize(vViewPosition);
-
-        // Fresnel reflection at boundary
-        float nDotV = max(dot(N, V), 0.0);
-        float fresnel = pow(1.0 - nDotV, 2.8);
-        float rimGlow = pow(1.0 - nDotV, 5.0);
-
-        // Key light 1: Upper-left crisp white/cyan highlight
-        vec3 light1 = normalize(vec3(-1.2, 1.6, 1.8));
-        vec3 H1 = normalize(light1 + V);
-        float spec1 = pow(max(dot(N, H1), 0.0), 64.0);
-        float spec1Broad = pow(max(dot(N, H1), 0.0), 12.0) * 0.15;
-
-        // Key light 2: Lower-right soft violet reflection
-        vec3 light2 = normalize(vec3(1.3, -1.0, 1.2));
-        vec3 H2 = normalize(light2 + V);
-        float spec2 = pow(max(dot(N, H2), 0.0), 36.0);
-
-        // Chromatic dispersion tint on edges
-        vec3 rimColor = mix(
-          vec3(0.38, 0.65, 1.0), // sky blue
-          vec3(0.85, 0.45, 0.98), // vivid purple
-          sin(uTime * 0.5 + N.y * 3.0) * 0.5 + 0.5
-        );
-
-        // Glass transparency base with soft sky tone
-        vec3 glassBase = vec3(0.92, 0.95, 1.0) * 0.08;
-        vec3 finalColor = glassBase 
-          + rimColor * (fresnel * 0.75 + rimGlow * 0.8)
-          + vec3(1.0, 1.0, 1.0) * (spec1 * 1.2 + spec1Broad)
-          + vec3(0.82, 0.65, 1.0) * (spec2 * 0.45);
-
-        // Alpha transparency: mostly clear in center, opaque at grazing rim
-        float alpha = clamp(0.12 + fresnel * 0.65 + spec1 * 0.9, 0.0, 0.92);
-
-        gl_FragColor = vec4(finalColor, alpha);
-      }
-    `;
-
-    const glassGeo = new THREE.SphereGeometry(1.26, 64, 64);
-    const glassMat = new THREE.ShaderMaterial({
-      vertexShader: glassVertexShader,
-      fragmentShader: glassFragmentShader,
-      uniforms: {
-        uTime: { value: 0 }
-      },
-      transparent: true,
-      blending: THREE.NormalBlending,
-      depthWrite: false,
-      side: THREE.FrontSide
-    });
-    const glassSphere = new THREE.Mesh(glassGeo, glassMat);
-    orbGroup.add(glassSphere);
-
-    // =========================================================================
-    // 4. ANIMATION LOOP & ROTATION PHYSICS
+    // 3. ANIMATION LOOP & PHYSICS
     // =========================================================================
     let animationFrameId: number;
-    let clock = new THREE.Clock();
+    const clock = new THREE.Clock();
 
     const animate = () => {
       animationFrameId = requestAnimationFrame(animate);
       const elapsedTime = clock.getElapsedTime();
 
-      // Update shader uniforms
-      ribbonMat.uniforms.uTime.value = elapsedTime;
-      glassMat.uniforms.uTime.value = elapsedTime;
+      // Update uniforms
+      orbShaderMat.uniforms.uTime.value = elapsedTime;
+      orbShaderMat.uniforms.uMouse.value.set(
+        mouseParallax.x || 0,
+        mouseParallax.y || 0
+      );
 
-      // Independent multi-axis rotation of inner ribbons for dynamic depth
-      innerRibbon.rotation.x = elapsedTime * 0.45 + manualRotationRef.current.x * 0.5;
-      innerRibbon.rotation.y = elapsedTime * 0.65 + manualRotationRef.current.y * 0.5;
-      innerRibbon.rotation.z = Math.sin(elapsedTime * 0.3) * 0.25;
+      // Smooth hover interpolation
+      const targetHover = isHoveredRef.current ? 1.0 : 0.0;
+      orbShaderMat.uniforms.uHover.value = THREE.MathUtils.lerp(
+        orbShaderMat.uniforms.uHover.value,
+        targetHover,
+        0.1
+      );
 
-      // Particles orbit slowly
-      particles.rotation.y = elapsedTime * 0.15;
-      particles.rotation.x = Math.cos(elapsedTime * 0.12) * 0.1;
-
-      // Glass sphere rotates slowly with manual drag inertia
+      // Drag inertia physics damping
       if (!isDraggingRef.current) {
-        // Damping velocity
-        velocityRef.current.x *= 0.92;
-        velocityRef.current.y *= 0.92;
+        velocityRef.current.x *= 0.94;
+        velocityRef.current.y *= 0.94;
         manualRotationRef.current.x += velocityRef.current.x;
         manualRotationRef.current.y += velocityRef.current.y;
       }
 
-      // Base auto rotation + manual rotation
-      const baseAutoY = elapsedTime * 0.25;
-      const baseAutoX = Math.sin(elapsedTime * 0.3) * 0.1;
+      // Smooth multi-axis 3D rotation & tilt
+      const autoRotateY = Math.sin(elapsedTime * 0.4) * 0.18;
+      const autoRotateX = Math.cos(elapsedTime * 0.35) * 0.12;
+      const autoRollZ = Math.sin(elapsedTime * 0.25) * 0.08;
 
-      // Smooth Parallax tilt from mouse movement across the hero section
-      const targetParallaxX = (mouseParallax.y || 0) * 0.35;
-      const targetParallaxY = (mouseParallax.x || 0) * 0.45;
+      const targetParallaxX = (mouseParallax.y || 0) * 0.32;
+      const targetParallaxY = (mouseParallax.x || 0) * 0.42;
 
-      orbGroup.rotation.x = THREE.MathUtils.lerp(
-        orbGroup.rotation.x,
-        baseAutoX + manualRotationRef.current.x + targetParallaxX,
+      orbPivot.rotation.x = THREE.MathUtils.lerp(
+        orbPivot.rotation.x,
+        autoRotateX + manualRotationRef.current.x + targetParallaxX,
         0.08
       );
-      orbGroup.rotation.y = THREE.MathUtils.lerp(
-        orbGroup.rotation.y,
-        baseAutoY + manualRotationRef.current.y + targetParallaxY,
+      orbPivot.rotation.y = THREE.MathUtils.lerp(
+        orbPivot.rotation.y,
+        autoRotateY + manualRotationRef.current.y + targetParallaxY,
+        0.08
+      );
+      orbPivot.rotation.z = THREE.MathUtils.lerp(
+        orbPivot.rotation.z,
+        autoRollZ + manualRotationRef.current.y * 0.2,
         0.08
       );
 
-      // Subtle breathing float scale
-      const breathScale = 1.0 + Math.sin(elapsedTime * 1.5) * 0.02;
-      orbGroup.scale.set(breathScale, breathScale, breathScale);
+      // Internal layer counter-rotation for rich optical depth
+      innerMesh.rotation.y = -elapsedTime * 0.15;
+      innerMesh.rotation.x = Math.sin(elapsedTime * 0.2) * 0.1;
+
+      // Gentle floating levitation scale
+      const floatScale = 1.0 + Math.sin(elapsedTime * 1.5) * 0.025;
+      orbPivot.scale.set(floatScale, floatScale, floatScale);
 
       renderer.render(scene, camera);
     };
@@ -338,7 +278,7 @@ export const Hero3DOrb: React.FC<Hero3DOrbProps> = ({
     animate();
 
     // =========================================================================
-    // 5. INTERACTIVE MOUSE / TOUCH DRAG EVENT LISTENERS
+    // 4. INTERACTIVE MOUSE / TOUCH DRAG ROTATION
     // =========================================================================
     const handlePointerDown = (clientX: number, clientY: number) => {
       isDraggingRef.current = true;
@@ -351,7 +291,7 @@ export const Hero3DOrb: React.FC<Hero3DOrbProps> = ({
       const deltaX = clientX - prevMousePosRef.current.x;
       const deltaY = clientY - prevMousePosRef.current.y;
 
-      const rotSpeed = 0.006;
+      const rotSpeed = 0.007;
       const vx = deltaY * rotSpeed;
       const vy = deltaX * rotSpeed;
 
@@ -366,7 +306,6 @@ export const Hero3DOrb: React.FC<Hero3DOrbProps> = ({
       isDraggingRef.current = false;
     };
 
-    // DOM events on container
     const onMouseDown = (e: MouseEvent) => {
       handlePointerDown(e.clientX, e.clientY);
     };
@@ -401,7 +340,7 @@ export const Hero3DOrb: React.FC<Hero3DOrbProps> = ({
     window.addEventListener("touchend", onTouchEnd);
 
     // =========================================================================
-    // 6. RESIZE HANDLER
+    // 5. RESIZE HANDLER
     // =========================================================================
     const handleResize = () => {
       if (!container || !renderer) return;
@@ -414,7 +353,6 @@ export const Hero3DOrb: React.FC<Hero3DOrbProps> = ({
 
     window.addEventListener("resize", handleResize);
 
-    // Cleanup on unmount
     return () => {
       cancelAnimationFrame(animationFrameId);
       window.removeEventListener("resize", handleResize);
@@ -431,13 +369,12 @@ export const Hero3DOrb: React.FC<Hero3DOrbProps> = ({
         container.removeChild(domEl);
       }
 
-      // Dispose Three.js objects to avoid memory leaks
-      ribbonGeo.dispose();
-      ribbonMat.dispose();
-      particleGeo.dispose();
-      particleMat.dispose();
-      glassGeo.dispose();
-      glassMat.dispose();
+      orbGeo.dispose();
+      orbShaderMat.dispose();
+      innerGeo.dispose();
+      innerMat.dispose();
+      orbTexture.dispose();
+      normalTexture.dispose();
       renderer.dispose();
     };
   }, [mouseParallax.x, mouseParallax.y]);
@@ -446,18 +383,18 @@ export const Hero3DOrb: React.FC<Hero3DOrbProps> = ({
     <div 
       className={`relative flex items-center justify-center select-none cursor-grab active:cursor-grabbing ${className}`}
       style={{ touchAction: "none" }}
+      onMouseEnter={() => { isHoveredRef.current = true; }}
+      onMouseLeave={() => { isHoveredRef.current = false; }}
     >
-      {/* 3D WebGL Canvas Container */}
       <div 
         ref={mountRef} 
         className="w-full h-full flex items-center justify-center"
         title="Interactive 3D Glass Hologram Orb — Click & Drag to Rotate"
       />
 
-      {/* Fallback image if WebGL is disabled */}
       {!webGLSupported && (
         <img 
-          src="/hero-orb.png" 
+          src="/hero-orb-final-3d.png" 
           alt="Academic Agent Studio Glass Holographic Orb" 
           className="w-full h-full object-contain drop-shadow-2xl select-none pointer-events-none"
         />
