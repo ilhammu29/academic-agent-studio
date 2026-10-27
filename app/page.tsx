@@ -48,7 +48,7 @@ export default function Home() {
   const [isSupabaseConfigured, setIsSupabaseConfigured] = useState(false);
 
   // App & Workflow Stage
-  const [stage, setStage] = useState<StudioStage>("input");
+  const [stage, setStage] = useState<StudioStage>("landing");
   const [category, setCategory] = useState<ProposalCategory>("skripsi");
   const [reportType, setReportType] = useState<ReportType | undefined>("skripsi");
 
@@ -112,7 +112,7 @@ export default function Home() {
       } else if (savedSession.stage) {
         setStage(savedSession.stage);
       }
-    } else if (!loggedIn) {
+    } else {
       setStage("landing");
     }
   }, []);
@@ -473,31 +473,33 @@ export default function Home() {
 
   return (
     <>
-      {/* 1. Cinematic Screen Loader Animation on Initial Mount */}
-      {showSplash && (
-        <FirstTimeLoadingScreen 
-          forceShow={forceShowreel}
-          onComplete={() => {
-            setShowSplash(false);
-            setForceShowreel(false);
-          }} 
-        />
-      )}
-
-      {/* 2. Full-Bleed Desktop & Mobile Responsive App Shell / Landing View */}
+      {/* Full-Bleed Desktop & Mobile Responsive App Shell / Landing View */}
       {stage === "landing" ? (
-        <LandingPageView
-          onEnterStudio={handleEnterStudio}
-          onOpenAuth={() => setIsAuthModalOpen(true)}
-          onOpenPayment={() => setIsPaymentModalOpen(true)}
-          onOpenSuperadmin={() => setIsSuperadminModalOpen(true)}
-          onReplayShowreel={() => {
-            setForceShowreel(true);
-            setShowSplash(true);
-          }}
-          currentUser={currentUser}
-          isLoggedIn={isLoggedIn}
-        />
+        <>
+          {/* Animasi Screen Loading Showreel: Diposisikan di Awal Landing Page Saja */}
+          {showSplash && (
+            <FirstTimeLoadingScreen 
+              forceShow={forceShowreel}
+              onComplete={() => {
+                setShowSplash(false);
+                setForceShowreel(false);
+              }} 
+            />
+          )}
+
+          <LandingPageView
+            onEnterStudio={handleEnterStudio}
+            onOpenAuth={() => setIsAuthModalOpen(true)}
+            onOpenPayment={() => setIsPaymentModalOpen(true)}
+            onOpenSuperadmin={() => setIsSuperadminModalOpen(true)}
+            onReplayShowreel={() => {
+              setForceShowreel(true);
+              setShowSplash(true);
+            }}
+            currentUser={currentUser}
+            isLoggedIn={isLoggedIn}
+          />
+        </>
       ) : (
         <AppShell
           currentStage={stage}

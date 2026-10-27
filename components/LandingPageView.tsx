@@ -340,6 +340,24 @@ export const LandingPageView: React.FC<LandingPageViewProps> = ({
       >
         <div className="max-w-6xl mx-auto text-center">
 
+          {/* Intro Motion Showreel Badge di Awal Landing Page */}
+          {onReplayShowreel && (
+            <div className="mb-6 sm:mb-8 flex justify-center">
+              <button
+                type="button"
+                onClick={onReplayShowreel}
+                className="inline-flex items-center gap-2.5 px-4 py-1.5 rounded-full bg-blue-50/80 dark:bg-blue-950/50 hover:bg-blue-100/90 dark:hover:bg-blue-900/60 border border-blue-200/80 dark:border-blue-800 text-blue-700 dark:text-blue-300 text-xs font-mono font-medium shadow-xs hover:scale-105 active:scale-95 transition-all cursor-pointer group"
+                title="Putar Animasi Screen Loading Showreel 15 Detik (120 BPM)"
+              >
+                <span className="w-2 h-2 rounded-full bg-blue-500 group-hover:animate-ping" />
+                <span className="font-bold tracking-tight">Animasi Motion Showreel 15 Detik</span>
+                <span className="text-[10px] text-blue-500 dark:text-blue-400 font-bold border-l border-blue-200 dark:border-blue-800 pl-2 flex items-center gap-1">
+                  120 BPM <Play className="w-2.5 h-2.5 fill-current" />
+                </span>
+              </button>
+            </div>
+          )}
+
           {/* MAIN 3-COLUMN HERO HEADLINE WITH 3D INTERACTIVE GLASS ORB */}
           <div className="flex flex-col lg:flex-row items-center justify-center gap-4 sm:gap-6 lg:gap-8 xl:gap-12">
             
