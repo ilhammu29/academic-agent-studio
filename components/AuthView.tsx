@@ -12,7 +12,7 @@ import {
   Mail, 
   User, 
   GraduationCap, 
-  ChevronDown,
+  ChevronDown, 
   Eye, 
   EyeOff, 
   ArrowLeft, 
@@ -149,12 +149,12 @@ export default function AuthView({
   };
 
   return (
-    <div className="w-full min-h-screen lg:h-screen lg:overflow-hidden bg-[#0A0E18] flex flex-col lg:flex-row select-none">
+    <div className="w-full min-h-screen lg:h-screen lg:overflow-hidden bg-white flex flex-col lg:flex-row select-none">
 
       {/* ========================================================================= */}
       {/* 1. LEFT PANE: BRANDING, HEADLINE, GLOWING 3D RIBBON, & MICRO CARDS        */}
       {/* ========================================================================= */}
-      <div className="relative w-full lg:w-1/2 flex flex-col justify-between p-8 sm:p-12 xl:p-16 bg-gradient-to-b from-[#0B101D] via-[#090D18] to-[#070A13] overflow-hidden shrink-0">
+      <div className="relative w-full lg:w-5/12 xl:w-[46%] flex flex-col justify-between p-8 sm:p-12 xl:p-16 bg-gradient-to-b from-[#0B101D] via-[#090D18] to-[#070A13] overflow-hidden shrink-0">
         
         {/* Curved 3D Wave Organic Light Ribbons in Bottom-Left */}
         <div className="absolute -left-20 -bottom-20 w-[480px] h-[480px] rounded-full bg-gradient-to-tr from-blue-700/20 via-indigo-600/15 to-purple-600/10 blur-[90px] pointer-events-none" />
@@ -264,15 +264,13 @@ export default function AuthView({
       </div>
 
       {/* ========================================================================= */}
-      {/* 2. RIGHT PANE: CRISP WHITE FLOATING CARD (LIGHT CANVAS BACKGROUND)        */}
+      {/* 2. RIGHT PANE: FULL-HEIGHT, SPACIOUS, EXPANSIVE FORM PANE                 */}
       {/* ========================================================================= */}
-      <div className="w-full lg:w-1/2 flex flex-col justify-center items-center p-4 sm:p-8 lg:p-6 xl:p-10 bg-[#F4F6FB] overflow-y-auto">
+      <div className="w-full lg:w-7/12 xl:w-[54%] flex flex-col justify-between p-6 sm:p-10 lg:p-10 xl:p-14 bg-white overflow-y-auto">
         
-        {/* Floating Card */}
-        <div className="w-full max-w-[430px] bg-white rounded-[28px] sm:rounded-[32px] p-6 sm:p-8 shadow-2xl shadow-slate-300/60 border border-slate-100 my-auto">
-          
-          {/* Card Header Brand */}
-          <div className="flex items-center gap-2.5 mb-6">
+        {/* Top Navbar in Form Pane */}
+        <div className="w-full max-w-xl mx-auto flex items-center justify-between shrink-0 mb-4 sm:mb-6">
+          <div className="flex items-center gap-2.5">
             <div className="w-7 h-7 flex items-center justify-center text-[#3B82F6] shrink-0">
               <svg className="w-6 h-6 fill-current" viewBox="0 0 24 24">
                 <path d="M12 0C12 6.627 6.627 12 0 12C6.627 12 12 17.373 12 24C12 17.373 17.373 12 24 12C17.373 12 12 6.627 12 0Z" />
@@ -288,129 +286,152 @@ export default function AuthView({
             </div>
           </div>
 
+          <Link
+            href="/"
+            className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-500 hover:text-slate-900 transition-colors py-1.5 px-3 rounded-full border border-slate-200 hover:border-slate-300 bg-slate-50"
+          >
+            <ArrowLeft className="w-3.5 h-3.5" />
+            <span>Kembali ke Beranda</span>
+          </Link>
+        </div>
+
+        {/* Spacious, Expansive Form Container */}
+        <div className="w-full max-w-xl mx-auto my-auto py-2 sm:py-4">
+          
           {/* Feedback Alerts */}
           {errorMsg && (
-            <div className="mb-4 p-3 rounded-xl bg-red-50 border border-red-200 text-red-600 text-xs flex items-start gap-2 animate-in fade-in duration-200">
+            <div className="mb-5 p-3.5 rounded-2xl bg-red-50 border border-red-200 text-red-600 text-xs sm:text-sm flex items-start gap-2.5 animate-in fade-in duration-200">
               <AlertCircle className="w-4 h-4 shrink-0 mt-0.5 text-red-500" />
               <div className="leading-snug">{errorMsg}</div>
             </div>
           )}
 
           {successMsg && (
-            <div className="mb-4 p-3 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-700 text-xs flex items-start gap-2 animate-in fade-in duration-200">
+            <div className="mb-5 p-3.5 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-700 text-xs sm:text-sm flex items-start gap-2.5 animate-in fade-in duration-200">
               <Check className="w-4 h-4 shrink-0 mt-0.5 text-emerald-600" />
               <div className="leading-snug">{successMsg}</div>
             </div>
           )}
 
           {/* ========================================================================= */}
-          {/* A. LOGIN FORM (SCREEN 1 REFERENSI)                                        */}
+          {/* A. LOGIN FORM (FULL-WIDTH & SPACIOUS)                                     */}
           {/* ========================================================================= */}
           {mode === 'login' && (
             <div>
-              <div className="mb-5">
-                <h2 className="text-xl sm:text-2xl font-bold tracking-tight text-[#0F172A]">
+              <div className="mb-6 sm:mb-8">
+                <h2 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-[#0F172A]">
                   Selamat datang kembali
                 </h2>
-                <p className="text-xs text-slate-400 mt-1">
-                  Masuk ke akun Anda untuk melanjutkan.
+                <p className="text-xs sm:text-sm text-slate-500 mt-1.5">
+                  Masuk ke akun Anda untuk melanjutkan ke Studio Workspace.
                 </p>
               </div>
 
-              <form onSubmit={handleLogin} className="space-y-3.5">
+              <form onSubmit={handleLogin} className="space-y-4 sm:space-y-5">
                 {/* Email / Username */}
-                <div className="relative">
-                  <Mail className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
-                  <input
-                    type="text"
-                    required
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    placeholder="Email atau Username"
-                    className="w-full pl-10 pr-3.5 py-3 rounded-xl bg-[#F8FAFC] border border-[#E2E8F0] focus:border-[#3B82F6] focus:bg-white focus:ring-2 focus:ring-blue-500/15 text-xs sm:text-sm text-[#0F172A] placeholder:text-slate-400 transition-all outline-none"
-                  />
+                <div>
+                  <label className="block text-xs font-semibold text-slate-700 mb-1.5">
+                    Email atau Username
+                  </label>
+                  <div className="relative">
+                    <Mail className="w-4 h-4 text-slate-400 absolute left-4 top-1/2 -translate-y-1/2" />
+                    <input
+                      type="text"
+                      required
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      placeholder="Email atau Username (Contoh: nama@unp.ac.id atau superadmin@academic.id)"
+                      className="w-full pl-11 pr-4 py-3.5 rounded-2xl bg-[#F8FAFC] border border-[#E2E8F0] focus:border-[#3B82F6] focus:bg-white focus:ring-4 focus:ring-blue-500/10 text-xs sm:text-sm text-[#0F172A] placeholder:text-slate-400 transition-all outline-none"
+                    />
+                  </div>
                 </div>
 
                 {/* Kata Sandi */}
-                <div className="relative">
-                  <Lock className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
-                  <input
-                    type={showPassword ? 'text' : 'password'}
-                    required
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    placeholder="Kata Sandi"
-                    className="w-full pl-10 pr-10 py-3 rounded-xl bg-[#F8FAFC] border border-[#E2E8F0] focus:border-[#3B82F6] focus:bg-white focus:ring-2 focus:ring-blue-500/15 text-xs sm:text-sm text-[#0F172A] placeholder:text-slate-400 transition-all outline-none"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors"
-                  >
-                    {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                  </button>
+                <div>
+                  <div className="flex items-center justify-between mb-1.5">
+                    <label className="text-xs font-semibold text-slate-700">
+                      Kata Sandi
+                    </label>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setEmail(SUPERADMIN_USER.email);
+                        setPassword('superadmin123');
+                      }}
+                      className="text-xs font-semibold text-blue-600 hover:text-blue-700 transition-colors cursor-pointer"
+                    >
+                      Lupa kata sandi?
+                    </button>
+                  </div>
+                  <div className="relative">
+                    <Lock className="w-4 h-4 text-slate-400 absolute left-4 top-1/2 -translate-y-1/2" />
+                    <input
+                      type={showPassword ? 'text' : 'password'}
+                      required
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      placeholder="Masukkan kata sandi akun Anda..."
+                      className="w-full pl-11 pr-11 py-3.5 rounded-2xl bg-[#F8FAFC] border border-[#E2E8F0] focus:border-[#3B82F6] focus:bg-white focus:ring-4 focus:ring-blue-500/10 text-xs sm:text-sm text-[#0F172A] placeholder:text-slate-400 transition-all outline-none"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors"
+                    >
+                      {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                    </button>
+                  </div>
                 </div>
 
-                {/* Remember Me & Forgot Password Row */}
-                <div className="flex items-center justify-between text-xs pt-0.5">
+                {/* Remember Me Checkbox */}
+                <div className="flex items-center text-xs">
                   <label className="flex items-center gap-2 text-slate-600 cursor-pointer">
                     <input
                       type="checkbox"
                       checked={rememberMe}
                       onChange={(e) => setRememberMe(e.target.checked)}
-                      className="w-3.5 h-3.5 rounded border-slate-300 text-blue-600 focus:ring-blue-500"
+                      className="w-4 h-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500"
                     />
-                    <span>Ingat saya</span>
+                    <span className="font-medium">Ingat saya di perangkat ini</span>
                   </label>
-
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setEmail(SUPERADMIN_USER.email);
-                      setPassword('superadmin123');
-                    }}
-                    className="text-blue-600 hover:text-blue-700 font-medium transition-colors cursor-pointer"
-                  >
-                    Lupa kata sandi?
-                  </button>
                 </div>
 
                 {/* Primary Button Masuk */}
                 <button
                   type="submit"
                   disabled={isLoading}
-                  className="w-full py-3 px-4 rounded-xl bg-[#4F46E5] hover:bg-[#4338CA] text-white font-semibold text-xs sm:text-sm shadow-md shadow-indigo-500/20 flex items-center justify-center gap-2 transition-all cursor-pointer mt-2"
+                  className="w-full py-3.5 sm:py-4 px-6 rounded-2xl bg-[#4F46E5] hover:bg-[#4338CA] text-white font-bold text-xs sm:text-sm shadow-lg shadow-indigo-500/25 flex items-center justify-center gap-2 transition-all cursor-pointer pt-2"
                 >
-                  <span>{isLoading ? 'Memproses...' : 'Masuk'}</span>
+                  <span>{isLoading ? 'Memproses Masuk...' : 'Masuk ke Studio Workspace'}</span>
                   <ArrowRight className="w-4 h-4" />
                 </button>
               </form>
 
               {/* Divider "atau" */}
-              <div className="relative my-4">
+              <div className="relative my-6">
                 <div className="absolute inset-0 flex items-center">
                   <div className="w-full border-t border-slate-200" />
                 </div>
-                <div className="relative flex justify-center text-[11px]">
-                  <span className="bg-white px-3 text-slate-400">atau</span>
+                <div className="relative flex justify-center text-xs">
+                  <span className="bg-white px-4 text-slate-400 font-medium">atau</span>
                 </div>
               </div>
 
-              {/* Secondary Button: Masuk dengan Superadmin / Akun Cepat */}
+              {/* Secondary Button: Masuk dengan Superadmin */}
               <button
                 type="button"
                 onClick={handleOneClickSuperadmin}
                 disabled={isLoading}
-                className="w-full py-2.5 px-3.5 rounded-xl border border-slate-200 hover:border-slate-300 hover:bg-slate-50 text-slate-700 font-semibold text-xs flex items-center justify-center gap-2 transition-all cursor-pointer"
+                className="w-full py-3 px-4 rounded-2xl border-2 border-slate-200 hover:border-slate-300 hover:bg-slate-50 text-slate-700 font-bold text-xs sm:text-sm flex items-center justify-center gap-2 transition-all cursor-pointer shadow-xs"
               >
-                <Zap className="w-3.5 h-3.5 text-blue-600" />
-                <span>Masuk dengan Superadmin</span>
+                <Zap className="w-4 h-4 text-blue-600" />
+                <span>Masuk dengan Superadmin (1-Klik Full Access)</span>
               </button>
 
               {/* Bottom Switcher */}
-              <div className="mt-5 text-center">
-                <p className="text-xs text-slate-500">
-                  Belum punya akun?{' '}
+              <div className="mt-8 text-center">
+                <p className="text-xs sm:text-sm text-slate-500">
+                  Belum memiliki akun?{' '}
                   <button
                     type="button"
                     onClick={() => {
@@ -418,7 +439,7 @@ export default function AuthView({
                       setErrorMsg('');
                       setSuccessMsg('');
                     }}
-                    className="text-blue-600 hover:text-blue-700 font-semibold transition-colors cursor-pointer"
+                    className="text-blue-600 hover:text-blue-700 font-bold transition-colors cursor-pointer"
                   >
                     Daftar di sini
                   </button>
@@ -428,122 +449,153 @@ export default function AuthView({
           )}
 
           {/* ========================================================================= */}
-          {/* B. REGISTER FORM (SCREEN 2 REFERENSI)                                     */}
+          {/* B. REGISTER FORM (FULL-WIDTH & SPACIOUS)                                  */}
           {/* ========================================================================= */}
           {mode === 'register' && (
             <div>
-              <div className="mb-4">
-                <h2 className="text-xl sm:text-2xl font-bold tracking-tight text-[#0F172A]">
+              <div className="mb-5 sm:mb-6">
+                <h2 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-[#0F172A]">
                   Buat akun baru
                 </h2>
-                <p className="text-xs text-slate-400 mt-1">
-                  Daftar untuk mulai menggunakan semua fitur.
+                <p className="text-xs sm:text-sm text-slate-500 mt-1">
+                  Daftar untuk mulai menggunakan semua fitur multi-agen akademik (Gratis 3x Kuota Penuh).
                 </p>
               </div>
 
-              <form onSubmit={handleRegister} className="space-y-3">
+              <form onSubmit={handleRegister} className="space-y-3.5 sm:space-y-4">
                 {/* 1. Nama Lengkap */}
-                <div className="relative">
-                  <User className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
-                  <input
-                    type="text"
-                    required
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
-                    placeholder="Nama Lengkap"
-                    className="w-full pl-10 pr-3.5 py-2.5 rounded-xl bg-[#F8FAFC] border border-[#E2E8F0] focus:border-[#3B82F6] focus:bg-white focus:ring-2 focus:ring-blue-500/15 text-xs sm:text-sm text-[#0F172A] placeholder:text-slate-400 transition-all outline-none"
-                  />
+                <div>
+                  <label className="block text-xs font-semibold text-slate-700 mb-1">
+                    Nama Lengkap &amp; Gelar
+                  </label>
+                  <div className="relative">
+                    <User className="w-4 h-4 text-slate-400 absolute left-4 top-1/2 -translate-y-1/2" />
+                    <input
+                      type="text"
+                      required
+                      value={name}
+                      onChange={(e) => setName(e.target.value)}
+                      placeholder="Contoh: Budi Santoso, S.T."
+                      className="w-full pl-11 pr-4 py-3 rounded-2xl bg-[#F8FAFC] border border-[#E2E8F0] focus:border-[#3B82F6] focus:bg-white focus:ring-4 focus:ring-blue-500/10 text-xs sm:text-sm text-[#0F172A] placeholder:text-slate-400 transition-all outline-none"
+                    />
+                  </div>
                 </div>
 
                 {/* 2. Email */}
-                <div className="relative">
-                  <Mail className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
-                  <input
-                    type="email"
-                    required
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    placeholder="Email"
-                    className="w-full pl-10 pr-3.5 py-2.5 rounded-xl bg-[#F8FAFC] border border-[#E2E8F0] focus:border-[#3B82F6] focus:bg-white focus:ring-2 focus:ring-blue-500/15 text-xs sm:text-sm text-[#0F172A] placeholder:text-slate-400 transition-all outline-none"
-                  />
+                <div>
+                  <label className="block text-xs font-semibold text-slate-700 mb-1">
+                    Alamat Email (Kampus / Pribadi)
+                  </label>
+                  <div className="relative">
+                    <Mail className="w-4 h-4 text-slate-400 absolute left-4 top-1/2 -translate-y-1/2" />
+                    <input
+                      type="email"
+                      required
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      placeholder="Contoh: nama@mhs.unp.ac.id"
+                      className="w-full pl-11 pr-4 py-3 rounded-2xl bg-[#F8FAFC] border border-[#E2E8F0] focus:border-[#3B82F6] focus:bg-white focus:ring-4 focus:ring-blue-500/10 text-xs sm:text-sm text-[#0F172A] placeholder:text-slate-400 transition-all outline-none"
+                    />
+                  </div>
                 </div>
 
-                {/* 3. Kata Sandi */}
-                <div className="relative">
-                  <Lock className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
-                  <input
-                    type={showPassword ? 'text' : 'password'}
-                    required
-                    minLength={6}
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    placeholder="Kata Sandi"
-                    className="w-full pl-10 pr-10 py-2.5 rounded-xl bg-[#F8FAFC] border border-[#E2E8F0] focus:border-[#3B82F6] focus:bg-white focus:ring-2 focus:ring-blue-500/15 text-xs sm:text-sm text-[#0F172A] placeholder:text-slate-400 transition-all outline-none"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors"
-                  >
-                    {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                  </button>
+                {/* 3. Kata Sandi & Konfirmasi (Spacious Grid on Larger Screens) */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+                  <div>
+                    <label className="block text-xs font-semibold text-slate-700 mb-1">
+                      Kata Sandi (Min. 6)
+                    </label>
+                    <div className="relative">
+                      <Lock className="w-4 h-4 text-slate-400 absolute left-4 top-1/2 -translate-y-1/2" />
+                      <input
+                        type={showPassword ? 'text' : 'password'}
+                        required
+                        minLength={6}
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        placeholder="Kata sandi..."
+                        className="w-full pl-11 pr-11 py-3 rounded-2xl bg-[#F8FAFC] border border-[#E2E8F0] focus:border-[#3B82F6] focus:bg-white focus:ring-4 focus:ring-blue-500/10 text-xs sm:text-sm text-[#0F172A] placeholder:text-slate-400 transition-all outline-none"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowPassword(!showPassword)}
+                        className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors"
+                      >
+                        {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                      </button>
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-semibold text-slate-700 mb-1">
+                      Konfirmasi Kata Sandi
+                    </label>
+                    <div className="relative">
+                      <Lock className="w-4 h-4 text-slate-400 absolute left-4 top-1/2 -translate-y-1/2" />
+                      <input
+                        type={showConfirmPassword ? 'text' : 'password'}
+                        required
+                        minLength={6}
+                        value={confirmPassword}
+                        onChange={(e) => setConfirmPassword(e.target.value)}
+                        placeholder="Ulangi sandi..."
+                        className="w-full pl-11 pr-11 py-3 rounded-2xl bg-[#F8FAFC] border border-[#E2E8F0] focus:border-[#3B82F6] focus:bg-white focus:ring-4 focus:ring-blue-500/10 text-xs sm:text-sm text-[#0F172A] placeholder:text-slate-400 transition-all outline-none"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                        className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors"
+                      >
+                        {showConfirmPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                      </button>
+                    </div>
+                  </div>
                 </div>
 
-                {/* 4. Konfirmasi Kata Sandi */}
-                <div className="relative">
-                  <Lock className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
-                  <input
-                    type={showConfirmPassword ? 'text' : 'password'}
-                    required
-                    minLength={6}
-                    value={confirmPassword}
-                    onChange={(e) => setConfirmPassword(e.target.value)}
-                    placeholder="Konfirmasi Kata Sandi"
-                    className="w-full pl-10 pr-10 py-2.5 rounded-xl bg-[#F8FAFC] border border-[#E2E8F0] focus:border-[#3B82F6] focus:bg-white focus:ring-2 focus:ring-blue-500/15 text-xs sm:text-sm text-[#0F172A] placeholder:text-slate-400 transition-all outline-none"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                    className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors"
-                  >
-                    {showConfirmPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                  </button>
+                {/* 4. Perguruan Tinggi / Instansi */}
+                <div>
+                  <label className="block text-xs font-semibold text-slate-700 mb-1">
+                    Perguruan Tinggi / Instansi
+                  </label>
+                  <div className="relative">
+                    <GraduationCap className="w-4 h-4 text-slate-400 absolute left-4 top-1/2 -translate-y-1/2 pointer-events-none" />
+                    <select
+                      value={institution}
+                      onChange={(e) => setInstitution(e.target.value)}
+                      className="w-full pl-11 pr-10 py-3 rounded-2xl bg-[#F8FAFC] border border-[#E2E8F0] focus:border-[#3B82F6] focus:bg-white focus:ring-4 focus:ring-blue-500/10 text-xs sm:text-sm text-[#0F172A] transition-all outline-none appearance-none cursor-pointer font-medium"
+                    >
+                      <option value="Universitas Negeri Padang (UNP)">Universitas Negeri Padang (UNP)</option>
+                      <option value="Universitas Indonesia (UI)">Universitas Indonesia (UI)</option>
+                      <option value="Institut Teknologi Bandung (ITB)">Institut Teknologi Bandung (ITB)</option>
+                      <option value="Universitas Gadjah Mada (UGM)">Universitas Gadjah Mada (UGM)</option>
+                      <option value="Institut Teknologi Sepuluh Nopember (ITS)">Institut Teknologi Sepuluh Nopember (ITS)</option>
+                      <option value="Universitas Andalas (UNAND)">Universitas Andalas (UNAND)</option>
+                      <option value="Universitas Lainnya / Instansi Mandiri">Universitas Lainnya / Instansi Mandiri</option>
+                    </select>
+                    <ChevronDown className="w-4 h-4 text-slate-400 absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none" />
+                  </div>
                 </div>
 
-                {/* 5. Perguruan Tinggi / Instansi */}
-                <div className="relative">
-                  <GraduationCap className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
-                  <select
-                    value={institution}
-                    onChange={(e) => setInstitution(e.target.value)}
-                    className="w-full pl-10 pr-8 py-2.5 rounded-xl bg-[#F8FAFC] border border-[#E2E8F0] focus:border-[#3B82F6] focus:bg-white focus:ring-2 focus:ring-blue-500/15 text-xs sm:text-sm text-[#0F172A] transition-all outline-none appearance-none cursor-pointer"
-                  >
-                    <option value="Universitas Negeri Padang (UNP)">Universitas Negeri Padang (UNP)</option>
-                    <option value="Universitas Indonesia (UI)">Universitas Indonesia (UI)</option>
-                    <option value="Institut Teknologi Bandung (ITB)">Institut Teknologi Bandung (ITB)</option>
-                    <option value="Universitas Gadjah Mada (UGM)">Universitas Gadjah Mada (UGM)</option>
-                    <option value="Institut Teknologi Sepuluh Nopember (ITS)">Institut Teknologi Sepuluh Nopember (ITS)</option>
-                    <option value="Universitas Andalas (UNAND)">Universitas Andalas (UNAND)</option>
-                    <option value="Universitas Lainnya / Instansi Mandiri">Universitas Lainnya / Instansi Mandiri</option>
-                  </select>
-                  <ChevronDown className="w-4 h-4 text-slate-400 absolute right-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
-                </div>
-
-                {/* 6. Program Studi / Peran */}
-                <div className="relative">
-                  <User className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
-                  <select
-                    value={role}
-                    onChange={(e) => setRole(e.target.value as UserRole)}
-                    className="w-full pl-10 pr-8 py-2.5 rounded-xl bg-[#F8FAFC] border border-[#E2E8F0] focus:border-[#3B82F6] focus:bg-white focus:ring-2 focus:ring-blue-500/15 text-xs sm:text-sm text-[#0F172A] transition-all outline-none appearance-none cursor-pointer"
-                  >
-                    <option value="Mahasiswa">Mahasiswa (Skripsi / Tesis / PKL)</option>
-                    <option value="Dosen Pembimbing">Dosen Pembimbing / Reviewer</option>
-                    <option value="Peneliti">Peneliti / Penulis Jurnal</option>
-                    <option value="Reviewer Industri">Reviewer Industri / Magang</option>
-                    <option value="Umum">Umum / Penulis Akademik</option>
-                  </select>
-                  <ChevronDown className="w-4 h-4 text-slate-400 absolute right-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+                {/* 5. Program Studi / Peran */}
+                <div>
+                  <label className="block text-xs font-semibold text-slate-700 mb-1">
+                    Peran &amp; Jenjang Akademik
+                  </label>
+                  <div className="relative">
+                    <User className="w-4 h-4 text-slate-400 absolute left-4 top-1/2 -translate-y-1/2 pointer-events-none" />
+                    <select
+                      value={role}
+                      onChange={(e) => setRole(e.target.value as UserRole)}
+                      className="w-full pl-11 pr-10 py-3 rounded-2xl bg-[#F8FAFC] border border-[#E2E8F0] focus:border-[#3B82F6] focus:bg-white focus:ring-4 focus:ring-blue-500/10 text-xs sm:text-sm text-[#0F172A] transition-all outline-none appearance-none cursor-pointer font-medium"
+                    >
+                      <option value="Mahasiswa">Mahasiswa (Skripsi / Tesis / PKL)</option>
+                      <option value="Dosen Pembimbing">Dosen Pembimbing / Reviewer</option>
+                      <option value="Peneliti">Peneliti / Penulis Jurnal</option>
+                      <option value="Reviewer Industri">Reviewer Industri / Magang</option>
+                      <option value="Umum">Umum / Penulis Akademik</option>
+                    </select>
+                    <ChevronDown className="w-4 h-4 text-slate-400 absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none" />
+                  </div>
                 </div>
 
                 {/* Submit Button */}
@@ -551,18 +603,18 @@ export default function AuthView({
                   <button
                     type="submit"
                     disabled={isLoading}
-                    className="w-full py-3 px-4 rounded-xl bg-[#2563EB] hover:bg-[#1D4ED8] text-white font-semibold text-xs sm:text-sm shadow-md shadow-blue-500/25 flex items-center justify-center gap-2 transition-all cursor-pointer"
+                    className="w-full py-3.5 sm:py-4 px-6 rounded-2xl bg-[#2563EB] hover:bg-[#1D4ED8] text-white font-bold text-xs sm:text-sm shadow-lg shadow-blue-500/25 flex items-center justify-center gap-2 transition-all cursor-pointer"
                   >
-                    <span>{isLoading ? 'Mendaftarkan...' : 'Daftar Sekarang'}</span>
+                    <span>{isLoading ? 'Mendaftarkan Akun...' : 'Daftar Sekarang & Masuk ke Studio'}</span>
                     <ArrowRight className="w-4 h-4" />
                   </button>
                 </div>
               </form>
 
               {/* Bottom Switcher */}
-              <div className="mt-5 text-center">
-                <p className="text-xs text-slate-500">
-                  Sudah punya akun?{' '}
+              <div className="mt-6 text-center">
+                <p className="text-xs sm:text-sm text-slate-500">
+                  Sudah memiliki akun?{' '}
                   <button
                     type="button"
                     onClick={() => {
@@ -570,7 +622,7 @@ export default function AuthView({
                       setErrorMsg('');
                       setSuccessMsg('');
                     }}
-                    className="text-blue-600 hover:text-blue-700 font-semibold transition-colors cursor-pointer"
+                    className="text-blue-600 hover:text-blue-700 font-bold transition-colors cursor-pointer"
                   >
                     Masuk di sini
                   </button>
@@ -579,6 +631,11 @@ export default function AuthView({
             </div>
           )}
 
+        </div>
+
+        {/* Bottom Sub-Footer in Form Pane */}
+        <div className="w-full max-w-xl mx-auto text-center text-xs text-slate-400 shrink-0 pt-4 border-t border-slate-100">
+          <span>academic agent studio &bull; platform multi-agen akademik otonom &bull; powered by oxidlabs</span>
         </div>
 
       </div>
