@@ -22,6 +22,7 @@ export const SUPERADMIN_USER: UserProfile = {
   id: 'usr-superadmin-ilham',
   email: 'superadmin@academic.id',
   name: 'Ilham Maulana (Superadmin)',
+  password: 'superadmin123',
   role: 'Superadmin',
   institution: 'Universitas Negeri Padang (UNP)',
   isSuperAdmin: true,
@@ -148,6 +149,13 @@ export function setUserLoggedIn(status: boolean) {
   }
 }
 
+export function logoutUser() {
+  if (typeof window !== 'undefined') {
+    setUserLoggedIn(false);
+    clearActiveSession();
+  }
+}
+
 // Initialize Supabase Client dynamically
 export function getSupabaseClient(): SupabaseClient | null {
   if (typeof window === 'undefined') return null;
@@ -223,15 +231,40 @@ export function registerUser(newUser: {
   role?: UserRole;
 }): { success: boolean; user?: UserProfile; message?: string } {
   const users = getRegisteredUsers();
-  const normalizedEmail = newUser.email.trim().toLowerCase();
+  const normalizedEmail = (newUser.email || '').trim().toLowerCase();
+  const trimmedName = (newUser.name || '').trim();
+
+  if (!trimmedName || trimmedName.length < 2) {
+    return { success: false, message: 'Nama lengkap wajib diisi minimal 2 karakter.' };
+  }
+
+  if (!normalizedEmail || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(normalizedEmail)) {
+    return { success: false, message: 'Format alamat email tidak valid.' };
+  }
+
+  if (newUser.password && newUser.password.length < 6) {
+    return { success: false, message: 'Kata sandi minimal 6 karakter.' };
+  }
+
+  // Lindungi akun reserved Superadmin
+  if (
+    normalizedEmail === 'superadmin@academic.id' || 
+    normalizedEmail === 'ilhammu29' || 
+    normalizedEmail === 'admin@academic.id'
+  ) {
+    return { 
+      success: false, 
+      message: 'Email atau username ini adalah akun khusus Superadmin. Silakan masuk melalui halaman login.' 
+    };
+  }
 
   if (users.some(u => u.email.toLowerCase() === normalizedEmail)) {
-    return { success: false, message: 'Email sudah terdaftar. Silakan login langsung.' };
+    return { success: false, message: 'Email sudah terdaftar. Silakan login langsung menggunakan kata sandi Anda.' };
   }
 
   const profile: UserProfile = {
     id: `usr-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`,
-    name: newUser.name.trim(),
+    name: trimmedName,
     email: normalizedEmail,
     password: newUser.password || '123456',
     institution: newUser.institution?.trim() || 'Universitas Negeri Padang (UNP)',
@@ -250,15 +283,28 @@ export function registerUser(newUser: {
   saveStoredUser(profile);
   setUserLoggedIn(true);
 
-  return { success: true, user: profile, message: 'Pendaftaran berhasil! Anda mendapatkan 3x kuota trial gratis.' };
+  return { success: true, user: profile, message: 'Pendaftaran berhasil! Akun Anda aktif dengan 3x kuota trial gratis.' };
 }
 
 export function loginUser(email: string, password?: string): { success: boolean; user?: UserProfile; message?: string } {
   const users = getRegisteredUsers();
-  const normalizedEmail = email.trim().toLowerCase();
+  const normalizedEmail = (email || '').trim().toLowerCase();
 
-  // Superadmin bypass
-  if (normalizedEmail === 'superadmin@academic.id' || normalizedEmail === 'ilhammu29' || normalizedEmail === 'admin') {
+  if (!normalizedEmail) {
+    return { success: false, message: 'Alamat email atau username wajib diisi.' };
+  }
+
+  // Superadmin Account Verification
+  if (
+    normalizedEmail === 'superadmin@academic.id' || 
+    normalizedEmail === 'ilhammu29' || 
+    normalizedEmail === 'admin'
+  ) {
+    // Validasi kata sandi superadmin jika diberikan
+    const validSuperadminPasswords = ['superadmin123', 'superadmin', 'ilhammu29', 'admin123'];
+    if (password && !validSuperadminPasswords.includes(password)) {
+      return { success: false, message: 'Kata sandi Superadmin salah. Silakan periksa kembali.' };
+    }
     saveStoredUser(SUPERADMIN_USER);
     setUserLoggedIn(true);
     return { success: true, user: SUPERADMIN_USER, message: 'Berhasil masuk sebagai Superadmin.' };
@@ -274,14 +320,11 @@ export function loginUser(email: string, password?: string): { success: boolean;
     return { success: true, user: existing, message: 'Berhasil masuk ke akun Anda.' };
   }
 
-  // Jika akun belum pernah dibuat, otomatis daftarkan akun baru dengan 3 trial
-  return registerUser({
-    name: normalizedEmail.split('@')[0],
-    email: normalizedEmail,
-    password: password || '123456',
-    institution: 'Universitas Negeri Padang (UNP)',
-    role: 'Mahasiswa'
-  });
+  // Akun tidak ditemukan: beri tahu user untuk registrasi, jangan auto-create akun diam-diam
+  return {
+    success: false,
+    message: 'Akun dengan email/username tersebut tidak ditemukan. Silakan periksa kembali atau buat akun baru di halaman Registrasi.'
+  };
 }
 
 // Konsumsi Kuota Pengguna

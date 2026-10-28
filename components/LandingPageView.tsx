@@ -276,7 +276,22 @@ export const LandingPageView: React.FC<LandingPageViewProps> = ({
                     {currentUser?.isSuperAdmin ? "👑 Superadmin" : currentUser?.isSubscribed ? "⭐ Pro" : `⚡ Trial: ${currentUser?.trialGeneratesLeft ?? 3}/3`}
                   </span>
                 </button>
-              ) : null}
+              ) : (
+                <div className="flex items-center gap-2">
+                  <a
+                    href="/login"
+                    className="hidden sm:inline-flex items-center px-3.5 py-1.5 rounded-full border border-zinc-300 dark:border-zinc-700 text-zinc-700 dark:text-zinc-200 hover:text-black dark:hover:text-white hover:bg-zinc-100 dark:hover:bg-zinc-800 text-xs font-semibold transition-all cursor-pointer"
+                  >
+                    Masuk
+                  </a>
+                  <a
+                    href="/register"
+                    className="hidden sm:inline-flex items-center px-3.5 py-1.5 rounded-full bg-blue-50 dark:bg-blue-950/40 text-blue-600 dark:text-blue-400 border border-blue-200 dark:border-blue-800 text-xs font-semibold hover:bg-blue-100 transition-all cursor-pointer"
+                  >
+                    Daftar
+                  </a>
+                </div>
+              )}
 
               {/* Try Studio Button (Matching Black Pill with Right Arrow) */}
               <button
@@ -642,9 +657,6 @@ export const LandingPageView: React.FC<LandingPageViewProps> = ({
           </div>
 
           <div className="flex items-center gap-6">
-            <button type="button" onClick={onOpenAuth} className="hover:text-zinc-800 dark:hover:text-zinc-200 transition-colors cursor-pointer">
-              Login Superadmin
-            </button>
             <a href="#examples-section" className="hover:text-zinc-800 dark:hover:text-zinc-200 transition-colors cursor-pointer">
               Panduan Format
             </a>

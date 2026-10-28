@@ -131,6 +131,24 @@ export default function Home() {
       }
     }
 
+    // Periksa apakah ada pending preset yang disimpan dari alur login
+    try {
+      const pendingRaw = sessionStorage.getItem("academic_pending_preset");
+      if (pendingRaw) {
+        const preset = JSON.parse(pendingRaw);
+        sessionStorage.removeItem("academic_pending_preset");
+        if (preset.title) setTitle(preset.title);
+        if (preset.category) setCategory(preset.category);
+        if (preset.reportType) setReportType(preset.reportType);
+        if (preset.targetEntity) setTargetEntity(preset.targetEntity);
+        if (preset.campusGuideline) setCampusGuideline(preset.campusGuideline);
+        if (isUserLoggedIn()) {
+          setStage("input");
+          return;
+        }
+      }
+    } catch {}
+
     // Selalu mulai di halaman landing page terlebih dahulu
     setStage("landing");
   }, []);
@@ -315,8 +333,11 @@ export default function Home() {
     if (!isUserLoggedIn() && !isLoggedIn) {
       if (preset) {
         pendingPresetRef.current = preset;
+        try {
+          sessionStorage.setItem("academic_pending_preset", JSON.stringify(preset));
+        } catch {}
       }
-      setIsAuthModalOpen(true);
+      window.location.href = "/login";
       return;
     }
 
@@ -354,7 +375,7 @@ export default function Home() {
     }
 
     if (!isUserLoggedIn() && !isLoggedIn) {
-      setIsAuthModalOpen(true);
+      window.location.href = "/login";
       return;
     }
 
@@ -555,7 +576,13 @@ export default function Home() {
 
           <LandingPageView
             onEnterStudio={handleEnterStudio}
-            onOpenAuth={() => setIsAuthModalOpen(true)}
+            onOpenAuth={() => {
+              if (isLoggedIn) {
+                setIsAuthModalOpen(true);
+              } else {
+                window.location.href = "/login";
+              }
+            }}
             onOpenPayment={() => setIsPaymentModalOpen(true)}
             onOpenSuperadmin={() => setIsSuperadminModalOpen(true)}
             currentUser={currentUser}

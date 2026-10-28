@@ -54,3 +54,29 @@ test('New user registration grants 3 trial generates and 5 restricted title gene
   assert.equal(q4.isRestrictedPreview, true);
   assert.equal(q4.remainingRestricted, 4);
 });
+
+test('Login logic validates passwords and non-existent users accurately', () => {
+  // 1. Unregistered user cannot log in
+  const notFound = loginUser('unregistered.person@example.com', 'somepass');
+  assert.equal(notFound.success, false);
+  assert.match(notFound.message || '', /tidak ditemukan/i);
+
+  // 2. Wrong password for registered user
+  const wrongPass = loginUser('budi.santoso@mhs.unp.ac.id', 'wrongpassword');
+  assert.equal(wrongPass.success, false);
+  assert.match(wrongPass.message || '', /kata sandi tidak sesuai/i);
+
+  // 3. Correct password for registered user
+  const correct = loginUser('budi.santoso@mhs.unp.ac.id', 'password123');
+  assert.equal(correct.success, true);
+  assert.equal(correct.user?.email, 'budi.santoso@mhs.unp.ac.id');
+
+  // 4. Superadmin login with password
+  const adminCorrect = loginUser('superadmin@academic.id', 'superadmin123');
+  assert.equal(adminCorrect.success, true);
+  assert.equal(adminCorrect.user?.isSuperAdmin, true);
+
+  // 5. Superadmin login with invalid password
+  const adminWrong = loginUser('superadmin@academic.id', 'randomfakekey');
+  assert.equal(adminWrong.success, false);
+});

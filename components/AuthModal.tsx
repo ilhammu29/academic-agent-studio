@@ -113,7 +113,7 @@ export default function AuthModal({
   // Handler Login 1-Klik Superadmin
   const handleSuperadminLogin = () => {
     setAuthError('');
-    const res = loginUser(SUPERADMIN_USER.email, 'superadmin');
+    const res = loginUser(SUPERADMIN_USER.email, 'superadmin123');
     if (res.user) {
       onUpdateUser(res.user);
       setAuthSuccess(true);
