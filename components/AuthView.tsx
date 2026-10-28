@@ -11,15 +11,15 @@ import {
   Lock, 
   Mail, 
   User, 
-  Building, 
+  GraduationCap, 
+  ChevronDown,
   Eye, 
   EyeOff, 
   ArrowLeft, 
   Zap, 
   AlertCircle,
-  FileCheck2,
-  GraduationCap,
-  BookOpenCheck
+  FileText,
+  Laptop
 } from 'lucide-react';
 import { 
   UserProfile, 
@@ -46,10 +46,16 @@ export default function AuthView({
   // Form Fields
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
   const [name, setName] = useState('');
   const [institution, setInstitution] = useState('Universitas Negeri Padang (UNP)');
   const [role, setRole] = useState<UserRole>('Mahasiswa');
+  const [programStudi, setProgramStudi] = useState('Teknik Elektro & Informatika');
+  const [rememberMe, setRememberMe] = useState(true);
+
+  // Password Visibility
   const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   // Status & Feedback
   const [errorMsg, setErrorMsg] = useState('');
@@ -77,7 +83,7 @@ export default function AuthView({
       } else {
         router.push(redirectUrl);
       }
-    }, 500);
+    }, 450);
   };
 
   // Submit Handler untuk Login
@@ -102,13 +108,19 @@ export default function AuthView({
     e.preventDefault();
     setErrorMsg('');
     setSuccessMsg('');
+
+    if (password !== confirmPassword) {
+      setErrorMsg('Konfirmasi kata sandi tidak cocok.');
+      return;
+    }
+
     setIsLoading(true);
 
     const res = registerUser({
       name,
       email,
       password,
-      institution,
+      institution: institution ? `${institution}${programStudi ? ` - ${programStudi}` : ''}` : 'Universitas Negeri Padang (UNP)',
       role
     });
 
@@ -136,498 +148,437 @@ export default function AuthView({
     }
   };
 
-  // Pre-fill formulir dengan kredensial Superadmin
-  const handlePreFillSuperadmin = () => {
-    setEmail(SUPERADMIN_USER.email);
-    setPassword('superadmin123');
-    setErrorMsg('');
-  };
-
   return (
-    <div className="w-full h-screen min-h-screen lg:h-screen lg:overflow-hidden bg-[#07090E] text-[#F8FAFC] flex flex-col lg:flex-row select-none">
+    <div className="w-full min-h-screen lg:h-screen lg:overflow-hidden bg-[#0A0E18] flex flex-col lg:flex-row select-none">
 
       {/* ========================================================================= */}
-      {/* LEFT PANE: BRAND SHOWCASE & FEATURE SPOTLIGHT (DESKTOP)                   */}
+      {/* 1. LEFT PANE: BRANDING, HEADLINE, GLOWING 3D RIBBON, & MICRO CARDS        */}
       {/* ========================================================================= */}
-      <div className="relative hidden lg:flex lg:w-5/12 xl:w-1/2 flex-col justify-between p-10 xl:p-14 bg-gradient-to-b from-[#0B0F19] via-[#080B13] to-[#05070B] border-r border-white/10 overflow-hidden">
-        {/* Subtle Background Glow Orbs */}
-        <div className="absolute -left-20 -top-20 w-96 h-96 rounded-full bg-blue-600/15 blur-[120px] pointer-events-none" />
-        <div className="absolute right-0 bottom-10 w-96 h-96 rounded-full bg-purple-600/10 blur-[130px] pointer-events-none" />
+      <div className="relative w-full lg:w-1/2 flex flex-col justify-between p-8 sm:p-12 xl:p-16 bg-gradient-to-b from-[#0B101D] via-[#090D18] to-[#070A13] overflow-hidden shrink-0">
         
-        {/* Subtle Mathematical Drafting Grid Lines */}
-        <div 
-          className="absolute inset-0 opacity-[0.04] pointer-events-none" 
-          style={{
-            backgroundImage: `radial-gradient(circle at 1px 1px, white 1px, transparent 0)`,
-            backgroundSize: '24px 24px'
-          }}
-        />
+        {/* Curved 3D Wave Organic Light Ribbons in Bottom-Left */}
+        <div className="absolute -left-20 -bottom-20 w-[480px] h-[480px] rounded-full bg-gradient-to-tr from-blue-700/20 via-indigo-600/15 to-purple-600/10 blur-[90px] pointer-events-none" />
+        <svg 
+          className="absolute -left-12 bottom-0 w-[520px] h-[440px] opacity-40 pointer-events-none"
+          viewBox="0 0 520 440" 
+          fill="none" 
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path 
+            d="M-80 440C-30 330 40 220 160 180C280 140 380 210 440 290C500 370 540 440 540 440" 
+            stroke="url(#gradient-ribbon-1)" 
+            strokeWidth="80" 
+            strokeLinecap="round" 
+            className="blur-xl"
+          />
+          <path 
+            d="M-40 460C30 350 110 240 220 200C330 160 410 220 470 320" 
+            stroke="url(#gradient-ribbon-2)" 
+            strokeWidth="38" 
+            strokeLinecap="round" 
+            className="blur-md"
+          />
+          <defs>
+            <linearGradient id="gradient-ribbon-1" x1="0" y1="200" x2="440" y2="440" gradientUnits="userSpaceOnUse">
+              <stop stopColor="#3B82F6" stopOpacity="0.4" />
+              <stop offset="0.6" stopColor="#6366F1" stopOpacity="0.3" />
+              <stop offset="1" stopColor="#8B5CF6" stopOpacity="0.1" />
+            </linearGradient>
+            <linearGradient id="gradient-ribbon-2" x1="50" y1="200" x2="470" y2="400" gradientUnits="userSpaceOnUse">
+              <stop stopColor="#60A5FA" stopOpacity="0.6" />
+              <stop offset="0.5" stopColor="#818CF8" stopOpacity="0.4" />
+              <stop offset="1" stopColor="#A78BFA" stopOpacity="0.1" />
+            </linearGradient>
+          </defs>
+        </svg>
 
-        {/* Top Header Branding */}
-        <div className="relative z-10 flex items-center justify-between">
-          <Link href="/" className="flex items-center gap-3 group">
-            <div className="w-9 h-9 rounded-xl bg-white/10 border border-white/20 flex items-center justify-center text-white shadow-md group-hover:scale-105 transition-all">
-              <svg className="w-5 h-5 fill-current" viewBox="0 0 24 24">
+        {/* Top Branding */}
+        <div className="relative z-10">
+          <Link href="/" className="inline-flex items-center gap-3 group">
+            {/* 4-Pointed Star Icon */}
+            <div className="w-8 h-8 flex items-center justify-center text-white shrink-0 group-hover:scale-110 transition-transform">
+              <svg className="w-6 h-6 fill-current" viewBox="0 0 24 24">
                 <path d="M12 0C12 6.627 6.627 12 0 12C6.627 12 12 17.373 12 24C12 17.373 17.373 12 24 12C17.373 12 12 6.627 12 0Z" />
               </svg>
             </div>
             <div>
-              <span className="font-bold text-base tracking-tight text-white block lowercase">
+              <span className="font-bold text-base sm:text-lg tracking-tight text-white block lowercase">
                 academic agent studio
               </span>
-              <span className="text-[10px] text-zinc-400 font-mono tracking-wider uppercase">
-                v2.5 Anti-Slop
+              <span className="text-[10px] text-zinc-400 font-mono tracking-widest uppercase block -mt-0.5">
+                v2.5 ANTI-SLOP
               </span>
             </div>
           </Link>
-
-          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
-            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-            12 Agents Ready
-          </span>
         </div>
 
-        {/* Center Editorial Showcase */}
-        <div className="relative z-10 my-auto py-6 max-w-lg">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold bg-blue-500/10 border border-blue-500/20 text-blue-400 mb-6">
-            <Sparkles className="w-3.5 h-3.5" />
-            <span>Autonomous Academic Multi-Agent Engine</span>
-          </div>
-
-          <h1 className="text-3xl xl:text-4xl font-black tracking-tight text-white leading-[1.18] mb-4">
-            Riset &amp; penulisan naskah akademik,{' '}
-            <span className="bg-gradient-to-r from-blue-400 via-indigo-300 to-purple-400 bg-clip-text text-transparent">
-              presisi tanpa kompromi.
+        {/* Center Headline & Thesis */}
+        <div className="relative z-10 my-auto py-8 sm:py-12 max-w-lg">
+          <h1 className="text-3xl sm:text-4xl xl:text-[42px] font-black tracking-tight text-white leading-[1.14] mb-5">
+            Riset &amp; penulisan<br />
+            naskah akademik,<br />
+            <span className="bg-gradient-to-r from-[#60A5FA] via-[#818CF8] to-[#C084FC] bg-clip-text text-transparent">
+              presisi tanpa<br />
+              kompromi.
             </span>
           </h1>
 
-          <p className="text-sm text-zinc-400 leading-relaxed mb-8">
+          <p className="text-xs sm:text-sm text-zinc-400 leading-relaxed max-w-md">
             Standar format skripsi, tesis, dan proposal penelitian terintegrasi dengan pedoman resmi Dikti &amp; FT UNP 2025.
           </p>
+        </div>
 
-          {/* Value Highlights Cards */}
-          <div className="space-y-3">
-            <div className="p-3.5 rounded-2xl bg-white/[0.03] border border-white/10 flex items-center gap-3.5 backdrop-blur-xs">
-              <div className="w-8 h-8 rounded-xl bg-blue-500/15 border border-blue-500/30 text-blue-400 flex items-center justify-center shrink-0">
-                <FileCheck2 className="w-4 h-4" />
-              </div>
-              <div>
-                <h2 className="text-xs font-bold text-white">Ekspor DOCX &amp; PPTX 100% Terstandar</h2>
-                <p className="text-[11px] text-zinc-400 mt-0.5">Lengkap dengan cover, bab naskah, daftar pustaka APA/IEEE, dan slide sidang 16:9.</p>
-              </div>
+        {/* Bottom 3 Micro-Feature Cards */}
+        <div className="relative z-10 grid grid-cols-3 gap-2.5 sm:gap-3.5 pt-4">
+          <div className="p-2 sm:p-2.5 rounded-xl bg-white/[0.04] border border-white/10 flex items-center gap-2 backdrop-blur-xs">
+            <div className="w-7 h-7 rounded-lg bg-blue-500/15 border border-blue-500/25 text-blue-400 flex items-center justify-center shrink-0">
+              <FileText className="w-3.5 h-3.5" />
             </div>
-
-            <div className="p-3.5 rounded-2xl bg-white/[0.03] border border-white/10 flex items-center gap-3.5 backdrop-blur-xs">
-              <div className="w-8 h-8 rounded-xl bg-purple-500/15 border border-purple-500/30 text-purple-400 flex items-center justify-center shrink-0">
-                <BookOpenCheck className="w-4 h-4" />
-              </div>
-              <div>
-                <h2 className="text-xs font-bold text-white">Verifikasi Sumber &amp; DOI Otentik</h2>
-                <p className="text-[11px] text-zinc-400 mt-0.5">Audit silang ke Crossref dan Semantic Scholar, bebas sitasi halusinasi AI.</p>
-              </div>
+            <div className="min-w-0">
+              <div className="text-[10px] sm:text-[11px] font-bold text-white truncate">Template Resmi</div>
+              <div className="text-[9px] text-zinc-400 truncate">Dikti &amp; FT UNP 2025</div>
             </div>
+          </div>
 
-            <div className="p-3.5 rounded-2xl bg-white/[0.03] border border-white/10 flex items-center gap-3.5 backdrop-blur-xs">
-              <div className="w-8 h-8 rounded-xl bg-amber-500/15 border border-amber-500/30 text-amber-400 flex items-center justify-center shrink-0">
-                <GraduationCap className="w-4 h-4" />
-              </div>
-              <div>
-                <h2 className="text-xs font-bold text-white">Simulasi Sidang &amp; Klinik Bimbingan</h2>
-                <p className="text-[11px] text-zinc-400 mt-0.5">Latihan tanya jawab berbasis pertanyaan kritis penguji akademik.</p>
-              </div>
+          <div className="p-2 sm:p-2.5 rounded-xl bg-white/[0.04] border border-white/10 flex items-center gap-2 backdrop-blur-xs">
+            <div className="w-7 h-7 rounded-lg bg-indigo-500/15 border border-indigo-500/25 text-indigo-400 flex items-center justify-center shrink-0">
+              <Sparkles className="w-3.5 h-3.5" />
+            </div>
+            <div className="min-w-0">
+              <div className="text-[10px] sm:text-[11px] font-bold text-white truncate">AI Assistant</div>
+              <div className="text-[9px] text-zinc-400 truncate">Lebih Produktif</div>
+            </div>
+          </div>
+
+          <div className="p-2 sm:p-2.5 rounded-xl bg-white/[0.04] border border-white/10 flex items-center gap-2 backdrop-blur-xs">
+            <div className="w-7 h-7 rounded-lg bg-purple-500/15 border border-purple-500/25 text-purple-400 flex items-center justify-center shrink-0">
+              <Laptop className="w-3.5 h-3.5" />
+            </div>
+            <div className="min-w-0">
+              <div className="text-[10px] sm:text-[11px] font-bold text-white truncate">Mudah Digunakan</div>
+              <div className="text-[9px] text-zinc-400 truncate">Di Semua Perangkat</div>
             </div>
           </div>
         </div>
 
-        {/* Bottom Showcase Footer */}
-        <div className="relative z-10 flex items-center justify-between text-xs text-zinc-500 pt-4 border-t border-white/10">
-          <span>&copy; 2026 Academic Agent Studio</span>
-          <span className="font-medium text-zinc-400">powered by oxidlabs</span>
-        </div>
       </div>
 
       {/* ========================================================================= */}
-      {/* RIGHT PANE: MODERN COMPACT AUTHENTICATION FORM                            */}
+      {/* 2. RIGHT PANE: CRISP WHITE FLOATING CARD (LIGHT CANVAS BACKGROUND)        */}
       {/* ========================================================================= */}
-      <div className="flex-1 h-full flex flex-col justify-between p-6 sm:p-10 lg:p-8 xl:p-12 overflow-y-auto bg-[#07090E]">
+      <div className="w-full lg:w-1/2 flex flex-col justify-center items-center p-4 sm:p-8 lg:p-6 xl:p-10 bg-[#F4F6FB] overflow-y-auto">
         
-        {/* Top Navbar in Form Pane */}
-        <div className="flex items-center justify-between w-full max-w-md mx-auto mb-4 shrink-0">
-          {/* Mobile Only Logo */}
-          <Link href="/" className="lg:hidden flex items-center gap-2">
-            <div className="w-7 h-7 rounded-lg bg-white/10 flex items-center justify-center text-white">
-              <svg className="w-4 h-4 fill-current" viewBox="0 0 24 24">
+        {/* Floating Card */}
+        <div className="w-full max-w-[430px] bg-white rounded-[28px] sm:rounded-[32px] p-6 sm:p-8 shadow-2xl shadow-slate-300/60 border border-slate-100 my-auto">
+          
+          {/* Card Header Brand */}
+          <div className="flex items-center gap-2.5 mb-6">
+            <div className="w-7 h-7 flex items-center justify-center text-[#3B82F6] shrink-0">
+              <svg className="w-6 h-6 fill-current" viewBox="0 0 24 24">
                 <path d="M12 0C12 6.627 6.627 12 0 12C6.627 12 12 17.373 12 24C12 17.373 17.373 12 24 12C17.373 12 12 6.627 12 0Z" />
               </svg>
             </div>
-            <span className="font-bold text-sm tracking-tight text-white lowercase">
-              academic agent studio
-            </span>
-          </Link>
-
-          <Link
-            href="/"
-            className="ml-auto inline-flex items-center gap-1.5 text-xs font-semibold text-zinc-400 hover:text-white transition-colors py-1.5 px-3 rounded-full border border-white/10 hover:border-white/20 bg-white/[0.04]"
-          >
-            <ArrowLeft className="w-3.5 h-3.5" />
-            <span>Kembali ke Beranda</span>
-          </Link>
-        </div>
-
-        {/* Centered Form Wrapper: Perfectly Height-Calibrated to Never Cut Off */}
-        <div className="w-full max-w-md mx-auto my-auto py-2">
-          
-          {/* Pill Tabs Switcher (Masuk / Daftar) */}
-          <div className="p-1 rounded-xl bg-zinc-900/90 border border-white/10 flex items-center mb-5 shadow-lg backdrop-blur-md">
-            <button
-              type="button"
-              onClick={() => {
-                setMode('login');
-                setErrorMsg('');
-                setSuccessMsg('');
-              }}
-              className={`flex-1 py-2 rounded-lg text-xs font-semibold transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
-                mode === 'login'
-                  ? 'bg-blue-600 text-white shadow-sm'
-                  : 'text-zinc-400 hover:text-zinc-200'
-              }`}
-            >
-              <User className="w-3.5 h-3.5" />
-              <span>Masuk (Login)</span>
-            </button>
-            <button
-              type="button"
-              onClick={() => {
-                setMode('register');
-                setErrorMsg('');
-                setSuccessMsg('');
-              }}
-              className={`flex-1 py-2 rounded-lg text-xs font-semibold transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
-                mode === 'register'
-                  ? 'bg-blue-600 text-white shadow-sm'
-                  : 'text-zinc-400 hover:text-zinc-200'
-              }`}
-            >
-              <Zap className="w-3.5 h-3.5" />
-              <span>Daftar Akun Baru</span>
-            </button>
+            <div>
+              <span className="font-bold text-sm sm:text-base tracking-tight text-[#0F172A] block lowercase">
+                academic agent studio
+              </span>
+              <span className="text-[9px] text-slate-400 font-mono tracking-widest uppercase block -mt-0.5">
+                v2.5 ANTI-SLOP
+              </span>
+            </div>
           </div>
 
-          {/* Form Card Container */}
-          <div className="rounded-2xl bg-[#0D111A]/95 border border-white/10 p-5 sm:p-6 shadow-2xl backdrop-blur-xl">
+          {/* Feedback Alerts */}
+          {errorMsg && (
+            <div className="mb-4 p-3 rounded-xl bg-red-50 border border-red-200 text-red-600 text-xs flex items-start gap-2 animate-in fade-in duration-200">
+              <AlertCircle className="w-4 h-4 shrink-0 mt-0.5 text-red-500" />
+              <div className="leading-snug">{errorMsg}</div>
+            </div>
+          )}
 
-            {/* Error & Success Feedback Banners */}
-            {errorMsg && (
-              <div className="mb-4 p-3 rounded-xl bg-red-500/10 border border-red-500/30 text-red-300 text-xs flex items-start gap-2.5 animate-in fade-in duration-200">
-                <AlertCircle className="w-4 h-4 shrink-0 mt-0.5 text-red-400" />
-                <div className="leading-snug">{errorMsg}</div>
+          {successMsg && (
+            <div className="mb-4 p-3 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-700 text-xs flex items-start gap-2 animate-in fade-in duration-200">
+              <Check className="w-4 h-4 shrink-0 mt-0.5 text-emerald-600" />
+              <div className="leading-snug">{successMsg}</div>
+            </div>
+          )}
+
+          {/* ========================================================================= */}
+          {/* A. LOGIN FORM (SCREEN 1 REFERENSI)                                        */}
+          {/* ========================================================================= */}
+          {mode === 'login' && (
+            <div>
+              <div className="mb-5">
+                <h2 className="text-xl sm:text-2xl font-bold tracking-tight text-[#0F172A]">
+                  Selamat datang kembali
+                </h2>
+                <p className="text-xs text-slate-400 mt-1">
+                  Masuk ke akun Anda untuk melanjutkan.
+                </p>
               </div>
-            )}
 
-            {successMsg && (
-              <div className="mb-4 p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-300 text-xs flex items-start gap-2.5 animate-in fade-in duration-200">
-                <Check className="w-4 h-4 shrink-0 mt-0.5 text-emerald-400" />
-                <div className="leading-snug">{successMsg}</div>
-              </div>
-            )}
-
-            {/* ========================================================================= */}
-            {/* 1. LOGIN FORM                                                             */}
-            {/* ========================================================================= */}
-            {mode === 'login' && (
-              <div>
-                <div className="mb-4">
-                  <h2 className="text-lg sm:text-xl font-bold tracking-tight text-white">
-                    Masuk ke Akun Anda
-                  </h2>
-                  <p className="text-[11px] text-zinc-400 mt-0.5">
-                    Gunakan email akun Anda atau akses khusus superadmin di bawah.
-                  </p>
+              <form onSubmit={handleLogin} className="space-y-3.5">
+                {/* Email / Username */}
+                <div className="relative">
+                  <Mail className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+                  <input
+                    type="text"
+                    required
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    placeholder="Email atau Username"
+                    className="w-full pl-10 pr-3.5 py-3 rounded-xl bg-[#F8FAFC] border border-[#E2E8F0] focus:border-[#3B82F6] focus:bg-white focus:ring-2 focus:ring-blue-500/15 text-xs sm:text-sm text-[#0F172A] placeholder:text-slate-400 transition-all outline-none"
+                  />
                 </div>
 
-                <form onSubmit={handleLogin} className="space-y-3.5">
-                  {/* Email / Username */}
-                  <div>
-                    <label className="block text-[11px] font-semibold text-zinc-300 mb-1">
-                      Email atau Username
-                    </label>
-                    <div className="relative">
-                      <Mail className="w-3.5 h-3.5 text-zinc-500 absolute left-3 top-1/2 -translate-y-1/2" />
-                      <input
-                        type="text"
-                        required
-                        value={email}
-                        onChange={(e) => setEmail(e.target.value)}
-                        placeholder="nama@unp.ac.id atau superadmin@academic.id"
-                        className="w-full pl-9 pr-3 py-2.5 rounded-lg bg-zinc-900/90 border border-white/10 text-xs text-white placeholder:text-zinc-600 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500/30 transition-all"
-                      />
-                    </div>
-                  </div>
-
-                  {/* Password */}
-                  <div>
-                    <label className="block text-[11px] font-semibold text-zinc-300 mb-1">
-                      Kata Sandi
-                    </label>
-                    <div className="relative">
-                      <Lock className="w-3.5 h-3.5 text-zinc-500 absolute left-3 top-1/2 -translate-y-1/2" />
-                      <input
-                        type={showPassword ? 'text' : 'password'}
-                        required
-                        value={password}
-                        onChange={(e) => setPassword(e.target.value)}
-                        placeholder="Masukkan kata sandi..."
-                        className="w-full pl-9 pr-9 py-2.5 rounded-lg bg-zinc-900/90 border border-white/10 text-xs text-white placeholder:text-zinc-600 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500/30 transition-all"
-                      />
-                      <button
-                        type="button"
-                        onClick={() => setShowPassword(!showPassword)}
-                        className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-500 hover:text-zinc-300 transition-colors"
-                      >
-                        {showPassword ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
-                      </button>
-                    </div>
-                  </div>
-
-                  {/* Submit Button */}
-                  <div className="pt-1">
-                    <button
-                      type="submit"
-                      disabled={isLoading}
-                      className="w-full py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white font-bold text-xs shadow-md shadow-blue-600/30 transition-all flex items-center justify-center gap-1.5 cursor-pointer"
-                    >
-                      <span>{isLoading ? 'Memproses Masuk...' : 'Masuk ke Studio Workspace'}</span>
-                      <ArrowRight className="w-3.5 h-3.5" />
-                    </button>
-                  </div>
-                </form>
-
-                {/* ========================================================================= */}
-                {/* AKUN KHUSUS SUPERADMIN CARD (COMPACT & MODERN)                            */}
-                {/* ========================================================================= */}
-                <div className="mt-5 pt-4 border-t border-white/10">
-                  <div className="p-3 rounded-xl bg-amber-500/10 border border-amber-500/25 relative">
-                    <div className="flex items-center justify-between mb-1.5">
-                      <div className="flex items-center gap-1.5">
-                        <Crown className="w-3.5 h-3.5 text-amber-400" />
-                        <span className="text-[11px] font-bold text-amber-300">
-                          Akun Khusus Superadmin
-                        </span>
-                      </div>
-                      <span className="text-[9px] uppercase font-mono px-1.5 py-0.2 rounded bg-amber-500/20 text-amber-300 font-bold">
-                        Full Access
-                      </span>
-                    </div>
-
-                    <div className="flex items-center justify-between text-[10px] font-mono text-zinc-300 bg-black/40 rounded-lg px-2.5 py-1.5 mb-2 border border-white/5">
-                      <span><span className="text-zinc-500">Email:</span> superadmin@academic.id</span>
-                      <span><span className="text-zinc-500">Pass:</span> superadmin123</span>
-                    </div>
-
-                    <div className="flex items-center gap-2">
-                      <button
-                        type="button"
-                        onClick={handleOneClickSuperadmin}
-                        disabled={isLoading}
-                        className="flex-1 py-1.5 px-2.5 rounded-lg bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white font-bold text-[11px] shadow-sm flex items-center justify-center gap-1 transition-all cursor-pointer"
-                      >
-                        <Crown className="w-3 h-3" />
-                        <span>1-Klik Masuk Superadmin</span>
-                      </button>
-                      <button
-                        type="button"
-                        onClick={handlePreFillSuperadmin}
-                        className="py-1.5 px-2.5 rounded-lg bg-white/10 hover:bg-white/15 text-zinc-300 font-medium text-[11px] border border-white/10 transition-colors cursor-pointer"
-                      >
-                        Isi Form
-                      </button>
-                    </div>
-                  </div>
+                {/* Kata Sandi */}
+                <div className="relative">
+                  <Lock className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+                  <input
+                    type={showPassword ? 'text' : 'password'}
+                    required
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    placeholder="Kata Sandi"
+                    className="w-full pl-10 pr-10 py-3 rounded-xl bg-[#F8FAFC] border border-[#E2E8F0] focus:border-[#3B82F6] focus:bg-white focus:ring-2 focus:ring-blue-500/15 text-xs sm:text-sm text-[#0F172A] placeholder:text-slate-400 transition-all outline-none"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors"
+                  >
+                    {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  </button>
                 </div>
 
-                {/* Footer Switcher */}
-                <div className="mt-4 text-center">
-                  <p className="text-[11px] text-zinc-400">
-                    Belum memiliki akun?{' '}
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setMode('register');
-                        setErrorMsg('');
-                        setSuccessMsg('');
-                      }}
-                      className="text-blue-400 hover:text-blue-300 font-semibold transition-colors cursor-pointer"
-                    >
-                      Daftar gratis (3x Kuota Trial) &rarr;
-                    </button>
-                  </p>
+                {/* Remember Me & Forgot Password Row */}
+                <div className="flex items-center justify-between text-xs pt-0.5">
+                  <label className="flex items-center gap-2 text-slate-600 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={rememberMe}
+                      onChange={(e) => setRememberMe(e.target.checked)}
+                      className="w-3.5 h-3.5 rounded border-slate-300 text-blue-600 focus:ring-blue-500"
+                    />
+                    <span>Ingat saya</span>
+                  </label>
+
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setEmail(SUPERADMIN_USER.email);
+                      setPassword('superadmin123');
+                    }}
+                    className="text-blue-600 hover:text-blue-700 font-medium transition-colors cursor-pointer"
+                  >
+                    Lupa kata sandi?
+                  </button>
+                </div>
+
+                {/* Primary Button Masuk */}
+                <button
+                  type="submit"
+                  disabled={isLoading}
+                  className="w-full py-3 px-4 rounded-xl bg-[#4F46E5] hover:bg-[#4338CA] text-white font-semibold text-xs sm:text-sm shadow-md shadow-indigo-500/20 flex items-center justify-center gap-2 transition-all cursor-pointer mt-2"
+                >
+                  <span>{isLoading ? 'Memproses...' : 'Masuk'}</span>
+                  <ArrowRight className="w-4 h-4" />
+                </button>
+              </form>
+
+              {/* Divider "atau" */}
+              <div className="relative my-4">
+                <div className="absolute inset-0 flex items-center">
+                  <div className="w-full border-t border-slate-200" />
+                </div>
+                <div className="relative flex justify-center text-[11px]">
+                  <span className="bg-white px-3 text-slate-400">atau</span>
                 </div>
               </div>
-            )}
 
-            {/* ========================================================================= */}
-            {/* 2. REGISTER FORM                                                          */}
-            {/* ========================================================================= */}
-            {mode === 'register' && (
-              <div>
-                <div className="mb-3">
-                  <h2 className="text-lg sm:text-xl font-bold tracking-tight text-white">
-                    Daftar Akun Baru
-                  </h2>
-                  <p className="text-[11px] text-zinc-400 mt-0.5">
-                    Dapatkan akses langsung ke 12 Autonomous Agents &amp; 3x trial gratis.
-                  </p>
-                </div>
+              {/* Secondary Button: Masuk dengan Superadmin / Akun Cepat */}
+              <button
+                type="button"
+                onClick={handleOneClickSuperadmin}
+                disabled={isLoading}
+                className="w-full py-2.5 px-3.5 rounded-xl border border-slate-200 hover:border-slate-300 hover:bg-slate-50 text-slate-700 font-semibold text-xs flex items-center justify-center gap-2 transition-all cursor-pointer"
+              >
+                <Zap className="w-3.5 h-3.5 text-blue-600" />
+                <span>Masuk dengan Superadmin</span>
+              </button>
 
-                {/* Welcome Perks Banner (Compact) */}
-                <div className="mb-3.5 p-2.5 rounded-xl bg-blue-500/10 border border-blue-500/20 flex items-center gap-2.5">
-                  <Sparkles className="w-3.5 h-3.5 text-blue-400 shrink-0" />
-                  <div className="text-[10px] text-zinc-300 leading-tight">
-                    <strong className="text-white font-semibold">Gratis 3x Generate Bab Lengkap: </strong>
-                    Termasuk ekspor DOCX terstandar Dikti &amp; FT UNP 2025.
-                  </div>
-                </div>
-
-                <form onSubmit={handleRegister} className="space-y-3">
-                  {/* Grid 2-Kolom: Nama Lengkap & Peran */}
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-                    <div>
-                      <label className="block text-[10px] font-semibold text-zinc-300 mb-1">
-                        Nama Lengkap &amp; Gelar
-                      </label>
-                      <div className="relative">
-                        <User className="w-3.5 h-3.5 text-zinc-500 absolute left-2.5 top-1/2 -translate-y-1/2" />
-                        <input
-                          type="text"
-                          required
-                          value={name}
-                          onChange={(e) => setName(e.target.value)}
-                          placeholder="Budi Santoso, S.T."
-                          className="w-full pl-8 pr-2.5 py-2 rounded-lg bg-zinc-900/90 border border-white/10 text-xs text-white placeholder:text-zinc-600 focus:outline-none focus:border-blue-500 transition-all"
-                        />
-                      </div>
-                    </div>
-
-                    <div>
-                      <label className="block text-[10px] font-semibold text-zinc-300 mb-1">
-                        Peran Akademik
-                      </label>
-                      <select
-                        value={role}
-                        onChange={(e) => setRole(e.target.value as UserRole)}
-                        className="w-full px-2.5 py-2 rounded-lg bg-zinc-900/90 border border-white/10 text-xs text-white focus:outline-none focus:border-blue-500 transition-all"
-                      >
-                        <option value="Mahasiswa">Mahasiswa</option>
-                        <option value="Dosen Pembimbing">Dosen Pembimbing</option>
-                        <option value="Peneliti">Peneliti</option>
-                        <option value="Reviewer Industri">Reviewer Industri</option>
-                        <option value="Umum">Umum</option>
-                      </select>
-                    </div>
-                  </div>
-
-                  {/* Grid 2-Kolom: Email & Kata Sandi */}
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-                    <div>
-                      <label className="block text-[10px] font-semibold text-zinc-300 mb-1">
-                        Alamat Email
-                      </label>
-                      <div className="relative">
-                        <Mail className="w-3.5 h-3.5 text-zinc-500 absolute left-2.5 top-1/2 -translate-y-1/2" />
-                        <input
-                          type="email"
-                          required
-                          value={email}
-                          onChange={(e) => setEmail(e.target.value)}
-                          placeholder="nama@kampus.ac.id"
-                          className="w-full pl-8 pr-2.5 py-2 rounded-lg bg-zinc-900/90 border border-white/10 text-xs text-white placeholder:text-zinc-600 focus:outline-none focus:border-blue-500 transition-all"
-                        />
-                      </div>
-                    </div>
-
-                    <div>
-                      <label className="block text-[10px] font-semibold text-zinc-300 mb-1">
-                        Kata Sandi (Min. 6)
-                      </label>
-                      <div className="relative">
-                        <Lock className="w-3.5 h-3.5 text-zinc-500 absolute left-2.5 top-1/2 -translate-y-1/2" />
-                        <input
-                          type={showPassword ? 'text' : 'password'}
-                          required
-                          minLength={6}
-                          value={password}
-                          onChange={(e) => setPassword(e.target.value)}
-                          placeholder="Kata sandi..."
-                          className="w-full pl-8 pr-8 py-2 rounded-lg bg-zinc-900/90 border border-white/10 text-xs text-white placeholder:text-zinc-600 focus:outline-none focus:border-blue-500 transition-all"
-                        />
-                        <button
-                          type="button"
-                          onClick={() => setShowPassword(!showPassword)}
-                          className="absolute right-2.5 top-1/2 -translate-y-1/2 text-zinc-500 hover:text-zinc-300 transition-colors"
-                        >
-                          {showPassword ? <EyeOff className="w-3 h-3" /> : <Eye className="w-3 h-3" />}
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Perguruan Tinggi / Instansi */}
-                  <div>
-                    <label className="block text-[10px] font-semibold text-zinc-300 mb-1">
-                      Perguruan Tinggi / Instansi
-                    </label>
-                    <div className="relative">
-                      <Building className="w-3.5 h-3.5 text-zinc-500 absolute left-2.5 top-1/2 -translate-y-1/2" />
-                      <input
-                        type="text"
-                        value={institution}
-                        onChange={(e) => setInstitution(e.target.value)}
-                        placeholder="Universitas Negeri Padang (UNP)"
-                        className="w-full pl-8 pr-2.5 py-2 rounded-lg bg-zinc-900/90 border border-white/10 text-xs text-white placeholder:text-zinc-600 focus:outline-none focus:border-blue-500 transition-all"
-                      />
-                    </div>
-                  </div>
-
-                  {/* Submit Button */}
-                  <div className="pt-1.5">
-                    <button
-                      type="submit"
-                      disabled={isLoading}
-                      className="w-full py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white font-bold text-xs shadow-md shadow-blue-600/30 transition-all flex items-center justify-center gap-1.5 cursor-pointer"
-                    >
-                      <span>{isLoading ? 'Mendaftarkan Akun...' : 'Daftar Sekarang & Masuk ke Studio'}</span>
-                      <ArrowRight className="w-3.5 h-3.5" />
-                    </button>
-                  </div>
-                </form>
-
-                {/* Footer Switcher */}
-                <div className="mt-3.5 text-center">
-                  <p className="text-[11px] text-zinc-400">
-                    Sudah memiliki akun?{' '}
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setMode('login');
-                        setErrorMsg('');
-                        setSuccessMsg('');
-                      }}
-                      className="text-blue-400 hover:text-blue-300 font-semibold transition-colors cursor-pointer"
-                    >
-                      Masuk di sini &rarr;
-                    </button>
-                  </p>
-                </div>
+              {/* Bottom Switcher */}
+              <div className="mt-5 text-center">
+                <p className="text-xs text-slate-500">
+                  Belum punya akun?{' '}
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setMode('register');
+                      setErrorMsg('');
+                      setSuccessMsg('');
+                    }}
+                    className="text-blue-600 hover:text-blue-700 font-semibold transition-colors cursor-pointer"
+                  >
+                    Daftar di sini
+                  </button>
+                </p>
               </div>
-            )}
+            </div>
+          )}
 
-          </div>
+          {/* ========================================================================= */}
+          {/* B. REGISTER FORM (SCREEN 2 REFERENSI)                                     */}
+          {/* ========================================================================= */}
+          {mode === 'register' && (
+            <div>
+              <div className="mb-4">
+                <h2 className="text-xl sm:text-2xl font-bold tracking-tight text-[#0F172A]">
+                  Buat akun baru
+                </h2>
+                <p className="text-xs text-slate-400 mt-1">
+                  Daftar untuk mulai menggunakan semua fitur.
+                </p>
+              </div>
 
-        </div>
+              <form onSubmit={handleRegister} className="space-y-3">
+                {/* 1. Nama Lengkap */}
+                <div className="relative">
+                  <User className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+                  <input
+                    type="text"
+                    required
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    placeholder="Nama Lengkap"
+                    className="w-full pl-10 pr-3.5 py-2.5 rounded-xl bg-[#F8FAFC] border border-[#E2E8F0] focus:border-[#3B82F6] focus:bg-white focus:ring-2 focus:ring-blue-500/15 text-xs sm:text-sm text-[#0F172A] placeholder:text-slate-400 transition-all outline-none"
+                  />
+                </div>
 
-        {/* Bottom Sub-Footer in Form Pane */}
-        <div className="w-full max-w-md mx-auto text-center text-[10px] text-zinc-600 shrink-0 pt-2">
-          <span>academic agent studio &bull; powered by oxidlabs</span>
+                {/* 2. Email */}
+                <div className="relative">
+                  <Mail className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+                  <input
+                    type="email"
+                    required
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    placeholder="Email"
+                    className="w-full pl-10 pr-3.5 py-2.5 rounded-xl bg-[#F8FAFC] border border-[#E2E8F0] focus:border-[#3B82F6] focus:bg-white focus:ring-2 focus:ring-blue-500/15 text-xs sm:text-sm text-[#0F172A] placeholder:text-slate-400 transition-all outline-none"
+                  />
+                </div>
+
+                {/* 3. Kata Sandi */}
+                <div className="relative">
+                  <Lock className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+                  <input
+                    type={showPassword ? 'text' : 'password'}
+                    required
+                    minLength={6}
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    placeholder="Kata Sandi"
+                    className="w-full pl-10 pr-10 py-2.5 rounded-xl bg-[#F8FAFC] border border-[#E2E8F0] focus:border-[#3B82F6] focus:bg-white focus:ring-2 focus:ring-blue-500/15 text-xs sm:text-sm text-[#0F172A] placeholder:text-slate-400 transition-all outline-none"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors"
+                  >
+                    {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  </button>
+                </div>
+
+                {/* 4. Konfirmasi Kata Sandi */}
+                <div className="relative">
+                  <Lock className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+                  <input
+                    type={showConfirmPassword ? 'text' : 'password'}
+                    required
+                    minLength={6}
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    placeholder="Konfirmasi Kata Sandi"
+                    className="w-full pl-10 pr-10 py-2.5 rounded-xl bg-[#F8FAFC] border border-[#E2E8F0] focus:border-[#3B82F6] focus:bg-white focus:ring-2 focus:ring-blue-500/15 text-xs sm:text-sm text-[#0F172A] placeholder:text-slate-400 transition-all outline-none"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                    className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors"
+                  >
+                    {showConfirmPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  </button>
+                </div>
+
+                {/* 5. Perguruan Tinggi / Instansi */}
+                <div className="relative">
+                  <GraduationCap className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+                  <select
+                    value={institution}
+                    onChange={(e) => setInstitution(e.target.value)}
+                    className="w-full pl-10 pr-8 py-2.5 rounded-xl bg-[#F8FAFC] border border-[#E2E8F0] focus:border-[#3B82F6] focus:bg-white focus:ring-2 focus:ring-blue-500/15 text-xs sm:text-sm text-[#0F172A] transition-all outline-none appearance-none cursor-pointer"
+                  >
+                    <option value="Universitas Negeri Padang (UNP)">Universitas Negeri Padang (UNP)</option>
+                    <option value="Universitas Indonesia (UI)">Universitas Indonesia (UI)</option>
+                    <option value="Institut Teknologi Bandung (ITB)">Institut Teknologi Bandung (ITB)</option>
+                    <option value="Universitas Gadjah Mada (UGM)">Universitas Gadjah Mada (UGM)</option>
+                    <option value="Institut Teknologi Sepuluh Nopember (ITS)">Institut Teknologi Sepuluh Nopember (ITS)</option>
+                    <option value="Universitas Andalas (UNAND)">Universitas Andalas (UNAND)</option>
+                    <option value="Universitas Lainnya / Instansi Mandiri">Universitas Lainnya / Instansi Mandiri</option>
+                  </select>
+                  <ChevronDown className="w-4 h-4 text-slate-400 absolute right-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+                </div>
+
+                {/* 6. Program Studi / Peran */}
+                <div className="relative">
+                  <User className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+                  <select
+                    value={role}
+                    onChange={(e) => setRole(e.target.value as UserRole)}
+                    className="w-full pl-10 pr-8 py-2.5 rounded-xl bg-[#F8FAFC] border border-[#E2E8F0] focus:border-[#3B82F6] focus:bg-white focus:ring-2 focus:ring-blue-500/15 text-xs sm:text-sm text-[#0F172A] transition-all outline-none appearance-none cursor-pointer"
+                  >
+                    <option value="Mahasiswa">Mahasiswa (Skripsi / Tesis / PKL)</option>
+                    <option value="Dosen Pembimbing">Dosen Pembimbing / Reviewer</option>
+                    <option value="Peneliti">Peneliti / Penulis Jurnal</option>
+                    <option value="Reviewer Industri">Reviewer Industri / Magang</option>
+                    <option value="Umum">Umum / Penulis Akademik</option>
+                  </select>
+                  <ChevronDown className="w-4 h-4 text-slate-400 absolute right-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+                </div>
+
+                {/* Submit Button */}
+                <div className="pt-2">
+                  <button
+                    type="submit"
+                    disabled={isLoading}
+                    className="w-full py-3 px-4 rounded-xl bg-[#2563EB] hover:bg-[#1D4ED8] text-white font-semibold text-xs sm:text-sm shadow-md shadow-blue-500/25 flex items-center justify-center gap-2 transition-all cursor-pointer"
+                  >
+                    <span>{isLoading ? 'Mendaftarkan...' : 'Daftar Sekarang'}</span>
+                    <ArrowRight className="w-4 h-4" />
+                  </button>
+                </div>
+              </form>
+
+              {/* Bottom Switcher */}
+              <div className="mt-5 text-center">
+                <p className="text-xs text-slate-500">
+                  Sudah punya akun?{' '}
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setMode('login');
+                      setErrorMsg('');
+                      setSuccessMsg('');
+                    }}
+                    className="text-blue-600 hover:text-blue-700 font-semibold transition-colors cursor-pointer"
+                  >
+                    Masuk di sini
+                  </button>
+                </p>
+              </div>
+            </div>
+          )}
+
         </div>
 
       </div>
