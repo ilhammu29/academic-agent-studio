@@ -461,24 +461,24 @@ Tolong bedah masalah ini dan rumuskan judul proposal akademik yang tajam dan tid
   const activeCandidate = candidateTitles.find((c) => c.id === selectedTitleId) || candidateTitles[0];
 
   return (
-    <div className="flex-1 flex flex-col w-full h-[calc(100vh-64px)] max-h-[calc(100vh-64px)] overflow-hidden bg-[#F8FAFC] dark:bg-[#080B12] text-[#0F172A] dark:text-[#F3F6FC]">
+    <div className="flex-1 flex flex-col w-full h-[calc(100vh-64px)] max-h-[calc(100vh-64px)] overflow-hidden bg-[#F8FAFC] dark:bg-[#0C0D0E] text-[#0F172A] dark:text-[#F3F6FC]">
       
       {/* ============================================================ */}
       {/* 1. TOP HEADER NAVIGATION BAR                                  */}
       {/* ============================================================ */}
-      <div className="px-6 py-3.5 border-b border-[#E2E8F0] dark:border-[#253149] bg-white/95 dark:bg-[#0B101A]/95 flex items-center justify-between flex-shrink-0 z-20">
+      <div className="px-6 py-3.5 border-b border-[#E2E8F0] dark:border-[#26282E] bg-white/95 dark:bg-[#121316]/95 flex items-center justify-between flex-shrink-0 z-20">
         <div className="flex items-center gap-3">
           <button
             type="button"
             onClick={onBackToHero}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-[#E2E8F0] dark:border-[#253149] bg-white dark:bg-[#111827] hover:bg-[#F1F5F9] dark:hover:bg-[#172033] text-xs font-semibold text-[#0F172A] dark:text-[#F3F6FC] transition-colors cursor-pointer shadow-2xs"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-[#E2E8F0] dark:border-[#26282E] bg-white dark:bg-[#17181C] hover:bg-[#F1F5F9] dark:hover:bg-[#1E1F24] text-xs font-semibold text-[#0F172A] dark:text-[#F3F6FC] transition-colors cursor-pointer shadow-2xs"
             title="Kembali ke halaman utama pembuatan proposal"
           >
             <ArrowLeft className="w-3.5 h-3.5 text-[#7C9CFF]" />
             <span>Beranda Usulan</span>
           </button>
 
-          <div className="h-4 w-[1px] bg-[#E2E8F0] dark:bg-[#253149]" />
+          <div className="h-4 w-[1px] bg-[#E2E8F0] dark:bg-[#26282E]" />
 
           <div className="flex items-center gap-2">
             <div className="w-8 h-8 rounded-lg bg-[#34D399]/15 border border-[#34D399]/30 flex items-center justify-center text-[#34D399]">
@@ -491,7 +491,7 @@ Tolong bedah masalah ini dan rumuskan judul proposal akademik yang tajam dan tid
                   AI MENTOR AKTIF
                 </span>
               </h1>
-              <p className="text-[11px] text-[#475569] dark:text-[#A4B1C7]">
+              <p className="text-[11px] text-[#475569] dark:text-[#9CA3AF]">
                 Eksplorasi masalah lapangan, validasi kelayakan, dan penajaman judul proposal
               </p>
             </div>
@@ -504,7 +504,7 @@ Tolong bedah masalah ini dan rumuskan judul proposal akademik yang tajam dan tid
             <button
               type="button"
               onClick={() => handleApplyCandidate(activeCandidate)}
-              className="px-4 py-2 rounded-xl bg-[#7C9CFF] hover:bg-[#9B8CFF] text-[#080B12] text-xs font-semibold transition-all cursor-pointer shadow-sm flex items-center gap-2"
+              className="px-4 py-2 rounded-xl bg-[#7C9CFF] hover:bg-[#9B8CFF] text-[#0C0D0E] text-xs font-semibold transition-all cursor-pointer shadow-sm flex items-center gap-2"
               title="Gunakan judul yang terpilih dari bimbingan dan mulai penyusunan naskah proposal"
             >
               <span>Gunakan Judul Terpilih ke Usulan</span>
@@ -522,7 +522,7 @@ Tolong bedah masalah ini dan rumuskan judul proposal akademik yang tajam dan tid
         {/* ============================================================ */}
         {/* LEFT COLUMN (Chatbot Thread ~ 7 cols / 58%)                  */}
         {/* ============================================================ */}
-        <div className="lg:col-span-7 flex flex-col h-full border-r border-[#E2E8F0] dark:border-[#253149] bg-white dark:bg-[#0B101A] overflow-hidden">
+        <div className="lg:col-span-7 flex flex-col h-full border-r border-[#E2E8F0] dark:border-[#26282E] bg-white dark:bg-[#121316] overflow-hidden">
           
           {/* Chat Messages Scrollable Stream */}
           <div className="flex-1 p-4 sm:p-6 overflow-y-auto space-y-4">
@@ -546,14 +546,14 @@ Tolong bedah masalah ini dan rumuskan judul proposal akademik yang tajam dan tid
                     <div
                       className={`p-4 sm:p-5 rounded-2xl ${
                         isAssistant
-                          ? "bg-[#F8FAFC] dark:bg-[#111827] border border-[#E2E8F0] dark:border-[#253149] text-[#0F172A] dark:text-[#F3F6FC]"
-                          : "bg-[#0F172A] text-white dark:bg-[#7C9CFF] dark:text-[#080B12] font-medium ml-auto"
+                          ? "bg-[#F8FAFC] dark:bg-[#17181C] border border-[#E2E8F0] dark:border-[#26282E] text-[#0F172A] dark:text-[#F3F6FC]"
+                          : "bg-[#0F172A] text-white dark:bg-[#7C9CFF] dark:text-[#0C0D0E] font-medium ml-auto"
                       }`}
                     >
                       {isAssistant ? (
                         <div className="space-y-3">
                           {/* Assistant Header & Actions */}
-                          <div className="flex items-center justify-between border-b border-[#E2E8F0] dark:border-[#253149] pb-2 mb-2 text-[11px]">
+                          <div className="flex items-center justify-between border-b border-[#E2E8F0] dark:border-[#26282E] pb-2 mb-2 text-[11px]">
                             <div className="flex items-center gap-1.5 font-medium text-[#7C9CFF]">
                               <Sparkles className="w-3.5 h-3.5" />
                               <span>Telaah Pembimbing Akademik</span>
@@ -561,7 +561,7 @@ Tolong bedah masalah ini dan rumuskan judul proposal akademik yang tajam dan tid
                             <button
                               type="button"
                               onClick={() => handleCopyMessage(msg.id, msg.content)}
-                              className="flex items-center gap-1 text-[10.5px] font-mono text-[#64748B] hover:text-[#7C9CFF] dark:text-[#A4B1C7] dark:hover:text-[#7C9CFF] px-2 py-0.5 rounded border border-transparent hover:border-[#253149] transition-all cursor-pointer"
+                              className="flex items-center gap-1 text-[10.5px] font-mono text-[#64748B] hover:text-[#7C9CFF] dark:text-[#9CA3AF] dark:hover:text-[#7C9CFF] px-2 py-0.5 rounded border border-transparent hover:border-[#26282E] transition-all cursor-pointer"
                               title="Salin Tanggapan"
                             >
                               {copiedMessageId === msg.id ? (
@@ -602,18 +602,18 @@ Tolong bedah masalah ini dan rumuskan judul proposal akademik yang tajam dan tid
                             {msg.candidateTitle.title}
                           </h4>
 
-                          <p className="text-[11px] text-[#64748B] dark:text-[#A4B1C7]">
+                          <p className="text-[11px] text-[#64748B] dark:text-[#9CA3AF]">
                             <strong>Lokus/Instansi:</strong> {msg.candidateTitle.entity}
                           </p>
 
                           <div className="pt-2 flex items-center justify-between border-t border-[#7C9CFF]/20 text-xs">
-                            <span className="text-[11px] text-[#64748B] dark:text-[#A4B1C7] italic">
+                            <span className="text-[11px] text-[#64748B] dark:text-[#9CA3AF] italic">
                               Tersimpan otomatis di Rak Calon Judul (Kanan)
                             </span>
                             <button
                               type="button"
                               onClick={() => handleApplyCandidate(msg.candidateTitle!)}
-                              className="px-3 py-1 rounded-lg bg-[#7C9CFF] hover:bg-[#688bf5] text-[#080B12] font-semibold text-[11px] transition-colors cursor-pointer flex items-center gap-1 shadow-2xs"
+                              className="px-3 py-1 rounded-lg bg-[#7C9CFF] hover:bg-[#688bf5] text-[#0C0D0E] font-semibold text-[11px] transition-colors cursor-pointer flex items-center gap-1 shadow-2xs"
                             >
                               <span>Terapkan</span>
                               <ArrowRight className="w-3 h-3" />
@@ -623,7 +623,7 @@ Tolong bedah masalah ini dan rumuskan judul proposal akademik yang tajam dan tid
                       )}
                     </div>
 
-                    <div className="text-[10px] text-[#64748B] dark:text-[#A4B1C7] px-1 font-mono">
+                    <div className="text-[10px] text-[#64748B] dark:text-[#9CA3AF] px-1 font-mono">
                       {msg.timestamp}
                     </div>
                   </div>
@@ -642,7 +642,7 @@ Tolong bedah masalah ini dan rumuskan judul proposal akademik yang tajam dan tid
                 <div className="w-7 h-7 rounded-full bg-[#34D399]/15 border border-[#34D399]/30 flex items-center justify-center text-[#34D399] flex-shrink-0 mt-1">
                   <Bot className="w-4 h-4" />
                 </div>
-                <div className="p-3.5 rounded-2xl bg-[#F8FAFC] dark:bg-[#111827] border border-[#E2E8F0] dark:border-[#253149] flex items-center gap-2 text-xs text-[#64748B] dark:text-[#A4B1C7]">
+                <div className="p-3.5 rounded-2xl bg-[#F8FAFC] dark:bg-[#17181C] border border-[#E2E8F0] dark:border-[#26282E] flex items-center gap-2 text-xs text-[#64748B] dark:text-[#9CA3AF]">
                   <div className="w-4 h-4 border-2 border-[#7C9CFF] border-t-transparent rounded-full animate-spin" />
                   <span>Dr. Bimbingan sedang membedah masalah &amp; merumuskan judul...</span>
                 </div>
@@ -653,8 +653,8 @@ Tolong bedah masalah ini dan rumuskan judul proposal akademik yang tajam dan tid
           </div>
 
           {/* Prompt Chips Recommendation */}
-          <div className="px-4 sm:px-6 py-2.5 border-t border-[#E2E8F0] dark:border-[#253149] bg-[#F8FAFC]/50 dark:bg-[#0B101A]/50 flex items-center gap-2 overflow-x-auto scrollbar-none flex-shrink-0 text-xs">
-            <span className="text-[11px] font-mono text-[#64748B] dark:text-[#A4B1C7] whitespace-nowrap flex items-center gap-1">
+          <div className="px-4 sm:px-6 py-2.5 border-t border-[#E2E8F0] dark:border-[#26282E] bg-[#F8FAFC]/50 dark:bg-[#121316]/50 flex items-center gap-2 overflow-x-auto scrollbar-none flex-shrink-0 text-xs">
+            <span className="text-[11px] font-mono text-[#64748B] dark:text-[#9CA3AF] whitespace-nowrap flex items-center gap-1">
               <Lightbulb className="w-3 h-3 text-[#FBBF24]" /> Topik Bimbingan:
             </span>
             {QUICK_PROMPT_CHIPS.map((chip, i) => (
@@ -662,7 +662,7 @@ Tolong bedah masalah ini dan rumuskan judul proposal akademik yang tajam dan tid
                 key={i}
                 type="button"
                 onClick={() => handleSendMessage(chip)}
-                className="px-3 py-1 rounded-full border border-[#E2E8F0] dark:border-[#253149] bg-white dark:bg-[#111827] hover:border-[#7C9CFF] text-[#0F172A] dark:text-[#F3F6FC] whitespace-nowrap text-[11px] font-medium transition-colors cursor-pointer shadow-2xs"
+                className="px-3 py-1 rounded-full border border-[#E2E8F0] dark:border-[#26282E] bg-white dark:bg-[#17181C] hover:border-[#7C9CFF] text-[#0F172A] dark:text-[#F3F6FC] whitespace-nowrap text-[11px] font-medium transition-colors cursor-pointer shadow-2xs"
               >
                 {chip}
               </button>
@@ -670,7 +670,7 @@ Tolong bedah masalah ini dan rumuskan judul proposal akademik yang tajam dan tid
           </div>
 
           {/* Input Box Footer */}
-          <div className="p-4 sm:p-5 border-t border-[#E2E8F0] dark:border-[#253149] bg-white dark:bg-[#0B101A] flex-shrink-0">
+          <div className="p-4 sm:p-5 border-t border-[#E2E8F0] dark:border-[#26282E] bg-white dark:bg-[#121316] flex-shrink-0">
             <div className="relative flex items-center gap-2">
               <textarea
                 rows={2}
@@ -683,7 +683,7 @@ Tolong bedah masalah ini dan rumuskan judul proposal akademik yang tajam dan tid
                   }
                 }}
                 placeholder="Tuliskan kendala Anda, amatan tugas di kantor, atau ide judul yang ingin dikonsultasikan... (Tekan Enter untuk kirim)"
-                className="w-full p-3 pr-24 rounded-xl border border-[#E2E8F0] dark:border-[#253149] bg-[#F8FAFC] dark:bg-[#111827] text-[#0F172A] dark:text-[#F3F6FC] placeholder:text-[#64748B] dark:placeholder:text-[#A4B1C7] text-xs focus:outline-hidden focus:border-[#7C9CFF] font-sans leading-relaxed resize-none"
+                className="w-full p-3 pr-24 rounded-xl border border-[#E2E8F0] dark:border-[#26282E] bg-[#F8FAFC] dark:bg-[#17181C] text-[#0F172A] dark:text-[#F3F6FC] placeholder:text-[#64748B] dark:placeholder:text-[#9CA3AF] text-xs focus:outline-hidden focus:border-[#7C9CFF] font-sans leading-relaxed resize-none"
               />
 
               <div className="absolute right-2.5 bottom-2.5 flex items-center gap-1.5">
@@ -694,7 +694,7 @@ Tolong bedah masalah ini dan rumuskan judul proposal akademik yang tajam dan tid
                   className={`p-2 rounded-lg text-xs transition-colors cursor-pointer ${
                     isListening
                       ? "bg-red-500 text-white animate-pulse"
-                      : "text-[#64748B] hover:text-[#0F172A] dark:text-[#A4B1C7] dark:hover:text-[#F3F6FC] hover:bg-[#F1F5F9] dark:hover:bg-[#172033]"
+                      : "text-[#64748B] hover:text-[#0F172A] dark:text-[#9CA3AF] dark:hover:text-[#F3F6FC] hover:bg-[#F1F5F9] dark:hover:bg-[#1E1F24]"
                   }`}
                   title="Gunakan suara"
                 >
@@ -706,14 +706,14 @@ Tolong bedah masalah ini dan rumuskan judul proposal akademik yang tajam dan tid
                   type="button"
                   onClick={() => handleSendMessage()}
                   disabled={isLoading || !inputText.trim()}
-                  className="px-3.5 py-2 rounded-lg bg-[#7C9CFF] hover:bg-[#688bf5] text-[#080B12] text-xs font-semibold disabled:opacity-40 transition-all cursor-pointer shadow-xs flex items-center gap-1.5"
+                  className="px-3.5 py-2 rounded-lg bg-[#7C9CFF] hover:bg-[#688bf5] text-[#0C0D0E] text-xs font-semibold disabled:opacity-40 transition-all cursor-pointer shadow-xs flex items-center gap-1.5"
                 >
                   <Send className="w-3.5 h-3.5" />
                   <span>Kirim</span>
                 </button>
               </div>
             </div>
-            <div className="flex items-center justify-between text-[10px] text-[#64748B] dark:text-[#A4B1C7] mt-1.5 px-1 font-mono">
+            <div className="flex items-center justify-between text-[10px] text-[#64748B] dark:text-[#9CA3AF] mt-1.5 px-1 font-mono">
               <span>Shift + Enter untuk baris baru</span>
               <span>Didukung Model Penalaran Akademik Gemini 3.5</span>
             </div>

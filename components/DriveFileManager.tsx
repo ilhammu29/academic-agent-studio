@@ -84,16 +84,16 @@ export default function DriveFileManager({
   });
 
   return (
-    <div className="w-full flex-1 flex flex-col md:flex-row bg-white dark:bg-[#0B101A] border border-[#E2E8F0] dark:border-[#253149] rounded-2xl overflow-hidden shadow-xl min-h-[600px] animate-in fade-in duration-200">
+    <div className="w-full flex-1 flex flex-col md:flex-row bg-white dark:bg-[#121316] border border-[#E2E8F0] dark:border-[#26282E] rounded-2xl overflow-hidden shadow-xl min-h-[600px] animate-in fade-in duration-200">
       
       {/* 1. DRIVE SIDEBAR (Studio Token Design) */}
-      <aside className="w-full md:w-64 bg-[#F8FAFC] dark:bg-[#080B12] border-b md:border-b-0 md:border-r border-[#E2E8F0] dark:border-[#253149] p-4 flex flex-col justify-between flex-shrink-0">
+      <aside className="w-full md:w-64 bg-[#F8FAFC] dark:bg-[#0C0D0E] border-b md:border-b-0 md:border-r border-[#E2E8F0] dark:border-[#26282E] p-4 flex flex-col justify-between flex-shrink-0">
         <div>
           {/* New Proposal CTA */}
           <button
             type="button"
             onClick={onNewProposal}
-            className="w-full py-2.5 px-3 rounded-xl bg-[#7C9CFF] hover:bg-[#688bf5] text-[#080B12] font-semibold text-xs transition-all flex items-center justify-center gap-2 cursor-pointer mb-5 shadow-xs"
+            className="w-full py-2.5 px-3 rounded-xl bg-[#7C9CFF] hover:bg-[#688bf5] text-[#0C0D0E] font-semibold text-xs transition-all flex items-center justify-center gap-2 cursor-pointer mb-5 shadow-xs"
           >
             <Plus className="w-4 h-4 stroke-[2.5]" />
             <span>Mulai Usulan Baru</span>
@@ -107,14 +107,14 @@ export default function DriveFileManager({
               className={`px-3 py-2 rounded-xl flex items-center justify-between text-xs transition-colors cursor-pointer whitespace-nowrap text-left ${
                 activeFolder === 'all'
                   ? 'bg-[#7C9CFF]/15 text-[#7C9CFF] border border-[#7C9CFF]/30 font-semibold shadow-2xs'
-                  : 'text-[#64748B] dark:text-[#A4B1C7] hover:text-[#0F172A] dark:hover:text-[#F3F6FC] hover:bg-[#F1F5F9] dark:hover:bg-[#111827]'
+                  : 'text-[#64748B] dark:text-[#9CA3AF] hover:text-[#0F172A] dark:hover:text-[#F3F6FC] hover:bg-[#F1F5F9] dark:hover:bg-[#17181C]'
               }`}
             >
               <div className="flex items-center gap-2">
                 <HardDrive className="w-4 h-4" />
                 <span>Semua Usulan</span>
               </div>
-              <span className="text-[10px] font-mono px-1.5 py-0.5 rounded-full bg-white dark:bg-[#111827] border border-[#E2E8F0] dark:border-[#253149]">
+              <span className="text-[10px] font-mono px-1.5 py-0.5 rounded-full bg-white dark:bg-[#17181C] border border-[#E2E8F0] dark:border-[#26282E]">
                 {projects.length}
               </span>
             </button>
@@ -125,14 +125,14 @@ export default function DriveFileManager({
               className={`px-3 py-2 rounded-xl flex items-center justify-between text-xs transition-colors cursor-pointer whitespace-nowrap text-left ${
                 activeFolder === 'word'
                   ? 'bg-[#7C9CFF]/15 text-[#7C9CFF] border border-[#7C9CFF]/30 font-semibold shadow-2xs'
-                  : 'text-[#64748B] dark:text-[#A4B1C7] hover:text-[#0F172A] dark:hover:text-[#F3F6FC] hover:bg-[#F1F5F9] dark:hover:bg-[#111827]'
+                  : 'text-[#64748B] dark:text-[#9CA3AF] hover:text-[#0F172A] dark:hover:text-[#F3F6FC] hover:bg-[#F1F5F9] dark:hover:bg-[#17181C]'
               }`}
             >
               <div className="flex items-center gap-2">
                 <FileText className="w-4 h-4" />
                 <span>Dokumen Word (.docx)</span>
               </div>
-              <span className="text-[10px] font-mono px-1.5 py-0.5 rounded-full bg-white dark:bg-[#111827] border border-[#E2E8F0] dark:border-[#253149]">
+              <span className="text-[10px] font-mono px-1.5 py-0.5 rounded-full bg-white dark:bg-[#17181C] border border-[#E2E8F0] dark:border-[#26282E]">
                 Dikti
               </span>
             </button>
@@ -143,14 +143,14 @@ export default function DriveFileManager({
               className={`px-3 py-2 rounded-xl flex items-center justify-between text-xs transition-colors cursor-pointer whitespace-nowrap text-left ${
                 activeFolder === 'pptx'
                   ? 'bg-[#7C9CFF]/15 text-[#7C9CFF] border border-[#7C9CFF]/30 font-semibold shadow-2xs'
-                  : 'text-[#64748B] dark:text-[#A4B1C7] hover:text-[#0F172A] dark:hover:text-[#F3F6FC] hover:bg-[#F1F5F9] dark:hover:bg-[#111827]'
+                  : 'text-[#64748B] dark:text-[#9CA3AF] hover:text-[#0F172A] dark:hover:text-[#F3F6FC] hover:bg-[#F1F5F9] dark:hover:bg-[#17181C]'
               }`}
             >
               <div className="flex items-center gap-2">
                 <Presentation className="w-4 h-4" />
                 <span>Slide Sidang (.pptx)</span>
               </div>
-              <span className="text-[10px] font-mono px-1.5 py-0.5 rounded-full bg-white dark:bg-[#111827] border border-[#E2E8F0] dark:border-[#253149]">
+              <span className="text-[10px] font-mono px-1.5 py-0.5 rounded-full bg-white dark:bg-[#17181C] border border-[#E2E8F0] dark:border-[#26282E]">
                 16:9
               </span>
             </button>
@@ -161,14 +161,14 @@ export default function DriveFileManager({
               className={`px-3 py-2 rounded-xl flex items-center justify-between text-xs transition-colors cursor-pointer whitespace-nowrap text-left ${
                 activeFolder === 'md'
                   ? 'bg-[#7C9CFF]/15 text-[#7C9CFF] border border-[#7C9CFF]/30 font-semibold shadow-2xs'
-                  : 'text-[#64748B] dark:text-[#A4B1C7] hover:text-[#0F172A] dark:hover:text-[#F3F6FC] hover:bg-[#F1F5F9] dark:hover:bg-[#111827]'
+                  : 'text-[#64748B] dark:text-[#9CA3AF] hover:text-[#0F172A] dark:hover:text-[#F3F6FC] hover:bg-[#F1F5F9] dark:hover:bg-[#17181C]'
               }`}
             >
               <div className="flex items-center gap-2">
                 <FileCode className="w-4 h-4" />
                 <span>Naskah Markdown</span>
               </div>
-              <span className="text-[10px] font-mono px-1.5 py-0.5 rounded-full bg-white dark:bg-[#111827] border border-[#E2E8F0] dark:border-[#253149]">
+              <span className="text-[10px] font-mono px-1.5 py-0.5 rounded-full bg-white dark:bg-[#17181C] border border-[#E2E8F0] dark:border-[#26282E]">
                 Raw
               </span>
             </button>
@@ -176,7 +176,7 @@ export default function DriveFileManager({
         </div>
 
         {/* Studio Storage Indicator */}
-        <div className="hidden md:block pt-4 border-t border-[#E2E8F0] dark:border-[#253149] text-[11px] text-[#64748B] dark:text-[#A4B1C7]">
+        <div className="hidden md:block pt-4 border-t border-[#E2E8F0] dark:border-[#26282E] text-[11px] text-[#64748B] dark:text-[#9CA3AF]">
           <div className="flex justify-between items-center mb-1.5">
             <span className="font-medium flex items-center gap-1.5 text-[#0F172A] dark:text-[#F3F6FC]">
               <HardDrive className="w-3.5 h-3.5 text-[#7C9CFF]" />
@@ -187,28 +187,28 @@ export default function DriveFileManager({
               Cloud Sync
             </span>
           </div>
-          <div className="w-full h-1.5 bg-[#E2E8F0] dark:bg-[#111827] rounded-full overflow-hidden mb-1">
+          <div className="w-full h-1.5 bg-[#E2E8F0] dark:bg-[#17181C] rounded-full overflow-hidden mb-1">
             <div className="w-[100%] h-full bg-gradient-to-r from-[#7C9CFF] to-[#34D399] rounded-full" />
           </div>
-          <p className="text-[10px] text-[#64748B] dark:text-[#A4B1C7]">
+          <p className="text-[10px] text-[#64748B] dark:text-[#9CA3AF]">
             {projects.length} Usulan Tersimpan &amp; Terindeks
           </p>
         </div>
       </aside>
 
       {/* 2. MAIN DRIVE CONTENT AREA */}
-      <div className="flex-1 flex flex-col bg-white dark:bg-[#0B101A] overflow-hidden">
+      <div className="flex-1 flex flex-col bg-white dark:bg-[#121316] overflow-hidden">
         
         {/* Top Search & Filter Bar */}
-        <div className="p-3 sm:p-4 border-b border-[#E2E8F0] dark:border-[#253149] bg-[#F8FAFC]/70 dark:bg-[#0B101A]/80 flex items-center justify-between gap-3">
+        <div className="p-3 sm:p-4 border-b border-[#E2E8F0] dark:border-[#26282E] bg-[#F8FAFC]/70 dark:bg-[#121316]/80 flex items-center justify-between gap-3">
           <div className="relative flex-1 max-w-sm">
-            <Search className="absolute left-3 top-2.5 w-4 h-4 text-[#64748B] dark:text-[#A4B1C7]" />
+            <Search className="absolute left-3 top-2.5 w-4 h-4 text-[#64748B] dark:text-[#9CA3AF]" />
             <input
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Cari usulan berdasarkan judul atau instansi..."
-              className="w-full bg-white dark:bg-[#111827] border border-[#E2E8F0] dark:border-[#253149] rounded-xl pl-9 pr-3 py-1.5 text-xs text-[#0F172A] dark:text-[#F3F6FC] placeholder:text-[#64748B] dark:placeholder:text-[#A4B1C7] focus:outline-hidden focus:border-[#7C9CFF] transition-colors"
+              className="w-full bg-white dark:bg-[#17181C] border border-[#E2E8F0] dark:border-[#26282E] rounded-xl pl-9 pr-3 py-1.5 text-xs text-[#0F172A] dark:text-[#F3F6FC] placeholder:text-[#64748B] dark:placeholder:text-[#9CA3AF] focus:outline-hidden focus:border-[#7C9CFF] transition-colors"
             />
           </div>
 
@@ -216,7 +216,7 @@ export default function DriveFileManager({
             <button
               type="button"
               onClick={() => setViewMode(viewMode === 'list' ? 'grid' : 'list')}
-              className="p-1.5 rounded-lg border border-[#E2E8F0] dark:border-[#253149] text-[#64748B] dark:text-[#A4B1C7] hover:text-[#0F172A] dark:hover:text-[#F3F6FC] hover:bg-[#F1F5F9] dark:hover:bg-[#111827] transition-colors cursor-pointer"
+              className="p-1.5 rounded-lg border border-[#E2E8F0] dark:border-[#26282E] text-[#64748B] dark:text-[#9CA3AF] hover:text-[#0F172A] dark:hover:text-[#F3F6FC] hover:bg-[#F1F5F9] dark:hover:bg-[#17181C] transition-colors cursor-pointer"
               title="Ganti Mode Tampilan"
             >
               {viewMode === 'list' ? <Grid className="w-4 h-4" /> : <List className="w-4 h-4" />}
@@ -225,7 +225,7 @@ export default function DriveFileManager({
             <button
               type="button"
               onClick={fetchFiles}
-              className="p-1.5 rounded-lg border border-[#E2E8F0] dark:border-[#253149] text-[#64748B] dark:text-[#A4B1C7] hover:text-[#0F172A] dark:hover:text-[#F3F6FC] hover:bg-[#F1F5F9] dark:hover:bg-[#111827] transition-colors cursor-pointer"
+              className="p-1.5 rounded-lg border border-[#E2E8F0] dark:border-[#26282E] text-[#64748B] dark:text-[#9CA3AF] hover:text-[#0F172A] dark:hover:text-[#F3F6FC] hover:bg-[#F1F5F9] dark:hover:bg-[#17181C] transition-colors cursor-pointer"
               title="Segarkan Berkas"
             >
               <RefreshCw className={`w-4 h-4 ${isLoading ? 'animate-spin' : ''}`} />
@@ -236,37 +236,37 @@ export default function DriveFileManager({
         {/* Content Area */}
         <div className="flex-1 p-4 sm:p-6 overflow-y-auto">
           {isLoading ? (
-            <div className="py-20 text-center text-[#64748B] dark:text-[#A4B1C7] text-xs flex flex-col items-center gap-2">
+            <div className="py-20 text-center text-[#64748B] dark:text-[#9CA3AF] text-xs flex flex-col items-center gap-2">
               <RefreshCw className="w-5 h-5 animate-spin text-[#7C9CFF]" />
               <span>Memuat usulan dari penyimpanan studio...</span>
             </div>
           ) : filtered.length === 0 ? (
-            <div className="py-20 text-center text-[#64748B] dark:text-[#A4B1C7] text-xs flex flex-col items-center gap-3">
+            <div className="py-20 text-center text-[#64748B] dark:text-[#9CA3AF] text-xs flex flex-col items-center gap-3">
               <div className="w-12 h-12 rounded-2xl bg-[#7C9CFF]/10 border border-[#7C9CFF]/20 flex items-center justify-center text-[#7C9CFF]">
                 <HardDrive className="w-6 h-6" />
               </div>
               <div>
                 <p className="font-semibold text-sm text-[#0F172A] dark:text-[#F3F6FC]">Belum ada berkas usulan tersimpan</p>
-                <p className="text-[#64748B] dark:text-[#A4B1C7] mt-1 max-w-sm mx-auto">
+                <p className="text-[#64748B] dark:text-[#9CA3AF] mt-1 max-w-sm mx-auto">
                   Mulai usulan proposal baru dari tahap Topik untuk menyusun naskah dan slide secara otomatis.
                 </p>
               </div>
               <button
                 type="button"
                 onClick={onNewProposal}
-                className="mt-2 px-4 py-2 rounded-xl bg-[#7C9CFF] text-[#080B12] text-xs font-semibold hover:bg-[#688bf5] transition-all cursor-pointer shadow-xs"
+                className="mt-2 px-4 py-2 rounded-xl bg-[#7C9CFF] text-[#0C0D0E] text-xs font-semibold hover:bg-[#688bf5] transition-all cursor-pointer shadow-xs"
               >
                 + Mulai Usulan Baru
               </button>
             </div>
           ) : viewMode === 'list' ? (
             /* LIST VIEW */
-            <div className="divide-y divide-[#E2E8F0] dark:divide-[#253149] border border-[#E2E8F0] dark:border-[#253149] rounded-xl overflow-hidden bg-white dark:bg-[#111827]">
+            <div className="divide-y divide-[#E2E8F0] dark:divide-[#26282E] border border-[#E2E8F0] dark:border-[#26282E] rounded-xl overflow-hidden bg-white dark:bg-[#17181C]">
               {filtered.map((item) => (
                 <div
                   key={item.id}
                   onClick={() => onLoadProject(item)}
-                  className="p-3.5 sm:p-4 hover:bg-[#F8FAFC] dark:hover:bg-[#172033] transition-colors cursor-pointer flex flex-col sm:flex-row sm:items-center justify-between gap-3 group"
+                  className="p-3.5 sm:p-4 hover:bg-[#F8FAFC] dark:hover:bg-[#1E1F24] transition-colors cursor-pointer flex flex-col sm:flex-row sm:items-center justify-between gap-3 group"
                 >
                   <div className="flex items-start gap-3 flex-1 min-w-0">
                     <div className="w-8 h-8 rounded-lg bg-[#7C9CFF]/15 text-[#7C9CFF] flex items-center justify-center flex-shrink-0 mt-0.5 border border-[#7C9CFF]/30">
@@ -277,14 +277,14 @@ export default function DriveFileManager({
                         <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-[#7C9CFF]/15 text-[#7C9CFF] font-semibold border border-[#7C9CFF]/30">
                           {item.category.toUpperCase()}
                         </span>
-                        <span className="text-[11px] text-[#64748B] dark:text-[#A4B1C7]">
+                        <span className="text-[11px] text-[#64748B] dark:text-[#9CA3AF]">
                           {item.targetEntity}
                         </span>
                       </div>
                       <h4 className="text-xs sm:text-sm font-semibold text-[#0F172A] dark:text-[#F3F6FC] truncate group-hover:text-[#7C9CFF] transition-colors">
                         {item.title}
                       </h4>
-                      <p className="text-[11px] text-[#64748B] dark:text-[#A4B1C7] mt-0.5">
+                      <p className="text-[11px] text-[#64748B] dark:text-[#9CA3AF] mt-0.5">
                         Durasi: {item.durationMonths} Bulan &bull; Diperbarui: {new Date(item.updatedAt).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' })}
                       </p>
                     </div>
@@ -294,7 +294,7 @@ export default function DriveFileManager({
                     <button
                       type="button"
                       onClick={(e) => handleDownloadWord(item, e)}
-                      className="px-2.5 py-1.5 rounded-lg border border-[#E2E8F0] dark:border-[#253149] hover:border-[#7C9CFF] text-[11px] font-medium text-[#0F172A] dark:text-[#F3F6FC] hover:text-[#7C9CFF] bg-white dark:bg-[#0B101A] transition-colors flex items-center gap-1.5 shadow-2xs"
+                      className="px-2.5 py-1.5 rounded-lg border border-[#E2E8F0] dark:border-[#26282E] hover:border-[#7C9CFF] text-[11px] font-medium text-[#0F172A] dark:text-[#F3F6FC] hover:text-[#7C9CFF] bg-white dark:bg-[#121316] transition-colors flex items-center gap-1.5 shadow-2xs"
                       title="Unduh DOCX Standar Dikti"
                     >
                       <Download className="w-3.5 h-3.5 text-[#7C9CFF]" /> Word (.docx)
@@ -303,7 +303,7 @@ export default function DriveFileManager({
                     <button
                       type="button"
                       onClick={(e) => handleDownloadSlide(item, e)}
-                      className="px-2.5 py-1.5 rounded-lg border border-[#E2E8F0] dark:border-[#253149] hover:border-[#9B8CFF] text-[11px] font-medium text-[#0F172A] dark:text-[#F3F6FC] hover:text-[#9B8CFF] bg-white dark:bg-[#0B101A] transition-colors flex items-center gap-1.5 shadow-2xs"
+                      className="px-2.5 py-1.5 rounded-lg border border-[#E2E8F0] dark:border-[#26282E] hover:border-[#9B8CFF] text-[11px] font-medium text-[#0F172A] dark:text-[#F3F6FC] hover:text-[#9B8CFF] bg-white dark:bg-[#121316] transition-colors flex items-center gap-1.5 shadow-2xs"
                       title="Unduh Slide Sidang PPTX 16:9"
                     >
                       <Presentation className="w-3.5 h-3.5 text-[#9B8CFF]" /> Slide (.pptx)
@@ -328,34 +328,34 @@ export default function DriveFileManager({
                 <div
                   key={item.id}
                   onClick={() => onLoadProject(item)}
-                  className="p-4 rounded-xl border border-[#E2E8F0] dark:border-[#253149] bg-white dark:bg-[#111827] hover:border-[#7C9CFF] transition-all cursor-pointer flex flex-col justify-between group shadow-2xs"
+                  className="p-4 rounded-xl border border-[#E2E8F0] dark:border-[#26282E] bg-white dark:bg-[#17181C] hover:border-[#7C9CFF] transition-all cursor-pointer flex flex-col justify-between group shadow-2xs"
                 >
                   <div>
                     <div className="flex items-center justify-between mb-2">
                       <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-[#7C9CFF]/15 text-[#7C9CFF] font-semibold border border-[#7C9CFF]/30">
                         {item.category.toUpperCase()}
                       </span>
-                      <span className="text-[11px] font-mono text-[#64748B] dark:text-[#A4B1C7]">
+                      <span className="text-[11px] font-mono text-[#64748B] dark:text-[#9CA3AF]">
                         {item.durationMonths} Bulan
                       </span>
                     </div>
                     <h4 className="text-xs sm:text-sm font-semibold text-[#0F172A] dark:text-[#F3F6FC] line-clamp-2 group-hover:text-[#7C9CFF] transition-colors">
                       {item.title}
                     </h4>
-                    <p className="text-[11px] text-[#64748B] dark:text-[#A4B1C7] mt-1.5 truncate">
+                    <p className="text-[11px] text-[#64748B] dark:text-[#9CA3AF] mt-1.5 truncate">
                       {item.targetEntity}
                     </p>
                   </div>
 
-                  <div className="pt-3 mt-3 border-t border-[#E2E8F0] dark:border-[#253149] flex items-center justify-between" onClick={(e) => e.stopPropagation()}>
-                    <span className="text-[10px] font-mono text-[#64748B] dark:text-[#A4B1C7]">
+                  <div className="pt-3 mt-3 border-t border-[#E2E8F0] dark:border-[#26282E] flex items-center justify-between" onClick={(e) => e.stopPropagation()}>
+                    <span className="text-[10px] font-mono text-[#64748B] dark:text-[#9CA3AF]">
                       {new Date(item.updatedAt).toLocaleDateString('id-ID', { day: 'numeric', month: 'short' })}
                     </span>
                     <div className="flex items-center gap-1.5">
                       <button
                         type="button"
                         onClick={(e) => handleDownloadWord(item, e)}
-                        className="p-1.5 rounded-lg hover:bg-[#F1F5F9] dark:hover:bg-[#172033] text-[#64748B] hover:text-[#7C9CFF] transition-colors"
+                        className="p-1.5 rounded-lg hover:bg-[#F1F5F9] dark:hover:bg-[#1E1F24] text-[#64748B] hover:text-[#7C9CFF] transition-colors"
                         title="Unduh Word"
                       >
                         <Download className="w-3.5 h-3.5" />
@@ -363,7 +363,7 @@ export default function DriveFileManager({
                       <button
                         type="button"
                         onClick={(e) => handleDownloadSlide(item, e)}
-                        className="p-1.5 rounded-lg hover:bg-[#F1F5F9] dark:hover:bg-[#172033] text-[#64748B] hover:text-[#9B8CFF] transition-colors"
+                        className="p-1.5 rounded-lg hover:bg-[#F1F5F9] dark:hover:bg-[#1E1F24] text-[#64748B] hover:text-[#9B8CFF] transition-colors"
                         title="Unduh Slide"
                       >
                         <Presentation className="w-3.5 h-3.5" />

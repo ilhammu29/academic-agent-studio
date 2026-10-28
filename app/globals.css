@@ -8,15 +8,15 @@
   --font-plus-jakarta: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
   --font-jetbrains-mono: 'JetBrains Mono', monospace;
 
-  /* Global Design Tokens (Dark Mode Default) */
-  --bg-app: #080B12;
-  --bg-nav: #0B101A;
-  --surface-primary: #111827;
-  --surface-secondary: #172033;
-  --surface-elevated: #1C263A;
-  --border-subtle: #253149;
-  --text-primary: #F3F6FC;
-  --text-secondary: #A4B1C7;
+  /* Global Design Tokens (Dark Mode Default - Hitam Doff / Matte Obsidian) */
+  --bg-app: #0C0D0E;
+  --bg-nav: #121316;
+  --surface-primary: #17181C;
+  --surface-secondary: #1E1F24;
+  --surface-elevated: #25262C;
+  --border-subtle: #26282E;
+  --text-primary: #F3F4F6;
+  --text-secondary: #9CA3AF;
   --accent-primary: #7C9CFF;
   --accent-secondary: #9B8CFF;
   --status-success: #34D399;
@@ -26,14 +26,14 @@
 
 html.dark {
   color-scheme: dark;
-  --bg-app: #080B12;
-  --bg-nav: #0B101A;
-  --surface-primary: #111827;
-  --surface-secondary: #172033;
-  --surface-elevated: #1C263A;
-  --border-subtle: #253149;
-  --text-primary: #F3F6FC;
-  --text-secondary: #A4B1C7;
+  --bg-app: #0C0D0E;
+  --bg-nav: #121316;
+  --surface-primary: #17181C;
+  --surface-secondary: #1E1F24;
+  --surface-elevated: #25262C;
+  --border-subtle: #26282E;
+  --text-primary: #F3F4F6;
+  --text-secondary: #9CA3AF;
   --accent-primary: #7C9CFF;
   --accent-secondary: #9B8CFF;
   --status-success: #34D399;
@@ -78,12 +78,12 @@ html.light body {
   color: var(--text-primary);
 }
 
-/* Atmospheric subtle background */
+/* Atmospheric subtle background (Hitam Doff / Matte Obsidian) */
 html.dark .ambient-gradient-bg {
-  background-color: #080B12;
+  background-color: #0C0D0E;
   background-image: 
-    radial-gradient(ellipse 80% 50% at 50% -20%, rgba(124, 156, 255, 0.04), transparent 70%),
-    linear-gradient(180deg, #0B101A 0%, #080B12 100%);
+    radial-gradient(ellipse 80% 50% at 50% -20%, rgba(255, 255, 255, 0.02), transparent 70%),
+    linear-gradient(180deg, #121316 0%, #0C0D0E 100%);
   background-attachment: fixed;
 }
 
@@ -109,16 +109,16 @@ input:focus, textarea:focus, select:focus {
 }
 
 html.dark ::-webkit-scrollbar-track {
-  background: #080B12;
+  background: #0C0D0E;
 }
 
 html.dark ::-webkit-scrollbar-thumb {
-  background: #253149;
+  background: #26282E;
   border-radius: 4px;
 }
 
 html.dark ::-webkit-scrollbar-thumb:hover {
-  background: #3B4B6E;
+  background: #383B44;
 }
 
 html.light ::-webkit-scrollbar-track {

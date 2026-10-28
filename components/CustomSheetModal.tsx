@@ -126,10 +126,10 @@ export const CustomSheetModal: React.FC<CustomSheetModalProps> = ({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 dark:bg-black/80 backdrop-blur-xs p-4 animate-in fade-in duration-200">
-      <div className="bg-white dark:bg-[#0B101A] border border-[#E2E8F0] dark:border-[#253149] rounded-2xl w-full max-w-4xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
+      <div className="bg-white dark:bg-[#121316] border border-[#E2E8F0] dark:border-[#26282E] rounded-2xl w-full max-w-4xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
         
         {/* Header */}
-        <div className="flex items-center justify-between p-5 border-b border-[#E2E8F0] dark:border-[#253149] bg-[#F8FAFC] dark:bg-[#111827]">
+        <div className="flex items-center justify-between p-5 border-b border-[#E2E8F0] dark:border-[#26282E] bg-[#F8FAFC] dark:bg-[#17181C]">
           <div className="flex items-center gap-2.5">
             <div className="w-8 h-8 rounded-lg bg-[#34D399]/15 border border-[#34D399]/30 flex items-center justify-center text-[#34D399]">
               <FileCheck className="w-4 h-4" />
@@ -141,7 +141,7 @@ export const CustomSheetModal: React.FC<CustomSheetModalProps> = ({
                   {sheets.filter(s => s.enabled).length} Lembar Aktif
                 </span>
               </h3>
-              <p className="text-xs text-[#64748B] dark:text-[#A4B1C7]">
+              <p className="text-xs text-[#64748B] dark:text-[#9CA3AF]">
                 Atur posisi nomor halaman, isi teks tanda tangan, atau upload scan resmi bertanda tangan dari kampus
               </p>
             </div>
@@ -149,7 +149,7 @@ export const CustomSheetModal: React.FC<CustomSheetModalProps> = ({
           <button
             type="button"
             onClick={onClose}
-            className="p-1.5 rounded-lg text-[#64748B] dark:text-[#A4B1C7] hover:text-[#0F172A] dark:hover:text-[#F3F6FC] hover:bg-[#F1F5F9] dark:hover:bg-[#172033] transition-colors cursor-pointer"
+            className="p-1.5 rounded-lg text-[#64748B] dark:text-[#9CA3AF] hover:text-[#0F172A] dark:hover:text-[#F3F6FC] hover:bg-[#F1F5F9] dark:hover:bg-[#1E1F24] transition-colors cursor-pointer"
           >
             <X className="w-4 h-4" />
           </button>
@@ -353,22 +353,22 @@ export const CustomSheetModal: React.FC<CustomSheetModalProps> = ({
         </div>
 
         {/* Footer */}
-        <div className="p-4 border-t border-[#E2E8F0] dark:border-[#253149] bg-[#F8FAFC] dark:bg-[#111827] flex items-center justify-between">
-          <span className="text-xs text-[#64748B] dark:text-[#A4B1C7] font-mono">
+        <div className="p-4 border-t border-[#E2E8F0] dark:border-[#26282E] bg-[#F8FAFC] dark:bg-[#17181C] flex items-center justify-between">
+          <span className="text-xs text-[#64748B] dark:text-[#9CA3AF] font-mono">
             Halaman awal menggunakan penomoran Romawi (i, ii, iii) sesuai kaidah Dikti.
           </span>
           <div className="flex items-center gap-2">
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-2 rounded-lg text-xs font-medium text-[#64748B] dark:text-[#A4B1C7] hover:bg-[#F1F5F9] dark:hover:bg-[#172033] transition-colors cursor-pointer"
+              className="px-4 py-2 rounded-lg text-xs font-medium text-[#64748B] dark:text-[#9CA3AF] hover:bg-[#F1F5F9] dark:hover:bg-[#1E1F24] transition-colors cursor-pointer"
             >
               Batal
             </button>
             <button
               type="button"
               onClick={handleSave}
-              className="px-4 py-2 rounded-lg bg-[#7C9CFF] hover:bg-[#688bf5] text-[#080B12] text-xs font-semibold transition-colors flex items-center gap-1.5 cursor-pointer shadow-xs"
+              className="px-4 py-2 rounded-lg bg-[#7C9CFF] hover:bg-[#688bf5] text-[#0C0D0E] text-xs font-semibold transition-colors flex items-center gap-1.5 cursor-pointer shadow-xs"
             >
               <Check className="w-3.5 h-3.5" />
               <span>Terapkan Lembar ke Dokumen</span>

@@ -251,12 +251,12 @@ export const AgentExecutionMonitor: React.FC<AgentExecutionMonitorProps> = ({
   const estimatedPages = currentDoc?.targetDepthPages || (category === "magang" ? 25 : category === "penelitian" ? 35 : 45);
 
   return (
-    <div className="flex-1 flex flex-col w-full h-[calc(100vh-4rem)] max-h-[calc(100vh-4rem)] overflow-hidden bg-[#F8FAFC] dark:bg-[#080B12] text-[#0F172A] dark:text-[#F3F6FC] animate-in fade-in duration-200">
+    <div className="flex-1 flex flex-col w-full h-[calc(100vh-4rem)] max-h-[calc(100vh-4rem)] overflow-hidden bg-[#F8FAFC] dark:bg-[#0C0D0E] text-[#0F172A] dark:text-[#F3F6FC] animate-in fade-in duration-200">
       
       {/* ============================================================ */}
       {/* 1. TOP UTILITY & STATUS BAR (Fixed Height)                   */}
       {/* ============================================================ */}
-      <div className="h-14 min-h-[56px] border-b border-[#E2E8F0] dark:border-[#253149] bg-white/95 dark:bg-[#0B101A]/95 px-4 sm:px-6 flex items-center justify-between gap-4 z-20 shrink-0">
+      <div className="h-14 min-h-[56px] border-b border-[#E2E8F0] dark:border-[#26282E] bg-white/95 dark:bg-[#121316]/95 px-4 sm:px-6 flex items-center justify-between gap-4 z-20 shrink-0">
         
         {/* Left: Step Context & Topic */}
         <div className="flex items-center gap-3 min-w-0">
@@ -269,7 +269,7 @@ export const AgentExecutionMonitor: React.FC<AgentExecutionMonitorProps> = ({
               <span className="text-[10px] font-mono font-bold uppercase px-2 py-0.5 rounded bg-[#7C9CFF]/10 text-[#7C9CFF] border border-[#7C9CFF]/20 shrink-0">
                 Langkah 3: Orkestrasi Multi-Agent
               </span>
-              <span className="text-[11px] text-[#64748B] dark:text-[#A4B1C7] hidden md:inline truncate max-w-sm">
+              <span className="text-[11px] text-[#64748B] dark:text-[#9CA3AF] hidden md:inline truncate max-w-sm">
                 Topik: <span className="font-semibold text-[#0F172A] dark:text-[#F3F6FC]">{title}</span>
               </span>
             </div>
@@ -278,12 +278,12 @@ export const AgentExecutionMonitor: React.FC<AgentExecutionMonitorProps> = ({
 
         {/* Center: Global Progress Bar & Timer */}
         <div className="hidden sm:flex items-center gap-3">
-          <div className="flex items-center gap-2 bg-[#F1F5F9] dark:bg-[#111827] px-3 py-1 rounded-full border border-[#E2E8F0] dark:border-[#253149]">
+          <div className="flex items-center gap-2 bg-[#F1F5F9] dark:bg-[#17181C] px-3 py-1 rounded-full border border-[#E2E8F0] dark:border-[#26282E]">
             <div className="w-2 h-2 rounded-full bg-[#7C9CFF] animate-ping" />
             <span className="text-xs font-mono font-bold text-[#0F172A] dark:text-[#F3F6FC]">
               {overallProgress}%
             </span>
-            <div className="w-24 bg-[#E2E8F0] dark:bg-[#253149] h-1.5 rounded-full overflow-hidden">
+            <div className="w-24 bg-[#E2E8F0] dark:bg-[#26282E] h-1.5 rounded-full overflow-hidden">
               <div 
                 className="h-full bg-[#7C9CFF] transition-all duration-300 rounded-full"
                 style={{ width: `${overallProgress}%` }}
@@ -291,7 +291,7 @@ export const AgentExecutionMonitor: React.FC<AgentExecutionMonitorProps> = ({
             </div>
           </div>
 
-          <span className="text-[11px] font-mono text-[#64748B] dark:text-[#A4B1C7] flex items-center gap-1">
+          <span className="text-[11px] font-mono text-[#64748B] dark:text-[#9CA3AF] flex items-center gap-1">
             <Clock className="w-3 h-3 text-[#64748B]" />
             <span>00:{elapsedSeconds < 10 ? `0${elapsedSeconds}` : elapsedSeconds}s</span>
           </span>
@@ -303,7 +303,7 @@ export const AgentExecutionMonitor: React.FC<AgentExecutionMonitorProps> = ({
             <button
               type="button"
               onClick={handleFastForward}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-[#CBD5E1] dark:border-[#253149] bg-white dark:bg-[#111827] hover:bg-[#F8FAFC] dark:hover:bg-[#172033] text-xs font-medium text-[#475569] dark:text-[#A4B1C7] hover:text-[#0F172A] dark:hover:text-[#F3F6FC] transition-colors cursor-pointer shadow-2xs"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-[#CBD5E1] dark:border-[#26282E] bg-white dark:bg-[#17181C] hover:bg-[#F8FAFC] dark:hover:bg-[#1E1F24] text-xs font-medium text-[#475569] dark:text-[#9CA3AF] hover:text-[#0F172A] dark:hover:text-[#F3F6FC] transition-colors cursor-pointer shadow-2xs"
               title="Lewati simulasi dan selesaikan kompilasi sekarang"
             >
               <Zap className="w-3.5 h-3.5 text-[#FBBF24]" />
@@ -338,11 +338,11 @@ export const AgentExecutionMonitor: React.FC<AgentExecutionMonitorProps> = ({
         {/* ========================================================== */}
         {/* PANEL A: LEFT RAIL — 5 AI SPECIALISTS PIPELINE             */}
         {/* ========================================================== */}
-        <aside className="w-72 lg:w-80 border-r border-[#E2E8F0] dark:border-[#253149] bg-white dark:bg-[#0B101A] flex flex-col justify-between overflow-hidden shrink-0 hidden md:flex">
+        <aside className="w-72 lg:w-80 border-r border-[#E2E8F0] dark:border-[#26282E] bg-white dark:bg-[#121316] flex flex-col justify-between overflow-hidden shrink-0 hidden md:flex">
           
           {/* Header */}
-          <div className="p-3.5 border-b border-[#E2E8F0] dark:border-[#253149] flex items-center justify-between">
-            <span className="text-[10px] font-bold uppercase tracking-wider text-[#64748B] dark:text-[#A4B1C7] flex items-center gap-1.5">
+          <div className="p-3.5 border-b border-[#E2E8F0] dark:border-[#26282E] flex items-center justify-between">
+            <span className="text-[10px] font-bold uppercase tracking-wider text-[#64748B] dark:text-[#9CA3AF] flex items-center gap-1.5">
               <Sparkles className="w-3.5 h-3.5 text-[#7C9CFF]" />
               <span>5 Agen Spesialis Akademik</span>
             </span>
@@ -368,7 +368,7 @@ export const AgentExecutionMonitor: React.FC<AgentExecutionMonitorProps> = ({
                     isSelected
                       ? "bg-[#7C9CFF]/10 border-[#7C9CFF] ring-1 ring-[#7C9CFF]/30 shadow-2xs"
                       : isDone
-                      ? "bg-[#F8FAFC] dark:bg-[#111827] border-[#E2E8F0] dark:border-[#253149] hover:border-[#7C9CFF]/50"
+                      ? "bg-[#F8FAFC] dark:bg-[#17181C] border-[#E2E8F0] dark:border-[#26282E] hover:border-[#7C9CFF]/50"
                       : isWorking
                       ? "bg-[#7C9CFF]/5 border-[#7C9CFF]/50 animate-pulse"
                       : "bg-transparent border-transparent opacity-60 hover:opacity-100"
@@ -380,8 +380,8 @@ export const AgentExecutionMonitor: React.FC<AgentExecutionMonitorProps> = ({
                         isDone 
                           ? "bg-[#34D399]/20 text-[#34D399]" 
                           : isWorking 
-                          ? "bg-[#7C9CFF] text-[#080B12]" 
-                          : "bg-[#E2E8F0] dark:bg-[#172033] text-[#64748B]"
+                          ? "bg-[#7C9CFF] text-[#0C0D0E]" 
+                          : "bg-[#E2E8F0] dark:bg-[#1E1F24] text-[#64748B]"
                       }`}>
                         {isDone ? (
                           <Check className="w-3.5 h-3.5 stroke-[2.5]" />
@@ -396,7 +396,7 @@ export const AgentExecutionMonitor: React.FC<AgentExecutionMonitorProps> = ({
                         <h4 className="text-xs font-bold truncate text-[#0F172A] dark:text-[#F3F6FC]">
                           {agent.name}
                         </h4>
-                        <p className="text-[10px] text-[#64748B] dark:text-[#A4B1C7] truncate">
+                        <p className="text-[10px] text-[#64748B] dark:text-[#9CA3AF] truncate">
                           {agent.role}
                         </p>
                       </div>
@@ -407,14 +407,14 @@ export const AgentExecutionMonitor: React.FC<AgentExecutionMonitorProps> = ({
                         ? "bg-[#34D399]/15 text-[#34D399]" 
                         : isWorking 
                         ? "bg-[#7C9CFF]/20 text-[#7C9CFF]" 
-                        : "bg-[#E2E8F0] dark:bg-[#172033] text-[#64748B]"
+                        : "bg-[#E2E8F0] dark:bg-[#1E1F24] text-[#64748B]"
                     }`}>
                       {isDone ? "100%" : isWorking ? `${agent.progress}%` : "Antre"}
                     </span>
                   </div>
 
                   {/* Micro task description */}
-                  <div className="text-[11px] text-[#475569] dark:text-[#A4B1C7] line-clamp-1 pl-9">
+                  <div className="text-[11px] text-[#475569] dark:text-[#9CA3AF] line-clamp-1 pl-9">
                     {agent.currentTask}
                   </div>
                 </button>
@@ -423,12 +423,12 @@ export const AgentExecutionMonitor: React.FC<AgentExecutionMonitorProps> = ({
           </div>
 
           {/* Left Footer: Institutional Standards Badge */}
-          <div className="p-3 border-t border-[#E2E8F0] dark:border-[#253149] bg-[#F8FAFC] dark:bg-[#080B12] text-xs space-y-1">
+          <div className="p-3 border-t border-[#E2E8F0] dark:border-[#26282E] bg-[#F8FAFC] dark:bg-[#0C0D0E] text-xs space-y-1">
             <div className="flex items-center gap-1.5 text-[11px] font-semibold text-[#0F172A] dark:text-[#F3F6FC]">
               <Landmark className="w-3.5 h-3.5 text-[#7C9CFF]" />
               <span className="truncate">{campusGuideline?.campusName || "Standar SN-Dikti 2024"}</span>
             </div>
-            <p className="text-[10px] text-[#64748B] dark:text-[#A4B1C7]">
+            <p className="text-[10px] text-[#64748B] dark:text-[#9CA3AF]">
               Format A4 &bull; Margin {campusGuideline?.margins ? `${campusGuideline.margins.leftCm}-${campusGuideline.margins.topCm}-${campusGuideline.margins.rightCm}-${campusGuideline.margins.bottomCm} cm` : "4-4-3-3 cm"} &bull; Citations APA/IEEE
             </p>
           </div>
@@ -438,12 +438,12 @@ export const AgentExecutionMonitor: React.FC<AgentExecutionMonitorProps> = ({
         {/* ========================================================== */}
         {/* PANEL B: CENTER STAGE — LIVE SYNTHESIS & DOCUMENT STREAM   */}
         {/* ========================================================== */}
-        <main className="flex-1 flex flex-col overflow-y-auto p-4 sm:p-6 lg:p-7 bg-[#F8FAFC] dark:bg-[#080B12] space-y-5">
+        <main className="flex-1 flex flex-col overflow-y-auto p-4 sm:p-6 lg:p-7 bg-[#F8FAFC] dark:bg-[#0C0D0E] space-y-5">
           
           {/* Document Telemetry Strip */}
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-            <div className="p-3 rounded-xl bg-white dark:bg-[#111827] border border-[#E2E8F0] dark:border-[#253149] shadow-2xs">
-              <span className="text-[10px] font-mono uppercase text-[#64748B] dark:text-[#A4B1C7] block mb-0.5">
+            <div className="p-3 rounded-xl bg-white dark:bg-[#17181C] border border-[#E2E8F0] dark:border-[#26282E] shadow-2xs">
+              <span className="text-[10px] font-mono uppercase text-[#64748B] dark:text-[#9CA3AF] block mb-0.5">
                 Target Halaman
               </span>
               <span className="text-sm font-bold text-[#0F172A] dark:text-[#F3F6FC]">
@@ -451,8 +451,8 @@ export const AgentExecutionMonitor: React.FC<AgentExecutionMonitorProps> = ({
               </span>
             </div>
 
-            <div className="p-3 rounded-xl bg-white dark:bg-[#111827] border border-[#E2E8F0] dark:border-[#253149] shadow-2xs">
-              <span className="text-[10px] font-mono uppercase text-[#64748B] dark:text-[#A4B1C7] block mb-0.5">
+            <div className="p-3 rounded-xl bg-white dark:bg-[#17181C] border border-[#E2E8F0] dark:border-[#26282E] shadow-2xs">
+              <span className="text-[10px] font-mono uppercase text-[#64748B] dark:text-[#9CA3AF] block mb-0.5">
                 Estimasi Kedalaman
               </span>
               <span className="text-sm font-bold text-[#7C9CFF]">
@@ -460,8 +460,8 @@ export const AgentExecutionMonitor: React.FC<AgentExecutionMonitorProps> = ({
               </span>
             </div>
 
-            <div className="p-3 rounded-xl bg-white dark:bg-[#111827] border border-[#E2E8F0] dark:border-[#253149] shadow-2xs">
-              <span className="text-[10px] font-mono uppercase text-[#64748B] dark:text-[#A4B1C7] block mb-0.5">
+            <div className="p-3 rounded-xl bg-white dark:bg-[#17181C] border border-[#E2E8F0] dark:border-[#26282E] shadow-2xs">
+              <span className="text-[10px] font-mono uppercase text-[#64748B] dark:text-[#9CA3AF] block mb-0.5">
                 Sitasi Primer
               </span>
               <span className="text-sm font-bold text-[#34D399]">
@@ -469,8 +469,8 @@ export const AgentExecutionMonitor: React.FC<AgentExecutionMonitorProps> = ({
               </span>
             </div>
 
-            <div className="p-3 rounded-xl bg-white dark:bg-[#111827] border border-[#E2E8F0] dark:border-[#253149] shadow-2xs">
-              <span className="text-[10px] font-mono uppercase text-[#64748B] dark:text-[#A4B1C7] block mb-0.5">
+            <div className="p-3 rounded-xl bg-white dark:bg-[#17181C] border border-[#E2E8F0] dark:border-[#26282E] shadow-2xs">
+              <span className="text-[10px] font-mono uppercase text-[#64748B] dark:text-[#9CA3AF] block mb-0.5">
                 Format Naskah
               </span>
               <span className="text-sm font-bold text-[#FBBF24]">
@@ -487,7 +487,7 @@ export const AgentExecutionMonitor: React.FC<AgentExecutionMonitorProps> = ({
                 Pratinjau Kompilasi Struktur Naskah
               </h3>
             </div>
-            <span className="text-[11px] font-mono text-[#64748B] dark:text-[#A4B1C7]">
+            <span className="text-[11px] font-mono text-[#64748B] dark:text-[#9CA3AF]">
               {overallProgress >= 100 ? "✓ 5 Bab Selesai Dikompilasi" : "Sedang menyusun secara simultan..."}
             </span>
           </div>
@@ -498,8 +498,8 @@ export const AgentExecutionMonitor: React.FC<AgentExecutionMonitorProps> = ({
             {/* Chapter 1 Card */}
             <div className={`p-4 rounded-xl border transition-all ${
               overallProgress >= 35 
-                ? "bg-white dark:bg-[#111827] border-[#E2E8F0] dark:border-[#253149] shadow-2xs" 
-                : "bg-white/50 dark:bg-[#111827]/40 border-dashed border-[#E2E8F0] dark:border-[#253149]"
+                ? "bg-white dark:bg-[#17181C] border-[#E2E8F0] dark:border-[#26282E] shadow-2xs" 
+                : "bg-white/50 dark:bg-[#17181C]/40 border-dashed border-[#E2E8F0] dark:border-[#26282E]"
             }`}>
               <div className="flex items-center justify-between gap-2 mb-2">
                 <span className="text-xs font-bold text-[#0F172A] dark:text-[#F3F6FC] flex items-center gap-2">
@@ -516,7 +516,7 @@ export const AgentExecutionMonitor: React.FC<AgentExecutionMonitorProps> = ({
                   </span>
                 )}
               </div>
-              <p className="text-xs text-[#475569] dark:text-[#A4B1C7] leading-relaxed line-clamp-2">
+              <p className="text-xs text-[#475569] dark:text-[#9CA3AF] leading-relaxed line-clamp-2">
                 {currentDoc?.executiveSummary || "Urgensi penelitian, rumusan masalah, ruang lingkup batasan, tujuan umum, dan manfaat teoretis/praktis."}
               </p>
             </div>
@@ -524,8 +524,8 @@ export const AgentExecutionMonitor: React.FC<AgentExecutionMonitorProps> = ({
             {/* Chapter 2 Card */}
             <div className={`p-4 rounded-xl border transition-all ${
               overallProgress >= 50 
-                ? "bg-white dark:bg-[#111827] border-[#E2E8F0] dark:border-[#253149] shadow-2xs" 
-                : "bg-white/50 dark:bg-[#111827]/40 border-dashed border-[#E2E8F0] dark:border-[#253149]"
+                ? "bg-white dark:bg-[#17181C] border-[#E2E8F0] dark:border-[#26282E] shadow-2xs" 
+                : "bg-white/50 dark:bg-[#17181C]/40 border-dashed border-[#E2E8F0] dark:border-[#26282E]"
             }`}>
               <div className="flex items-center justify-between gap-2 mb-2">
                 <span className="text-xs font-bold text-[#0F172A] dark:text-[#F3F6FC] flex items-center gap-2">
@@ -542,7 +542,7 @@ export const AgentExecutionMonitor: React.FC<AgentExecutionMonitorProps> = ({
                   </span>
                 )}
               </div>
-              <p className="text-xs text-[#475569] dark:text-[#A4B1C7] leading-relaxed line-clamp-2">
+              <p className="text-xs text-[#475569] dark:text-[#9CA3AF] leading-relaxed line-clamp-2">
                 {currentDoc?.bab2?.profilInstansi || "Landasan teori komprehensif, telaah state of the art minimal 10 jurnal primer terindeks, dan matriks research gap komparatif."}
               </p>
             </div>
@@ -550,8 +550,8 @@ export const AgentExecutionMonitor: React.FC<AgentExecutionMonitorProps> = ({
             {/* Chapter 3 Card */}
             <div className={`p-4 rounded-xl border transition-all ${
               overallProgress >= 70 
-                ? "bg-white dark:bg-[#111827] border-[#E2E8F0] dark:border-[#253149] shadow-2xs" 
-                : "bg-white/50 dark:bg-[#111827]/40 border-dashed border-[#E2E8F0] dark:border-[#253149]"
+                ? "bg-white dark:bg-[#17181C] border-[#E2E8F0] dark:border-[#26282E] shadow-2xs" 
+                : "bg-white/50 dark:bg-[#17181C]/40 border-dashed border-[#E2E8F0] dark:border-[#26282E]"
             }`}>
               <div className="flex items-center justify-between gap-2 mb-2">
                 <span className="text-xs font-bold text-[#0F172A] dark:text-[#F3F6FC] flex items-center gap-2">
@@ -568,7 +568,7 @@ export const AgentExecutionMonitor: React.FC<AgentExecutionMonitorProps> = ({
                   </span>
                 )}
               </div>
-              <p className="text-xs text-[#475569] dark:text-[#A4B1C7] leading-relaxed line-clamp-2">
+              <p className="text-xs text-[#475569] dark:text-[#9CA3AF] leading-relaxed line-clamp-2">
                 Metode pelaksanaan terstruktur, populasi/sampel, instrumen kalibrasi, teknik analisis data, dan jadwal WBS mingguan terstandar.
               </p>
             </div>
@@ -576,8 +576,8 @@ export const AgentExecutionMonitor: React.FC<AgentExecutionMonitorProps> = ({
             {/* Chapter 4 / Deliverables Card */}
             <div className={`p-4 rounded-xl border transition-all ${
               overallProgress >= 88 
-                ? "bg-white dark:bg-[#111827] border-[#E2E8F0] dark:border-[#253149] shadow-2xs" 
-                : "bg-white/50 dark:bg-[#111827]/40 border-dashed border-[#E2E8F0] dark:border-[#253149]"
+                ? "bg-white dark:bg-[#17181C] border-[#E2E8F0] dark:border-[#26282E] shadow-2xs" 
+                : "bg-white/50 dark:bg-[#17181C]/40 border-dashed border-[#E2E8F0] dark:border-[#26282E]"
             }`}>
               <div className="flex items-center justify-between gap-2 mb-2">
                 <span className="text-xs font-bold text-[#0F172A] dark:text-[#F3F6FC] flex items-center gap-2">
@@ -594,7 +594,7 @@ export const AgentExecutionMonitor: React.FC<AgentExecutionMonitorProps> = ({
                   </span>
                 )}
               </div>
-              <p className="text-xs text-[#475569] dark:text-[#A4B1C7] leading-relaxed line-clamp-2">
+              <p className="text-xs text-[#475569] dark:text-[#9CA3AF] leading-relaxed line-clamp-2">
                 Audit Turnitin pra-cek, validasi tabel 3-garis terbuka, dan perancangan slide presentasi eksekutif 16:9 siap sidang.
               </p>
             </div>
@@ -612,7 +612,7 @@ export const AgentExecutionMonitor: React.FC<AgentExecutionMonitorProps> = ({
                   <h4 className="text-sm font-bold text-[#0F172A] dark:text-[#F3F6FC]">
                     Naskah Akademik Selesai Disintesis!
                   </h4>
-                  <p className="text-xs text-[#475569] dark:text-[#A4B1C7]">
+                  <p className="text-xs text-[#475569] dark:text-[#9CA3AF]">
                     Dokumen siap dibuka di Document Studio untuk disunting, ditelaah dengan Turnitin, dan diekspor ke DOCX atau PPTX.
                   </p>
                 </div>
@@ -621,7 +621,7 @@ export const AgentExecutionMonitor: React.FC<AgentExecutionMonitorProps> = ({
               <button
                 type="button"
                 onClick={handleFinish}
-                className="w-full sm:w-auto px-6 py-2.5 rounded-xl bg-[#0F172A] dark:bg-[#7C9CFF] hover:bg-black dark:hover:bg-[#9B8CFF] text-white dark:text-[#080B12] text-xs font-bold transition-all shadow-md flex items-center justify-center gap-2 cursor-pointer shrink-0"
+                className="w-full sm:w-auto px-6 py-2.5 rounded-xl bg-[#0F172A] dark:bg-[#7C9CFF] hover:bg-black dark:hover:bg-[#9B8CFF] text-white dark:text-[#0C0D0E] text-xs font-bold transition-all shadow-md flex items-center justify-center gap-2 cursor-pointer shrink-0"
               >
                 <span>Buka Dokumen Studio</span>
                 <ArrowRight className="w-4 h-4" />
@@ -634,25 +634,25 @@ export const AgentExecutionMonitor: React.FC<AgentExecutionMonitorProps> = ({
         {/* ========================================================== */}
         {/* PANEL C: RIGHT RAIL — REAL-TIME CONSOLE & AUDIT TELEMETRY  */}
         {/* ========================================================== */}
-        <aside className="w-80 lg:w-92 border-l border-[#E2E8F0] dark:border-[#253149] bg-white dark:bg-[#0B101A] flex flex-col justify-between overflow-hidden shrink-0 hidden xl:flex">
+        <aside className="w-80 lg:w-92 border-l border-[#E2E8F0] dark:border-[#26282E] bg-white dark:bg-[#121316] flex flex-col justify-between overflow-hidden shrink-0 hidden xl:flex">
           
           {/* Header */}
-          <div className="p-3.5 border-b border-[#E2E8F0] dark:border-[#253149] flex items-center justify-between">
+          <div className="p-3.5 border-b border-[#E2E8F0] dark:border-[#26282E] flex items-center justify-between">
             <span className="text-[10px] font-bold uppercase tracking-wider text-[#0F172A] dark:text-[#F3F6FC] flex items-center gap-1.5">
               <Terminal className="w-3.5 h-3.5 text-[#7C9CFF]" />
               <span>Log Telemetri Orkestrasi</span>
             </span>
             <div className="flex items-center gap-1.5">
               <span className="w-2 h-2 rounded-full bg-[#34D399] animate-pulse" />
-              <span className="text-[10px] font-mono text-[#64748B] dark:text-[#A4B1C7]">Live Console</span>
+              <span className="text-[10px] font-mono text-[#64748B] dark:text-[#9CA3AF]">Live Console</span>
             </div>
           </div>
 
           {/* Terminal Console Logs */}
-          <div className="flex-1 overflow-y-auto p-3.5 font-mono text-[11px] space-y-2 bg-[#F8FAFC] dark:bg-[#080B12]">
+          <div className="flex-1 overflow-y-auto p-3.5 font-mono text-[11px] space-y-2 bg-[#F8FAFC] dark:bg-[#0C0D0E]">
             {activeLogs.map((log, i) => (
               <div key={i} className="leading-relaxed flex gap-2">
-                <span className="text-[#64748B] dark:text-[#A4B1C7] select-none shrink-0">
+                <span className="text-[#64748B] dark:text-[#9CA3AF] select-none shrink-0">
                   [{log.time}]
                 </span>
                 <div>
@@ -665,7 +665,7 @@ export const AgentExecutionMonitor: React.FC<AgentExecutionMonitorProps> = ({
                   }`}>
                     {log.agent}:
                   </span>
-                  <span className="text-[#475569] dark:text-[#A4B1C7]">
+                  <span className="text-[#475569] dark:text-[#9CA3AF]">
                     {log.text}
                   </span>
                 </div>
@@ -675,26 +675,26 @@ export const AgentExecutionMonitor: React.FC<AgentExecutionMonitorProps> = ({
           </div>
 
           {/* Institutional Compliance Checklist */}
-          <div className="p-3.5 border-t border-[#E2E8F0] dark:border-[#253149] bg-white dark:bg-[#0B101A] space-y-2">
-            <span className="text-[10px] font-bold uppercase tracking-wider text-[#64748B] dark:text-[#A4B1C7] block">
+          <div className="p-3.5 border-t border-[#E2E8F0] dark:border-[#26282E] bg-white dark:bg-[#121316] space-y-2">
+            <span className="text-[10px] font-bold uppercase tracking-wider text-[#64748B] dark:text-[#9CA3AF] block">
               Quality Assurance Checklist:
             </span>
 
             <div className="space-y-1.5 text-[11px]">
               <div className="flex items-center justify-between">
-                <span className="text-[#475569] dark:text-[#A4B1C7]">Margin A4 Standar Institusi</span>
+                <span className="text-[#475569] dark:text-[#9CA3AF]">Margin A4 Standar Institusi</span>
                 <span className="text-[#34D399] font-mono font-bold">✓ LOLOS</span>
               </div>
               <div className="flex items-center justify-between">
-                <span className="text-[#475569] dark:text-[#A4B1C7]">Penomoran Bab &amp; Desimal</span>
+                <span className="text-[#475569] dark:text-[#9CA3AF]">Penomoran Bab &amp; Desimal</span>
                 <span className="text-[#34D399] font-mono font-bold">✓ LOLOS</span>
               </div>
               <div className="flex items-center justify-between">
-                <span className="text-[#475569] dark:text-[#A4B1C7]">Sinkronisasi Masalah &amp; Tujuan</span>
+                <span className="text-[#475569] dark:text-[#9CA3AF]">Sinkronisasi Masalah &amp; Tujuan</span>
                 <span className="text-[#34D399] font-mono font-bold">✓ SINKRON</span>
               </div>
               <div className="flex items-center justify-between">
-                <span className="text-[#475569] dark:text-[#A4B1C7]">Integritas Bebas Fabrikasi</span>
+                <span className="text-[#475569] dark:text-[#9CA3AF]">Integritas Bebas Fabrikasi</span>
                 <span className="text-[#34D399] font-mono font-bold">✓ TERVERIFIKASI</span>
               </div>
             </div>

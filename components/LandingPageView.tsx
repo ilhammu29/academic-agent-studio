@@ -112,7 +112,7 @@ export const LandingPageView: React.FC<LandingPageViewProps> = ({
   ];
 
   return (
-    <div className="min-h-screen bg-[#FDFDFE] dark:bg-[#080B12] text-[#0F172A] dark:text-[#F3F6FC] transition-colors selection:bg-[#7C9CFF]/30 font-sans relative overflow-x-hidden">
+    <div className="min-h-screen bg-[#FDFDFE] dark:bg-[#0C0D0E] text-[#0F172A] dark:text-[#F3F6FC] transition-colors selection:bg-[#7C9CFF]/30 font-sans relative overflow-x-hidden">
       
       {/* ========================================================================= */}
       {/* EMBEDDED CSS KEYFRAMES FOR SMOOTH 3D MOTION & LEVITATION                  */}
@@ -475,7 +475,7 @@ export const LandingPageView: React.FC<LandingPageViewProps> = ({
             {sampleTopics.map((item, idx) => (
               <div 
                 key={idx}
-                className="p-6 rounded-2xl bg-white dark:bg-[#111827] border border-[#E2E8F0] dark:border-[#1E293B] hover:border-blue-500/50 hover:shadow-lg transition-all flex flex-col justify-between"
+                className="p-6 rounded-2xl bg-white dark:bg-[#17181C] border border-[#E2E8F0] dark:border-[#1E293B] hover:border-blue-500/50 hover:shadow-lg transition-all flex flex-col justify-between"
               >
                 <div>
                   <div className="flex items-center justify-between mb-3">
@@ -526,7 +526,7 @@ export const LandingPageView: React.FC<LandingPageViewProps> = ({
       {/* ========================================================================= */}
       {/* 5. PRICING & SUBSCRIPTION SECTION                                         */}
       {/* ========================================================================= */}
-      <section id="pricing-section" className="relative z-10 py-16 px-4 sm:px-6 lg:px-8 border-t border-[#E2E8F0] dark:border-[#1E293B] bg-[#F8FAFC] dark:bg-[#080B12]">
+      <section id="pricing-section" className="relative z-10 py-16 px-4 sm:px-6 lg:px-8 border-t border-[#E2E8F0] dark:border-[#1E293B] bg-[#F8FAFC] dark:bg-[#0C0D0E]">
         <div className="max-w-5xl mx-auto text-center">
           
           <span className="text-xs font-mono font-semibold px-3 py-1 rounded-full bg-amber-100 dark:bg-amber-950/60 text-amber-700 dark:text-amber-300 border border-amber-200 dark:border-amber-900 uppercase tracking-wider">
@@ -542,7 +542,7 @@ export const LandingPageView: React.FC<LandingPageViewProps> = ({
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-10 text-left">
             
             {/* Free Trial Tier */}
-            <div className="p-6 rounded-3xl bg-white dark:bg-[#111827] border border-[#E2E8F0] dark:border-[#1F2937] flex flex-col justify-between">
+            <div className="p-6 rounded-3xl bg-white dark:bg-[#17181C] border border-[#E2E8F0] dark:border-[#1F2937] flex flex-col justify-between">
               <div>
                 <div className="text-xs font-bold text-zinc-500 uppercase tracking-wider">Free Trial</div>
                 <div className="text-2xl font-black text-zinc-900 dark:text-white mt-1">Rp 0</div>
@@ -572,7 +572,7 @@ export const LandingPageView: React.FC<LandingPageViewProps> = ({
             </div>
 
             {/* Skripsi & Tesis Pro Tier */}
-            <div className="p-6 rounded-3xl bg-white dark:bg-[#111827] border-2 border-amber-500 flex flex-col justify-between relative shadow-xl shadow-amber-500/10">
+            <div className="p-6 rounded-3xl bg-white dark:bg-[#17181C] border-2 border-amber-500 flex flex-col justify-between relative shadow-xl shadow-amber-500/10">
               <span className="absolute -top-3 right-6 text-[10px] font-bold px-3 py-0.5 rounded-full bg-amber-500 text-white shadow-xs">
                 REKOMENDASI MAHASISWA
               </span>
@@ -609,7 +609,7 @@ export const LandingPageView: React.FC<LandingPageViewProps> = ({
             </div>
 
             {/* Peneliti Unlimited Tier */}
-            <div className="p-6 rounded-3xl bg-white dark:bg-[#111827] border border-[#E2E8F0] dark:border-[#1F2937] flex flex-col justify-between">
+            <div className="p-6 rounded-3xl bg-white dark:bg-[#17181C] border border-[#E2E8F0] dark:border-[#1F2937] flex flex-col justify-between">
               <div>
                 <div className="text-xs font-bold text-purple-600 dark:text-purple-400 uppercase tracking-wider">Peneliti &amp; Dosen</div>
                 <div className="text-2xl font-black text-zinc-900 dark:text-white mt-1">Rp 199.000</div>
@@ -646,7 +646,7 @@ export const LandingPageView: React.FC<LandingPageViewProps> = ({
       {/* ========================================================================= */}
       {/* 6. FOOTER SECTION                                                         */}
       {/* ========================================================================= */}
-      <footer id="docs-section" className="relative z-10 py-12 px-4 sm:px-6 lg:px-8 border-t border-[#E2E8F0] dark:border-[#1E293B] bg-white dark:bg-[#0B101A] text-xs text-zinc-500">
+      <footer id="docs-section" className="relative z-10 py-12 px-4 sm:px-6 lg:px-8 border-t border-[#E2E8F0] dark:border-[#1E293B] bg-white dark:bg-[#121316] text-xs text-zinc-500">
         <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-2.5">
             <svg className="w-4 h-4 fill-current text-zinc-700 dark:text-zinc-300" viewBox="0 0 24 24">

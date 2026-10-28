@@ -1154,7 +1154,7 @@ NIP / NIK.
   };
 
   return (
-    <div className="w-full h-[calc(100vh-4rem)] max-h-[calc(100vh-4rem)] flex flex-col overflow-hidden bg-[#F8FAFC] dark:bg-[#080B12] text-[#0F172A] dark:text-[#F3F6FC]">
+    <div className="w-full h-[calc(100vh-4rem)] max-h-[calc(100vh-4rem)] flex flex-col overflow-hidden bg-[#F8FAFC] dark:bg-[#0C0D0E] text-[#0F172A] dark:text-[#F3F6FC]">
       
       <div role="note" className="no-print border-b border-amber-300 bg-amber-50 px-4 py-2 text-xs leading-relaxed text-amber-950 dark:border-amber-900 dark:bg-amber-950 dark:text-amber-100">Draf otomatis dapat memuat data, hasil, atau referensi yang belum diverifikasi. Periksa dan ganti dengan bukti serta sumber asli sebelum digunakan.</div>
       {/* Toast Notification */}
@@ -1173,20 +1173,20 @@ NIP / NIK.
       )}
 
       {/* 1. Minimalist Studio Top App Bar (Google AI Studio / ChatGPT style) */}
-      <header className="sticky top-0 z-30 h-14 bg-white/95 dark:bg-[#0B101A]/95 backdrop-blur-md border-b border-[#E2E8F0] dark:border-[#253149] px-3 sm:px-6 flex items-center justify-between gap-3 no-print">
+      <header className="sticky top-0 z-30 h-14 bg-white/95 dark:bg-[#121316]/95 backdrop-blur-md border-b border-[#E2E8F0] dark:border-[#26282E] px-3 sm:px-6 flex items-center justify-between gap-3 no-print">
         {/* Left: Back, Outline Toggle, and Document Breadcrumbs */}
         <div className="flex items-center gap-2 sm:gap-3 min-w-0">
           <button
             type="button"
             onClick={onReset}
-            className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-semibold text-[#475569] dark:text-[#A4B1C7] hover:text-[#0F172A] dark:hover:text-[#F3F6FC] hover:bg-[#F1F5F9] dark:hover:bg-[#172033] transition-colors cursor-pointer"
+            className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-semibold text-[#475569] dark:text-[#9CA3AF] hover:text-[#0F172A] dark:hover:text-[#F3F6FC] hover:bg-[#F1F5F9] dark:hover:bg-[#1E1F24] transition-colors cursor-pointer"
             title="Kembali ke Dashboard & Proyek"
           >
             <ChevronLeft className="w-4 h-4" />
             <span className="hidden sm:inline">Dashboard</span>
           </button>
 
-          <div className="w-[1px] h-4 bg-[#E2E8F0] dark:bg-[#253149] hidden sm:block" />
+          <div className="w-[1px] h-4 bg-[#E2E8F0] dark:bg-[#26282E] hidden sm:block" />
 
           {/* Toggle Outline Sidebar */}
           <button
@@ -1194,8 +1194,8 @@ NIP / NIK.
             onClick={() => setIsLeftPanelOpen(!isLeftPanelOpen)}
             className={`p-1.5 rounded-lg border transition-all cursor-pointer ${
               isLeftPanelOpen
-                ? "bg-[#0F172A] text-white dark:bg-[#172033] dark:text-[#7C9CFF] border-[#0F172A] dark:border-[#7C9CFF]/40 shadow-xs"
-                : "bg-white dark:bg-[#111827] text-[#475569] dark:text-[#A4B1C7] border-[#E2E8F0] dark:border-[#253149] hover:bg-[#F1F5F9] dark:hover:bg-[#172033]"
+                ? "bg-[#0F172A] text-white dark:bg-[#1E1F24] dark:text-[#7C9CFF] border-[#0F172A] dark:border-[#7C9CFF]/40 shadow-xs"
+                : "bg-white dark:bg-[#17181C] text-[#475569] dark:text-[#9CA3AF] border-[#E2E8F0] dark:border-[#26282E] hover:bg-[#F1F5F9] dark:hover:bg-[#1E1F24]"
             }`}
             title={isLeftPanelOpen ? "Tutup panel navigasi bab" : "Buka panel navigasi bab"}
           >
@@ -1204,7 +1204,7 @@ NIP / NIK.
 
           {/* Doc Title & Category */}
           <div className="flex items-center gap-2 min-w-0">
-            <span className="text-[10px] uppercase font-mono font-bold tracking-wider px-2 py-0.5 rounded-md bg-[#F1F5F9] dark:bg-[#172033] text-[#0F172A] dark:text-[#7C9CFF] border border-[#E2E8F0] dark:border-[#253149] shrink-0">
+            <span className="text-[10px] uppercase font-mono font-bold tracking-wider px-2 py-0.5 rounded-md bg-[#F1F5F9] dark:bg-[#1E1F24] text-[#0F172A] dark:text-[#7C9CFF] border border-[#E2E8F0] dark:border-[#26282E] shrink-0">
               {currentDoc.category === "magang" ? "Magang" : currentDoc.category === "skripsi" ? "Skripsi" : "Tesis"}
             </span>
             <h1 className="text-xs sm:text-sm font-bold text-[#0F172A] dark:text-[#F3F6FC] truncate max-w-[160px] sm:max-w-[260px] md:max-w-[340px]" title={currentDoc.title}>
@@ -1228,7 +1228,7 @@ NIP / NIK.
               setCustomizerTab("depth");
               setIsPageCustomizerModalOpen(true);
             }}
-            className="hidden lg:inline-flex items-center gap-1.5 px-3 py-1 rounded-lg bg-[#F1F5F9] hover:bg-[#E2E8F0] dark:bg-[#111827] dark:hover:bg-[#1E293B] border border-[#E2E8F0] dark:border-[#253149] text-[11px] font-mono text-[#475569] dark:text-[#A4B1C7] shadow-2xs cursor-pointer transition-colors"
+            className="hidden lg:inline-flex items-center gap-1.5 px-3 py-1 rounded-lg bg-[#F1F5F9] hover:bg-[#E2E8F0] dark:bg-[#17181C] dark:hover:bg-[#1E293B] border border-[#E2E8F0] dark:border-[#26282E] text-[11px] font-mono text-[#475569] dark:text-[#9CA3AF] shadow-2xs cursor-pointer transition-colors"
             title="Klik untuk Mengatur Target Ketebalan Halaman & Densitas Naskah"
           >
             <FileText className="w-3.5 h-3.5 text-[#7C9CFF]" />
@@ -1240,22 +1240,22 @@ NIP / NIK.
           </button>
 
           {/* Undo & Redo */}
-          <div className="flex items-center border border-[#E2E8F0] dark:border-[#253149] rounded-lg overflow-hidden bg-white dark:bg-[#111827] shadow-2xs">
+          <div className="flex items-center border border-[#E2E8F0] dark:border-[#26282E] rounded-lg overflow-hidden bg-white dark:bg-[#17181C] shadow-2xs">
             <button
               type="button"
               onClick={handleUndo}
               disabled={historyIndex <= 0}
-              className="p-1.5 hover:bg-[#F1F5F9] dark:hover:bg-[#172033] disabled:opacity-30 text-[#475569] dark:text-[#A4B1C7] transition-colors cursor-pointer"
+              className="p-1.5 hover:bg-[#F1F5F9] dark:hover:bg-[#1E1F24] disabled:opacity-30 text-[#475569] dark:text-[#9CA3AF] transition-colors cursor-pointer"
               title="Undo"
             >
               <RotateCcw className="w-3.5 h-3.5" />
             </button>
-            <div className="w-[1px] h-4 bg-[#E2E8F0] dark:bg-[#253149]" />
+            <div className="w-[1px] h-4 bg-[#E2E8F0] dark:bg-[#26282E]" />
             <button
               type="button"
               onClick={handleRedo}
               disabled={historyIndex >= history.length - 1}
-              className="p-1.5 hover:bg-[#F1F5F9] dark:hover:bg-[#172033] disabled:opacity-30 text-[#475569] dark:text-[#A4B1C7] transition-colors cursor-pointer"
+              className="p-1.5 hover:bg-[#F1F5F9] dark:hover:bg-[#1E1F24] disabled:opacity-30 text-[#475569] dark:text-[#9CA3AF] transition-colors cursor-pointer"
               title="Redo"
             >
               <RotateCw className="w-3.5 h-3.5" />
@@ -1266,7 +1266,7 @@ NIP / NIK.
           <button
             type="button"
             onClick={() => setIsGuidelineModalOpen(true)}
-            className="hidden sm:flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border border-[#E2E8F0] dark:border-[#253149] bg-white dark:bg-[#111827] hover:bg-[#F1F5F9] dark:hover:bg-[#172033] text-[#0F172A] dark:text-[#F3F6FC] text-xs font-medium transition-all cursor-pointer shadow-2xs"
+            className="hidden sm:flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border border-[#E2E8F0] dark:border-[#26282E] bg-white dark:bg-[#17181C] hover:bg-[#F1F5F9] dark:hover:bg-[#1E1F24] text-[#0F172A] dark:text-[#F3F6FC] text-xs font-medium transition-all cursor-pointer shadow-2xs"
             title="Format Pedoman Kampus"
           >
             <Landmark className="w-3.5 h-3.5 text-[#7C9CFF] shrink-0" />
@@ -1283,8 +1283,8 @@ NIP / NIK.
               }}
               className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-xs font-medium transition-all cursor-pointer shadow-2xs ${
                 isExportDropdownOpen
-                  ? "bg-[#0F172A] text-white dark:bg-[#172033] dark:text-[#7C9CFF] border-[#0F172A] dark:border-[#7C9CFF]/40"
-                  : "border-[#E2E8F0] dark:border-[#253149] bg-white dark:bg-[#111827] hover:bg-[#F1F5F9] dark:hover:bg-[#172033] text-[#0F172A] dark:text-[#F3F6FC]"
+                  ? "bg-[#0F172A] text-white dark:bg-[#1E1F24] dark:text-[#7C9CFF] border-[#0F172A] dark:border-[#7C9CFF]/40"
+                  : "border-[#E2E8F0] dark:border-[#26282E] bg-white dark:bg-[#17181C] hover:bg-[#F1F5F9] dark:hover:bg-[#1E1F24] text-[#0F172A] dark:text-[#F3F6FC]"
               }`}
             >
               <FileDown className="w-3.5 h-3.5 text-[#7C9CFF]" />
@@ -1293,19 +1293,19 @@ NIP / NIK.
             </button>
 
             {isExportDropdownOpen && (
-              <div className="absolute right-0 mt-2 w-60 rounded-xl border border-[#E2E8F0] dark:border-[#253149] bg-white dark:bg-[#111827] p-1.5 shadow-xl z-30 animate-in fade-in zoom-in-95 duration-100">
+              <div className="absolute right-0 mt-2 w-60 rounded-xl border border-[#E2E8F0] dark:border-[#26282E] bg-white dark:bg-[#17181C] p-1.5 shadow-xl z-30 animate-in fade-in zoom-in-95 duration-100">
                 <button
                   type="button"
                   onClick={() => { setIsExportDropdownOpen(false); handleDownloadDocx(); }}
                   disabled={isExportingDocx}
-                  className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-medium text-[#0F172A] dark:text-[#F3F6FC] hover:bg-[#F1F5F9] dark:hover:bg-[#172033] transition-colors text-left cursor-pointer"
+                  className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-medium text-[#0F172A] dark:text-[#F3F6FC] hover:bg-[#F1F5F9] dark:hover:bg-[#1E1F24] transition-colors text-left cursor-pointer"
                 >
                   <FileDown className="w-4 h-4 text-[#7C9CFF] flex-shrink-0" />
                   <div>
                     <p className="font-semibold text-[#0F172A] dark:text-[#F3F6FC]">
                       {isExportingDocx ? "Menyusun Word..." : "Dokumen Word (.docx)"}
                     </p>
-                    <p className="text-[10px] text-[#475569] dark:text-[#A4B1C7]">Standar nomor halaman &amp; margin kampus</p>
+                    <p className="text-[10px] text-[#475569] dark:text-[#9CA3AF]">Standar nomor halaman &amp; margin kampus</p>
                   </div>
                 </button>
 
@@ -1313,14 +1313,14 @@ NIP / NIK.
                   type="button"
                   onClick={() => { setIsExportDropdownOpen(false); handleDownloadPptx(); }}
                   disabled={isExportingPptx}
-                  className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-medium text-[#0F172A] dark:text-[#F3F6FC] hover:bg-[#F1F5F9] dark:hover:bg-[#172033] transition-colors text-left cursor-pointer"
+                  className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-medium text-[#0F172A] dark:text-[#F3F6FC] hover:bg-[#F1F5F9] dark:hover:bg-[#1E1F24] transition-colors text-left cursor-pointer"
                 >
                   <Presentation className="w-4 h-4 text-[#FBBF24] flex-shrink-0" />
                   <div>
                     <p className="font-semibold text-[#0F172A] dark:text-[#F3F6FC]">
                       {isExportingPptx ? "Menyusun Slide..." : "Slide Sidang (.pptx)"}
                     </p>
-                    <p className="text-[10px] text-[#475569] dark:text-[#A4B1C7]">Format eksekutif 16:9 siap presentasi</p>
+                    <p className="text-[10px] text-[#475569] dark:text-[#9CA3AF]">Format eksekutif 16:9 siap presentasi</p>
                   </div>
                 </button>
 
@@ -1335,38 +1335,38 @@ NIP / NIK.
                       <p className="font-semibold text-[#0F172A] dark:text-[#F3F6FC]">
                         Buka Slide Studio Terpisah ↗
                       </p>
-                      <p className="text-[10px] text-[#475569] dark:text-[#A4B1C7]">Visual AI &amp; latihan simulasi sidang</p>
+                      <p className="text-[10px] text-[#475569] dark:text-[#9CA3AF]">Visual AI &amp; latihan simulasi sidang</p>
                     </div>
                   </button>
                 )}
 
-                <div className="my-1 border-t border-[#E2E8F0] dark:border-[#253149]"></div>
+                <div className="my-1 border-t border-[#E2E8F0] dark:border-[#26282E]"></div>
 
                 <button
                   type="button"
                   onClick={() => { setIsExportDropdownOpen(false); handleExportBibTeX(); }}
-                  className="w-full flex items-center gap-2.5 px-3 py-1.5 rounded-lg text-xs font-medium text-[#0F172A] dark:text-[#F3F6FC] hover:bg-[#F1F5F9] dark:hover:bg-[#172033] transition-colors text-left cursor-pointer"
+                  className="w-full flex items-center gap-2.5 px-3 py-1.5 rounded-lg text-xs font-medium text-[#0F172A] dark:text-[#F3F6FC] hover:bg-[#F1F5F9] dark:hover:bg-[#1E1F24] transition-colors text-left cursor-pointer"
                 >
-                  <BookMarked className="w-4 h-4 text-[#475569] dark:text-[#A4B1C7] flex-shrink-0" />
+                  <BookMarked className="w-4 h-4 text-[#475569] dark:text-[#9CA3AF] flex-shrink-0" />
                   <div>
                     <p className="font-semibold text-[#0F172A] dark:text-[#F3F6FC]">Kutipan BibTeX (.bib)</p>
-                    <p className="text-[10px] text-[#475569] dark:text-[#A4B1C7]">Untuk Mendeley &amp; Zotero</p>
+                    <p className="text-[10px] text-[#475569] dark:text-[#9CA3AF]">Untuk Mendeley &amp; Zotero</p>
                   </div>
                 </button>
 
                 <button
                   type="button"
                   onClick={() => { setIsExportDropdownOpen(false); handleExportRIS(); }}
-                  className="w-full flex items-center gap-2.5 px-3 py-1.5 rounded-lg text-xs font-medium text-[#0F172A] dark:text-[#F3F6FC] hover:bg-[#F1F5F9] dark:hover:bg-[#172033] transition-colors text-left cursor-pointer"
+                  className="w-full flex items-center gap-2.5 px-3 py-1.5 rounded-lg text-xs font-medium text-[#0F172A] dark:text-[#F3F6FC] hover:bg-[#F1F5F9] dark:hover:bg-[#1E1F24] transition-colors text-left cursor-pointer"
                 >
-                  <BookmarkCheck className="w-4 h-4 text-[#475569] dark:text-[#A4B1C7] flex-shrink-0" />
+                  <BookmarkCheck className="w-4 h-4 text-[#475569] dark:text-[#9CA3AF] flex-shrink-0" />
                   <div>
                     <p className="font-semibold text-[#0F172A] dark:text-[#F3F6FC]">Kutipan RIS (.ris)</p>
-                    <p className="text-[10px] text-[#475569] dark:text-[#A4B1C7]">Untuk EndNote &amp; RefWorks</p>
+                    <p className="text-[10px] text-[#475569] dark:text-[#9CA3AF]">Untuk EndNote &amp; RefWorks</p>
                   </div>
                 </button>
 
-                <div className="my-1 border-t border-[#E2E8F0] dark:border-[#253149]"></div>
+                <div className="my-1 border-t border-[#E2E8F0] dark:border-[#26282E]"></div>
 
                 <button
                   type="button"
@@ -1391,38 +1391,38 @@ NIP / NIK.
                     URL.revokeObjectURL(url);
                     setToastMessage("✓ File cadangan naskah (.json) berhasil diunduh.");
                   }}
-                  className="w-full flex items-center gap-2.5 px-3 py-1.5 rounded-lg text-xs font-medium text-[#0F172A] dark:text-[#F3F6FC] hover:bg-[#F1F5F9] dark:hover:bg-[#172033] transition-colors text-left cursor-pointer"
+                  className="w-full flex items-center gap-2.5 px-3 py-1.5 rounded-lg text-xs font-medium text-[#0F172A] dark:text-[#F3F6FC] hover:bg-[#F1F5F9] dark:hover:bg-[#1E1F24] transition-colors text-left cursor-pointer"
                 >
                   <FileCheck2 className="w-4 h-4 text-[#34D399] flex-shrink-0" />
                   <div>
                     <p className="font-semibold text-[#0F172A] dark:text-[#F3F6FC]">Cadangan Proyek (.json)</p>
-                    <p className="text-[10px] text-[#475569] dark:text-[#A4B1C7]">Simpan berkas lengkap agar aman</p>
+                    <p className="text-[10px] text-[#475569] dark:text-[#9CA3AF]">Simpan berkas lengkap agar aman</p>
                   </div>
                 </button>
 
-                <div className="my-1 border-t border-[#E2E8F0] dark:border-[#253149]"></div>
+                <div className="my-1 border-t border-[#E2E8F0] dark:border-[#26282E]"></div>
 
                 <button
                   type="button"
                   onClick={() => { setIsExportDropdownOpen(false); handleCopy(); }}
-                  className="w-full flex items-center gap-2.5 px-3 py-1.5 rounded-lg text-xs font-medium text-[#0F172A] dark:text-[#F3F6FC] hover:bg-[#F1F5F9] dark:hover:bg-[#172033] transition-colors text-left cursor-pointer"
+                  className="w-full flex items-center gap-2.5 px-3 py-1.5 rounded-lg text-xs font-medium text-[#0F172A] dark:text-[#F3F6FC] hover:bg-[#F1F5F9] dark:hover:bg-[#1E1F24] transition-colors text-left cursor-pointer"
                 >
-                  <Copy className="w-4 h-4 text-[#475569] dark:text-[#A4B1C7] flex-shrink-0" />
+                  <Copy className="w-4 h-4 text-[#475569] dark:text-[#9CA3AF] flex-shrink-0" />
                   <div>
                     <p className="font-semibold text-[#0F172A] dark:text-[#F3F6FC]">{copied ? "Tersalin ke Clipboard" : "Salin Markdown (.md)"}</p>
-                    <p className="text-[10px] text-[#475569] dark:text-[#A4B1C7]">Naskah lengkap format Markdown</p>
+                    <p className="text-[10px] text-[#475569] dark:text-[#9CA3AF]">Naskah lengkap format Markdown</p>
                   </div>
                 </button>
 
                 <button
                   type="button"
                   onClick={() => { setIsExportDropdownOpen(false); handlePrint(); }}
-                  className="w-full flex items-center gap-2.5 px-3 py-1.5 rounded-lg text-xs font-medium text-[#0F172A] dark:text-[#F3F6FC] hover:bg-[#F1F5F9] dark:hover:bg-[#172033] transition-colors text-left cursor-pointer"
+                  className="w-full flex items-center gap-2.5 px-3 py-1.5 rounded-lg text-xs font-medium text-[#0F172A] dark:text-[#F3F6FC] hover:bg-[#F1F5F9] dark:hover:bg-[#1E1F24] transition-colors text-left cursor-pointer"
                 >
-                  <Printer className="w-4 h-4 text-[#475569] dark:text-[#A4B1C7] flex-shrink-0" />
+                  <Printer className="w-4 h-4 text-[#475569] dark:text-[#9CA3AF] flex-shrink-0" />
                   <div>
                     <p className="font-semibold text-[#0F172A] dark:text-[#F3F6FC]">Cetak Dokumen / PDF</p>
-                    <p className="text-[10px] text-[#475569] dark:text-[#A4B1C7]">Tata letak cetak A4 langsung</p>
+                    <p className="text-[10px] text-[#475569] dark:text-[#9CA3AF]">Tata letak cetak A4 langsung</p>
                   </div>
                 </button>
               </div>
@@ -1434,7 +1434,7 @@ NIP / NIK.
             type="button"
             onClick={handleSaveToArchive}
             disabled={isSavingArchive}
-            className="hidden md:flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border border-[#E2E8F0] dark:border-[#253149] bg-white dark:bg-[#111827] hover:bg-[#F1F5F9] dark:hover:bg-[#172033] text-[#0F172A] dark:text-[#F3F6FC] text-xs font-medium transition-all cursor-pointer shadow-2xs disabled:opacity-50"
+            className="hidden md:flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border border-[#E2E8F0] dark:border-[#26282E] bg-white dark:bg-[#17181C] hover:bg-[#F1F5F9] dark:hover:bg-[#1E1F24] text-[#0F172A] dark:text-[#F3F6FC] text-xs font-medium transition-all cursor-pointer shadow-2xs disabled:opacity-50"
             title="Simpan naskah ke database arsip"
           >
             <Bookmark className="w-3.5 h-3.5 text-[#FBBF24]" />
@@ -1447,8 +1447,8 @@ NIP / NIK.
             onClick={() => setIsRightPanelOpen(!isRightPanelOpen)}
             className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-xs font-semibold shadow-2xs transition-all cursor-pointer ${
               isRightPanelOpen
-                ? "bg-[#0F172A] text-white dark:bg-[#172033] dark:text-[#7C9CFF] border-[#0F172A] dark:border-[#7C9CFF]/40"
-                : "bg-white dark:bg-[#111827] text-[#0F172A] dark:text-[#F3F6FC] border-[#E2E8F0] dark:border-[#253149] hover:bg-[#F1F5F9] dark:hover:bg-[#172033]"
+                ? "bg-[#0F172A] text-white dark:bg-[#1E1F24] dark:text-[#7C9CFF] border-[#0F172A] dark:border-[#7C9CFF]/40"
+                : "bg-white dark:bg-[#17181C] text-[#0F172A] dark:text-[#F3F6FC] border-[#E2E8F0] dark:border-[#26282E] hover:bg-[#F1F5F9] dark:hover:bg-[#1E1F24]"
             }`}
             title="Buka / Tutup Panel Asisten AI & Audit QA"
           >
@@ -1459,7 +1459,7 @@ NIP / NIK.
       </header>
 
       {/* 1.5 Sticky Category & Chapter Sub-Toolbar Ribbon */}
-      <div className="h-11 min-h-[44px] border-b border-[#E2E8F0] dark:border-[#253149] bg-white/95 dark:bg-[#0B101A]/95 backdrop-blur-md px-3 sm:px-6 flex items-center justify-between gap-3 overflow-x-auto no-print shrink-0 z-20">
+      <div className="h-11 min-h-[44px] border-b border-[#E2E8F0] dark:border-[#26282E] bg-white/95 dark:bg-[#121316]/95 backdrop-blur-md px-3 sm:px-6 flex items-center justify-between gap-3 overflow-x-auto no-print shrink-0 z-20">
         
         {/* Left: 3 Main Workspace Categories */}
         <div className="flex items-center gap-1 shrink-0">
@@ -1468,8 +1468,8 @@ NIP / NIK.
             onClick={() => { setWorkspaceCategory("naskah"); setActiveTab("naskah"); }}
             className={`px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-all cursor-pointer ${
               workspaceCategory === "naskah"
-                ? "bg-[#0F172A] text-white dark:bg-[#7C9CFF] dark:text-[#080B12] shadow-xs"
-                : "text-[#64748B] dark:text-[#A4B1C7] hover:bg-[#F1F5F9] dark:hover:bg-[#172033]"
+                ? "bg-[#0F172A] text-white dark:bg-[#7C9CFF] dark:text-[#0C0D0E] shadow-xs"
+                : "text-[#64748B] dark:text-[#9CA3AF] hover:bg-[#F1F5F9] dark:hover:bg-[#1E1F24]"
             }`}
           >
             <FileText className="w-3.5 h-3.5" />
@@ -1481,8 +1481,8 @@ NIP / NIK.
             onClick={() => { setWorkspaceCategory("metodologi"); setActiveTab(metodologiTab); }}
             className={`px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-all cursor-pointer ${
               workspaceCategory === "metodologi"
-                ? "bg-[#0F172A] text-white dark:bg-[#7C9CFF] dark:text-[#080B12] shadow-xs"
-                : "text-[#64748B] dark:text-[#A4B1C7] hover:bg-[#F1F5F9] dark:hover:bg-[#172033]"
+                ? "bg-[#0F172A] text-white dark:bg-[#7C9CFF] dark:text-[#0C0D0E] shadow-xs"
+                : "text-[#64748B] dark:text-[#9CA3AF] hover:bg-[#F1F5F9] dark:hover:bg-[#1E1F24]"
             }`}
           >
             <Network className="w-3.5 h-3.5" />
@@ -1494,8 +1494,8 @@ NIP / NIK.
             onClick={() => { setWorkspaceCategory("sidang"); setActiveTab(sidangTab); }}
             className={`px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-all cursor-pointer ${
               workspaceCategory === "sidang"
-                ? "bg-[#0F172A] text-white dark:bg-[#7C9CFF] dark:text-[#080B12] shadow-xs"
-                : "text-[#64748B] dark:text-[#A4B1C7] hover:bg-[#F1F5F9] dark:hover:bg-[#172033]"
+                ? "bg-[#0F172A] text-white dark:bg-[#7C9CFF] dark:text-[#0C0D0E] shadow-xs"
+                : "text-[#64748B] dark:text-[#9CA3AF] hover:bg-[#F1F5F9] dark:hover:bg-[#1E1F24]"
             }`}
           >
             <GraduationCap className="w-3.5 h-3.5" />
@@ -1507,7 +1507,7 @@ NIP / NIK.
         {workspaceCategory === "naskah" && (
           <div className="flex items-center gap-2 shrink-0">
             {/* Chapter Jump Selector */}
-            <div className="flex items-center gap-0.5 bg-[#F1F5F9] dark:bg-[#111827] p-0.5 rounded-lg border border-[#E2E8F0] dark:border-[#253149] text-xs">
+            <div className="flex items-center gap-0.5 bg-[#F1F5F9] dark:bg-[#17181C] p-0.5 rounded-lg border border-[#E2E8F0] dark:border-[#26282E] text-xs">
               {(isUNPPkl ? [
                 { id: "all", label: "Semua" },
                 { id: "frontmatter", label: "Cover" },
@@ -1531,8 +1531,8 @@ NIP / NIK.
                   onClick={() => setNaskahSection(s.id as any)}
                   className={`px-2 py-0.5 rounded-md font-medium text-[11px] transition-all cursor-pointer ${
                     naskahSection === s.id
-                      ? "bg-white dark:bg-[#172033] text-[#7C9CFF] font-bold shadow-2xs"
-                      : "text-[#64748B] dark:text-[#A4B1C7] hover:text-[#0F172A] dark:hover:text-[#F3F6FC]"
+                      ? "bg-white dark:bg-[#1E1F24] text-[#7C9CFF] font-bold shadow-2xs"
+                      : "text-[#64748B] dark:text-[#9CA3AF] hover:text-[#0F172A] dark:hover:text-[#F3F6FC]"
                   }`}
                 >
                   {s.label}
@@ -1541,12 +1541,12 @@ NIP / NIK.
             </div>
 
             {/* Formatting Tools (Microsoft Word Reverse-Engineered Toolbar) */}
-            <div className="flex items-center gap-1 border-l border-[#E2E8F0] dark:border-[#253149] pl-2 text-xs">
+            <div className="flex items-center gap-1 border-l border-[#E2E8F0] dark:border-[#26282E] pl-2 text-xs">
               {/* Font Family */}
               <select
                 value={currentDoc.campusGuideline?.typography?.fontFamily || "Times New Roman"}
                 onChange={(e) => handleChangeFontFamily(e.target.value)}
-                className="px-2 py-1 rounded-md border border-[#E2E8F0] dark:border-[#253149] bg-white dark:bg-[#111827] text-[#0F172A] dark:text-[#F3F6FC] text-[11px] focus:outline-none cursor-pointer"
+                className="px-2 py-1 rounded-md border border-[#E2E8F0] dark:border-[#26282E] bg-white dark:bg-[#17181C] text-[#0F172A] dark:text-[#F3F6FC] text-[11px] focus:outline-none cursor-pointer"
                 title="Font Resmi Dokumen"
               >
                 <option value="Times New Roman">Times New Roman</option>
@@ -1559,7 +1559,7 @@ NIP / NIK.
               <select
                 value={currentDoc.campusGuideline?.typography?.lineSpacing || 1.5}
                 onChange={(e) => handleChangeLineSpacing(parseFloat(e.target.value))}
-                className="px-2 py-1 rounded-md border border-[#E2E8F0] dark:border-[#253149] bg-white dark:bg-[#111827] text-[#0F172A] dark:text-[#F3F6FC] text-[11px] focus:outline-none cursor-pointer"
+                className="px-2 py-1 rounded-md border border-[#E2E8F0] dark:border-[#26282E] bg-white dark:bg-[#17181C] text-[#0F172A] dark:text-[#F3F6FC] text-[11px] focus:outline-none cursor-pointer"
                 title="Spasi Baris Paragraf"
               >
                 <option value={1.15}>Spasi 1.15x</option>
@@ -1574,7 +1574,7 @@ NIP / NIK.
                   (currentDoc.campusGuideline?.margins?.topCm === 1.5) ? "narrow" : "normal"
                 }
                 onChange={(e) => handleChangeMarginsPreset(e.target.value as any)}
-                className="px-2 py-1 rounded-md border border-[#E2E8F0] dark:border-[#253149] bg-white dark:bg-[#111827] text-[#0F172A] dark:text-[#F3F6FC] text-[11px] focus:outline-none cursor-pointer"
+                className="px-2 py-1 rounded-md border border-[#E2E8F0] dark:border-[#26282E] bg-white dark:bg-[#17181C] text-[#0F172A] dark:text-[#F3F6FC] text-[11px] focus:outline-none cursor-pointer"
                 title="Margin Kertas A4"
               >
                 <option value="dikti">Margin Dikti (4-4-3-3)</option>
@@ -1586,7 +1586,7 @@ NIP / NIK.
               <button
                 type="button"
                 onClick={() => setCitationStyle(prev => prev === "apa" ? "ieee" : "apa")}
-                className="px-2 py-1 rounded-md border border-[#E2E8F0] dark:border-[#253149] bg-white dark:bg-[#111827] text-[#0F172A] dark:text-[#F3F6FC] font-mono text-[11px] hover:border-[#7C9CFF] transition-colors cursor-pointer"
+                className="px-2 py-1 rounded-md border border-[#E2E8F0] dark:border-[#26282E] bg-white dark:bg-[#17181C] text-[#0F172A] dark:text-[#F3F6FC] font-mono text-[11px] hover:border-[#7C9CFF] transition-colors cursor-pointer"
                 title="Ganti format sitasi APA 7th / IEEE"
               >
                 {citationStyle === "apa" ? "APA 7th" : "IEEE"}
@@ -1596,7 +1596,7 @@ NIP / NIK.
               <select
                 value={currentDoc.campusGuideline?.headingStyle || "decimal"}
                 onChange={(e) => handleChangeHeadingStyle(e.target.value as HeadingStyleType)}
-                className="px-2 py-1 rounded-md border border-[#E2E8F0] dark:border-[#253149] bg-white dark:bg-[#111827] text-[#0F172A] dark:text-[#F3F6FC] text-[11px] focus:outline-none cursor-pointer"
+                className="px-2 py-1 rounded-md border border-[#E2E8F0] dark:border-[#26282E] bg-white dark:bg-[#17181C] text-[#0F172A] dark:text-[#F3F6FC] text-[11px] focus:outline-none cursor-pointer"
                 title="Gaya Penomoran Sub-bab"
               >
                 <option value="decimal">Desimal (1.1)</option>
@@ -1608,7 +1608,7 @@ NIP / NIK.
               <select
                 value={watermarkType}
                 onChange={(e) => setWatermarkType(e.target.value as any)}
-                className="px-2 py-1 rounded-md border border-[#E2E8F0] dark:border-[#253149] bg-white dark:bg-[#111827] text-[#0F172A] dark:text-[#F3F6FC] text-[11px] focus:outline-none cursor-pointer"
+                className="px-2 py-1 rounded-md border border-[#E2E8F0] dark:border-[#26282E] bg-white dark:bg-[#17181C] text-[#0F172A] dark:text-[#F3F6FC] text-[11px] focus:outline-none cursor-pointer"
                 title="Watermark Kertas"
               >
                 <option value="none">Watermark: Nonaktif</option>
@@ -1624,8 +1624,8 @@ NIP / NIK.
                 onClick={() => setShowMarginRuler(!showMarginRuler)}
                 className={`px-2 py-1 rounded-md border text-[11px] font-mono transition-colors cursor-pointer ${
                   showMarginRuler
-                    ? "bg-[#7C9CFF] text-[#080B12] border-[#7C9CFF] font-bold"
-                    : "bg-white dark:bg-[#111827] text-[#64748B] dark:text-[#A4B1C7] border-[#E2E8F0] dark:border-[#253149]"
+                    ? "bg-[#7C9CFF] text-[#0C0D0E] border-[#7C9CFF] font-bold"
+                    : "bg-white dark:bg-[#17181C] text-[#64748B] dark:text-[#9CA3AF] border-[#E2E8F0] dark:border-[#26282E]"
                 }`}
                 title="Tampilkan garis margin panduan A4"
               >
@@ -1653,8 +1653,8 @@ NIP / NIK.
               onClick={() => { setMetodologiTab("flowchart"); setActiveTab("flowchart"); }}
               className={`px-2.5 py-1 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-all cursor-pointer ${
                 activeTab === "flowchart"
-                  ? "bg-[#0F172A] text-white dark:bg-[#172033] dark:text-[#7C9CFF] border border-[#7C9CFF]/40 shadow-xs"
-                  : "text-[#64748B] dark:text-[#A4B1C7] hover:bg-[#F1F5F9] dark:hover:bg-[#172033]"
+                  ? "bg-[#0F172A] text-white dark:bg-[#1E1F24] dark:text-[#7C9CFF] border border-[#7C9CFF]/40 shadow-xs"
+                  : "text-[#64748B] dark:text-[#9CA3AF] hover:bg-[#F1F5F9] dark:hover:bg-[#1E1F24]"
               }`}
             >
               <Network className="w-3.5 h-3.5" />
@@ -1665,8 +1665,8 @@ NIP / NIK.
               onClick={() => { setMetodologiTab("tree"); setActiveTab("tree"); }}
               className={`px-2.5 py-1 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-all cursor-pointer ${
                 activeTab === "tree"
-                  ? "bg-[#0F172A] text-white dark:bg-[#172033] dark:text-[#7C9CFF] border border-[#7C9CFF]/40 shadow-xs"
-                  : "text-[#64748B] dark:text-[#A4B1C7] hover:bg-[#F1F5F9] dark:hover:bg-[#172033]"
+                  ? "bg-[#0F172A] text-white dark:bg-[#1E1F24] dark:text-[#7C9CFF] border border-[#7C9CFF]/40 shadow-xs"
+                  : "text-[#64748B] dark:text-[#9CA3AF] hover:bg-[#F1F5F9] dark:hover:bg-[#1E1F24]"
               }`}
             >
               <Compass className="w-3.5 h-3.5" />
@@ -1677,8 +1677,8 @@ NIP / NIK.
               onClick={() => { setMetodologiTab("jadwal"); setActiveTab("jadwal"); }}
               className={`px-2.5 py-1 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-all cursor-pointer ${
                 activeTab === "jadwal"
-                  ? "bg-[#0F172A] text-white dark:bg-[#172033] dark:text-[#7C9CFF] border border-[#7C9CFF]/40 shadow-xs"
-                  : "text-[#64748B] dark:text-[#A4B1C7] hover:bg-[#F1F5F9] dark:hover:bg-[#172033]"
+                  ? "bg-[#0F172A] text-white dark:bg-[#1E1F24] dark:text-[#7C9CFF] border border-[#7C9CFF]/40 shadow-xs"
+                  : "text-[#64748B] dark:text-[#9CA3AF] hover:bg-[#F1F5F9] dark:hover:bg-[#1E1F24]"
               }`}
             >
               <CalendarDays className="w-3.5 h-3.5" />
@@ -1694,8 +1694,8 @@ NIP / NIK.
               onClick={() => { setSidangTab("defense"); setActiveTab("defense"); }}
               className={`px-2.5 py-1 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-all cursor-pointer ${
                 activeTab === "defense"
-                  ? "bg-[#0F172A] text-white dark:bg-[#172033] dark:text-[#7C9CFF] border border-[#7C9CFF]/40 shadow-xs"
-                  : "text-[#64748B] dark:text-[#A4B1C7] hover:bg-[#F1F5F9] dark:hover:bg-[#172033]"
+                  ? "bg-[#0F172A] text-white dark:bg-[#1E1F24] dark:text-[#7C9CFF] border border-[#7C9CFF]/40 shadow-xs"
+                  : "text-[#64748B] dark:text-[#9CA3AF] hover:bg-[#F1F5F9] dark:hover:bg-[#1E1F24]"
               }`}
             >
               <ShieldAlert className="w-3.5 h-3.5 text-[#FBBF24]" />
@@ -1706,8 +1706,8 @@ NIP / NIK.
               onClick={() => { setSidangTab("revisionMatrix"); setActiveTab("revisionMatrix"); }}
               className={`px-2.5 py-1 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-all cursor-pointer ${
                 activeTab === "revisionMatrix"
-                  ? "bg-[#0F172A] text-white dark:bg-[#172033] dark:text-[#7C9CFF] border border-[#7C9CFF]/40 shadow-xs"
-                  : "text-[#64748B] dark:text-[#A4B1C7] hover:bg-[#F1F5F9] dark:hover:bg-[#172033]"
+                  ? "bg-[#0F172A] text-white dark:bg-[#1E1F24] dark:text-[#7C9CFF] border border-[#7C9CFF]/40 shadow-xs"
+                  : "text-[#64748B] dark:text-[#9CA3AF] hover:bg-[#F1F5F9] dark:hover:bg-[#1E1F24]"
               }`}
             >
               <Layers className="w-3.5 h-3.5 text-[#9B8CFF]" />
@@ -1718,8 +1718,8 @@ NIP / NIK.
               onClick={() => { setSidangTab("audit"); setActiveTab("audit"); }}
               className={`px-2.5 py-1 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-all cursor-pointer ${
                 activeTab === "audit"
-                  ? "bg-[#0F172A] text-white dark:bg-[#172033] dark:text-[#7C9CFF] border border-[#7C9CFF]/40 shadow-xs"
-                  : "text-[#64748B] dark:text-[#A4B1C7] hover:bg-[#F1F5F9] dark:hover:bg-[#172033]"
+                  ? "bg-[#0F172A] text-white dark:bg-[#1E1F24] dark:text-[#7C9CFF] border border-[#7C9CFF]/40 shadow-xs"
+                  : "text-[#64748B] dark:text-[#9CA3AF] hover:bg-[#F1F5F9] dark:hover:bg-[#1E1F24]"
               }`}
             >
               <ShieldCheck className="w-3.5 h-3.5 text-[#34D399]" />
@@ -1733,16 +1733,16 @@ NIP / NIK.
       <div className="flex-1 flex overflow-hidden">
         {/* PANEL 1: LEFT DOCUMENT OUTLINE / CHAPTER NAVIGATION (Collapsible) */}
         {isLeftPanelOpen && (
-          <aside className="w-64 sm:w-72 shrink-0 border-r border-[#E2E8F0] dark:border-[#253149] bg-white dark:bg-[#0B101A] overflow-y-auto flex flex-col no-print transition-all duration-200">
+          <aside className="w-64 sm:w-72 shrink-0 border-r border-[#E2E8F0] dark:border-[#26282E] bg-white dark:bg-[#121316] overflow-y-auto flex flex-col no-print transition-all duration-200">
             {/* Header */}
-            <div className="p-3 border-b border-[#E2E8F0] dark:border-[#253149] flex items-center justify-between">
-              <span className="text-[11px] font-mono font-bold uppercase tracking-wider text-[#475569] dark:text-[#A4B1C7]">
+            <div className="p-3 border-b border-[#E2E8F0] dark:border-[#26282E] flex items-center justify-between">
+              <span className="text-[11px] font-mono font-bold uppercase tracking-wider text-[#475569] dark:text-[#9CA3AF]">
                 Struktur Dokumen
               </span>
               <button
                 type="button"
                 onClick={() => setIsLeftPanelOpen(false)}
-                className="p-1 rounded-md text-[#475569] dark:text-[#A4B1C7] hover:text-[#0F172A] dark:hover:text-[#F3F6FC] hover:bg-[#F1F5F9] dark:hover:bg-[#172033] cursor-pointer"
+                className="p-1 rounded-md text-[#475569] dark:text-[#9CA3AF] hover:text-[#0F172A] dark:hover:text-[#F3F6FC] hover:bg-[#F1F5F9] dark:hover:bg-[#1E1F24] cursor-pointer"
                 title="Tutup Navigasi Bab"
               >
                 <X className="w-3.5 h-3.5" />
@@ -1753,7 +1753,7 @@ NIP / NIK.
             <div className="flex-1 p-2 space-y-4">
               {workspaceCategory === "naskah" && (
                 <div className="space-y-1">
-                  <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-[#475569] dark:text-[#A4B1C7] px-2 block mb-1">
+                  <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-[#475569] dark:text-[#9CA3AF] px-2 block mb-1">
                     Daftar Bab &amp; Bagian
                   </span>
                   {(isUNPPkl ? [
@@ -1785,12 +1785,12 @@ NIP / NIK.
                         }}
                         className={`w-full flex items-center justify-between px-3 py-1.5 rounded-lg text-xs transition-all cursor-pointer text-left ${
                           isActive
-                            ? "bg-[#0F172A] text-white dark:bg-[#172033] dark:text-[#7C9CFF] font-bold shadow-xs"
-                            : "text-[#475569] dark:text-[#A4B1C7] hover:bg-[#F1F5F9] dark:hover:bg-[#172033]/60"
+                            ? "bg-[#0F172A] text-white dark:bg-[#1E1F24] dark:text-[#7C9CFF] font-bold shadow-xs"
+                            : "text-[#475569] dark:text-[#9CA3AF] hover:bg-[#F1F5F9] dark:hover:bg-[#1E1F24]/60"
                         }`}
                       >
                         <span className="flex items-center gap-2 truncate">
-                          <IconComp className={`w-3.5 h-3.5 shrink-0 ${isActive ? 'text-[#7C9CFF]' : 'text-[#475569] dark:text-[#A4B1C7]'}`} />
+                          <IconComp className={`w-3.5 h-3.5 shrink-0 ${isActive ? 'text-[#7C9CFF]' : 'text-[#475569] dark:text-[#9CA3AF]'}`} />
                           <span className="truncate">{s.label}</span>
                         </span>
                         {s.badge && (
@@ -1803,14 +1803,14 @@ NIP / NIK.
                   })}
 
                   {/* Bagian & Lampiran Quick Tools */}
-                  <div className="pt-3 border-t border-[#E2E8F0] dark:border-[#253149] space-y-0.5">
-                    <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-[#475569] dark:text-[#A4B1C7] px-2 block mb-1">
+                  <div className="pt-3 border-t border-[#E2E8F0] dark:border-[#26282E] space-y-0.5">
+                    <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-[#475569] dark:text-[#9CA3AF] px-2 block mb-1">
                       Bagian &amp; Lampiran
                     </span>
                     <button
                       type="button"
                       onClick={() => setIsCampusLogoModalOpen(true)}
-                      className="w-full flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-xs text-[#475569] dark:text-[#A4B1C7] hover:bg-[#F1F5F9] dark:hover:bg-[#172033] transition-colors text-left cursor-pointer"
+                      className="w-full flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-xs text-[#475569] dark:text-[#9CA3AF] hover:bg-[#F1F5F9] dark:hover:bg-[#1E1F24] transition-colors text-left cursor-pointer"
                     >
                       <Landmark className="w-3.5 h-3.5 text-[#7C9CFF] shrink-0" />
                       <span>Logo Kampus &amp; Sampul</span>
@@ -1818,7 +1818,7 @@ NIP / NIK.
                     <button
                       type="button"
                       onClick={() => setIsTheoryCustomizerModalOpen(true)}
-                      className="w-full flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-xs text-[#475569] dark:text-[#A4B1C7] hover:bg-[#F1F5F9] dark:hover:bg-[#172033] transition-colors text-left cursor-pointer"
+                      className="w-full flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-xs text-[#475569] dark:text-[#9CA3AF] hover:bg-[#F1F5F9] dark:hover:bg-[#1E1F24] transition-colors text-left cursor-pointer"
                     >
                       <BookOpen className="w-3.5 h-3.5 text-[#9B8CFF] shrink-0" />
                       <span>Kustom Teori ({currentDoc.bab2?.landasanTeori?.length || 13})</span>
@@ -1826,7 +1826,7 @@ NIP / NIK.
                     <button
                       type="button"
                       onClick={() => setIsCustomSheetModalOpen(true)}
-                      className="w-full flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-xs text-[#475569] dark:text-[#A4B1C7] hover:bg-[#F1F5F9] dark:hover:bg-[#172033] transition-colors text-left cursor-pointer"
+                      className="w-full flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-xs text-[#475569] dark:text-[#9CA3AF] hover:bg-[#F1F5F9] dark:hover:bg-[#1E1F24] transition-colors text-left cursor-pointer"
                     >
                       <FileSignature className="w-3.5 h-3.5 text-[#FBBF24] shrink-0" />
                       <span>Lembar Khusus &amp; Scan</span>
@@ -1834,7 +1834,7 @@ NIP / NIK.
                     <button
                       type="button"
                       onClick={() => setIsImageManagerModalOpen(true)}
-                      className="w-full flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-xs text-[#475569] dark:text-[#A4B1C7] hover:bg-[#F1F5F9] dark:hover:bg-[#172033] transition-colors text-left cursor-pointer"
+                      className="w-full flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-xs text-[#475569] dark:text-[#9CA3AF] hover:bg-[#F1F5F9] dark:hover:bg-[#1E1F24] transition-colors text-left cursor-pointer"
                     >
                       <ImageIcon className="w-3.5 h-3.5 text-[#34D399] shrink-0" />
                       <span>Gambar &amp; Diagram Bab</span>
@@ -1842,7 +1842,7 @@ NIP / NIK.
                     <button
                       type="button"
                       onClick={() => setIsLogbookModalOpen(true)}
-                      className="w-full flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-xs text-[#475569] dark:text-[#A4B1C7] hover:bg-[#F1F5F9] dark:hover:bg-[#172033] transition-colors text-left cursor-pointer"
+                      className="w-full flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-xs text-[#475569] dark:text-[#9CA3AF] hover:bg-[#F1F5F9] dark:hover:bg-[#1E1F24] transition-colors text-left cursor-pointer"
                     >
                       <CalendarDays className="w-3.5 h-3.5 text-[#7C9CFF] shrink-0" />
                       <span>Logbook Catatan Lapangan</span>
@@ -1850,7 +1850,7 @@ NIP / NIK.
                     <button
                       type="button"
                       onClick={() => setIsDefenseMinutesModalOpen(true)}
-                      className="w-full flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-xs text-[#475569] dark:text-[#A4B1C7] hover:bg-[#F1F5F9] dark:hover:bg-[#172033] transition-colors text-left cursor-pointer"
+                      className="w-full flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-xs text-[#475569] dark:text-[#9CA3AF] hover:bg-[#F1F5F9] dark:hover:bg-[#1E1F24] transition-colors text-left cursor-pointer"
                     >
                       <FileCheck2 className="w-3.5 h-3.5 text-[#FB7185] shrink-0" />
                       <span>Berita Acara Sidang</span>
@@ -1861,7 +1861,7 @@ NIP / NIK.
 
               {workspaceCategory === "metodologi" && (
                 <div className="space-y-1">
-                  <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-[#475569] dark:text-[#A4B1C7] px-2 block mb-1">
+                  <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-[#475569] dark:text-[#9CA3AF] px-2 block mb-1">
                     Instrumen Metodologi
                   </span>
                   {[
@@ -1881,11 +1881,11 @@ NIP / NIK.
                         }}
                         className={`w-full flex items-center gap-2 px-3 py-2 rounded-lg text-xs transition-all cursor-pointer text-left ${
                           isActive
-                            ? "bg-[#0F172A] text-white dark:bg-[#172033] dark:text-[#7C9CFF] font-bold"
-                            : "text-[#475569] dark:text-[#A4B1C7] hover:bg-[#F1F5F9] dark:hover:bg-[#172033]/60"
+                            ? "bg-[#0F172A] text-white dark:bg-[#1E1F24] dark:text-[#7C9CFF] font-bold"
+                            : "text-[#475569] dark:text-[#9CA3AF] hover:bg-[#F1F5F9] dark:hover:bg-[#1E1F24]/60"
                         }`}
                       >
-                        <IconComp className={`w-3.5 h-3.5 shrink-0 ${isActive ? 'text-[#7C9CFF]' : 'text-[#475569] dark:text-[#A4B1C7]'}`} />
+                        <IconComp className={`w-3.5 h-3.5 shrink-0 ${isActive ? 'text-[#7C9CFF]' : 'text-[#475569] dark:text-[#9CA3AF]'}`} />
                         <span>{m.label}</span>
                       </button>
                     );
@@ -1895,7 +1895,7 @@ NIP / NIK.
 
               {workspaceCategory === "sidang" && (
                 <div className="space-y-1">
-                  <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-[#475569] dark:text-[#A4B1C7] px-2 block mb-1">
+                  <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-[#475569] dark:text-[#9CA3AF] px-2 block mb-1">
                     Kesiapan Sidang &amp; Audit
                   </span>
                   {[
@@ -1915,8 +1915,8 @@ NIP / NIK.
                         }}
                         className={`w-full flex items-center gap-2 px-3 py-2 rounded-lg text-xs transition-all cursor-pointer text-left ${
                           isActive
-                            ? "bg-[#0F172A] text-white dark:bg-[#172033] dark:text-[#7C9CFF] font-bold"
-                            : "text-[#475569] dark:text-[#A4B1C7] hover:bg-[#F1F5F9] dark:hover:bg-[#172033]/60"
+                            ? "bg-[#0F172A] text-white dark:bg-[#1E1F24] dark:text-[#7C9CFF] font-bold"
+                            : "text-[#475569] dark:text-[#9CA3AF] hover:bg-[#F1F5F9] dark:hover:bg-[#1E1F24]/60"
                         }`}
                       >
                         <IconComp className={`w-3.5 h-3.5 shrink-0 ${s.color}`} />
@@ -1930,7 +1930,7 @@ NIP / NIK.
 
             {/* Bottom link to Presentation Studio */}
             {onOpenPresentationStudio && (
-              <div className="p-3 border-t border-[#E2E8F0] dark:border-[#253149]">
+              <div className="p-3 border-t border-[#E2E8F0] dark:border-[#26282E]">
                 <button
                   type="button"
                   onClick={onOpenPresentationStudio}
@@ -1948,7 +1948,7 @@ NIP / NIK.
         )}
 
         {/* PANEL 2: CENTER DOCUMENT CANVAS (Spacious & Clean Academic Sheet) */}
-        <main className="flex-1 overflow-y-auto px-3 sm:px-6 md:px-8 py-6 flex flex-col items-center bg-[#F1F5F9] dark:bg-[#080B12]">
+        <main className="flex-1 overflow-y-auto px-3 sm:px-6 md:px-8 py-6 flex flex-col items-center bg-[#F1F5F9] dark:bg-[#0C0D0E]">
           <div className="w-full max-w-[880px] space-y-6">
 
             {/* TAB 1: NASKAH PROPOSAL LENGKAP */}
@@ -2004,7 +2004,7 @@ NIP / NIK.
           
           {/* Chapter Focus Mode Indicator (Only when a specific chapter is isolated) */}
           {naskahSection !== "all" && (
-            <div className="no-print mb-6 px-3.5 py-2.5 rounded-lg bg-[#F8FAFC] dark:bg-[#111827] border border-[#E2E8F0] dark:border-[#253149] flex flex-wrap items-center justify-between gap-2 text-xs">
+            <div className="no-print mb-6 px-3.5 py-2.5 rounded-lg bg-[#F8FAFC] dark:bg-[#17181C] border border-[#E2E8F0] dark:border-[#26282E] flex flex-wrap items-center justify-between gap-2 text-xs">
               <div className="flex items-center gap-2">
                 <span className="w-2 h-2 rounded-full bg-[#7C9CFF] animate-pulse"></span>
                 <span className="font-semibold text-[#0F172A] dark:text-[#F3F6FC]">
@@ -2018,7 +2018,7 @@ NIP / NIK.
                     "Daftar Pustaka, Logbook & Berita Acara"
                   }
                 </span>
-                <span className="text-[#64748B] dark:text-[#A4B1C7] text-[11px] hidden sm:inline">• Menampilkan bab terisolasi untuk fokus telaah</span>
+                <span className="text-[#64748B] dark:text-[#9CA3AF] text-[11px] hidden sm:inline">• Menampilkan bab terisolasi untuk fokus telaah</span>
               </div>
               <button
                 type="button"
@@ -2038,10 +2038,10 @@ NIP / NIK.
               {/* BAGIAN 1: HALAMAN JUDUL / COVER STANDAR DIKTI */}
           {/* ========================================================================= */}
           {!disabledSections.includes("section-cover") && (
-          <div id="section-cover" className="relative text-center pb-12 mb-12 border-b-2 border-[#E2E8F0] dark:border-[#253149] print:border-black print:pb-0 print:mb-0 print:min-h-screen print:flex print:flex-col print:justify-between print-break-page print:break-after-page">
+          <div id="section-cover" className="relative text-center pb-12 mb-12 border-b-2 border-[#E2E8F0] dark:border-[#26282E] print:border-black print:pb-0 print:mb-0 print:min-h-screen print:flex print:flex-col print:justify-between print-break-page print:break-after-page">
             {/* Action Bar Cover (No-Print) */}
-            <div className="no-print mb-6 p-2 rounded-lg bg-[#F8FAFC] dark:bg-[#111827] border border-[#E2E8F0] dark:border-[#253149] flex items-center justify-between flex-wrap gap-2 text-xs">
-              <span className="font-mono text-[#64748B] dark:text-[#A4B1C7] text-[11px] flex items-center gap-1.5">
+            <div className="no-print mb-6 p-2 rounded-lg bg-[#F8FAFC] dark:bg-[#17181C] border border-[#E2E8F0] dark:border-[#26282E] flex items-center justify-between flex-wrap gap-2 text-xs">
+              <span className="font-mono text-[#64748B] dark:text-[#9CA3AF] text-[11px] flex items-center gap-1.5">
                 <Landmark className="w-3.5 h-3.5 text-[#7C9CFF]" />
                 Format Cover Standar Dikti (Logo 6x6 s.d. 7x7 cm)
               </span>
@@ -2049,7 +2049,7 @@ NIP / NIK.
                 <button
                   type="button"
                   onClick={() => setIsCampusLogoModalOpen(true)}
-                  className="px-2.5 py-1 rounded-md bg-white dark:bg-[#172033] border border-[#E2E8F0] dark:border-[#253149] text-[#0F172A] dark:text-[#F3F6FC] hover:border-[#7C9CFF] text-[11px] font-medium flex items-center gap-1.5 cursor-pointer shadow-2xs transition-colors"
+                  className="px-2.5 py-1 rounded-md bg-white dark:bg-[#1E1F24] border border-[#E2E8F0] dark:border-[#26282E] text-[#0F172A] dark:text-[#F3F6FC] hover:border-[#7C9CFF] text-[11px] font-medium flex items-center gap-1.5 cursor-pointer shadow-2xs transition-colors"
                 >
                   <ImageIcon className="w-3 h-3 text-[#7C9CFF]" />
                   <span>{currentDoc.campusLogoUrl ? "Ganti Logo Kampus" : "Unggah / Pilih Logo"}</span>
@@ -2057,7 +2057,7 @@ NIP / NIK.
                 <button
                   type="button"
                   onClick={() => setIsCustomSheetModalOpen(true)}
-                  className="px-2.5 py-1 rounded-md bg-white dark:bg-[#172033] border border-[#E2E8F0] dark:border-[#253149] text-[#0F172A] dark:text-[#F3F6FC] hover:border-[#7C9CFF] text-[11px] font-medium flex items-center gap-1.5 cursor-pointer shadow-2xs transition-colors"
+                  className="px-2.5 py-1 rounded-md bg-white dark:bg-[#1E1F24] border border-[#E2E8F0] dark:border-[#26282E] text-[#0F172A] dark:text-[#F3F6FC] hover:border-[#7C9CFF] text-[11px] font-medium flex items-center gap-1.5 cursor-pointer shadow-2xs transition-colors"
                 >
                   <FileSignature className="w-3 h-3 text-[#34D399]" />
                   <span>Lembar Pengesahan & Scan</span>
@@ -2493,10 +2493,10 @@ NIP / NIK.
           {/* BAGIAN 5A: ABSTRAK (BAHASA INDONESIA - Halaman v) */}
           {/* ========================================================================= */}
           {!disabledSections.includes("section-abstrak") && (
-          <section id="section-abstrak" className="relative pb-12 mb-12 border-b-2 border-[#E2E8F0] dark:border-[#253149] print:border-black font-serif text-xs sm:text-sm print:break-after-page">
-            <div className="flex items-center justify-between mb-4 border-b border-[#E2E8F0] dark:border-[#253149] pb-2 print:border-black">
+          <section id="section-abstrak" className="relative pb-12 mb-12 border-b-2 border-[#E2E8F0] dark:border-[#26282E] print:border-black font-serif text-xs sm:text-sm print:break-after-page">
+            <div className="flex items-center justify-between mb-4 border-b border-[#E2E8F0] dark:border-[#26282E] pb-2 print:border-black">
               <div className="text-center w-full">
-                <span className="text-[10px] font-mono uppercase tracking-widest text-[#64748B] dark:text-[#A4B1C7] block mb-1">
+                <span className="text-[10px] font-mono uppercase tracking-widest text-[#64748B] dark:text-[#9CA3AF] block mb-1">
                   INTISARI KARYA ILMIAH
                 </span>
                 <h2 className="text-base sm:text-lg font-bold text-[#0F172A] dark:text-[#F3F6FC] uppercase tracking-wide print:text-black">
@@ -2512,7 +2512,7 @@ NIP / NIK.
                 <p className="text-[#334155] dark:text-[#CBD5E1] print:text-black pt-1">
                   Oleh: <strong>{currentDoc.candidateName}</strong> (NIM: {currentDoc.candidateId})
                 </p>
-                <p className="text-[#64748B] dark:text-[#A4B1C7] text-[11px]">
+                <p className="text-[#64748B] dark:text-[#9CA3AF] text-[11px]">
                   Program Studi {currentDoc.facultyMajor}, {currentDoc.institution}
                 </p>
               </div>
@@ -2527,7 +2527,7 @@ NIP / NIK.
                 Rancangan kerja ini disusun secara sistematis agar dapat diuji kelayakannya dalam seminar proposal, serta memberikan kepastian tata kelola data, mitigasi risiko teknis, dan etika riset akademik yang ketat.
               </p>
 
-              <div className="pt-3 border-t border-[#E2E8F0] dark:border-[#253149] text-xs">
+              <div className="pt-3 border-t border-[#E2E8F0] dark:border-[#26282E] text-xs">
                 <p>
                   <strong>Kata Kunci:</strong> <em>{currentDoc.category}, {currentDoc.targetDepartment || "Metodologi"}, {currentDoc.facultyMajor.split(" ").slice(0, 2).join(" ")}, Optimasi Sistem, Analisis Kinerja</em>
                 </p>
@@ -2544,10 +2544,10 @@ NIP / NIK.
           {/* BAGIAN 5B: ABSTRACT (ENGLISH - Halaman vi) */}
           {/* ========================================================================= */}
           {!disabledSections.includes("section-abstract-en") && (
-          <section id="section-abstract-en" className="relative pb-12 mb-12 border-b-2 border-[#E2E8F0] dark:border-[#253149] print:border-black font-serif text-xs sm:text-sm print:break-after-page">
-            <div className="flex items-center justify-between mb-4 border-b border-[#E2E8F0] dark:border-[#253149] pb-2 print:border-black">
+          <section id="section-abstract-en" className="relative pb-12 mb-12 border-b-2 border-[#E2E8F0] dark:border-[#26282E] print:border-black font-serif text-xs sm:text-sm print:break-after-page">
+            <div className="flex items-center justify-between mb-4 border-b border-[#E2E8F0] dark:border-[#26282E] pb-2 print:border-black">
               <div className="text-center w-full">
-                <span className="text-[10px] font-mono uppercase tracking-widest text-[#64748B] dark:text-[#A4B1C7] block mb-1">
+                <span className="text-[10px] font-mono uppercase tracking-widest text-[#64748B] dark:text-[#9CA3AF] block mb-1">
                   SCIENTIFIC ABSTRACT
                 </span>
                 <h2 className="text-base sm:text-lg font-bold text-[#0F172A] dark:text-[#F3F6FC] uppercase tracking-wide print:text-black">
@@ -2563,7 +2563,7 @@ NIP / NIK.
                 <p className="text-[#334155] dark:text-[#CBD5E1] print:text-black pt-1">
                   Author: <strong>{currentDoc.candidateName}</strong> (Student ID: {currentDoc.candidateId})
                 </p>
-                <p className="text-[#64748B] dark:text-[#A4B1C7] text-[11px]">
+                <p className="text-[#64748B] dark:text-[#9CA3AF] text-[11px]">
                   Department of {currentDoc.facultyMajor}, {currentDoc.institution}
                 </p>
               </div>
@@ -2578,7 +2578,7 @@ NIP / NIK.
                 Furthermore, this structured methodology strictly guarantees research ethics compliance, institutional data security, and verifiable risk mitigation throughout the research lifecycle.
               </p>
 
-              <div className="pt-3 border-t border-[#E2E8F0] dark:border-[#253149] text-xs not-italic">
+              <div className="pt-3 border-t border-[#E2E8F0] dark:border-[#26282E] text-xs not-italic">
                 <p>
                   <strong>Keywords:</strong> <em>Academic Research, Applied Methodology, Operational Excellence, {currentDoc.category.toUpperCase()}, Performance Optimization</em>
                 </p>
@@ -2948,12 +2948,12 @@ NIP / NIK.
 
               {/* Front Matter Navigation Footer */}
               {naskahSection === "frontmatter" && (
-                <div className="flex items-center justify-between pt-8 mt-12 border-t border-[#E2E8F0] dark:border-[#253149] text-xs font-medium no-print">
+                <div className="flex items-center justify-between pt-8 mt-12 border-t border-[#E2E8F0] dark:border-[#26282E] text-xs font-medium no-print">
                   <div></div>
                   <button
                     type="button"
                     onClick={() => { setNaskahSection("bab1"); window.scrollTo({ top: 0, behavior: "smooth" }); }}
-                    className="px-4 py-2 rounded-lg bg-[#0F172A] hover:bg-black text-white dark:bg-[#7C9CFF] dark:hover:bg-[#688bf5] dark:text-[#080B12] font-semibold text-xs flex items-center gap-1.5 transition-colors cursor-pointer shadow-xs"
+                    className="px-4 py-2 rounded-lg bg-[#0F172A] hover:bg-black text-white dark:bg-[#7C9CFF] dark:hover:bg-[#688bf5] dark:text-[#0C0D0E] font-semibold text-xs flex items-center gap-1.5 transition-colors cursor-pointer shadow-xs"
                   >
                     <span>Lanjut ke Bab I: Pendahuluan</span>
                     <ChevronRight className="w-4 h-4" />
@@ -2970,7 +2970,7 @@ NIP / NIK.
             <>
               {/* BAGIAN 9: RINGKASAN EKSEKUTIF */}
           {!disabledSections.includes("section-ringkasan") && (
-          <div id="section-ringkasan" className="mb-10 p-4 sm:p-5 rounded-lg bg-[#F8FAFC] dark:bg-[#111827]/70 border border-[#E2E8F0] dark:border-[#253149] print:border-gray-300 print:bg-gray-50">
+          <div id="section-ringkasan" className="mb-10 p-4 sm:p-5 rounded-lg bg-[#F8FAFC] dark:bg-[#17181C]/70 border border-[#E2E8F0] dark:border-[#26282E] print:border-gray-300 print:bg-gray-50">
             <div className="flex items-center justify-between mb-2">
               <h3 className="text-xs font-mono font-semibold uppercase tracking-wider text-[#0F172A] dark:text-[#F3F6FC] print:text-black">
                 Ringkasan Eksekutif
@@ -2978,7 +2978,7 @@ NIP / NIK.
               <button
                 type="button"
                 onClick={() => handleRefineWithAI("executiveSummary", "Ringkasan Eksekutif", currentDoc.executiveSummary)}
-                className="no-print opacity-70 hover:opacity-100 text-[11px] font-mono text-[#64748B] hover:text-[#7C9CFF] dark:text-[#A4B1C7] dark:hover:text-[#7C9CFF] bg-white dark:bg-[#172033] px-2 py-0.5 rounded border border-[#E2E8F0] dark:border-[#253149] hover:border-[#7C9CFF] flex items-center gap-1 cursor-pointer transition-all shadow-2xs"
+                className="no-print opacity-70 hover:opacity-100 text-[11px] font-mono text-[#64748B] hover:text-[#7C9CFF] dark:text-[#9CA3AF] dark:hover:text-[#7C9CFF] bg-white dark:bg-[#1E1F24] px-2 py-0.5 rounded border border-[#E2E8F0] dark:border-[#26282E] hover:border-[#7C9CFF] flex items-center gap-1 cursor-pointer transition-all shadow-2xs"
               >
                 <Sparkles className="w-3 h-3 text-[#7C9CFF]" />
                 <span>Revisi AI</span>
@@ -2993,7 +2993,7 @@ NIP / NIK.
           {/* BAB I */}
           {!disabledSections.includes("section-bab1") && (
           <section id="section-bab1" className="mb-10 print-break-page print:break-after-page">
-            <div className="border-b border-[#E2E8F0] dark:border-[#253149] pb-3 mb-6 print:border-black">
+            <div className="border-b border-[#E2E8F0] dark:border-[#26282E] pb-3 mb-6 print:border-black">
               {renderChapterHeading(currentDoc.bab1.title, "BAB I", "PENDAHULUAN")}
             </div>
 
@@ -3017,7 +3017,7 @@ NIP / NIK.
                       <button
                         type="button"
                         onClick={() => handleRefineWithAI("bab1.latarBelakang", "A. Latar Belakang", currentDoc.bab1.latarBelakang.join("\n\n"))}
-                        className="no-print opacity-70 hover:opacity-100 text-[11px] font-mono text-[#64748B] hover:text-[#7C9CFF] dark:text-[#A4B1C7] dark:hover:text-[#7C9CFF] bg-white dark:bg-[#172033] px-2 py-0.5 rounded border border-[#E2E8F0] dark:border-[#253149] hover:border-[#7C9CFF] flex items-center gap-1 cursor-pointer transition-all shadow-2xs"
+                        className="no-print opacity-70 hover:opacity-100 text-[11px] font-mono text-[#64748B] hover:text-[#7C9CFF] dark:text-[#9CA3AF] dark:hover:text-[#7C9CFF] bg-white dark:bg-[#1E1F24] px-2 py-0.5 rounded border border-[#E2E8F0] dark:border-[#26282E] hover:border-[#7C9CFF] flex items-center gap-1 cursor-pointer transition-all shadow-2xs"
                       >
                         <Sparkles className="w-3 h-3 text-[#7C9CFF]" />
                         <span>Revisi AI</span>
@@ -3082,7 +3082,7 @@ NIP / NIK.
                       <button
                         type="button"
                         onClick={() => handleRefineWithAI("bab1.latarBelakang", "1.1 Latar Belakang Masalah", currentDoc.bab1.latarBelakang.join("\n\n"))}
-                        className="no-print opacity-70 hover:opacity-100 text-[11px] font-mono text-[#64748B] hover:text-[#7C9CFF] dark:text-[#A4B1C7] dark:hover:text-[#7C9CFF] bg-white dark:bg-[#172033] px-2 py-0.5 rounded border border-[#E2E8F0] dark:border-[#253149] hover:border-[#7C9CFF] flex items-center gap-1 cursor-pointer transition-all shadow-2xs"
+                        className="no-print opacity-70 hover:opacity-100 text-[11px] font-mono text-[#64748B] hover:text-[#7C9CFF] dark:text-[#9CA3AF] dark:hover:text-[#7C9CFF] bg-white dark:bg-[#1E1F24] px-2 py-0.5 rounded border border-[#E2E8F0] dark:border-[#26282E] hover:border-[#7C9CFF] flex items-center gap-1 cursor-pointer transition-all shadow-2xs"
                       >
                         <Sparkles className="w-3 h-3 text-[#7C9CFF]" />
                         <span>Revisi AI</span>
@@ -3110,7 +3110,7 @@ NIP / NIK.
                       <button
                         type="button"
                         onClick={() => handleRefineWithAI("bab1.rumusanMasalah", "1.2 Rumusan Masalah", currentDoc.bab1.rumusanMasalah.join("\n"))}
-                        className="no-print opacity-70 hover:opacity-100 text-[11px] font-mono text-[#64748B] hover:text-[#7C9CFF] dark:text-[#A4B1C7] dark:hover:text-[#7C9CFF] bg-white dark:bg-[#172033] px-2 py-0.5 rounded border border-[#E2E8F0] dark:border-[#253149] hover:border-[#7C9CFF] flex items-center gap-1 cursor-pointer transition-all shadow-2xs"
+                        className="no-print opacity-70 hover:opacity-100 text-[11px] font-mono text-[#64748B] hover:text-[#7C9CFF] dark:text-[#9CA3AF] dark:hover:text-[#7C9CFF] bg-white dark:bg-[#1E1F24] px-2 py-0.5 rounded border border-[#E2E8F0] dark:border-[#26282E] hover:border-[#7C9CFF] flex items-center gap-1 cursor-pointer transition-all shadow-2xs"
                       >
                         <Sparkles className="w-3 h-3 text-[#7C9CFF]" />
                         <span>Revisi AI</span>
@@ -3170,11 +3170,11 @@ NIP / NIK.
 
               {/* Bab 1 Navigation Footer */}
               {naskahSection === "bab1" && (
-                <div className="flex items-center justify-between pt-8 mt-12 border-t border-[#E2E8F0] dark:border-[#253149] text-xs font-medium no-print">
+                <div className="flex items-center justify-between pt-8 mt-12 border-t border-[#E2E8F0] dark:border-[#26282E] text-xs font-medium no-print">
                   <button
                     type="button"
                     onClick={() => { setNaskahSection("frontmatter"); window.scrollTo({ top: 0, behavior: "smooth" }); }}
-                    className="px-3.5 py-2 rounded-lg border border-[#E2E8F0] dark:border-[#253149] hover:bg-[#F1F5F9] dark:hover:bg-[#172033] transition-colors flex items-center gap-1.5 cursor-pointer text-[#64748B] dark:text-[#A4B1C7]"
+                    className="px-3.5 py-2 rounded-lg border border-[#E2E8F0] dark:border-[#26282E] hover:bg-[#F1F5F9] dark:hover:bg-[#1E1F24] transition-colors flex items-center gap-1.5 cursor-pointer text-[#64748B] dark:text-[#9CA3AF]"
                   >
                     <ChevronLeft className="w-4 h-4" />
                     <span>Kelengkapan Awal</span>
@@ -3182,7 +3182,7 @@ NIP / NIK.
                   <button
                     type="button"
                     onClick={() => { setNaskahSection("bab2"); window.scrollTo({ top: 0, behavior: "smooth" }); }}
-                    className="px-4 py-2 rounded-lg bg-[#0F172A] hover:bg-black text-white dark:bg-[#7C9CFF] dark:hover:bg-[#688bf5] dark:text-[#080B12] font-semibold text-xs flex items-center gap-1.5 transition-colors cursor-pointer shadow-xs"
+                    className="px-4 py-2 rounded-lg bg-[#0F172A] hover:bg-black text-white dark:bg-[#7C9CFF] dark:hover:bg-[#688bf5] dark:text-[#0C0D0E] font-semibold text-xs flex items-center gap-1.5 transition-colors cursor-pointer shadow-xs"
                   >
                     <span>Lanjut ke Bab II: {isUNPPkl ? "Topik Bahasan" : "Tinjauan Pustaka"}</span>
                     <ChevronRight className="w-4 h-4" />
@@ -3207,7 +3207,7 @@ NIP / NIK.
               {/* BAB II */}
               {!disabledSections.includes("section-bab2") && (
               <section id="section-bab2" className="mb-10 print-break-page print:break-after-page">
-            <div className="relative border-b border-[#E2E8F0] dark:border-[#253149] pb-3 mb-6 print:border-black flex flex-col items-center">
+            <div className="relative border-b border-[#E2E8F0] dark:border-[#26282E] pb-3 mb-6 print:border-black flex flex-col items-center">
               {renderChapterHeading(
                 currentDoc.bab2.title,
                 "BAB II",
@@ -3226,14 +3226,14 @@ NIP / NIK.
             </div>
 
             {/* Depth Banner & Customizer Alert */}
-            <div className="no-print mb-4 p-3 rounded-lg bg-[#F8FAFC] dark:bg-[#111827] border border-[#E2E8F0] dark:border-[#253149] flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
+            <div className="no-print mb-4 p-3 rounded-lg bg-[#F8FAFC] dark:bg-[#17181C] border border-[#E2E8F0] dark:border-[#26282E] flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
               <div className="flex items-center gap-2">
                 <BookOpen className="w-4 h-4 text-[#7C9CFF] shrink-0" />
                 <div>
                   <p className="font-semibold text-[#0F172A] dark:text-[#F3F6FC]">
                     Kedalaman Bab II: {currentDoc.bab2.landasanTeori?.length || 0} Landasan Teori Ilmiah Otoritatif
                   </p>
-                  <p className="text-[11px] text-[#64748B] dark:text-[#A4B1C7]">
+                  <p className="text-[11px] text-[#64748B] dark:text-[#9CA3AF]">
                     Setiap teori disinkronkan langsung dengan sitasi jurnal pada Daftar Pustaka ({citationStyle === "apa" ? "APA 7th" : "IEEE"})
                   </p>
                 </div>
@@ -3241,7 +3241,7 @@ NIP / NIK.
               <button
                 type="button"
                 onClick={() => setIsTheoryCustomizerModalOpen(true)}
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#0F172A] hover:bg-black text-white dark:bg-[#7C9CFF] dark:hover:bg-[#688bf5] dark:text-[#080B12] font-semibold text-xs shadow-xs transition-colors cursor-pointer self-start sm:self-auto"
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#0F172A] hover:bg-black text-white dark:bg-[#7C9CFF] dark:hover:bg-[#688bf5] dark:text-[#0C0D0E] font-semibold text-xs shadow-xs transition-colors cursor-pointer self-start sm:self-auto"
               >
                 <Sparkles className="w-3.5 h-3.5" />
                 <span>+ Atur Jumlah Teori (5, 8, 13, 20)</span>
@@ -3473,11 +3473,11 @@ NIP / NIK.
 
               {/* Bab 2 Navigation Footer */}
               {naskahSection === "bab2" && (
-                <div className="flex items-center justify-between pt-8 mt-12 border-t border-[#E2E8F0] dark:border-[#253149] text-xs font-medium no-print">
+                <div className="flex items-center justify-between pt-8 mt-12 border-t border-[#E2E8F0] dark:border-[#26282E] text-xs font-medium no-print">
                   <button
                     type="button"
                     onClick={() => { setNaskahSection("bab1"); window.scrollTo({ top: 0, behavior: "smooth" }); }}
-                    className="px-3.5 py-2 rounded-lg border border-[#E2E8F0] dark:border-[#253149] hover:bg-[#F1F5F9] dark:hover:bg-[#172033] transition-colors flex items-center gap-1.5 cursor-pointer text-[#64748B] dark:text-[#A4B1C7]"
+                    className="px-3.5 py-2 rounded-lg border border-[#E2E8F0] dark:border-[#26282E] hover:bg-[#F1F5F9] dark:hover:bg-[#1E1F24] transition-colors flex items-center gap-1.5 cursor-pointer text-[#64748B] dark:text-[#9CA3AF]"
                   >
                     <ChevronLeft className="w-4 h-4" />
                     <span>Bab I: Pendahuluan</span>
@@ -3485,7 +3485,7 @@ NIP / NIK.
                   <button
                     type="button"
                     onClick={() => { setNaskahSection("bab3"); window.scrollTo({ top: 0, behavior: "smooth" }); }}
-                    className="px-4 py-2 rounded-lg bg-[#0F172A] hover:bg-black text-white dark:bg-[#7C9CFF] dark:hover:bg-[#688bf5] dark:text-[#080B12] font-semibold text-xs flex items-center gap-1.5 transition-colors cursor-pointer shadow-xs"
+                    className="px-4 py-2 rounded-lg bg-[#0F172A] hover:bg-black text-white dark:bg-[#7C9CFF] dark:hover:bg-[#688bf5] dark:text-[#0C0D0E] font-semibold text-xs flex items-center gap-1.5 transition-colors cursor-pointer shadow-xs"
                   >
                     <span>Lanjut ke Bab III: {isUNPPkl ? "Penutup" : "Metodologi"}</span>
                     <ChevronRight className="w-4 h-4" />
@@ -3503,7 +3503,7 @@ NIP / NIK.
               {/* BAB III */}
               {!disabledSections.includes("section-bab3") && (
               <section id="section-bab3" className="mb-10 print-break-page print:break-after-page">
-            <div className="relative border-b border-[#E2E8F0] dark:border-[#253149] pb-3 mb-6 print:border-black flex flex-col items-center">
+            <div className="relative border-b border-[#E2E8F0] dark:border-[#26282E] pb-3 mb-6 print:border-black flex flex-col items-center">
               {renderChapterHeading(
                 currentDoc.bab3.title,
                 "BAB III",
@@ -3513,7 +3513,7 @@ NIP / NIK.
                 <button
                   type="button"
                   onClick={() => setIsImageManagerModalOpen(true)}
-                  className="text-[11px] font-mono text-[#64748B] dark:text-[#A4B1C7] hover:text-[#0F172A] dark:hover:text-[#F3F6FC] bg-white dark:bg-[#172033] px-2.5 py-1 rounded-md border border-[#E2E8F0] dark:border-[#253149] hover:border-[#7C9CFF] flex items-center gap-1.5 cursor-pointer shadow-2xs transition-colors"
+                  className="text-[11px] font-mono text-[#64748B] dark:text-[#9CA3AF] hover:text-[#0F172A] dark:hover:text-[#F3F6FC] bg-white dark:bg-[#1E1F24] px-2.5 py-1 rounded-md border border-[#E2E8F0] dark:border-[#26282E] hover:border-[#7C9CFF] flex items-center gap-1.5 cursor-pointer shadow-2xs transition-colors"
                 >
                   <ImageIcon className="w-3.5 h-3.5 text-[#7C9CFF]" />
                   <span>+ Sisipkan Gambar / Diagram</span>
@@ -3523,7 +3523,7 @@ NIP / NIK.
 
             {/* Formal Academic Figure 3.1: Bagan Alir Tahapan Pelaksanaan */}
             {!isUNPPkl && (
-              <div className="my-6 p-4 rounded-xl border border-[#E2E8F0] dark:border-[#253149] bg-[#F8FAFC] dark:bg-[#111827]/50 text-center">
+              <div className="my-6 p-4 rounded-xl border border-[#E2E8F0] dark:border-[#26282E] bg-[#F8FAFC] dark:bg-[#17181C]/50 text-center">
                 <div className="max-w-2xl mx-auto py-2">
                   <AcademicFlowchartDiagram doc={currentDoc} type="methodology" />
                 </div>
@@ -3535,7 +3535,7 @@ NIP / NIK.
 
             {/* Inserted Chapter 3 Custom Figures */}
             {currentDoc.documentFigures?.filter(f => f.chapterPlacement === 3).map((fig, fIdx) => (
-              <div key={fig.id || fIdx} className="my-6 p-4 rounded-xl border border-[#E2E8F0] dark:border-[#253149] bg-[#F8FAFC] dark:bg-[#111827]/50 text-center">
+              <div key={fig.id || fIdx} className="my-6 p-4 rounded-xl border border-[#E2E8F0] dark:border-[#26282E] bg-[#F8FAFC] dark:bg-[#17181C]/50 text-center">
                 <img
                   src={fig.imageDataUrl}
                   alt={fig.caption}
@@ -3544,7 +3544,7 @@ NIP / NIK.
                 <p className="text-xs font-serif font-bold text-[#0F172A] dark:text-[#F3F6FC] mt-2 text-center">
                   {fig.figureNumber || `Gambar 3.${fIdx + 2}`} {fig.caption}
                 </p>
-                {fig.source && <p className="text-[11px] text-[#64748B] dark:text-[#A4B1C7] mt-0.5">Sumber: {fig.source}</p>}
+                {fig.source && <p className="text-[11px] text-[#64748B] dark:text-[#9CA3AF] mt-0.5">Sumber: {fig.source}</p>}
               </div>
             ))}
 
@@ -3738,11 +3738,11 @@ NIP / NIK.
 
               {/* Bab 3 Navigation Footer */}
               {naskahSection === "bab3" && (
-                <div className="flex items-center justify-between pt-8 mt-12 border-t border-[#E2E8F0] dark:border-[#253149] text-xs font-medium no-print">
+                <div className="flex items-center justify-between pt-8 mt-12 border-t border-[#E2E8F0] dark:border-[#26282E] text-xs font-medium no-print">
                   <button
                     type="button"
                     onClick={() => { setNaskahSection("bab2"); window.scrollTo({ top: 0, behavior: "smooth" }); }}
-                    className="px-3.5 py-2 rounded-lg border border-[#E2E8F0] dark:border-[#253149] hover:bg-[#F1F5F9] dark:hover:bg-[#172033] transition-colors flex items-center gap-1.5 cursor-pointer text-[#64748B] dark:text-[#A4B1C7]"
+                    className="px-3.5 py-2 rounded-lg border border-[#E2E8F0] dark:border-[#26282E] hover:bg-[#F1F5F9] dark:hover:bg-[#1E1F24] transition-colors flex items-center gap-1.5 cursor-pointer text-[#64748B] dark:text-[#9CA3AF]"
                   >
                     <ChevronLeft className="w-4 h-4" />
                     <span>Bab II: {isUNPPkl ? "Topik Bahasan" : "Tinjauan Pustaka"}</span>
@@ -3750,7 +3750,7 @@ NIP / NIK.
                   <button
                     type="button"
                     onClick={() => { setNaskahSection(isUNPPkl ? "backmatter" : "bab4"); window.scrollTo({ top: 0, behavior: "smooth" }); }}
-                    className="px-4 py-2 rounded-lg bg-[#0F172A] hover:bg-black text-white dark:bg-[#7C9CFF] dark:hover:bg-[#688bf5] dark:text-[#080B12] font-semibold text-xs flex items-center gap-1.5 transition-colors cursor-pointer shadow-xs"
+                    className="px-4 py-2 rounded-lg bg-[#0F172A] hover:bg-black text-white dark:bg-[#7C9CFF] dark:hover:bg-[#688bf5] dark:text-[#0C0D0E] font-semibold text-xs flex items-center gap-1.5 transition-colors cursor-pointer shadow-xs"
                   >
                     <span>{isUNPPkl ? "Lanjut ke Pustaka & Lampiran" : "Lanjut ke Bab IV: Rencana Kerja"}</span>
                     <ChevronRight className="w-4 h-4" />
@@ -3768,7 +3768,7 @@ NIP / NIK.
               {/* BAB IV: MATRIKS TABEL AKADEMIK (3 Garis Horizontal Standar) */}
               {!disabledSections.includes("section-bab4") && (
               <section id="section-bab4" className="mb-10 print-break-page print:break-after-page">
-            <div className="border-b border-[#E2E8F0] dark:border-[#253149] pb-3 mb-6 print:border-black">
+            <div className="border-b border-[#E2E8F0] dark:border-[#26282E] pb-3 mb-6 print:border-black">
               {renderChapterHeading(
                 currentDoc.bab4.title,
                 "BAB IV",
@@ -3784,14 +3784,14 @@ NIP / NIK.
             <div className="overflow-x-auto my-4">
               <table className="w-full text-left text-xs border-t-2 border-b-2 border-zinc-300 dark:border-zinc-700 print:border-black">
                 <thead>
-                  <tr className="border-b border-[#E2E8F0] dark:border-[#253149] print:border-black font-semibold text-[#0F172A] dark:text-[#F3F6FC] print:text-black">
+                  <tr className="border-b border-[#E2E8F0] dark:border-[#26282E] print:border-black font-semibold text-[#0F172A] dark:text-[#F3F6FC] print:text-black">
                     <th className="py-2 px-3">Minggu</th>
                     <th className="py-2 px-3">Tahap Pelaksanaan</th>
                     <th className="py-2 px-3">Rincian Aktivitas</th>
                     <th className="py-2 px-3">Target Luaran (Output)</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-[#E2E8F0] dark:divide-[#253149] print:divide-gray-300 text-[#334155] dark:text-[#CBD5E1] print:text-black">
+                <tbody className="divide-y divide-[#E2E8F0] dark:divide-[#26282E] print:divide-gray-300 text-[#334155] dark:text-[#CBD5E1] print:text-black">
                   {currentDoc.bab4.jadwalMatriks.map((row, idx) => (
                     <tr key={idx}>
                       <td className="py-2.5 px-3 font-mono font-medium text-[#0F172A] dark:text-[#F3F6FC] print:text-black whitespace-nowrap">
@@ -3805,14 +3805,14 @@ NIP / NIK.
                           {row.activities.map((act, aIdx) => <li key={aIdx}>{act}</li>)}
                         </ul>
                       </td>
-                      <td className="py-2.5 px-3 font-mono text-[11px] text-[#64748B] dark:text-[#A4B1C7] print:text-black">
+                      <td className="py-2.5 px-3 font-mono text-[11px] text-[#64748B] dark:text-[#9CA3AF] print:text-black">
                         {row.output}
                       </td>
                     </tr>
                   ))}
                 </tbody>
               </table>
-              <p className="text-[11px] text-[#64748B] dark:text-[#A4B1C7] mt-2 italic print:text-gray-600">
+              <p className="text-[11px] text-[#64748B] dark:text-[#9CA3AF] mt-2 italic print:text-gray-600">
                 *Tabel terbuka 3 garis horizontal sesuai kaidah penulisan karya ilmiah perguruan tinggi.
               </p>
             </div>
@@ -3898,11 +3898,11 @@ NIP / NIK.
 
               {/* Bab 4 Navigation Footer */}
               {naskahSection === "bab4" && (
-                <div className="flex items-center justify-between pt-8 mt-12 border-t border-[#E2E8F0] dark:border-[#253149] text-xs font-medium no-print">
+                <div className="flex items-center justify-between pt-8 mt-12 border-t border-[#E2E8F0] dark:border-[#26282E] text-xs font-medium no-print">
                   <button
                     type="button"
                     onClick={() => { setNaskahSection("bab3"); window.scrollTo({ top: 0, behavior: "smooth" }); }}
-                    className="px-3.5 py-2 rounded-lg border border-[#E2E8F0] dark:border-[#253149] hover:bg-[#F1F5F9] dark:hover:bg-[#172033] transition-colors flex items-center gap-1.5 cursor-pointer text-[#64748B] dark:text-[#A4B1C7]"
+                    className="px-3.5 py-2 rounded-lg border border-[#E2E8F0] dark:border-[#26282E] hover:bg-[#F1F5F9] dark:hover:bg-[#1E1F24] transition-colors flex items-center gap-1.5 cursor-pointer text-[#64748B] dark:text-[#9CA3AF]"
                   >
                     <ChevronLeft className="w-4 h-4" />
                     <span>Bab III: Metodologi</span>
@@ -3910,7 +3910,7 @@ NIP / NIK.
                   <button
                     type="button"
                     onClick={() => { setNaskahSection("bab5"); window.scrollTo({ top: 0, behavior: "smooth" }); }}
-                    className="px-4 py-2 rounded-lg bg-[#0F172A] hover:bg-black text-white dark:bg-[#7C9CFF] dark:hover:bg-[#688bf5] dark:text-[#080B12] font-semibold text-xs flex items-center gap-1.5 transition-colors cursor-pointer shadow-xs"
+                    className="px-4 py-2 rounded-lg bg-[#0F172A] hover:bg-black text-white dark:bg-[#7C9CFF] dark:hover:bg-[#688bf5] dark:text-[#0C0D0E] font-semibold text-xs flex items-center gap-1.5 transition-colors cursor-pointer shadow-xs"
                   >
                     <span>Lanjut ke Bab V: Penutup</span>
                     <ChevronRight className="w-4 h-4" />
@@ -3928,7 +3928,7 @@ NIP / NIK.
               {/* BAB V: KESIMPULAN, REKOMENDASI KONTRIBUSI, & MITIGASI RISIKO */}
               {!disabledSections.includes("section-bab5") && (
               <section id="section-bab5" className="mb-10 print-break-page print:break-after-page">
-            <div className="border-b border-[#E2E8F0] dark:border-[#253149] pb-3 mb-6 print:border-black">
+            <div className="border-b border-[#E2E8F0] dark:border-[#26282E] pb-3 mb-6 print:border-black">
               {renderChapterHeading(
                 currentDoc.bab5?.title || (currentDoc.category === "magang" ? "BAB V: PENUTUP, KONTRIBUSI, & MITIGASI RISIKO" : "BAB V: KESIMPULAN, REKOMENDASI KONTRIBUSI, & MITIGASI RISIKO"),
                 "BAB V",
@@ -4024,11 +4024,11 @@ NIP / NIK.
 
               {/* Bab 5 Navigation Footer */}
               {naskahSection === "bab5" && (
-                <div className="flex items-center justify-between pt-8 mt-12 border-t border-[#E2E8F0] dark:border-[#253149] text-xs font-medium no-print">
+                <div className="flex items-center justify-between pt-8 mt-12 border-t border-[#E2E8F0] dark:border-[#26282E] text-xs font-medium no-print">
                   <button
                     type="button"
                     onClick={() => { setNaskahSection("bab4"); window.scrollTo({ top: 0, behavior: "smooth" }); }}
-                    className="px-3.5 py-2 rounded-lg border border-[#E2E8F0] dark:border-[#253149] hover:bg-[#F1F5F9] dark:hover:bg-[#172033] transition-colors flex items-center gap-1.5 cursor-pointer text-[#64748B] dark:text-[#A4B1C7]"
+                    className="px-3.5 py-2 rounded-lg border border-[#E2E8F0] dark:border-[#26282E] hover:bg-[#F1F5F9] dark:hover:bg-[#1E1F24] transition-colors flex items-center gap-1.5 cursor-pointer text-[#64748B] dark:text-[#9CA3AF]"
                   >
                     <ChevronLeft className="w-4 h-4" />
                     <span>Bab IV: Rencana Kerja</span>
@@ -4036,7 +4036,7 @@ NIP / NIK.
                   <button
                     type="button"
                     onClick={() => { setNaskahSection("backmatter"); window.scrollTo({ top: 0, behavior: "smooth" }); }}
-                    className="px-4 py-2 rounded-lg bg-[#0F172A] hover:bg-black text-white dark:bg-[#7C9CFF] dark:hover:bg-[#688bf5] dark:text-[#080B12] font-semibold text-xs flex items-center gap-1.5 transition-colors cursor-pointer shadow-xs"
+                    className="px-4 py-2 rounded-lg bg-[#0F172A] hover:bg-black text-white dark:bg-[#7C9CFF] dark:hover:bg-[#688bf5] dark:text-[#0C0D0E] font-semibold text-xs flex items-center gap-1.5 transition-colors cursor-pointer shadow-xs"
                   >
                     <span>Daftar Pustaka &amp; Lampiran</span>
                     <ChevronRight className="w-4 h-4" />
@@ -4053,8 +4053,8 @@ NIP / NIK.
             <>
               {/* DAFTAR PUSTAKA (Standar APA 7th Edition / IEEE) */}
           {currentDoc.bibliography && currentDoc.bibliography.length > 0 && !disabledSections.includes("section-pustaka") && (
-            <section id="section-pustaka" className="mb-10 pt-6 border-t border-[#E2E8F0] dark:border-[#253149] print:border-black print-break-page print:break-after-page">
-              <div className="relative border-b border-[#E2E8F0] dark:border-[#253149] pb-3 mb-6 print:border-black flex flex-col items-center">
+            <section id="section-pustaka" className="mb-10 pt-6 border-t border-[#E2E8F0] dark:border-[#26282E] print:border-black print-break-page print:break-after-page">
+              <div className="relative border-b border-[#E2E8F0] dark:border-[#26282E] pb-3 mb-6 print:border-black flex flex-col items-center">
                 <div className="text-center w-full chapter-heading">
                   <h2 className="text-base sm:text-lg font-serif font-bold text-[#0F172A] dark:text-[#F3F6FC] print:text-black uppercase tracking-wide chapter-title">
                     DAFTAR PUSTAKA
@@ -4071,7 +4071,7 @@ NIP / NIK.
                     <RefreshCw className={`w-3 h-3 ${isVerifyingCitations ? 'animate-spin' : ''}`} />
                     <span>{isVerifyingCitations ? "Memeriksa Crossref/OpenAlex..." : "Verifikasi Silang DOI"}</span>
                   </button>
-                  <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-[#F8FAFC] dark:bg-[#111827] text-[#64748B] dark:text-[#A4B1C7] border border-[#E2E8F0] dark:border-[#253149]">
+                  <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-[#F8FAFC] dark:bg-[#17181C] text-[#64748B] dark:text-[#9CA3AF] border border-[#E2E8F0] dark:border-[#26282E]">
                     {citationStyle === "apa" ? "STANDAR APA 7TH EDITION" : "STANDAR IEEE"}
                   </span>
                 </div>
@@ -4139,10 +4139,10 @@ NIP / NIK.
 
           {/* LAMPIRAN-LAMPIRAN AKADEMIK */}
           {!disabledSections.includes("section-lampiran") && (
-          <section id="section-lampiran" className="mt-12 pt-8 border-t-2 border-[#E2E8F0] dark:border-[#253149] print:border-black font-serif print-break-page print:break-after-page">
-            <div className="relative border-b border-[#E2E8F0] dark:border-[#253149] pb-3 mb-6 print:border-black flex flex-col items-center">
+          <section id="section-lampiran" className="mt-12 pt-8 border-t-2 border-[#E2E8F0] dark:border-[#26282E] print:border-black font-serif print-break-page print:break-after-page">
+            <div className="relative border-b border-[#E2E8F0] dark:border-[#26282E] pb-3 mb-6 print:border-black flex flex-col items-center">
               <div className="text-center w-full chapter-heading">
-                <span className="text-[10px] font-mono uppercase tracking-widest text-[#64748B] dark:text-[#A4B1C7] block mb-1">
+                <span className="text-[10px] font-mono uppercase tracking-widest text-[#64748B] dark:text-[#9CA3AF] block mb-1">
                   BERKAS PENDUKUNG, LOGBOOK &amp; INSTRUMEN BAKU
                 </span>
                 <h2 className="text-base sm:text-lg font-serif font-bold text-[#0F172A] dark:text-[#F3F6FC] print:text-black uppercase tracking-wide chapter-title">
@@ -4342,11 +4342,11 @@ NIP / NIK.
 
               {/* Back Matter Navigation Footer */}
               {naskahSection === "backmatter" && (
-                <div className="flex items-center justify-between pt-8 mt-12 border-t border-[#E2E8F0] dark:border-[#253149] text-xs font-medium no-print">
+                <div className="flex items-center justify-between pt-8 mt-12 border-t border-[#E2E8F0] dark:border-[#26282E] text-xs font-medium no-print">
                   <button
                     type="button"
                     onClick={() => { setNaskahSection(isUNPPkl ? "bab3" : "bab5"); window.scrollTo({ top: 0, behavior: "smooth" }); }}
-                    className="px-3.5 py-2 rounded-lg border border-[#E2E8F0] dark:border-[#253149] hover:bg-[#F1F5F9] dark:hover:bg-[#172033] transition-colors flex items-center gap-1.5 cursor-pointer text-[#64748B] dark:text-[#A4B1C7]"
+                    className="px-3.5 py-2 rounded-lg border border-[#E2E8F0] dark:border-[#26282E] hover:bg-[#F1F5F9] dark:hover:bg-[#1E1F24] transition-colors flex items-center gap-1.5 cursor-pointer text-[#64748B] dark:text-[#9CA3AF]"
                   >
                     <ChevronLeft className="w-4 h-4" />
                     <span>{isUNPPkl ? "Bab III: Penutup" : "Bab V: Penutup"}</span>
@@ -4354,7 +4354,7 @@ NIP / NIK.
                   <button
                     type="button"
                     onClick={() => { setNaskahSection("all"); window.scrollTo({ top: 0, behavior: "smooth" }); }}
-                    className="px-4 py-2 rounded-lg bg-[#0F172A] hover:bg-black text-white dark:bg-[#7C9CFF] dark:hover:bg-[#688bf5] dark:text-[#080B12] font-semibold text-xs transition-colors cursor-pointer shadow-xs"
+                    className="px-4 py-2 rounded-lg bg-[#0F172A] hover:bg-black text-white dark:bg-[#7C9CFF] dark:hover:bg-[#688bf5] dark:text-[#0C0D0E] font-semibold text-xs transition-colors cursor-pointer shadow-xs"
                   >
                     <span>Tampilkan Semua Halaman (Utuh) ≡</span>
                   </button>
@@ -4798,17 +4798,17 @@ NIP / NIK.
 
         {/* PANEL 3: RIGHT COLLAPSIBLE INSPECTOR (Co-Pilot, QA Audit, Literatur, Format) */}
         {isRightPanelOpen && (
-          <aside className="w-80 sm:w-96 shrink-0 border-l border-[#E2E8F0] dark:border-[#253149] bg-white dark:bg-[#111827] overflow-y-auto flex flex-col no-print transition-all duration-200">
+          <aside className="w-80 sm:w-96 shrink-0 border-l border-[#E2E8F0] dark:border-[#26282E] bg-white dark:bg-[#17181C] overflow-y-auto flex flex-col no-print transition-all duration-200">
             {/* Header with Inspector Tabs & Close Button */}
-            <div className="p-2 border-b border-[#E2E8F0] dark:border-[#253149] flex items-center justify-between gap-1">
+            <div className="p-2 border-b border-[#E2E8F0] dark:border-[#26282E] flex items-center justify-between gap-1">
               <div className="flex items-center gap-1 overflow-x-auto scrollbar-none text-xs">
                 <button
                   type="button"
                   onClick={() => setInspectorTab("copilot")}
                   className={`px-2.5 py-1.5 rounded-lg font-semibold flex items-center gap-1 transition-colors cursor-pointer ${
                     inspectorTab === "copilot"
-                      ? "bg-[#0F172A] text-white dark:bg-[#172033] dark:text-[#7C9CFF] shadow-2xs"
-                      : "text-[#475569] dark:text-[#A4B1C7] hover:bg-[#F1F5F9] dark:hover:bg-[#172033]"
+                      ? "bg-[#0F172A] text-white dark:bg-[#1E1F24] dark:text-[#7C9CFF] shadow-2xs"
+                      : "text-[#475569] dark:text-[#9CA3AF] hover:bg-[#F1F5F9] dark:hover:bg-[#1E1F24]"
                   }`}
                 >
                   <Bot className="w-3.5 h-3.5 text-[#7C9CFF]" />
@@ -4820,8 +4820,8 @@ NIP / NIK.
                   onClick={() => setInspectorTab("qa")}
                   className={`px-2.5 py-1.5 rounded-lg font-semibold flex items-center gap-1 transition-colors cursor-pointer ${
                     inspectorTab === "qa"
-                      ? "bg-[#0F172A] text-white dark:bg-[#172033] dark:text-[#7C9CFF] shadow-2xs"
-                      : "text-[#475569] dark:text-[#A4B1C7] hover:bg-[#F1F5F9] dark:hover:bg-[#172033]"
+                      ? "bg-[#0F172A] text-white dark:bg-[#1E1F24] dark:text-[#7C9CFF] shadow-2xs"
+                      : "text-[#475569] dark:text-[#9CA3AF] hover:bg-[#F1F5F9] dark:hover:bg-[#1E1F24]"
                   }`}
                 >
                   <ShieldCheck className="w-3.5 h-3.5 text-[#34D399]" />
@@ -4833,8 +4833,8 @@ NIP / NIK.
                   onClick={() => setInspectorTab("literature")}
                   className={`px-2.5 py-1.5 rounded-lg font-semibold flex items-center gap-1 transition-colors cursor-pointer ${
                     inspectorTab === "literature"
-                      ? "bg-[#0F172A] text-white dark:bg-[#172033] dark:text-[#7C9CFF] shadow-2xs"
-                      : "text-[#475569] dark:text-[#A4B1C7] hover:bg-[#F1F5F9] dark:hover:bg-[#172033]"
+                      ? "bg-[#0F172A] text-white dark:bg-[#1E1F24] dark:text-[#7C9CFF] shadow-2xs"
+                      : "text-[#475569] dark:text-[#9CA3AF] hover:bg-[#F1F5F9] dark:hover:bg-[#1E1F24]"
                   }`}
                 >
                   <BookOpen className="w-3.5 h-3.5 text-[#9B8CFF]" />
@@ -4846,8 +4846,8 @@ NIP / NIK.
                   onClick={() => setInspectorTab("format")}
                   className={`px-2.5 py-1.5 rounded-lg font-semibold flex items-center gap-1 transition-colors cursor-pointer ${
                     inspectorTab === "format"
-                      ? "bg-[#0F172A] text-white dark:bg-[#172033] dark:text-[#7C9CFF] shadow-2xs"
-                      : "text-[#475569] dark:text-[#A4B1C7] hover:bg-[#F1F5F9] dark:hover:bg-[#172033]"
+                      ? "bg-[#0F172A] text-white dark:bg-[#1E1F24] dark:text-[#7C9CFF] shadow-2xs"
+                      : "text-[#475569] dark:text-[#9CA3AF] hover:bg-[#F1F5F9] dark:hover:bg-[#1E1F24]"
                   }`}
                 >
                   <SlidersHorizontal className="w-3.5 h-3.5 text-[#FBBF24]" />
@@ -4858,7 +4858,7 @@ NIP / NIK.
               <button
                 type="button"
                 onClick={() => setIsRightPanelOpen(false)}
-                className="p-1.5 rounded-md text-[#475569] dark:text-[#A4B1C7] hover:text-[#0F172A] dark:hover:text-[#F3F6FC] hover:bg-[#F1F5F9] dark:hover:bg-[#172033] cursor-pointer"
+                className="p-1.5 rounded-md text-[#475569] dark:text-[#9CA3AF] hover:text-[#0F172A] dark:hover:text-[#F3F6FC] hover:bg-[#F1F5F9] dark:hover:bg-[#1E1F24] cursor-pointer"
                 title="Tutup Panel Asisten"
               >
                 <X className="w-3.5 h-3.5" />
@@ -4873,14 +4873,14 @@ NIP / NIK.
                     <Sparkles className="w-3.5 h-3.5 text-[#7C9CFF]" />
                     <span>Asisten Akademik Cerdas</span>
                   </h4>
-                  <p className="text-[11px] text-[#475569] dark:text-[#A4B1C7]">
+                  <p className="text-[11px] text-[#475569] dark:text-[#9CA3AF]">
                     Didukung SOP 12 Metode Berpikir &amp; Standar Evaluasi Dikti.
                   </p>
                 </div>
 
                 {/* Quick Prompts */}
                 <div className="space-y-1">
-                  <span className="text-[10px] font-mono text-[#475569] dark:text-[#A4B1C7] uppercase">Arahan Cepat:</span>
+                  <span className="text-[10px] font-mono text-[#475569] dark:text-[#9CA3AF] uppercase">Arahan Cepat:</span>
                   <div className="flex flex-wrap gap-1">
                     {[
                       "Perdalam latar belakang dengan data empiris",
@@ -4892,7 +4892,7 @@ NIP / NIK.
                         key={idx}
                         type="button"
                         onClick={() => handleSendInspectorCopilot(p)}
-                        className="text-[10px] text-left px-2 py-1 rounded-md bg-[#F1F5F9] dark:bg-[#172033] hover:bg-[#E2E8F0] dark:hover:bg-[#1C263A] text-[#0F172A] dark:text-[#F3F6FC] transition-colors cursor-pointer"
+                        className="text-[10px] text-left px-2 py-1 rounded-md bg-[#F1F5F9] dark:bg-[#1E1F24] hover:bg-[#E2E8F0] dark:hover:bg-[#25262C] text-[#0F172A] dark:text-[#F3F6FC] transition-colors cursor-pointer"
                       >
                         + {p}
                       </button>
@@ -4907,8 +4907,8 @@ NIP / NIK.
                       key={msg.id}
                       className={`p-2.5 rounded-xl text-xs space-y-1 ${
                         msg.sender === "user"
-                          ? "bg-[#0F172A] text-white dark:bg-[#172033] dark:text-[#7C9CFF] ml-4"
-                          : "bg-[#F1F5F9] dark:bg-[#0B101A] border border-[#E2E8F0] dark:border-[#253149] text-[#0F172A] dark:text-[#F3F6FC] mr-2"
+                          ? "bg-[#0F172A] text-white dark:bg-[#1E1F24] dark:text-[#7C9CFF] ml-4"
+                          : "bg-[#F1F5F9] dark:bg-[#121316] border border-[#E2E8F0] dark:border-[#26282E] text-[#0F172A] dark:text-[#F3F6FC] mr-2"
                       }`}
                     >
                       <div className="flex justify-between items-center text-[10px] opacity-60">
@@ -4919,7 +4919,7 @@ NIP / NIK.
                     </div>
                   ))}
                   {inspectorCopilotLoading && (
-                    <div className="p-2.5 rounded-xl text-xs bg-[#F1F5F9] dark:bg-[#172033] text-[#475569] dark:text-[#A4B1C7] flex items-center gap-2">
+                    <div className="p-2.5 rounded-xl text-xs bg-[#F1F5F9] dark:bg-[#1E1F24] text-[#475569] dark:text-[#9CA3AF] flex items-center gap-2">
                       <RefreshCw className="w-3.5 h-3.5 animate-spin text-[#7C9CFF]" />
                       <span>Co-Pilot sedang menelaah naskah...</span>
                     </div>
@@ -4927,14 +4927,14 @@ NIP / NIK.
                 </div>
 
                 {/* Input box */}
-                <div className="pt-2 border-t border-[#E2E8F0] dark:border-[#253149] flex gap-1.5">
+                <div className="pt-2 border-t border-[#E2E8F0] dark:border-[#26282E] flex gap-1.5">
                   <input
                     type="text"
                     value={inspectorCopilotInput}
                     onChange={(e) => setInspectorCopilotInput(e.target.value)}
                     onKeyDown={(e) => { if (e.key === "Enter") handleSendInspectorCopilot(); }}
                     placeholder="Tanya saran bab, sitasi, atau sidang..."
-                    className="flex-1 px-3 py-1.5 rounded-lg border border-[#E2E8F0] dark:border-[#253149] bg-[#F8FAFC] dark:bg-[#0B101A] text-xs text-[#0F172A] dark:text-[#F3F6FC] placeholder:text-[#475569] dark:placeholder:text-[#A4B1C7] focus:outline-hidden"
+                    className="flex-1 px-3 py-1.5 rounded-lg border border-[#E2E8F0] dark:border-[#26282E] bg-[#F8FAFC] dark:bg-[#121316] text-xs text-[#0F172A] dark:text-[#F3F6FC] placeholder:text-[#475569] dark:placeholder:text-[#9CA3AF] focus:outline-hidden"
                   />
                   <button
                     type="button"
@@ -5137,7 +5137,7 @@ NIP / NIK.
       {/* ============================================================ */}
       {/* MICROSOFT WORD REVERSE-ENGINEERED STATUS BAR (Bottom Strip) */}
       {/* ============================================================ */}
-      <footer className="h-9 min-h-[36px] border-t border-[#E2E8F0] dark:border-[#253149] bg-white/95 dark:bg-[#0B101A]/95 backdrop-blur-md px-3 sm:px-6 flex items-center justify-between text-[11px] font-mono text-[#64748B] dark:text-[#A4B1C7] select-none no-print shrink-0 z-20">
+      <footer className="h-9 min-h-[36px] border-t border-[#E2E8F0] dark:border-[#26282E] bg-white/95 dark:bg-[#121316]/95 backdrop-blur-md px-3 sm:px-6 flex items-center justify-between text-[11px] font-mono text-[#64748B] dark:text-[#9CA3AF] select-none no-print shrink-0 z-20">
         
         {/* Left: Document Metrics Telemetry */}
         <div className="flex items-center gap-1.5 sm:gap-2 overflow-x-auto scrollbar-none py-1">
@@ -5154,17 +5154,17 @@ NIP / NIK.
             <span>~{estimatedPhysicalPages} halaman perkiraan / Target {currentDoc.targetDepthPages || 35} Hal ▾</span>
           </button>
 
-          <div className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-[#F1F5F9] dark:bg-[#111827] border border-[#E2E8F0] dark:border-[#253149] text-[#0F172A] dark:text-[#F3F6FC]">
+          <div className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-[#F1F5F9] dark:bg-[#17181C] border border-[#E2E8F0] dark:border-[#26282E] text-[#0F172A] dark:text-[#F3F6FC]">
             <span className="font-semibold">~{totalWordsCount.toLocaleString("id-ID")}</span>
-            <span className="text-[#64748B] dark:text-[#A4B1C7]">Kata</span>
+            <span className="text-[#64748B] dark:text-[#9CA3AF]">Kata</span>
           </div>
 
-          <div className="hidden sm:inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-[#F1F5F9] dark:bg-[#111827] border border-[#E2E8F0] dark:border-[#253149] text-[#0F172A] dark:text-[#F3F6FC]">
+          <div className="hidden sm:inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-[#F1F5F9] dark:bg-[#17181C] border border-[#E2E8F0] dark:border-[#26282E] text-[#0F172A] dark:text-[#F3F6FC]">
             <span className="font-semibold">~{totalCharactersCount.toLocaleString("id-ID")}</span>
-            <span className="text-[#64748B] dark:text-[#A4B1C7]">Karakter</span>
+            <span className="text-[#64748B] dark:text-[#9CA3AF]">Karakter</span>
           </div>
 
-          <div className="hidden md:inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-[#F1F5F9] dark:bg-[#111827] border border-[#E2E8F0] dark:border-[#253149] text-[#64748B] dark:text-[#A4B1C7]">
+          <div className="hidden md:inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-[#F1F5F9] dark:bg-[#17181C] border border-[#E2E8F0] dark:border-[#26282E] text-[#64748B] dark:text-[#9CA3AF]">
             <span>⏱️ ~{readingTimeMinutes} mnt baca</span>
           </div>
 
@@ -5180,7 +5180,7 @@ NIP / NIK.
           <button
             type="button"
             onClick={() => setIsPageCustomizerModalOpen(true)}
-            className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg border border-[#E2E8F0] dark:border-[#253149] bg-white dark:bg-[#111827] hover:border-[#7C9CFF] text-[#0F172A] dark:text-[#F3F6FC] transition-colors cursor-pointer text-[11px] font-sans font-medium shadow-2xs"
+            className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg border border-[#E2E8F0] dark:border-[#26282E] bg-white dark:bg-[#17181C] hover:border-[#7C9CFF] text-[#0F172A] dark:text-[#F3F6FC] transition-colors cursor-pointer text-[11px] font-sans font-medium shadow-2xs"
             title="Kustomisasi Susunan Lembar & Halaman Dokumen"
           >
             <Layers className="w-3.5 h-3.5 text-[#7C9CFF]" />
@@ -5188,7 +5188,7 @@ NIP / NIK.
           </button>
 
           {/* Zoom Controls */}
-          <div className="flex items-center gap-1 bg-white dark:bg-[#111827] px-1.5 py-0.5 rounded-lg border border-[#E2E8F0] dark:border-[#253149] shadow-2xs">
+          <div className="flex items-center gap-1 bg-white dark:bg-[#17181C] px-1.5 py-0.5 rounded-lg border border-[#E2E8F0] dark:border-[#26282E] shadow-2xs">
             <button
               type="button"
               onClick={() => setZoomLevel(prev => Math.max(70, prev - 10))}
@@ -5222,9 +5222,9 @@ NIP / NIK.
       {/* MODAL: KUSTOMISASI LEMBAR & KETEBALAN HALAMAN DOKUMEN (100% REAL DEPTH ENGINE) */}
       {isPageCustomizerModalOpen && (
         <div className="fixed inset-0 z-50 bg-black/60 dark:bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="w-full max-w-2xl bg-white dark:bg-[#0B101A] border border-[#E2E8F0] dark:border-[#253149] rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[88vh] animate-in zoom-in-95 duration-150">
+          <div className="w-full max-w-2xl bg-white dark:bg-[#121316] border border-[#E2E8F0] dark:border-[#26282E] rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[88vh] animate-in zoom-in-95 duration-150">
             {/* Modal Header */}
-            <div className="p-4 sm:p-5 border-b border-[#E2E8F0] dark:border-[#253149] flex items-center justify-between">
+            <div className="p-4 sm:p-5 border-b border-[#E2E8F0] dark:border-[#26282E] flex items-center justify-between">
               <div className="flex items-center gap-2.5">
                 <div className="w-9 h-9 rounded-xl bg-[#7C9CFF]/15 border border-[#7C9CFF]/30 flex items-center justify-center text-[#7C9CFF]">
                   <SlidersHorizontal className="w-4.5 h-4.5" />
@@ -5236,7 +5236,7 @@ NIP / NIK.
                       100% Real Engine
                     </span>
                   </h3>
-                  <p className="text-xs text-[#64748B] dark:text-[#A4B1C7]">
+                  <p className="text-xs text-[#64748B] dark:text-[#9CA3AF]">
                     Atur target ketebalan naskah (bukan pajangan) atau kelola susunan lembar &amp; lampiran
                   </p>
                 </div>
@@ -5244,21 +5244,21 @@ NIP / NIK.
               <button
                 type="button"
                 onClick={() => setIsPageCustomizerModalOpen(false)}
-                className="p-1.5 rounded-lg text-[#64748B] hover:text-[#0F172A] dark:text-[#A4B1C7] dark:hover:text-[#F3F6FC] hover:bg-[#F1F5F9] dark:hover:bg-[#172033] transition-colors cursor-pointer"
+                className="p-1.5 rounded-lg text-[#64748B] hover:text-[#0F172A] dark:text-[#9CA3AF] dark:hover:text-[#F3F6FC] hover:bg-[#F1F5F9] dark:hover:bg-[#1E1F24] transition-colors cursor-pointer"
               >
                 <X className="w-4 h-4" />
               </button>
             </div>
 
             {/* Modal Navigation Tabs */}
-            <div className="flex border-b border-[#E2E8F0] dark:border-[#253149] bg-[#F8FAFC] dark:bg-[#080B12] px-4 pt-2 gap-2 text-xs">
+            <div className="flex border-b border-[#E2E8F0] dark:border-[#26282E] bg-[#F8FAFC] dark:bg-[#0C0D0E] px-4 pt-2 gap-2 text-xs">
               <button
                 type="button"
                 onClick={() => setCustomizerTab("depth")}
                 className={`pb-2.5 px-3 font-semibold flex items-center gap-1.5 border-b-2 transition-all cursor-pointer ${
                   customizerTab === "depth"
                     ? "border-[#7C9CFF] text-[#7C9CFF]"
-                    : "border-transparent text-[#64748B] dark:text-[#A4B1C7] hover:text-[#0F172A] dark:hover:text-[#F3F6FC]"
+                    : "border-transparent text-[#64748B] dark:text-[#9CA3AF] hover:text-[#0F172A] dark:hover:text-[#F3F6FC]"
                 }`}
               >
                 <Sparkles className="w-3.5 h-3.5" />
@@ -5270,7 +5270,7 @@ NIP / NIK.
                 className={`pb-2.5 px-3 font-semibold flex items-center gap-1.5 border-b-2 transition-all cursor-pointer ${
                   customizerTab === "sections"
                     ? "border-[#7C9CFF] text-[#7C9CFF]"
-                    : "border-transparent text-[#64748B] dark:text-[#A4B1C7] hover:text-[#0F172A] dark:hover:text-[#F3F6FC]"
+                    : "border-transparent text-[#64748B] dark:text-[#9CA3AF] hover:text-[#0F172A] dark:hover:text-[#F3F6FC]"
                 }`}
               >
                 <Layers className="w-3.5 h-3.5" />
@@ -5284,12 +5284,12 @@ NIP / NIK.
                 <div className="space-y-4">
                   {/* Status Comparison Cards */}
                   <div className="grid grid-cols-2 gap-3">
-                    <div className="p-3 rounded-xl border border-[#E2E8F0] dark:border-[#253149] bg-white dark:bg-[#111827]">
-                      <span className="text-[10px] font-mono text-[#64748B] dark:text-[#A4B1C7] block mb-1">
+                    <div className="p-3 rounded-xl border border-[#E2E8F0] dark:border-[#26282E] bg-white dark:bg-[#17181C]">
+                      <span className="text-[10px] font-mono text-[#64748B] dark:text-[#9CA3AF] block mb-1">
                         Halaman Fisik Riil Saat Ini
                       </span>
                       <p className="text-lg sm:text-xl font-bold text-[#0F172A] dark:text-[#F3F6FC]">
-                        ~{estimatedPhysicalPages} <span className="text-xs font-normal text-[#64748B] dark:text-[#A4B1C7]">Hal A4</span>
+                        ~{estimatedPhysicalPages} <span className="text-xs font-normal text-[#64748B] dark:text-[#9CA3AF]">Hal A4</span>
                       </p>
                       <span className="text-[10px] text-[#34D399] font-mono">
                         ~{totalWordsCount.toLocaleString("id-ID")} kata terkompilasi
@@ -5310,7 +5310,7 @@ NIP / NIK.
                   </div>
 
                   {/* Interactive Slider */}
-                  <div className="p-3.5 rounded-xl border border-[#E2E8F0] dark:border-[#253149] bg-[#F8FAFC] dark:bg-[#111827] space-y-2">
+                  <div className="p-3.5 rounded-xl border border-[#E2E8F0] dark:border-[#26282E] bg-[#F8FAFC] dark:bg-[#17181C] space-y-2">
                     <div className="flex justify-between items-center text-xs">
                       <span className="font-semibold text-[#0F172A] dark:text-[#F3F6FC]">
                         Geser Slider Target Halaman:
@@ -5328,7 +5328,7 @@ NIP / NIK.
                       onChange={(e) => setTempTargetPages(Number(e.target.value))}
                       className="w-full accent-[#7C9CFF] cursor-pointer"
                     />
-                    <div className="flex justify-between text-[10px] font-mono text-[#64748B] dark:text-[#A4B1C7]">
+                    <div className="flex justify-between text-[10px] font-mono text-[#64748B] dark:text-[#9CA3AF]">
                       <span>15 Hal (Ringkas)</span>
                       <span>35 Hal (PKL)</span>
                       <span>50 Hal (Skripsi)</span>
@@ -5339,7 +5339,7 @@ NIP / NIK.
 
                   {/* Quick Preset Buttons */}
                   <div className="space-y-1.5">
-                    <label className="text-[11px] font-semibold text-[#475569] dark:text-[#A4B1C7]">
+                    <label className="text-[11px] font-semibold text-[#475569] dark:text-[#9CA3AF]">
                       Preset Cepat Berdasarkan Jenjang / Jenis Laporan:
                     </label>
                     <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
@@ -5357,7 +5357,7 @@ NIP / NIK.
                           className={`p-2 rounded-lg border text-left text-xs font-medium transition-all cursor-pointer ${
                             tempTargetPages === preset.pages
                               ? "bg-[#7C9CFF]/20 border-[#7C9CFF] text-[#7C9CFF] font-semibold"
-                              : "bg-white dark:bg-[#111827] border-[#E2E8F0] dark:border-[#253149] text-[#0F172A] dark:text-[#F3F6FC] hover:border-[#7C9CFF]/50"
+                              : "bg-white dark:bg-[#17181C] border-[#E2E8F0] dark:border-[#26282E] text-[#0F172A] dark:text-[#F3F6FC] hover:border-[#7C9CFF]/50"
                           }`}
                         >
                           {preset.label}
@@ -5365,8 +5365,8 @@ NIP / NIK.
                       ))}
 
                       {/* Custom Numeric Input */}
-                      <div className="p-1 rounded-lg border border-[#E2E8F0] dark:border-[#253149] bg-white dark:bg-[#111827] flex items-center px-2">
-                        <span className="text-[10px] text-[#64748B] dark:text-[#A4B1C7] mr-1">Bebas:</span>
+                      <div className="p-1 rounded-lg border border-[#E2E8F0] dark:border-[#26282E] bg-white dark:bg-[#17181C] flex items-center px-2">
+                        <span className="text-[10px] text-[#64748B] dark:text-[#9CA3AF] mr-1">Bebas:</span>
                         <input
                           type="number"
                           min={15}
@@ -5375,7 +5375,7 @@ NIP / NIK.
                           onChange={(e) => setTempTargetPages(Math.max(15, Math.min(150, Number(e.target.value))))}
                           className="w-full bg-transparent font-mono font-bold text-xs text-[#0F172A] dark:text-[#F3F6FC] focus:outline-none"
                         />
-                        <span className="text-[10px] text-[#64748B] dark:text-[#A4B1C7]">Hal</span>
+                        <span className="text-[10px] text-[#64748B] dark:text-[#9CA3AF]">Hal</span>
                       </div>
                     </div>
                   </div>
@@ -5395,7 +5395,7 @@ NIP / NIK.
                       type="button"
                       disabled={isScalingDepth}
                       onClick={() => handleApplyTargetDepth(tempTargetPages)}
-                      className="w-full py-2.5 rounded-xl bg-[#7C9CFF] hover:bg-[#688bf5] text-[#080B12] font-bold text-xs flex items-center justify-center gap-2 cursor-pointer shadow-md hover:shadow-lg transition-all disabled:opacity-50"
+                      className="w-full py-2.5 rounded-xl bg-[#7C9CFF] hover:bg-[#688bf5] text-[#0C0D0E] font-bold text-xs flex items-center justify-center gap-2 cursor-pointer shadow-md hover:shadow-lg transition-all disabled:opacity-50"
                     >
                       {isScalingDepth ? (
                         <>
@@ -5438,8 +5438,8 @@ NIP / NIK.
                         key={sheet.id}
                         className={`p-3 rounded-xl border flex items-center justify-between transition-all ${
                           isOff
-                            ? "bg-[#F8FAFC]/50 dark:bg-[#111827]/40 border-[#E2E8F0] dark:border-[#253149] opacity-60"
-                            : "bg-white dark:bg-[#111827] border-[#E2E8F0] dark:border-[#253149] shadow-2xs"
+                            ? "bg-[#F8FAFC]/50 dark:bg-[#17181C]/40 border-[#E2E8F0] dark:border-[#26282E] opacity-60"
+                            : "bg-white dark:bg-[#17181C] border-[#E2E8F0] dark:border-[#26282E] shadow-2xs"
                         }`}
                       >
                         <div className="flex items-center gap-2.5">
@@ -5448,7 +5448,7 @@ NIP / NIK.
                             <p className={`font-semibold ${isOff ? "line-through text-zinc-400" : "text-[#0F172A] dark:text-[#F3F6FC]"}`}>
                               {sheet.label}
                             </p>
-                            <span className="text-[10px] font-mono text-[#64748B] dark:text-[#A4B1C7]">
+                            <span className="text-[10px] font-mono text-[#64748B] dark:text-[#9CA3AF]">
                               {sheet.badge}
                             </span>
                           </div>
@@ -5472,7 +5472,7 @@ NIP / NIK.
             </div>
 
             {/* Modal Footer */}
-            <div className="p-4 border-t border-[#E2E8F0] dark:border-[#253149] bg-[#F8FAFC] dark:bg-[#080B12] flex items-center justify-between">
+            <div className="p-4 border-t border-[#E2E8F0] dark:border-[#26282E] bg-[#F8FAFC] dark:bg-[#0C0D0E] flex items-center justify-between">
               {customizerTab === "sections" ? (
                 <button
                   type="button"
@@ -5480,13 +5480,13 @@ NIP / NIK.
                     setIsPageCustomizerModalOpen(false);
                     setIsCustomSheetModalOpen(true);
                   }}
-                  className="px-3 py-1.5 rounded-lg border border-[#E2E8F0] dark:border-[#253149] bg-white dark:bg-[#111827] text-xs font-semibold text-[#0F172A] dark:text-[#F3F6FC] hover:border-[#7C9CFF] flex items-center gap-1.5 transition-colors cursor-pointer shadow-2xs"
+                  className="px-3 py-1.5 rounded-lg border border-[#E2E8F0] dark:border-[#26282E] bg-white dark:bg-[#17181C] text-xs font-semibold text-[#0F172A] dark:text-[#F3F6FC] hover:border-[#7C9CFF] flex items-center gap-1.5 transition-colors cursor-pointer shadow-2xs"
                 >
                   <Plus className="w-3.5 h-3.5 text-[#7C9CFF]" />
                   <span>+ Tambah Lembar Khusus / Scan</span>
                 </button>
               ) : (
-                <span className="text-[11px] font-mono text-[#64748B] dark:text-[#A4B1C7]">
+                <span className="text-[11px] font-mono text-[#64748B] dark:text-[#9CA3AF]">
                   Target aktif: {currentDoc.targetDepthPages || 35} Halaman
                 </span>
               )}
@@ -5494,7 +5494,7 @@ NIP / NIK.
               <button
                 type="button"
                 onClick={() => setIsPageCustomizerModalOpen(false)}
-                className="px-4 py-1.5 rounded-lg bg-[#0F172A] hover:bg-black text-white dark:bg-[#7C9CFF] dark:hover:bg-[#688bf5] dark:text-[#080B12] text-xs font-semibold cursor-pointer shadow-xs transition-colors"
+                className="px-4 py-1.5 rounded-lg bg-[#0F172A] hover:bg-black text-white dark:bg-[#7C9CFF] dark:hover:bg-[#688bf5] dark:text-[#0C0D0E] text-xs font-semibold cursor-pointer shadow-xs transition-colors"
               >
                 Selesai
               </button>

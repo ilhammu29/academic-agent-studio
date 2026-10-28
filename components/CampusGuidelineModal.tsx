@@ -114,10 +114,10 @@ export const CampusGuidelineModal: React.FC<CampusGuidelineModalProps> = ({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-5 bg-black/60 dark:bg-black/80 backdrop-blur-md animate-in fade-in duration-150">
-      <div className="w-full max-w-3xl bg-white dark:bg-[#0B101A] border border-[#E2E8F0] dark:border-[#253149] rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[92vh] animate-in zoom-in-95 duration-150">
+      <div className="w-full max-w-3xl bg-white dark:bg-[#121316] border border-[#E2E8F0] dark:border-[#26282E] rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[92vh] animate-in zoom-in-95 duration-150">
         
         {/* Header */}
-        <div className="px-5 py-4 border-b border-[#E2E8F0] dark:border-[#253149] flex items-center justify-between bg-[#F8FAFC] dark:bg-[#111827]">
+        <div className="px-5 py-4 border-b border-[#E2E8F0] dark:border-[#26282E] flex items-center justify-between bg-[#F8FAFC] dark:bg-[#17181C]">
           <div className="flex items-center gap-3">
             <div className="w-9 h-9 rounded-xl bg-[#7C9CFF]/15 text-[#7C9CFF] border border-[#7C9CFF]/30 flex items-center justify-center shadow-xs">
               <Landmark className="w-4 h-4" />
@@ -129,7 +129,7 @@ export const CampusGuidelineModal: React.FC<CampusGuidelineModalProps> = ({
                   Auto-Word Sync
                 </span>
               </h3>
-              <p className="text-[11px] text-[#64748B] dark:text-[#A4B1C7]">
+              <p className="text-[11px] text-[#64748B] dark:text-[#9CA3AF]">
                 Sesuaikan margin (4-4-3-3), tipografi, dan lembar pengesahan persis sesuai buku pedoman fakultas Anda.
               </p>
             </div>
@@ -138,21 +138,21 @@ export const CampusGuidelineModal: React.FC<CampusGuidelineModalProps> = ({
           <button
             type="button"
             onClick={onClose}
-            className="p-1.5 rounded-lg hover:bg-[#F1F5F9] dark:hover:bg-[#172033] text-[#64748B] dark:text-[#A4B1C7] hover:text-[#0F172A] dark:hover:text-[#F3F6FC] transition-colors cursor-pointer"
+            className="p-1.5 rounded-lg hover:bg-[#F1F5F9] dark:hover:bg-[#1E1F24] text-[#64748B] dark:text-[#9CA3AF] hover:text-[#0F172A] dark:hover:text-[#F3F6FC] transition-colors cursor-pointer"
           >
             <X className="w-4 h-4" />
           </button>
         </div>
 
         {/* Tab Switcher */}
-        <div className="grid grid-cols-3 border-b border-[#E2E8F0] dark:border-[#253149] text-xs font-medium bg-[#F8FAFC] dark:bg-[#080B12] p-1.5 gap-1.5">
+        <div className="grid grid-cols-3 border-b border-[#E2E8F0] dark:border-[#26282E] text-xs font-medium bg-[#F8FAFC] dark:bg-[#0C0D0E] p-1.5 gap-1.5">
           <button
             type="button"
             onClick={() => setActiveTab("presets")}
             className={`py-2 px-3 rounded-lg flex items-center justify-center gap-1.5 transition-all cursor-pointer ${
               activeTab === "presets"
-                ? "bg-white dark:bg-[#111827] text-[#7C9CFF] font-semibold border border-[#7C9CFF]/30 shadow-2xs"
-                : "text-[#64748B] dark:text-[#A4B1C7] hover:text-[#0F172A] dark:hover:text-[#F3F6FC]"
+                ? "bg-white dark:bg-[#17181C] text-[#7C9CFF] font-semibold border border-[#7C9CFF]/30 shadow-2xs"
+                : "text-[#64748B] dark:text-[#9CA3AF] hover:text-[#0F172A] dark:hover:text-[#F3F6FC]"
             }`}
           >
             <Landmark className="w-3.5 h-3.5" />
@@ -164,8 +164,8 @@ export const CampusGuidelineModal: React.FC<CampusGuidelineModalProps> = ({
             onClick={() => setActiveTab("upload")}
             className={`py-2 px-3 rounded-lg flex items-center justify-center gap-1.5 transition-all cursor-pointer ${
               activeTab === "upload"
-                ? "bg-white dark:bg-[#111827] text-[#7C9CFF] font-semibold border border-[#7C9CFF]/30 shadow-2xs"
-                : "text-[#64748B] dark:text-[#A4B1C7] hover:text-[#0F172A] dark:hover:text-[#F3F6FC]"
+                ? "bg-white dark:bg-[#17181C] text-[#7C9CFF] font-semibold border border-[#7C9CFF]/30 shadow-2xs"
+                : "text-[#64748B] dark:text-[#9CA3AF] hover:text-[#0F172A] dark:hover:text-[#F3F6FC]"
             }`}
           >
             <UploadCloud className="w-3.5 h-3.5" />
@@ -177,8 +177,8 @@ export const CampusGuidelineModal: React.FC<CampusGuidelineModalProps> = ({
             onClick={() => setActiveTab("custom")}
             className={`py-2 px-3 rounded-lg flex items-center justify-center gap-1.5 transition-all cursor-pointer ${
               activeTab === "custom"
-                ? "bg-white dark:bg-[#111827] text-[#7C9CFF] font-semibold border border-[#7C9CFF]/30 shadow-2xs"
-                : "text-[#64748B] dark:text-[#A4B1C7] hover:text-[#0F172A] dark:hover:text-[#F3F6FC]"
+                ? "bg-white dark:bg-[#17181C] text-[#7C9CFF] font-semibold border border-[#7C9CFF]/30 shadow-2xs"
+                : "text-[#64748B] dark:text-[#9CA3AF] hover:text-[#0F172A] dark:hover:text-[#F3F6FC]"
             }`}
           >
             <SlidersHorizontal className="w-3.5 h-3.5" />
@@ -208,7 +208,7 @@ export const CampusGuidelineModal: React.FC<CampusGuidelineModalProps> = ({
                       className={`p-3.5 rounded-xl border text-left cursor-pointer transition-all ${
                         isSelected
                           ? "bg-[#7C9CFF]/15 border-[#7C9CFF]/40 text-[#0F172A] dark:text-[#F3F6FC] shadow-2xs scale-[1.01]"
-                          : "bg-white dark:bg-[#111827] border-[#E2E8F0] dark:border-[#253149] hover:border-[#7C9CFF]/40 text-[#0F172A] dark:text-[#F3F6FC]"
+                          : "bg-white dark:bg-[#17181C] border-[#E2E8F0] dark:border-[#26282E] hover:border-[#7C9CFF]/40 text-[#0F172A] dark:text-[#F3F6FC]"
                       }`}
                     >
                       <div className="flex items-start justify-between gap-2">
@@ -219,26 +219,26 @@ export const CampusGuidelineModal: React.FC<CampusGuidelineModalProps> = ({
                           <span className={`inline-block text-[10px] font-mono mt-1 px-2 py-0.5 rounded-md ${
                             isSelected 
                               ? "bg-[#7C9CFF]/25 text-[#7C9CFF]" 
-                              : "bg-[#F1F5F9] dark:bg-[#172033] text-[#64748B] dark:text-[#A4B1C7]"
+                              : "bg-[#F1F5F9] dark:bg-[#1E1F24] text-[#64748B] dark:text-[#9CA3AF]"
                           }`}>
                             {preset.badge}
                           </span>
                         </div>
                         {isSelected && (
-                          <div className="w-5 h-5 rounded-full bg-[#34D399] text-[#080B12] flex items-center justify-center flex-shrink-0 mt-0.5 font-bold">
+                          <div className="w-5 h-5 rounded-full bg-[#34D399] text-[#0C0D0E] flex items-center justify-center flex-shrink-0 mt-0.5 font-bold">
                             <Check className="w-3 h-3 stroke-[3]" />
                           </div>
                         )}
                       </div>
 
                       <p className={`text-[11px] mt-2 line-clamp-2 leading-relaxed ${
-                        isSelected ? "text-[#334155] dark:text-[#CBD5E1]" : "text-[#64748B] dark:text-[#A4B1C7]"
+                        isSelected ? "text-[#334155] dark:text-[#CBD5E1]" : "text-[#64748B] dark:text-[#9CA3AF]"
                       }`}>
                         {preset.description}
                       </p>
 
                       <div className={`mt-3 pt-2.5 border-t flex items-center justify-between text-[10px] font-mono ${
-                        isSelected ? "border-[#7C9CFF]/30 text-[#7C9CFF]" : "border-[#E2E8F0] dark:border-[#253149] text-[#64748B] dark:text-[#A4B1C7]"
+                        isSelected ? "border-[#7C9CFF]/30 text-[#7C9CFF]" : "border-[#E2E8F0] dark:border-[#26282E] text-[#64748B] dark:text-[#9CA3AF]"
                       }`}>
                         <span>Margin: {preset.margins.leftCm}-{preset.margins.topCm}-{preset.margins.rightCm}-{preset.margins.bottomCm} cm</span>
                         <span>Sitasi: {preset.citationStyle.toUpperCase()}</span>
@@ -542,9 +542,9 @@ export const CampusGuidelineModal: React.FC<CampusGuidelineModalProps> = ({
         </div>
 
         {/* Modal Footer */}
-        <div className="p-3.5 px-5 border-t border-[#E2E8F0] dark:border-[#253149] bg-[#F8FAFC] dark:bg-[#111827] flex items-center justify-between text-xs">
+        <div className="p-3.5 px-5 border-t border-[#E2E8F0] dark:border-[#26282E] bg-[#F8FAFC] dark:bg-[#17181C] flex items-center justify-between text-xs">
           <div className="flex items-center gap-2">
-            <span className="text-[#64748B] dark:text-[#A4B1C7] hidden sm:inline">Format Aktif:</span>
+            <span className="text-[#64748B] dark:text-[#9CA3AF] hidden sm:inline">Format Aktif:</span>
             <span className="font-bold text-[#0F172A] dark:text-[#F3F6FC]">
               {activeGuideline.campusName}
             </span>
@@ -557,14 +557,14 @@ export const CampusGuidelineModal: React.FC<CampusGuidelineModalProps> = ({
             <button
               type="button"
               onClick={onClose}
-              className="px-3.5 py-2 rounded-xl text-[#64748B] dark:text-[#A4B1C7] hover:text-[#0F172A] dark:hover:text-[#F3F6FC] transition-colors cursor-pointer"
+              className="px-3.5 py-2 rounded-xl text-[#64748B] dark:text-[#9CA3AF] hover:text-[#0F172A] dark:hover:text-[#F3F6FC] transition-colors cursor-pointer"
             >
               Batal
             </button>
             <button
               type="button"
               onClick={handleSaveAndApply}
-              className="px-5 py-2 rounded-xl bg-[#7C9CFF] hover:bg-[#688bf5] text-[#080B12] font-semibold shadow-xs transition-all cursor-pointer flex items-center gap-1.5"
+              className="px-5 py-2 rounded-xl bg-[#7C9CFF] hover:bg-[#688bf5] text-[#0C0D0E] font-semibold shadow-xs transition-all cursor-pointer flex items-center gap-1.5"
             >
               <Check className="w-3.5 h-3.5 stroke-[2.5]" />
               <span>Terapkan ke Naskah &amp; Word</span>

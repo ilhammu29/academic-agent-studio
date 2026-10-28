@@ -284,7 +284,7 @@ export const PresentationStudio: React.FC<PresentationStudioProps> = ({
         return "bg-[#0a1f18] text-emerald-50 border-emerald-900/60";
       case "executive-dark":
       default:
-        return "bg-[#0B101A] text-[#F3F6FC] border-[#253149]";
+        return "bg-[#121316] text-[#F3F6FC] border-[#26282E]";
     }
   };
 
@@ -314,7 +314,7 @@ export const PresentationStudio: React.FC<PresentationStudioProps> = ({
       )}
 
       {/* TOP COMMAND TOOLBAR (Hidden in fullscreen unless hovered) */}
-      <div className={`bg-white dark:bg-[#111827] border border-[#E2E8F0] dark:border-[#253149] rounded-2xl p-4 shadow-sm flex flex-col lg:flex-row lg:items-center justify-between gap-4 ${isFullscreen ? "opacity-90 hover:opacity-100 transition-opacity" : ""}`}>
+      <div className={`bg-white dark:bg-[#17181C] border border-[#E2E8F0] dark:border-[#26282E] rounded-2xl p-4 shadow-sm flex flex-col lg:flex-row lg:items-center justify-between gap-4 ${isFullscreen ? "opacity-90 hover:opacity-100 transition-opacity" : ""}`}>
         
         {/* Left: Branding & Breadcrumbs */}
         <div className="flex items-center gap-3">
@@ -322,7 +322,7 @@ export const PresentationStudio: React.FC<PresentationStudioProps> = ({
             <button
               type="button"
               onClick={onBackToDocument}
-              className="px-3 py-1.5 rounded-lg border border-[#E2E8F0] dark:border-[#253149] hover:bg-[#F1F5F9] dark:hover:bg-[#172033] text-xs font-semibold flex items-center gap-1.5 cursor-pointer transition-colors text-[#0F172A] dark:text-[#F3F6FC]"
+              className="px-3 py-1.5 rounded-lg border border-[#E2E8F0] dark:border-[#26282E] hover:bg-[#F1F5F9] dark:hover:bg-[#1E1F24] text-xs font-semibold flex items-center gap-1.5 cursor-pointer transition-colors text-[#0F172A] dark:text-[#F3F6FC]"
               title="Kembali ke Dokumen Naskah"
             >
               <FileText className="w-3.5 h-3.5 text-[#7C9CFF]" />
@@ -330,7 +330,7 @@ export const PresentationStudio: React.FC<PresentationStudioProps> = ({
             </button>
           )}
 
-          <div className="h-6 w-px bg-[#E2E8F0] dark:bg-[#253149] hidden sm:block" />
+          <div className="h-6 w-px bg-[#E2E8F0] dark:bg-[#26282E] hidden sm:block" />
 
           <div>
             <div className="flex items-center gap-2">
@@ -344,7 +344,7 @@ export const PresentationStudio: React.FC<PresentationStudioProps> = ({
                 {currentDoc.slides.length} Slide
               </span>
             </div>
-            <p className="text-[11px] text-[#475569] dark:text-[#A4B1C7] truncate max-w-md sm:max-w-xl">
+            <p className="text-[11px] text-[#475569] dark:text-[#9CA3AF] truncate max-w-md sm:max-w-xl">
               {currentDoc.title}
             </p>
           </div>
@@ -354,13 +354,13 @@ export const PresentationStudio: React.FC<PresentationStudioProps> = ({
         <div className="flex flex-wrap items-center gap-2">
           
           {/* Rehearsal Timer */}
-          <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-[#F8FAFC] dark:bg-[#0B101A] border border-[#E2E8F0] dark:border-[#253149] font-mono text-xs">
-            <span className="text-[#64748B] dark:text-[#A4B1C7] text-[10px]">WAKTU:</span>
+          <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-[#F8FAFC] dark:bg-[#121316] border border-[#E2E8F0] dark:border-[#26282E] font-mono text-xs">
+            <span className="text-[#64748B] dark:text-[#9CA3AF] text-[10px]">WAKTU:</span>
             <span className="font-bold text-[#0F172A] dark:text-[#F3F6FC]">{formatTimer(timerSeconds)}</span>
             <button
               type="button"
               onClick={() => setIsTimerRunning(!isTimerRunning)}
-              className="p-1 text-[#64748B] hover:text-[#0F172A] dark:text-[#A4B1C7] dark:hover:text-[#F3F6FC] cursor-pointer"
+              className="p-1 text-[#64748B] hover:text-[#0F172A] dark:text-[#9CA3AF] dark:hover:text-[#F3F6FC] cursor-pointer"
               title={isTimerRunning ? "Jeda Timer" : "Mulai Simulasi Waktu Presentasi"}
             >
               {isTimerRunning ? <Pause className="w-3 h-3" /> : <Play className="w-3 h-3" />}
@@ -383,7 +383,7 @@ export const PresentationStudio: React.FC<PresentationStudioProps> = ({
             <select
               value={slideTheme}
               onChange={(e) => setSlideTheme(e.target.value as SlideTheme)}
-              className="px-2.5 py-1.5 rounded-lg bg-[#F8FAFC] dark:bg-[#0B101A] border border-[#E2E8F0] dark:border-[#253149] text-xs font-medium text-[#0F172A] dark:text-[#F3F6FC] cursor-pointer focus:outline-hidden"
+              className="px-2.5 py-1.5 rounded-lg bg-[#F8FAFC] dark:bg-[#121316] border border-[#E2E8F0] dark:border-[#26282E] text-xs font-medium text-[#0F172A] dark:text-[#F3F6FC] cursor-pointer focus:outline-hidden"
               title="Tema Warna Slide"
             >
               <option value="executive-dark">Tema: Dark Slate (Default)</option>
@@ -394,14 +394,14 @@ export const PresentationStudio: React.FC<PresentationStudioProps> = ({
           </div>
 
           {/* Visual Mode Toggle (Google Flow vs AI Concept) */}
-          <div className="flex items-center p-0.5 rounded-lg bg-[#F8FAFC] dark:bg-[#0B101A] border border-[#E2E8F0] dark:border-[#253149]">
+          <div className="flex items-center p-0.5 rounded-lg bg-[#F8FAFC] dark:bg-[#121316] border border-[#E2E8F0] dark:border-[#26282E]">
             <button
               type="button"
               onClick={() => setSlideVisualMode("google-flow")}
               className={`px-2.5 py-1.5 rounded-md text-xs font-medium transition-all cursor-pointer flex items-center gap-1.5 ${
                 slideVisualMode === "google-flow"
-                  ? "bg-white dark:bg-[#172033] text-[#7C9CFF] shadow-2xs font-semibold border border-[#7C9CFF]/30"
-                  : "text-[#64748B] dark:text-[#A4B1C7] hover:text-[#0F172A] dark:hover:text-[#F3F6FC]"
+                  ? "bg-white dark:bg-[#1E1F24] text-[#7C9CFF] shadow-2xs font-semibold border border-[#7C9CFF]/30"
+                  : "text-[#64748B] dark:text-[#9CA3AF] hover:text-[#0F172A] dark:hover:text-[#F3F6FC]"
               }`}
             >
               <Activity className="w-3.5 h-3.5 text-[#7C9CFF]" />
@@ -417,8 +417,8 @@ export const PresentationStudio: React.FC<PresentationStudioProps> = ({
               }}
               className={`px-2.5 py-1.5 rounded-md text-xs font-medium transition-all cursor-pointer flex items-center gap-1.5 ${
                 slideVisualMode === "ai-concept"
-                  ? "bg-white dark:bg-[#172033] text-[#7C9CFF] shadow-2xs font-semibold border border-[#7C9CFF]/30"
-                  : "text-[#64748B] dark:text-[#A4B1C7] hover:text-[#0F172A] dark:hover:text-[#F3F6FC]"
+                  ? "bg-white dark:bg-[#1E1F24] text-[#7C9CFF] shadow-2xs font-semibold border border-[#7C9CFF]/30"
+                  : "text-[#64748B] dark:text-[#9CA3AF] hover:text-[#0F172A] dark:hover:text-[#F3F6FC]"
               }`}
             >
               <Sparkles className="w-3.5 h-3.5 text-[#9B8CFF]" />
@@ -431,7 +431,7 @@ export const PresentationStudio: React.FC<PresentationStudioProps> = ({
             type="button"
             onClick={handleBatchGenerateAllSlideVisuals}
             disabled={isBatchGeneratingSlides}
-            className="px-3 py-1.5 rounded-lg bg-white dark:bg-[#111827] border border-[#7C9CFF]/40 text-[#7C9CFF] hover:bg-[#7C9CFF]/10 disabled:opacity-50 text-xs font-semibold flex items-center gap-1.5 shadow-2xs transition-colors cursor-pointer"
+            className="px-3 py-1.5 rounded-lg bg-white dark:bg-[#17181C] border border-[#7C9CFF]/40 text-[#7C9CFF] hover:bg-[#7C9CFF]/10 disabled:opacity-50 text-xs font-semibold flex items-center gap-1.5 shadow-2xs transition-colors cursor-pointer"
             title="Generate ilustrasi visual AI untuk semua slide sekaligus"
           >
             <Sparkles className={`w-3.5 h-3.5 ${isBatchGeneratingSlides ? "animate-spin" : ""}`} />
@@ -442,7 +442,7 @@ export const PresentationStudio: React.FC<PresentationStudioProps> = ({
           <button
             type="button"
             onClick={() => setIsFullscreen(!isFullscreen)}
-            className="p-2 rounded-lg border border-[#E2E8F0] dark:border-[#253149] hover:bg-[#F1F5F9] dark:hover:bg-[#172033] text-[#64748B] dark:text-[#A4B1C7] hover:text-[#0F172A] dark:hover:text-[#F3F6FC] cursor-pointer transition-colors"
+            className="p-2 rounded-lg border border-[#E2E8F0] dark:border-[#26282E] hover:bg-[#F1F5F9] dark:hover:bg-[#1E1F24] text-[#64748B] dark:text-[#9CA3AF] hover:text-[#0F172A] dark:hover:text-[#F3F6FC] cursor-pointer transition-colors"
             title={isFullscreen ? "Keluar Fullscreen (Esc)" : "Mode Presentasi Layar Penuh (F / F5)"}
           >
             {isFullscreen ? <Minimize2 className="w-4 h-4" /> : <Maximize2 className="w-4 h-4" />}
@@ -453,7 +453,7 @@ export const PresentationStudio: React.FC<PresentationStudioProps> = ({
             type="button"
             onClick={handleDownloadPptx}
             disabled={isExportingPptx}
-            className="px-3.5 py-1.5 rounded-lg bg-[#7C9CFF] hover:bg-[#688bf5] disabled:opacity-50 text-[#080B12] text-xs font-semibold flex items-center gap-1.5 shadow-xs transition-colors cursor-pointer"
+            className="px-3.5 py-1.5 rounded-lg bg-[#7C9CFF] hover:bg-[#688bf5] disabled:opacity-50 text-[#0C0D0E] text-xs font-semibold flex items-center gap-1.5 shadow-xs transition-colors cursor-pointer"
           >
             {isExportingPptx ? (
               <RefreshCw className="w-3.5 h-3.5 animate-spin" />
@@ -602,13 +602,13 @@ export const PresentationStudio: React.FC<PresentationStudioProps> = ({
           </div>
 
           {/* Column 2: Contextual Visual Architecture Panel (45%) */}
-          <div className="lg:col-span-6 flex flex-col justify-between bg-[#080B12]/60 rounded-xl border border-[#253149] p-5 relative overflow-hidden">
+          <div className="lg:col-span-6 flex flex-col justify-between bg-[#0C0D0E]/60 rounded-xl border border-[#26282E] p-5 relative overflow-hidden">
             
             {/* MODE A: GOOGLE FLOW / EXECUTIVE ARCHITECTURE */}
             {slideVisualMode === "google-flow" && (
               <div className="h-full flex flex-col justify-between space-y-4">
-                <div className="flex items-center justify-between pb-2.5 border-b border-[#253149]">
-                  <span className="text-[10px] font-mono uppercase tracking-wider text-[#A4B1C7] flex items-center gap-1.5">
+                <div className="flex items-center justify-between pb-2.5 border-b border-[#26282E]">
+                  <span className="text-[10px] font-mono uppercase tracking-wider text-[#9CA3AF] flex items-center gap-1.5">
                     <Activity className="w-3 h-3 text-[#7C9CFF]" />
                     Kerangka Arsitektur &amp; Capaian
                   </span>
@@ -619,13 +619,13 @@ export const PresentationStudio: React.FC<PresentationStudioProps> = ({
 
                 {/* Structured Milestone Cards */}
                 <div className="space-y-2.5 my-auto">
-                  <div className="p-3 rounded-xl bg-[#0B101A] border border-[#253149] flex items-start gap-3">
+                  <div className="p-3 rounded-xl bg-[#121316] border border-[#26282E] flex items-start gap-3">
                     <div className="w-6 h-6 rounded-lg bg-[#7C9CFF]/15 text-[#7C9CFF] font-mono text-xs flex items-center justify-center font-bold flex-shrink-0 mt-0.5">
                       01
                     </div>
                     <div className="min-w-0">
                       <div className="text-xs font-semibold text-white">Identifikasi &amp; Latar Belakang Masalah</div>
-                      <div className="text-[11px] text-[#A4B1C7] leading-relaxed truncate">{currentDoc.targetEntity}</div>
+                      <div className="text-[11px] text-[#9CA3AF] leading-relaxed truncate">{currentDoc.targetEntity}</div>
                     </div>
                   </div>
 
@@ -635,22 +635,22 @@ export const PresentationStudio: React.FC<PresentationStudioProps> = ({
                     </div>
                     <div className="min-w-0">
                       <div className="text-xs font-semibold text-white truncate">{activeSlide.title}</div>
-                      <div className="text-[11px] text-[#A4B1C7] leading-relaxed truncate">{activeSlide.subtitle}</div>
+                      <div className="text-[11px] text-[#9CA3AF] leading-relaxed truncate">{activeSlide.subtitle}</div>
                     </div>
                   </div>
 
-                  <div className="p-3 rounded-xl bg-[#0B101A] border border-[#253149] flex items-start gap-3">
+                  <div className="p-3 rounded-xl bg-[#121316] border border-[#26282E] flex items-start gap-3">
                     <div className="w-6 h-6 rounded-lg bg-[#FBBF24]/20 text-[#FBBF24] font-mono text-xs flex items-center justify-center font-bold flex-shrink-0 mt-0.5">
                       03
                     </div>
                     <div className="min-w-0">
                       <div className="text-xs font-semibold text-white">Luaran Teruji &amp; Validasi Empiris</div>
-                      <div className="text-[11px] text-[#A4B1C7] leading-relaxed">Penyusunan naskah proposal terverifikasi bebas plagiarisme</div>
+                      <div className="text-[11px] text-[#9CA3AF] leading-relaxed">Penyusunan naskah proposal terverifikasi bebas plagiarisme</div>
                     </div>
                   </div>
                 </div>
 
-                <div className="pt-2.5 border-t border-[#253149] flex items-center justify-between text-[10px] font-mono text-[#A4B1C7]">
+                <div className="pt-2.5 border-t border-[#26282E] flex items-center justify-between text-[10px] font-mono text-[#9CA3AF]">
                   <span className="flex items-center gap-1 text-[#34D399]">
                     <Check className="w-3 h-3 text-[#34D399]" />
                     Standar Akademik Dikti
@@ -735,7 +735,7 @@ export const PresentationStudio: React.FC<PresentationStudioProps> = ({
       </div>
 
       {/* SPEAKER NOTES & PRESENTER GUIDE CARD */}
-      <div className="p-4 sm:p-5 rounded-2xl bg-white dark:bg-[#0B101A] border border-[#E2E8F0] dark:border-[#253149] space-y-2.5 shadow-2xs">
+      <div className="p-4 sm:p-5 rounded-2xl bg-white dark:bg-[#121316] border border-[#E2E8F0] dark:border-[#26282E] space-y-2.5 shadow-2xs">
         <div className="flex items-center justify-between">
           <span className="text-xs font-semibold text-[#0F172A] dark:text-[#F3F6FC] flex items-center gap-1.5">
             <Brain className="w-4 h-4 text-[#7C9CFF]" />
@@ -744,13 +744,13 @@ export const PresentationStudio: React.FC<PresentationStudioProps> = ({
           <button
             type="button"
             onClick={handleCopySpeakerNotes}
-            className="px-2.5 py-1 rounded-md bg-[#F8FAFC] dark:bg-[#111827] hover:bg-[#F1F5F9] dark:hover:bg-[#172033] text-[#334155] dark:text-[#CBD5E1] border border-[#E2E8F0] dark:border-[#253149] text-xs font-medium flex items-center gap-1 cursor-pointer transition-colors shadow-2xs"
+            className="px-2.5 py-1 rounded-md bg-[#F8FAFC] dark:bg-[#17181C] hover:bg-[#F1F5F9] dark:hover:bg-[#1E1F24] text-[#334155] dark:text-[#CBD5E1] border border-[#E2E8F0] dark:border-[#26282E] text-xs font-medium flex items-center gap-1 cursor-pointer transition-colors shadow-2xs"
           >
             {copiedNotes ? <Check className="w-3.5 h-3.5 text-[#34D399]" /> : <Copy className="w-3.5 h-3.5" />}
             <span>{copiedNotes ? "Tersalin!" : "Salin Catatan"}</span>
           </button>
         </div>
-        <p className="text-xs sm:text-sm text-[#334155] dark:text-[#CBD5E1] leading-relaxed italic bg-[#F8FAFC] dark:bg-[#111827]/70 p-3.5 rounded-xl border border-[#E2E8F0] dark:border-[#253149]">
+        <p className="text-xs sm:text-sm text-[#334155] dark:text-[#CBD5E1] leading-relaxed italic bg-[#F8FAFC] dark:bg-[#17181C]/70 p-3.5 rounded-xl border border-[#E2E8F0] dark:border-[#26282E]">
           "{activeSlide.speakerNotes || "Presenter dapat memaparkan latar belakang, justifikasi metodologis, dan kontribusi empiris pada bagian ini."}"
         </p>
       </div>
@@ -758,8 +758,8 @@ export const PresentationStudio: React.FC<PresentationStudioProps> = ({
       {/* EDIT SLIDE MODAL */}
       {isEditModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 dark:bg-black/80 backdrop-blur-xs animate-in fade-in duration-200">
-          <div className="w-full max-w-xl bg-white dark:bg-[#0B101A] border border-[#E2E8F0] dark:border-[#253149] rounded-2xl shadow-2xl p-5 space-y-4 max-h-[90vh] overflow-y-auto">
-            <div className="flex items-center justify-between pb-3 border-b border-[#E2E8F0] dark:border-[#253149]">
+          <div className="w-full max-w-xl bg-white dark:bg-[#121316] border border-[#E2E8F0] dark:border-[#26282E] rounded-2xl shadow-2xl p-5 space-y-4 max-h-[90vh] overflow-y-auto">
+            <div className="flex items-center justify-between pb-3 border-b border-[#E2E8F0] dark:border-[#26282E]">
               <h3 className="text-sm font-bold text-[#0F172A] dark:text-[#F3F6FC] flex items-center gap-2">
                 <Edit3 className="w-4 h-4 text-[#7C9CFF]" />
                 <span>Edit Slide {activeSlideIndex + 1}</span>
@@ -767,7 +767,7 @@ export const PresentationStudio: React.FC<PresentationStudioProps> = ({
               <button
                 type="button"
                 onClick={() => setIsEditModalOpen(false)}
-                className="p-1 rounded-lg hover:bg-[#F1F5F9] dark:hover:bg-[#172033] text-[#64748B] dark:text-[#A4B1C7] cursor-pointer"
+                className="p-1 rounded-lg hover:bg-[#F1F5F9] dark:hover:bg-[#1E1F24] text-[#64748B] dark:text-[#9CA3AF] cursor-pointer"
               >
                 <X className="w-4 h-4" />
               </button>
@@ -780,7 +780,7 @@ export const PresentationStudio: React.FC<PresentationStudioProps> = ({
                   type="text"
                   value={editKicker}
                   onChange={(e) => setEditKicker(e.target.value)}
-                  className="w-full px-3 py-2 rounded-lg bg-white dark:bg-[#111827] border border-[#E2E8F0] dark:border-[#253149] text-[#0F172A] dark:text-[#F3F6FC] focus:outline-hidden"
+                  className="w-full px-3 py-2 rounded-lg bg-white dark:bg-[#17181C] border border-[#E2E8F0] dark:border-[#26282E] text-[#0F172A] dark:text-[#F3F6FC] focus:outline-hidden"
                 />
               </div>
 
@@ -790,7 +790,7 @@ export const PresentationStudio: React.FC<PresentationStudioProps> = ({
                   type="text"
                   value={editTitle}
                   onChange={(e) => setEditTitle(e.target.value)}
-                  className="w-full px-3 py-2 rounded-lg bg-white dark:bg-[#111827] border border-[#E2E8F0] dark:border-[#253149] text-[#0F172A] dark:text-[#F3F6FC] focus:outline-hidden"
+                  className="w-full px-3 py-2 rounded-lg bg-white dark:bg-[#17181C] border border-[#E2E8F0] dark:border-[#26282E] text-[#0F172A] dark:text-[#F3F6FC] focus:outline-hidden"
                 />
               </div>
 
@@ -800,7 +800,7 @@ export const PresentationStudio: React.FC<PresentationStudioProps> = ({
                   type="text"
                   value={editSubtitle}
                   onChange={(e) => setEditSubtitle(e.target.value)}
-                  className="w-full px-3 py-2 rounded-lg bg-white dark:bg-[#111827] border border-[#E2E8F0] dark:border-[#253149] text-[#0F172A] dark:text-[#F3F6FC] focus:outline-hidden"
+                  className="w-full px-3 py-2 rounded-lg bg-white dark:bg-[#17181C] border border-[#E2E8F0] dark:border-[#26282E] text-[#0F172A] dark:text-[#F3F6FC] focus:outline-hidden"
                 />
               </div>
 
@@ -808,7 +808,7 @@ export const PresentationStudio: React.FC<PresentationStudioProps> = ({
                 <label className="font-semibold block mb-1 text-[#0F172A] dark:text-[#F3F6FC]">Poin-poin Kunci (Key Points)</label>
                 {editPoints.map((pt, idx) => (
                   <div key={idx} className="flex items-center gap-2 mb-2">
-                    <span className="font-mono text-[#64748B] dark:text-[#A4B1C7]">{idx + 1}.</span>
+                    <span className="font-mono text-[#64748B] dark:text-[#9CA3AF]">{idx + 1}.</span>
                     <input
                       type="text"
                       value={pt}
@@ -817,7 +817,7 @@ export const PresentationStudio: React.FC<PresentationStudioProps> = ({
                         newPts[idx] = e.target.value;
                         setEditPoints(newPts);
                       }}
-                      className="flex-1 px-3 py-1.5 rounded-lg bg-white dark:bg-[#111827] border border-[#E2E8F0] dark:border-[#253149] text-[#0F172A] dark:text-[#F3F6FC] focus:outline-hidden"
+                      className="flex-1 px-3 py-1.5 rounded-lg bg-white dark:bg-[#17181C] border border-[#E2E8F0] dark:border-[#26282E] text-[#0F172A] dark:text-[#F3F6FC] focus:outline-hidden"
                     />
                     <button
                       type="button"
@@ -831,7 +831,7 @@ export const PresentationStudio: React.FC<PresentationStudioProps> = ({
                 <button
                   type="button"
                   onClick={() => setEditPoints([...editPoints, "Poin argumen baru"])}
-                  className="mt-1 px-2.5 py-1 rounded-md border border-dashed border-[#E2E8F0] dark:border-[#253149] text-[11px] font-medium text-[#64748B] dark:text-[#A4B1C7] hover:text-[#0F172A] dark:hover:text-[#F3F6FC] cursor-pointer"
+                  className="mt-1 px-2.5 py-1 rounded-md border border-dashed border-[#E2E8F0] dark:border-[#26282E] text-[11px] font-medium text-[#64748B] dark:text-[#9CA3AF] hover:text-[#0F172A] dark:hover:text-[#F3F6FC] cursor-pointer"
                 >
                   + Tambah Poin
                 </button>
@@ -843,23 +843,23 @@ export const PresentationStudio: React.FC<PresentationStudioProps> = ({
                   rows={3}
                   value={editNotes}
                   onChange={(e) => setEditNotes(e.target.value)}
-                  className="w-full px-3 py-2 rounded-lg bg-white dark:bg-[#111827] border border-[#E2E8F0] dark:border-[#253149] text-[#0F172A] dark:text-[#F3F6FC] focus:outline-hidden resize-none"
+                  className="w-full px-3 py-2 rounded-lg bg-white dark:bg-[#17181C] border border-[#E2E8F0] dark:border-[#26282E] text-[#0F172A] dark:text-[#F3F6FC] focus:outline-hidden resize-none"
                 />
               </div>
             </div>
 
-            <div className="flex items-center justify-end gap-2 pt-3 border-t border-[#E2E8F0] dark:border-[#253149]">
+            <div className="flex items-center justify-end gap-2 pt-3 border-t border-[#E2E8F0] dark:border-[#26282E]">
               <button
                 type="button"
                 onClick={() => setIsEditModalOpen(false)}
-                className="px-3 py-1.5 rounded-lg border border-[#E2E8F0] dark:border-[#253149] text-xs font-semibold cursor-pointer text-[#64748B] dark:text-[#A4B1C7]"
+                className="px-3 py-1.5 rounded-lg border border-[#E2E8F0] dark:border-[#26282E] text-xs font-semibold cursor-pointer text-[#64748B] dark:text-[#9CA3AF]"
               >
                 Batal
               </button>
               <button
                 type="button"
                 onClick={handleSaveEditSlide}
-                className="px-4 py-1.5 rounded-lg bg-[#7C9CFF] hover:bg-[#688bf5] text-[#080B12] text-xs font-semibold transition-colors cursor-pointer shadow-xs"
+                className="px-4 py-1.5 rounded-lg bg-[#7C9CFF] hover:bg-[#688bf5] text-[#0C0D0E] text-xs font-semibold transition-colors cursor-pointer shadow-xs"
               >
                 Simpan Perubahan
               </button>
