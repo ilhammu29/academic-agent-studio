@@ -306,7 +306,7 @@ export const HeroInputView: React.FC<HeroInputViewProps> = ({
   };
 
   return (
-    <div className="flex-1 flex flex-col justify-between max-w-5xl mx-auto w-full px-4 sm:px-8 py-5 sm:py-7 animate-in fade-in duration-300 text-[#0F172A] dark:text-[#F3F6FC]">
+    <div className="flex-1 flex flex-col justify-between max-w-5xl mx-auto w-full px-4 sm:px-8 py-5 sm:py-7 animate-in fade-in duration-300 text-[#0F172A] dark:text-[#F3F4F6]">
       
       {/* ============================================================ */}
       {/* TOP ENHANCEMENT: ACTIVE WORK-IN-PROGRESS QUICK RESUME BAR    */}
@@ -326,7 +326,7 @@ export const HeroInputView: React.FC<HeroInputViewProps> = ({
                   ~{activeDoc.targetDepthPages || 25} Halaman
                 </span>
               </div>
-              <h3 className="text-xs sm:text-sm font-semibold text-[#0F172A] dark:text-[#F3F6FC] truncate max-w-xl">
+              <h3 className="text-xs sm:text-sm font-semibold text-[#0F172A] dark:text-[#F3F4F6] truncate max-w-xl">
                 {activeDoc.title}
               </h3>
             </div>
@@ -345,7 +345,7 @@ export const HeroInputView: React.FC<HeroInputViewProps> = ({
                 <button
                   type="button"
                   onClick={() => onNavigateStage("slides")}
-                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#F1F5F9] dark:bg-[#1E1F24] hover:bg-[#E2E8F0] dark:hover:bg-[#25262C] text-[#0F172A] dark:text-[#F3F6FC] border border-[#CBD5E1] dark:border-[#26282E] text-xs font-medium transition-all shadow-2xs cursor-pointer"
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#F1F5F9] dark:bg-[#1E1F24] hover:bg-[#E2E8F0] dark:hover:bg-[#25262C] text-[#0F172A] dark:text-[#F3F4F6] border border-[#CBD5E1] dark:border-[#26282E] text-xs font-medium transition-all shadow-2xs cursor-pointer"
                   title="Buka Slide Sidang PPTX"
                 >
                   <Presentation className="w-3.5 h-3.5 text-[#9B8CFF]" />
@@ -360,10 +360,10 @@ export const HeroInputView: React.FC<HeroInputViewProps> = ({
       {/* ============================================================ */}
       {/* 1. HERO MAIN STAGE: Center-Aligned with Compact Slime Bubble */}
       {/* ============================================================ */}
-      <div className="flex-1 flex flex-col items-center text-center justify-center w-full my-auto z-10 py-3 sm:py-5">
+      <div className="flex-1 flex flex-col items-center text-center justify-center w-full my-auto z-10 py-4 sm:py-6">
         
         {/* COMPACT FLUID MORPHING SLIME / BUBBLE (Centered & Scaled) */}
-        <div className="w-[180px] h-[150px] relative flex items-center justify-center pointer-events-none select-none mb-3">
+        <div className="w-[180px] h-[150px] relative flex items-center justify-center pointer-events-none select-none mb-4 sm:mb-6">
           {/* Ambient Glow */}
           <div className="absolute w-44 h-44 rounded-full bg-blue-500/15 dark:bg-[#7C9CFF]/15 blur-2xl animate-slime-pulse" />
           
@@ -413,29 +413,20 @@ export const HeroInputView: React.FC<HeroInputViewProps> = ({
           />
         </div>
 
-        {/* Subtle Top Badge */}
-        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-md bg-white dark:bg-[#17181C] border border-[#E2E8F0] dark:border-[#26282E] text-xs font-medium text-[#475569] dark:text-[#9CA3AF] mb-3 shadow-2xs">
-          <GraduationCap className="w-3.5 h-3.5 text-[#7C9CFF] flex-shrink-0" />
-          <span>{activeCampusName ? activeCampusName : "OXID Academic Studio • Standar Pedoman Dikti & Kampus"}</span>
-        </div>
-
         {/* Centered Headline */}
-        <div className="space-y-1.5 max-w-2xl">
-          <h1 className="text-3xl sm:text-5xl font-bold tracking-tight text-[#0F172A] dark:text-[#F3F6FC] leading-tight">
+        <div className="max-w-2xl px-2">
+          <h1 className="text-2xl sm:text-4xl lg:text-[40px] font-bold tracking-tight text-[#0F172A] dark:text-[#F3F4F6] leading-tight">
             Perumusan Usulan Proposal &amp; Karya Ilmiah
           </h1>
-          <p className="text-sm sm:text-base text-[#475569] dark:text-[#9CA3AF] mt-2 max-w-xl mx-auto leading-relaxed font-normal">
-            Ketikkan judul usulan Anda atau cari inspirasi topik. Agen AI memandu wawancara diagnostik sebelum draf proposal disusun untuk Anda tinjau.
-          </p>
         </div>
 
         {/* ACTION TOOLBAR: Spacious, neatly grouped with rounded-lg */}
-        <div className="mt-5 flex flex-wrap items-center justify-center gap-2 text-xs">
+        <div className="mt-5 sm:mt-6 flex flex-wrap items-center justify-center gap-2 text-xs">
           {/* 1. Generator Judul (AI & Internet) */}
           <button
             type="button"
             onClick={() => handleOpenAiRecommender()}
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white dark:bg-[#17181C] border border-[#CBD5E1] dark:border-[#26282E] hover:border-[#7C9CFF] text-[#0F172A] dark:text-[#F3F6FC] font-medium transition-all shadow-2xs cursor-pointer group hover:bg-[#F8FAFC] dark:hover:bg-[#1E1F24]"
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white dark:bg-[#17181C] border border-[#CBD5E1] dark:border-[#26282E] hover:border-[#7C9CFF] text-[#0F172A] dark:text-[#F3F4F6] font-medium transition-all shadow-2xs cursor-pointer group hover:bg-[#F8FAFC] dark:hover:bg-[#1E1F24]"
             title="Cari ide judul akademik berbasis penalaran AI dan literatur primer jurnal internasional"
           >
             <Lightbulb className="w-3.5 h-3.5 text-[#FBBF24] group-hover:scale-110 transition-transform" />
@@ -460,7 +451,7 @@ export const HeroInputView: React.FC<HeroInputViewProps> = ({
             <button
               type="button"
               onClick={onOpenGuidelineModal}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white dark:bg-[#17181C] border border-[#CBD5E1] dark:border-[#26282E] hover:border-[#7C9CFF] text-[#0F172A] dark:text-[#F3F6FC] font-medium transition-all shadow-2xs cursor-pointer hover:bg-[#F8FAFC] dark:hover:bg-[#1E1F24]"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white dark:bg-[#17181C] border border-[#CBD5E1] dark:border-[#26282E] hover:border-[#7C9CFF] text-[#0F172A] dark:text-[#F3F4F6] font-medium transition-all shadow-2xs cursor-pointer hover:bg-[#F8FAFC] dark:hover:bg-[#1E1F24]"
               title="Pilih format kampus atau tempelkan teks pedoman"
             >
               <Landmark className="w-3.5 h-3.5 text-[#9B8CFF]" />
@@ -475,7 +466,7 @@ export const HeroInputView: React.FC<HeroInputViewProps> = ({
             className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-xs font-medium transition-all shadow-2xs cursor-pointer ${
               showParameters
                 ? "bg-[#7C9CFF]/15 border-[#7C9CFF] text-[#7C9CFF]"
-                : "bg-white dark:bg-[#17181C] border-[#CBD5E1] dark:border-[#26282E] hover:border-[#7C9CFF] text-[#0F172A] dark:text-[#F3F6FC]"
+                : "bg-white dark:bg-[#17181C] border-[#CBD5E1] dark:border-[#26282E] hover:border-[#7C9CFF] text-[#0F172A] dark:text-[#F3F4F6]"
             }`}
           >
             <SlidersHorizontal className="w-3.5 h-3.5 text-[#7C9CFF]" />
@@ -530,7 +521,7 @@ export const HeroInputView: React.FC<HeroInputViewProps> = ({
                       onClick={() => handleSelectTemplate(key, tpl)}
                       className={`p-2.5 rounded-xl border text-left transition-all cursor-pointer flex flex-col justify-between ${
                         isSelected
-                          ? "bg-[#7C9CFF]/10 border-[#7C9CFF] ring-1 ring-[#7C9CFF]/40 text-[#0F172A] dark:text-[#F3F6FC]"
+                          ? "bg-[#7C9CFF]/10 border-[#7C9CFF] ring-1 ring-[#7C9CFF]/40 text-[#0F172A] dark:text-[#F3F4F6]"
                           : "bg-[#F8FAFC] dark:bg-[#121316] border-[#E2E8F0] dark:border-[#26282E] hover:border-[#7C9CFF]/50 text-[#475569] dark:text-[#9CA3AF]"
                       }`}
                     >
@@ -541,7 +532,7 @@ export const HeroInputView: React.FC<HeroInputViewProps> = ({
                           </span>
                           {isSelected && <Check className="w-3.5 h-3.5 text-[#7C9CFF]" />}
                         </div>
-                        <div className="text-xs font-semibold leading-tight line-clamp-1 text-[#0F172A] dark:text-[#F3F6FC]">
+                        <div className="text-xs font-semibold leading-tight line-clamp-1 text-[#0F172A] dark:text-[#F3F4F6]">
                           {tpl.name.split("/")[0].trim()}
                         </div>
                       </div>
@@ -565,7 +556,7 @@ export const HeroInputView: React.FC<HeroInputViewProps> = ({
                   value={targetEntity}
                   onChange={(e) => setTargetEntity(e.target.value)}
                   placeholder="Contoh: PT Telkom / RSUP Sardjito"
-                  className="w-full bg-[#F8FAFC] dark:bg-[#121316] border border-[#E2E8F0] dark:border-[#26282E] rounded-lg px-3 py-1.5 text-xs text-[#0F172A] dark:text-[#F3F6FC] placeholder:text-[#64748B] focus:outline-none focus:border-[#7C9CFF] transition-colors"
+                  className="w-full bg-[#F8FAFC] dark:bg-[#121316] border border-[#E2E8F0] dark:border-[#26282E] rounded-lg px-3 py-1.5 text-xs text-[#0F172A] dark:text-[#F3F4F6] placeholder:text-[#64748B] focus:outline-none focus:border-[#7C9CFF] transition-colors"
                 />
               </div>
 
@@ -576,7 +567,7 @@ export const HeroInputView: React.FC<HeroInputViewProps> = ({
                 <select
                   value={durationMonths}
                   onChange={(e) => setDurationMonths(Number(e.target.value))}
-                  className="w-full bg-[#F8FAFC] dark:bg-[#121316] border border-[#E2E8F0] dark:border-[#26282E] rounded-lg px-3 py-1.5 text-xs text-[#0F172A] dark:text-[#F3F6FC] focus:outline-none focus:border-[#7C9CFF] transition-colors cursor-pointer"
+                  className="w-full bg-[#F8FAFC] dark:bg-[#121316] border border-[#E2E8F0] dark:border-[#26282E] rounded-lg px-3 py-1.5 text-xs text-[#0F172A] dark:text-[#F3F4F6] focus:outline-none focus:border-[#7C9CFF] transition-colors cursor-pointer"
                 >
                   <option value={1}>1 Bulan (Penelitian Singkat)</option>
                   <option value={2}>2 Bulan</option>
@@ -596,7 +587,7 @@ export const HeroInputView: React.FC<HeroInputViewProps> = ({
                   value={candidateName}
                   onChange={(e) => setCandidateName(e.target.value)}
                   placeholder="Nama Lengkap Anda"
-                  className="w-full bg-[#F8FAFC] dark:bg-[#121316] border border-[#E2E8F0] dark:border-[#26282E] rounded-lg px-3 py-1.5 text-xs text-[#0F172A] dark:text-[#F3F6FC] placeholder:text-[#64748B] focus:outline-none focus:border-[#7C9CFF] transition-colors"
+                  className="w-full bg-[#F8FAFC] dark:bg-[#121316] border border-[#E2E8F0] dark:border-[#26282E] rounded-lg px-3 py-1.5 text-xs text-[#0F172A] dark:text-[#F3F4F6] placeholder:text-[#64748B] focus:outline-none focus:border-[#7C9CFF] transition-colors"
                 />
               </div>
 
@@ -609,7 +600,7 @@ export const HeroInputView: React.FC<HeroInputViewProps> = ({
                   value={candidateId}
                   onChange={(e) => setCandidateId(e.target.value)}
                   placeholder="Nomor Induk Mahasiswa"
-                  className="w-full bg-[#F8FAFC] dark:bg-[#121316] border border-[#E2E8F0] dark:border-[#26282E] rounded-lg px-3 py-1.5 text-xs text-[#0F172A] dark:text-[#F3F6FC] placeholder:text-[#64748B] focus:outline-none focus:border-[#7C9CFF] transition-colors"
+                  className="w-full bg-[#F8FAFC] dark:bg-[#121316] border border-[#E2E8F0] dark:border-[#26282E] rounded-lg px-3 py-1.5 text-xs text-[#0F172A] dark:text-[#F3F4F6] placeholder:text-[#64748B] focus:outline-none focus:border-[#7C9CFF] transition-colors"
                 />
               </div>
             </div>
@@ -667,7 +658,7 @@ export const HeroInputView: React.FC<HeroInputViewProps> = ({
                         setTargetDepthPages(Math.max(10, Math.min(150, val)));
                       }
                     }}
-                    className="w-12 bg-transparent text-xs font-bold text-[#0F172A] dark:text-[#F3F6FC] text-center focus:outline-none"
+                    className="w-12 bg-transparent text-xs font-bold text-[#0F172A] dark:text-[#F3F4F6] text-center focus:outline-none"
                   />
                   <span className="text-[10px] text-[#64748B] dark:text-[#9CA3AF]">Hal</span>
                 </div>
@@ -680,15 +671,15 @@ export const HeroInputView: React.FC<HeroInputViewProps> = ({
         {/* ============================================================ */}
         {/* HERO INPUT CAPSULE (Centered, Spacious, High Interaction)     */}
         {/* ============================================================ */}
-        <div className="w-full max-w-3xl mt-5 bg-white dark:bg-[#17181C] border border-[#CBD5E1] dark:border-[#26282E] rounded-2xl p-2 pl-4 pr-2.5 flex items-center gap-2.5 shadow-md shadow-zinc-200/50 dark:shadow-none hover:border-[#7C9CFF]/60 dark:hover:border-[#7C9CFF]/60 transition-all focus-within:border-[#7C9CFF] focus-within:ring-2 focus-within:ring-[#7C9CFF]/20">
+        <div className="w-full max-w-3xl mt-5 sm:mt-6 bg-white dark:bg-[#17181C] border border-[#CBD5E1] dark:border-[#26282E] rounded-2xl p-2 pl-4 pr-2.5 flex items-center gap-2.5 shadow-md shadow-zinc-200/50 dark:shadow-none hover:border-[#7C9CFF]/60 dark:hover:border-[#7C9CFF]/60 transition-all focus-within:border-[#7C9CFF] focus-within:ring-2 focus-within:ring-[#7C9CFF]/20">
           <input
             type="text"
             aria-label="Judul atau topik usulan"
             value={title}
             onChange={(e) => setTitle(e.target.value)}
             onKeyDown={handleKeyDown}
-            placeholder="Tuliskan judul usulan atau ketik topik (contoh: obesitas, AI, supply chain, fintech)..."
-            className="w-full bg-transparent border-none outline-none text-[#0F172A] dark:text-[#F3F6FC] placeholder:text-[#64748B] text-sm sm:text-base font-normal py-2 text-left"
+            placeholder="Tuliskan judul usulan atau ketik topik riset (contoh: Internet of Things, Sistem AI, Energi Terbarukan)..."
+            className="w-full bg-transparent border-none outline-none text-[#0F172A] dark:text-[#F3F4F6] placeholder:text-[#64748B] text-sm sm:text-base font-normal py-2 text-left"
           />
 
           {/* Clear button if text entered */}
@@ -696,7 +687,7 @@ export const HeroInputView: React.FC<HeroInputViewProps> = ({
             <button
               type="button"
               onClick={() => setTitle("")}
-              className="p-1 rounded-md text-[#64748B] hover:text-[#0F172A] dark:hover:text-[#F3F6FC] transition-colors cursor-pointer"
+              className="p-1 rounded-md text-[#64748B] hover:text-[#0F172A] dark:hover:text-[#F3F4F6] transition-colors cursor-pointer"
               title="Hapus teks"
             >
               <X className="w-4 h-4" />
@@ -708,7 +699,7 @@ export const HeroInputView: React.FC<HeroInputViewProps> = ({
             type="button"
             onClick={() => handleOpenAiRecommender(title.trim())}
             title="Generate usulan judul berdasarkan kata kunci ini (AI & Internet)"
-            className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#F1F5F9] hover:bg-[#E2E8F0] dark:bg-[#1E1F24] dark:hover:bg-[#25262C] text-[#0F172A] dark:text-[#F3F6FC] font-medium text-xs transition-colors flex-shrink-0 cursor-pointer shadow-2xs"
+            className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#F1F5F9] hover:bg-[#E2E8F0] dark:bg-[#1E1F24] dark:hover:bg-[#25262C] text-[#0F172A] dark:text-[#F3F4F6] font-medium text-xs transition-colors flex-shrink-0 cursor-pointer shadow-2xs"
           >
             <Lightbulb className="w-3.5 h-3.5 text-[#FBBF24]" />
             <span>Cari Ide Judul</span>
@@ -772,7 +763,7 @@ export const HeroInputView: React.FC<HeroInputViewProps> = ({
                       setTargetEntity(p.targetEntity || "");
                     }
                   }}
-                  className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-white dark:bg-[#17181C] hover:bg-[#F8FAFC] dark:hover:bg-[#1E1F24] border border-[#E2E8F0] dark:border-[#26282E] hover:border-[#7C9CFF]/50 text-xs text-[#0F172A] dark:text-[#F3F6FC] transition-all cursor-pointer shadow-2xs group max-w-[200px] truncate"
+                  className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-white dark:bg-[#17181C] hover:bg-[#F8FAFC] dark:hover:bg-[#1E1F24] border border-[#E2E8F0] dark:border-[#26282E] hover:border-[#7C9CFF]/50 text-xs text-[#0F172A] dark:text-[#F3F4F6] transition-all cursor-pointer shadow-2xs group max-w-[200px] truncate"
                   title={p.title}
                 >
                   <span className="w-1.5 h-1.5 rounded-full bg-[#34D399]" />
@@ -807,7 +798,7 @@ export const HeroInputView: React.FC<HeroInputViewProps> = ({
             <button
               type="button"
               onClick={onOpenDatabase}
-              className="inline-flex items-center gap-1.5 hover:text-[#0F172A] dark:hover:text-[#F3F6FC] transition-colors cursor-pointer"
+              className="inline-flex items-center gap-1.5 hover:text-[#0F172A] dark:hover:text-[#F3F4F6] transition-colors cursor-pointer"
             >
               <Database className="w-3.5 h-3.5 text-[#7C9CFF]" />
               <span>Database Arsip Usulan</span>
@@ -818,7 +809,7 @@ export const HeroInputView: React.FC<HeroInputViewProps> = ({
             <button
               type="button"
               onClick={onOpenDrive}
-              className="inline-flex items-center gap-1.5 hover:text-[#0F172A] dark:hover:text-[#F3F6FC] transition-colors cursor-pointer"
+              className="inline-flex items-center gap-1.5 hover:text-[#0F172A] dark:hover:text-[#F3F4F6] transition-colors cursor-pointer"
             >
               <FolderOpen className="w-3.5 h-3.5 text-[#9B8CFF]" />
               <span>File lokal</span>
@@ -849,7 +840,7 @@ export const HeroInputView: React.FC<HeroInputViewProps> = ({
                   <Lightbulb className="w-4 h-4 text-[#FBBF24]" />
                 </div>
                 <div>
-                  <h3 className="text-sm font-bold text-[#0F172A] dark:text-[#F3F6FC]">
+                  <h3 className="text-sm font-bold text-[#0F172A] dark:text-[#F3F4F6]">
                     Dual-Engine Generator Judul Akademik
                   </h3>
                   <p className="text-[11px] text-[#64748B] dark:text-[#9CA3AF]">
@@ -860,7 +851,7 @@ export const HeroInputView: React.FC<HeroInputViewProps> = ({
               <button
                 type="button"
                 onClick={() => setIsAiRecommenderOpen(false)}
-                className="p-1.5 rounded-lg text-[#64748B] hover:text-[#0F172A] dark:hover:text-[#F3F6FC] hover:bg-[#F1F5F9] dark:hover:bg-[#1E1F24] transition-colors cursor-pointer"
+                className="p-1.5 rounded-lg text-[#64748B] hover:text-[#0F172A] dark:hover:text-[#F3F4F6] hover:bg-[#F1F5F9] dark:hover:bg-[#1E1F24] transition-colors cursor-pointer"
               >
                 <X className="w-4 h-4" />
               </button>
@@ -882,7 +873,7 @@ export const HeroInputView: React.FC<HeroInputViewProps> = ({
                       }
                     }}
                     placeholder="Masukkan kata kunci riset (contoh: stunting, blockchain, cyber security)..."
-                    className="w-full pl-9 pr-3 py-2 rounded-xl bg-white dark:bg-[#17181C] border border-[#CBD5E1] dark:border-[#26282E] text-xs text-[#0F172A] dark:text-[#F3F6FC] placeholder:text-[#64748B] focus:outline-none focus:border-[#7C9CFF] transition-colors"
+                    className="w-full pl-9 pr-3 py-2 rounded-xl bg-white dark:bg-[#17181C] border border-[#CBD5E1] dark:border-[#26282E] text-xs text-[#0F172A] dark:text-[#F3F4F6] placeholder:text-[#64748B] focus:outline-none focus:border-[#7C9CFF] transition-colors"
                   />
                 </div>
                 <button
@@ -908,7 +899,7 @@ export const HeroInputView: React.FC<HeroInputViewProps> = ({
                   className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
                     recommenderTab === "ai"
                       ? "bg-white dark:bg-[#1E1F24] text-[#7C9CFF] border border-[#7C9CFF]/40 shadow-xs"
-                      : "text-[#64748B] dark:text-[#9CA3AF] hover:text-[#0F172A] dark:hover:text-[#F3F6FC]"
+                      : "text-[#64748B] dark:text-[#9CA3AF] hover:text-[#0F172A] dark:hover:text-[#F3F4F6]"
                   }`}
                 >
                   <Bot className="w-3.5 h-3.5 text-[#7C9CFF]" />
@@ -926,7 +917,7 @@ export const HeroInputView: React.FC<HeroInputViewProps> = ({
                   className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
                     recommenderTab === "internet"
                       ? "bg-white dark:bg-[#1E1F24] text-[#34D399] border border-[#34D399]/40 shadow-xs"
-                      : "text-[#64748B] dark:text-[#9CA3AF] hover:text-[#0F172A] dark:hover:text-[#F3F6FC]"
+                      : "text-[#64748B] dark:text-[#9CA3AF] hover:text-[#0F172A] dark:hover:text-[#F3F4F6]"
                   }`}
                 >
                   <Globe className="w-3.5 h-3.5 text-[#34D399]" />
@@ -974,7 +965,7 @@ export const HeroInputView: React.FC<HeroInputViewProps> = ({
                               )}
                             </div>
 
-                            <h4 className="text-xs sm:text-sm font-semibold text-[#0F172A] dark:text-[#F3F6FC] leading-snug">
+                            <h4 className="text-xs sm:text-sm font-semibold text-[#0F172A] dark:text-[#F3F4F6] leading-snug">
                               {rec.title}
                             </h4>
 
@@ -1037,7 +1028,7 @@ export const HeroInputView: React.FC<HeroInputViewProps> = ({
                               )}
                             </div>
 
-                            <h4 className="text-xs sm:text-sm font-semibold text-[#0F172A] dark:text-[#F3F6FC] leading-snug">
+                            <h4 className="text-xs sm:text-sm font-semibold text-[#0F172A] dark:text-[#F3F4F6] leading-snug">
                               {rec.title}
                             </h4>
 
@@ -1071,7 +1062,7 @@ export const HeroInputView: React.FC<HeroInputViewProps> = ({
               <button
                 type="button"
                 onClick={() => setIsAiRecommenderOpen(false)}
-                className="px-3 py-1 rounded-lg border border-[#CBD5E1] dark:border-[#26282E] text-[#475569] dark:text-[#9CA3AF] hover:text-[#0F172A] dark:hover:text-[#F3F6FC] transition-colors cursor-pointer"
+                className="px-3 py-1 rounded-lg border border-[#CBD5E1] dark:border-[#26282E] text-[#475569] dark:text-[#9CA3AF] hover:text-[#0F172A] dark:hover:text-[#F3F4F6] transition-colors cursor-pointer"
               >
                 Tutup
               </button>
