@@ -48,9 +48,9 @@ export default function AuthView({
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [name, setName] = useState('');
-  const [institution, setInstitution] = useState('Universitas Negeri Padang (UNP)');
+  const [institution, setInstitution] = useState('');
   const [role, setRole] = useState<UserRole>('Mahasiswa');
-  const [programStudi, setProgramStudi] = useState('Teknik Elektro & Informatika');
+  const [programStudi, setProgramStudi] = useState('');
   const [rememberMe, setRememberMe] = useState(true);
 
   // Password Visibility
@@ -120,7 +120,7 @@ export default function AuthView({
       name,
       email,
       password,
-      institution: institution ? `${institution}${programStudi ? ` - ${programStudi}` : ''}` : 'Universitas Negeri Padang (UNP)',
+      institution: institution.trim() || 'Perguruan Tinggi / Instansi Mandiri',
       role
     });
 
@@ -192,7 +192,7 @@ export default function AuthView({
           </defs>
         </svg>
 
-        {/* Top Branding */}
+        {/* Top Branding (Left Pane) */}
         <div className="relative z-10">
           <Link href="/" className="inline-flex items-center gap-3 group">
             {/* 4-Pointed Star Icon */}
@@ -204,9 +204,6 @@ export default function AuthView({
             <div>
               <span className="font-bold text-base sm:text-lg tracking-tight text-white block lowercase">
                 academic agent studio
-              </span>
-              <span className="text-[10px] text-zinc-400 font-mono tracking-widest uppercase block -mt-0.5">
-                v2.5 ANTI-SLOP
               </span>
             </div>
           </Link>
@@ -224,7 +221,7 @@ export default function AuthView({
           </h1>
 
           <p className="text-xs sm:text-sm text-zinc-400 leading-relaxed max-w-md">
-            Standar format skripsi, tesis, dan proposal penelitian terintegrasi dengan pedoman resmi Dikti &amp; FT UNP 2025.
+            Platform perumusan usulan proposal, skripsi, tesis, dan naskah ilmiah terintegrasi dengan standar penulisan akademik komprehensif.
           </p>
         </div>
 
@@ -235,8 +232,8 @@ export default function AuthView({
               <FileText className="w-3.5 h-3.5" />
             </div>
             <div className="min-w-0">
-              <div className="text-[10px] sm:text-[11px] font-bold text-white truncate">Template Resmi</div>
-              <div className="text-[9px] text-zinc-400 truncate">Dikti &amp; FT UNP 2025</div>
+              <div className="text-[10px] sm:text-[11px] font-bold text-white truncate">Format Standar</div>
+              <div className="text-[9px] text-zinc-400 truncate">Pedoman Akademik</div>
             </div>
           </div>
 
@@ -268,24 +265,8 @@ export default function AuthView({
       {/* ========================================================================= */}
       <div className="w-full lg:w-7/12 xl:w-[54%] flex flex-col justify-between p-6 sm:p-10 lg:p-10 xl:p-14 bg-white overflow-y-auto">
         
-        {/* Top Navbar in Form Pane */}
-        <div className="w-full max-w-xl mx-auto flex items-center justify-between shrink-0 mb-4 sm:mb-6">
-          <div className="flex items-center gap-2.5">
-            <div className="w-7 h-7 flex items-center justify-center text-[#3B82F6] shrink-0">
-              <svg className="w-6 h-6 fill-current" viewBox="0 0 24 24">
-                <path d="M12 0C12 6.627 6.627 12 0 12C6.627 12 12 17.373 12 24C12 17.373 17.373 12 24 12C17.373 12 12 6.627 12 0Z" />
-              </svg>
-            </div>
-            <div>
-              <span className="font-bold text-sm sm:text-base tracking-tight text-[#0F172A] block lowercase">
-                academic agent studio
-              </span>
-              <span className="text-[9px] text-slate-400 font-mono tracking-widest uppercase block -mt-0.5">
-                v2.5 ANTI-SLOP
-              </span>
-            </div>
-          </div>
-
+        {/* Top Header in Form Pane (Back button only, logo removed as requested) */}
+        <div className="w-full max-w-xl mx-auto flex items-center justify-end shrink-0 mb-4 sm:mb-6">
           <Link
             href="/"
             className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-500 hover:text-slate-900 transition-colors py-1.5 px-3 rounded-full border border-slate-200 hover:border-slate-300 bg-slate-50"
@@ -340,7 +321,7 @@ export default function AuthView({
                       required
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
-                      placeholder="Email atau Username (Contoh: nama@unp.ac.id atau superadmin@academic.id)"
+                      placeholder="Email atau Username (Contoh: user@kampus.ac.id atau superadmin@academic.id)"
                       className="w-full pl-11 pr-4 py-3.5 rounded-2xl bg-[#F8FAFC] border border-[#E2E8F0] focus:border-[#3B82F6] focus:bg-white focus:ring-4 focus:ring-blue-500/10 text-xs sm:text-sm text-[#0F172A] placeholder:text-slate-400 transition-all outline-none"
                     />
                   </div>
@@ -493,7 +474,7 @@ export default function AuthView({
                       required
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
-                      placeholder="Contoh: nama@mhs.unp.ac.id"
+                      placeholder="Contoh: nama@kampus.ac.id atau user@email.com"
                       className="w-full pl-11 pr-4 py-3 rounded-2xl bg-[#F8FAFC] border border-[#E2E8F0] focus:border-[#3B82F6] focus:bg-white focus:ring-4 focus:ring-blue-500/10 text-xs sm:text-sm text-[#0F172A] placeholder:text-slate-400 transition-all outline-none"
                     />
                   </div>
@@ -552,28 +533,48 @@ export default function AuthView({
                   </div>
                 </div>
 
-                {/* 4. Perguruan Tinggi / Instansi */}
+                {/* 4. Perguruan Tinggi / Instansi (Bisa Diisi Mandiri Secara Bebas) */}
                 <div>
-                  <label className="block text-xs font-semibold text-slate-700 mb-1">
-                    Perguruan Tinggi / Instansi
-                  </label>
+                  <div className="flex items-center justify-between mb-1">
+                    <label className="text-xs font-semibold text-slate-700">
+                      Perguruan Tinggi / Instansi
+                    </label>
+                    <span className="text-[10.5px] text-slate-400">
+                      Bisa diisi nama kampus sendiri
+                    </span>
+                  </div>
                   <div className="relative">
                     <GraduationCap className="w-4 h-4 text-slate-400 absolute left-4 top-1/2 -translate-y-1/2 pointer-events-none" />
-                    <select
+                    <input
+                      type="text"
+                      required
                       value={institution}
                       onChange={(e) => setInstitution(e.target.value)}
-                      className="w-full pl-11 pr-10 py-3 rounded-2xl bg-[#F8FAFC] border border-[#E2E8F0] focus:border-[#3B82F6] focus:bg-white focus:ring-4 focus:ring-blue-500/10 text-xs sm:text-sm text-[#0F172A] transition-all outline-none appearance-none cursor-pointer font-medium"
-                    >
-                      <option value="Universitas Negeri Padang (UNP)">Universitas Negeri Padang (UNP)</option>
-                      <option value="Universitas Indonesia (UI)">Universitas Indonesia (UI)</option>
-                      <option value="Institut Teknologi Bandung (ITB)">Institut Teknologi Bandung (ITB)</option>
-                      <option value="Universitas Gadjah Mada (UGM)">Universitas Gadjah Mada (UGM)</option>
-                      <option value="Institut Teknologi Sepuluh Nopember (ITS)">Institut Teknologi Sepuluh Nopember (ITS)</option>
-                      <option value="Universitas Andalas (UNAND)">Universitas Andalas (UNAND)</option>
-                      <option value="Universitas Lainnya / Instansi Mandiri">Universitas Lainnya / Instansi Mandiri</option>
-                    </select>
-                    <ChevronDown className="w-4 h-4 text-slate-400 absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none" />
+                      list="institution-suggestions"
+                      placeholder="Ketik nama kampus atau instansi Anda..."
+                      className="w-full pl-11 pr-4 py-3 rounded-2xl bg-[#F8FAFC] border border-[#E2E8F0] focus:border-[#3B82F6] focus:bg-white focus:ring-4 focus:ring-blue-500/10 text-xs sm:text-sm text-[#0F172A] placeholder:text-slate-400 transition-all outline-none font-medium"
+                    />
+                    <datalist id="institution-suggestions">
+                      <option value="Universitas Indonesia (UI)" />
+                      <option value="Institut Teknologi Bandung (ITB)" />
+                      <option value="Universitas Gadjah Mada (UGM)" />
+                      <option value="Institut Teknologi Sepuluh Nopember (ITS)" />
+                      <option value="Universitas Diponegoro (UNDIP)" />
+                      <option value="Universitas Brawijaya (UB)" />
+                      <option value="Universitas Airlangga (UNAIR)" />
+                      <option value="Universitas Padjadjaran (UNPAD)" />
+                      <option value="Universitas Sebelas Maret (UNS)" />
+                      <option value="Universitas Hasanuddin (UNHAS)" />
+                      <option value="Universitas Sumatera Utara (USU)" />
+                      <option value="Universitas Andalas (UNAND)" />
+                      <option value="Universitas Negeri Padang (UNP)" />
+                      <option value="Politeknik Negeri / Swasta" />
+                      <option value="Instansi Riset / Perusahaan Mandiri" />
+                    </datalist>
                   </div>
+                  <p className="text-[10.5px] text-slate-400 mt-1 pl-1">
+                    Bisa diisi manual sesuai nama universitas, politeknik, sekolah tinggi, atau instansi Anda.
+                  </p>
                 </div>
 
                 {/* 5. Program Studi / Peran */}
