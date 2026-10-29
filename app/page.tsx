@@ -16,7 +16,7 @@ import { AcademicConsultationModal } from "@/components/AcademicConsultationModa
 import { ConsultationStudio } from "@/components/ConsultationStudio";
 import { PresentationStudio } from "@/components/PresentationStudio";
 import { CAMPUS_PRESETS } from "@/lib/campusPresets";
-import FirstTimeLoadingScreen from "@/components/FirstTimeLoadingScreen";
+import ScreenLoader from "@/components/ScreenLoader";
 import { PaymentModal } from "@/components/PaymentModal";
 import { SuperadminPanelModal } from "@/components/SuperadminPanelModal";
 import AuthModal from "@/components/AuthModal";
@@ -562,13 +562,10 @@ export default function Home() {
       {/* Full-Bleed Desktop & Mobile Responsive App Shell / Landing View */}
       {stage === "landing" ? (
         <>
-          {/* Animasi Screen Loading Showreel: Diposisikan di Awal Landing Page Saja untuk First-Time Visit */}
+          {/* Screen Loading Minimal: Logo bintang + academic agent studio */}
           {showSplash && (
-            <FirstTimeLoadingScreen 
+            <ScreenLoader 
               onComplete={() => {
-                try {
-                  localStorage.setItem("academic_showreel_seen", "true");
-                } catch {}
                 setShowSplash(false);
               }} 
             />
