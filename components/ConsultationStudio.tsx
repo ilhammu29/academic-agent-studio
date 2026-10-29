@@ -1,34 +1,30 @@
 "use client";
-import { aiFetch } from "@/lib/aiClient";
 
 import React, { useState, useRef, useEffect } from "react";
 import { ProposalCategory } from "@/types/studio";
 import { 
-  ArrowLeft, 
   Send, 
   Sparkles, 
   Bot, 
-  User, 
-  GraduationCap, 
-  Building2, 
-  BookOpen, 
-  CheckCircle2, 
-  Lightbulb, 
   Mic, 
   MicOff, 
-  RotateCcw, 
-  Layers, 
+  SlidersHorizontal,
+  Clock,
+  Bookmark,
   ArrowRight, 
-  Search, 
-  ExternalLink,
-  HelpCircle,
-  TrendingUp,
-  FileText,
-  Copy,
-  Check
+  Copy, 
+  Check,
+  X,
+  RotateCcw,
+  Lightbulb,
+  Layers,
+  BookOpen,
+  CheckCircle2,
+  Building2,
+  GraduationCap
 } from "lucide-react";
-import { TitleRecommendation } from "@/lib/titleGenerator";
-import { stripDoubleAsterisks, sanitizeAcademicText } from "@/lib/textSanitizer";
+import { aiFetch } from "@/lib/aiClient";
+import { stripDoubleAsterisks } from "@/lib/textSanitizer";
 
 /**
  * Helper untuk mem-parse teks inline dengan sintaks bold, menghapus asterisks literal '**'
@@ -66,14 +62,14 @@ function FormattedConsultationMessage({ content }: { content: string }) {
   const flushBullets = (keyIdx: number) => {
     if (currentBullets.length > 0) {
       elements.push(
-        <div key={`bullets-${keyIdx}`} className="my-2.5 space-y-2 pl-1 sm:pl-2">
+        <div key={`bullets-${keyIdx}`} className="my-2 space-y-2 pl-1 sm:pl-2">
           {currentBullets.map((b, bIdx) => (
-            <div key={bIdx} className="flex items-start gap-2.5 text-xs text-[#334155] dark:text-[#CBD5E1]">
-              <span className="w-1.5 h-1.5 rounded-full bg-[#7C9CFF] mt-1.5 flex-shrink-0" />
+            <div key={bIdx} className="flex items-start gap-2.5 text-xs sm:text-[13px] text-slate-700 dark:text-zinc-300">
+              <span className="w-1.5 h-1.5 rounded-full bg-blue-500 mt-1.5 flex-shrink-0" />
               <div className="flex-1 leading-relaxed">
                 {b.key ? (
                   <>
-                    <strong className="font-semibold text-[#0F172A] dark:text-[#F3F6FC]">
+                    <strong className="font-semibold text-[#0F172A] dark:text-white">
                       {renderFormattedInlineText(b.key)}:{' '}
                     </strong>
                     <span>{renderFormattedInlineText(b.text)}</span>
@@ -127,7 +123,7 @@ function FormattedConsultationMessage({ content }: { content: string }) {
       const title = numMatch[2];
       elements.push(
         <div key={`num-${idx}`} className="mt-3.5 mb-1.5 flex items-start gap-2.5">
-          <span className="inline-flex items-center justify-center w-5 h-5 rounded-md bg-[#7C9CFF]/15 border border-[#7C9CFF]/30 text-[#7C9CFF] font-mono text-[11px] font-bold flex-shrink-0 mt-0.5">
+          <span className="inline-flex items-center justify-center w-5 h-5 rounded-md bg-blue-500/10 border border-blue-500/25 text-blue-600 dark:text-blue-400 font-mono text-[11px] font-bold flex-shrink-0 mt-0.5">
             {num.length === 1 ? `0${num}` : num}
           </span>
           <div className="font-semibold text-xs sm:text-sm text-[#0F172A] dark:text-[#F3F6FC] leading-snug">
@@ -141,8 +137,8 @@ function FormattedConsultationMessage({ content }: { content: string }) {
     // Cek baris penekanan rekomendasi judul atau solusi
     if (line.startsWith("👉") || line.toLowerCase().includes("rekomendasi judul") || line.toLowerCase().includes("rekomendasi formulasi")) {
       elements.push(
-        <div key={`rec-${idx}`} className="my-2.5 p-3 rounded-xl bg-[#7C9CFF]/10 border border-[#7C9CFF]/30 text-[#0F172A] dark:text-[#F3F6FC] text-xs font-medium flex items-start gap-2.5">
-          <span className="text-[#7C9CFF] text-sm leading-none mt-0.5">💡</span>
+        <div key={`rec-${idx}`} className="my-2.5 p-3 sm:p-4 rounded-xl bg-blue-500/10 border border-blue-500/30 text-[#0F172A] dark:text-white text-xs sm:text-sm font-medium flex items-start gap-2.5">
+          <span className="text-blue-500 text-sm leading-none mt-0.5">💡</span>
           <div className="flex-1 leading-relaxed">
             {renderFormattedInlineText(line.replace(/^👉\s*/, ""))}
           </div>
@@ -153,7 +149,7 @@ function FormattedConsultationMessage({ content }: { content: string }) {
 
     // Paragraf umum
     elements.push(
-      <p key={`p-${idx}`} className="leading-relaxed font-sans text-xs text-[#334155] dark:text-[#CBD5E1] mb-2">
+      <p key={`p-${idx}`} className="leading-relaxed font-sans text-xs sm:text-[13px] text-slate-700 dark:text-zinc-300 mb-2">
         {renderFormattedInlineText(line)}
       </p>
     );
@@ -197,11 +193,10 @@ interface ConsultationStudioProps {
 }
 
 const QUICK_PROMPT_CHIPS = [
-  "Saya bingung mencari masalah nyata di instansi/tempat magang",
+  "Saya bingung mencari masalah nyata di instansi mitra",
   "Bantu cari research gap untuk topik yang saya minati",
   "Validasi apakah ide judul saya terlalu luas atau sempit",
-  "Bagaimana cara memetakan alur Bab I s.d. Bab IV agar logis?",
-  "Data di kantor bersifat rahasia, apa alternatif metode yang bisa saya ambil?"
+  "Data bersifat rahasia, apa alternatif metode risetnya?"
 ];
 
 export const ConsultationStudio: React.FC<ConsultationStudioProps> = ({
@@ -217,35 +212,14 @@ export const ConsultationStudio: React.FC<ConsultationStudioProps> = ({
   onProceedWithTitle
 }) => {
   // Chat thread
-  const [messages, setMessages] = useState<ChatMessage[]>([
-    {
-      id: "welcome-1",
-      role: "assistant",
-      content: `Selamat datang di **Klinik Bimbingan & Konsultasi Ide Akademik (AI Mentor)**. 
-      
-Saya adalah asisten mentor akademik Anda. Apakah Anda sedang:
-1. **Bingung menemukan masalah riil** di tempat magang/instansi mitra?
-2. **Memiliki topik umum** (misal: *obesitas, AI, supply chain*) namun bingung merumuskan judul dan celah riset (*research gap*)?
-3. **Sudah memiliki draf judul** tetapi ragu dengan alur metodologi dan kelayakan akademiknya?
-
-Ceritakan situasi atau bidang yang sedang Anda hadapi di bawah, dan kita akan bedah bersama hingga menghasilkan judul yang siap diajukan.`,
-      timestamp: new Date().toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" })
-    }
-  ]);
-
+  const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [inputText, setInputText] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [isListening, setIsListening] = useState(false);
   const [copiedMessageId, setCopiedMessageId] = useState<string | null>(null);
 
-  const handleCopyMessage = (id: string, text: string) => {
-    navigator.clipboard.writeText(stripDoubleAsterisks(text));
-    setCopiedMessageId(id);
-    setTimeout(() => setCopiedMessageId(null), 2500);
-  };
-
-  // Right Workbench Tabs: "titles" | "diagnostic" | "guidelines"
-  const [activeRightTab, setActiveRightTab] = useState<"titles" | "diagnostic" | "guidelines">("titles");
+  // Right Side Drawer State: "none" | "candidates" | "history" | "parameters"
+  const [activeDrawer, setActiveDrawer] = useState<"none" | "candidates" | "history" | "parameters">("none");
 
   // Candidate Titles Scratchpad
   const [candidateTitles, setCandidateTitles] = useState<ConsultationCandidateTitle[]>([
@@ -269,20 +243,30 @@ Ceritakan situasi atau bidang yang sedang Anda hadapi di bawah, dan kita akan be
   // Selected candidate title
   const [selectedTitleId, setSelectedTitleId] = useState<string>("cand-default-1");
 
-  // Diagnostic Canvas Form
+  // Diagnostic Canvas Form State
   const [diagSymptom, setDiagSymptom] = useState("");
   const [diagRootCause, setDiagRootCause] = useState("");
   const [diagSolution, setDiagSolution] = useState("");
-  const [diagEntity, setDiagEntity] = useState(targetEntity || "");
   const [isAnalyzingDiag, setIsAnalyzingDiag] = useState(false);
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  const hasChatted = messages.filter((m) => m.role === "user").length > 0;
 
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages, isLoading]);
+    if (hasChatted) {
+      messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    }
+  }, [messages, isLoading, hasChatted]);
 
   const nowTimestamp = () => new Date().toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" });
+
+  const handleCopyMessage = (id: string, text: string) => {
+    navigator.clipboard.writeText(stripDoubleAsterisks(text));
+    setCopiedMessageId(id);
+    setTimeout(() => setCopiedMessageId(null), 2500);
+  };
 
   // Voice speech-to-text
   const toggleSpeechRecognition = () => {
@@ -381,8 +365,7 @@ Ceritakan situasi atau bidang yang sedang Anda hadapi di bawah, dan kita akan be
         throw new Error(data.error || "Gagal mendapatkan respon");
       }
     } catch (err: any) {
-      console.warn("Consultation fetch error, using intelligent fallback:", err);
-      // Fallback response with concrete title formulation
+      console.warn("Consultation fetch fallback active:", err);
       const isMagang = category === "magang";
       const fallbackTitle = isMagang 
         ? `Optimasi Alur Kerja dan Evaluasi Efisiensi Berkelanjutan pada ${targetEntity || "Unit Operasional"}`
@@ -414,10 +397,10 @@ Ceritakan situasi atau bidang yang sedang Anda hadapi di bawah, dan kita akan be
 
 Berdasarkan analisis akademik, kunci utama perumusan judul yang kuat adalah **menghindari sekadar mencatat tugas rutin**, melainkan **mengidentifikasi friksi, inefisiensi, atau kesenjangan (gap)** antara kondisi saat ini dengan kondisi ideal.
 
-Saya telah merumuskan satu calon judul akademik di panel kanan:
+Saya telah merumuskan satu calon judul akademik:
 👉 **"${fallbackTitle}"**
 
-Silakan cek rincian alur kerja di panel kanan, atau sampaikan masukan jika ingin menggeser fokus variabelnya.`,
+Silakan cek rincian alur kerja di panel Rak Calon Judul (ikon bookmark kanan), atau sampaikan masukan jika ingin menggeser fokus variabelnya.`,
         candidateTitle: fallbackCandidate,
         timestamp: nowTimestamp()
       };
@@ -435,245 +418,317 @@ Silakan cek rincian alur kerja di panel kanan, atau sampaikan masukan jika ingin
     }
     setIsAnalyzingDiag(true);
 
-    const promptText = `Saya melakukan analisis diagnostik masalah di ${diagEntity || targetEntity || "tempat magang/studi"}:
+    const promptText = `Saya melakukan analisis diagnostik masalah di ${targetEntity || "tempat magang/studi"}:
 - Gejala Lapangan: "${diagSymptom}"
 - Dugaan Akar Masalah: "${diagRootCause || "Belum diketahui pasti"}"
 - Rencana Solusi: "${diagSolution || "Perlu saran intervensi yang tepat"}"
 
 Tolong bedah masalah ini dan rumuskan judul proposal akademik yang tajam dan tidak klise!`;
 
-    setActiveRightTab("titles");
+    setActiveDrawer("none");
     await handleSendMessage(promptText);
     setIsAnalyzingDiag(false);
   };
 
   // Apply Candidate Title to Studio
-  const handleApplyCandidate = (candidate: ConsultationCandidateTitle) => {
-    const cleanTitle = stripDoubleAsterisks(candidate.title);
-    const cleanEntity = stripDoubleAsterisks(candidate.entity);
-    setTitle(cleanTitle);
-    setCategory(candidate.category);
-    setTargetEntity(cleanEntity);
-    setDurationMonths(candidate.durationMonths);
-    onProceedWithTitle(cleanTitle, cleanEntity, candidate.category, candidate.durationMonths);
+  const handleApplyCandidate = (cand: ConsultationCandidateTitle) => {
+    setTitle(cand.title);
+    if (cand.entity) setTargetEntity(cand.entity);
+    if (cand.category) setCategory(cand.category);
+    if (cand.durationMonths) setDurationMonths(cand.durationMonths);
+    onProceedWithTitle(cand.title, cand.entity, cand.category, cand.durationMonths);
   };
 
   const activeCandidate = candidateTitles.find((c) => c.id === selectedTitleId) || candidateTitles[0];
 
   return (
-    <div className="flex-1 flex flex-col w-full h-[calc(100vh-64px)] max-h-[calc(100vh-64px)] overflow-hidden bg-[#F8FAFC] dark:bg-[#0C0D0E] text-[#0F172A] dark:text-[#F3F6FC]">
+    <div className="relative w-full h-[calc(100vh-4rem)] flex overflow-hidden bg-[#FAFCFF] dark:bg-[#09090b] text-[#0F172A] dark:text-[#F8FAFC]">
       
-      {/* ============================================================ */}
-      {/* 1. TOP HEADER NAVIGATION BAR                                  */}
-      {/* ============================================================ */}
-      <div className="px-6 py-3.5 border-b border-[#E2E8F0] dark:border-[#26282E] bg-white/95 dark:bg-[#121316]/95 flex items-center justify-between flex-shrink-0 z-20">
-        <div className="flex items-center gap-3">
-          <button
-            type="button"
-            onClick={onBackToHero}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-[#E2E8F0] dark:border-[#26282E] bg-white dark:bg-[#17181C] hover:bg-[#F1F5F9] dark:hover:bg-[#1E1F24] text-xs font-semibold text-[#0F172A] dark:text-[#F3F6FC] transition-colors cursor-pointer shadow-2xs"
-            title="Kembali ke halaman utama pembuatan proposal"
-          >
-            <ArrowLeft className="w-3.5 h-3.5 text-[#7C9CFF]" />
-            <span>Beranda Usulan</span>
-          </button>
-
-          <div className="h-4 w-[1px] bg-[#E2E8F0] dark:bg-[#26282E]" />
-
+      {/* ========================================================================= */}
+      {/* 1. MAIN EXPANSIVE CONSULTATION CANVAS                                     */}
+      {/* ========================================================================= */}
+      <main className="flex-1 flex flex-col h-full overflow-hidden relative">
+        
+        {/* Mobile Action Bar (Top Right) */}
+        <div className="md:hidden flex items-center justify-between px-4 py-2 border-b border-slate-200/80 dark:border-[#26282E] bg-white/70 dark:bg-[#121316]/70 backdrop-blur-sm z-20">
           <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-lg bg-[#34D399]/15 border border-[#34D399]/30 flex items-center justify-center text-[#34D399]">
-              <GraduationCap className="w-4 h-4" />
-            </div>
-            <div>
-              <h1 className="text-xs sm:text-sm font-bold text-[#0F172A] dark:text-[#F3F6FC] flex items-center gap-2">
-                <span>Klinik Bimbingan &amp; Konsultasi Ide</span>
-                <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-[#34D399]/15 text-[#34D399] border border-[#34D399]/30 font-semibold">
-                  AI MENTOR AKTIF
-                </span>
-              </h1>
-              <p className="text-[11px] text-[#475569] dark:text-[#9CA3AF]">
-                Eksplorasi masalah lapangan, validasi kelayakan, dan penajaman judul proposal
-              </p>
-            </div>
+            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+            <span className="text-xs font-semibold text-slate-700 dark:text-zinc-300">Klinik Bimbingan</span>
           </div>
-        </div>
 
-        {/* Right CTA: Apply Selected Title to Studio */}
-        <div className="flex items-center gap-2">
-          {activeCandidate && (
+          <div className="flex items-center gap-1.5">
             <button
               type="button"
-              onClick={() => handleApplyCandidate(activeCandidate)}
-              className="px-4 py-2 rounded-xl bg-[#7C9CFF] hover:bg-[#9B8CFF] text-[#0C0D0E] text-xs font-semibold transition-all cursor-pointer shadow-sm flex items-center gap-2"
-              title="Gunakan judul yang terpilih dari bimbingan dan mulai penyusunan naskah proposal"
+              onClick={() => setActiveDrawer(activeDrawer === "parameters" ? "none" : "parameters")}
+              className={`p-2 rounded-lg text-xs transition-colors ${
+                activeDrawer === "parameters"
+                  ? "bg-blue-50 text-blue-600 dark:bg-blue-950/50 dark:text-blue-400"
+                  : "text-slate-500 hover:text-slate-900 dark:text-zinc-400"
+              }`}
+              title="Parameter Usulan"
             >
-              <span>Gunakan Judul Terpilih ke Usulan</span>
-              <ArrowRight className="w-3.5 h-3.5" />
+              <SlidersHorizontal className="w-4 h-4" />
             </button>
-          )}
+            <button
+              type="button"
+              onClick={() => setActiveDrawer(activeDrawer === "history" ? "none" : "history")}
+              className={`p-2 rounded-lg text-xs transition-colors ${
+                activeDrawer === "history"
+                  ? "bg-blue-50 text-blue-600 dark:bg-blue-950/50 dark:text-blue-400"
+                  : "text-slate-500 hover:text-slate-900 dark:text-zinc-400"
+              }`}
+              title="Riwayat Sesi"
+            >
+              <Clock className="w-4 h-4" />
+            </button>
+            <button
+              type="button"
+              onClick={() => setActiveDrawer(activeDrawer === "candidates" ? "none" : "candidates")}
+              className={`relative p-2 rounded-lg text-xs transition-colors ${
+                activeDrawer === "candidates"
+                  ? "bg-blue-50 text-blue-600 dark:bg-blue-950/50 dark:text-blue-400"
+                  : "text-slate-500 hover:text-slate-900 dark:text-zinc-400"
+              }`}
+              title="Rak Calon Judul"
+            >
+              <Bookmark className="w-4 h-4" />
+              {candidateTitles.length > 0 && (
+                <span className="absolute top-1 right-1 w-2 h-2 rounded-full bg-blue-600" />
+              )}
+            </button>
+          </div>
         </div>
-      </div>
 
-      {/* ============================================================ */}
-      {/* 2. MAIN WORKSPACE: Chatbot (Left) + Toolbox Suite (Right)     */}
-      {/* ============================================================ */}
-      <div className="flex-1 grid grid-cols-1 lg:grid-cols-12 overflow-hidden w-full h-full">
-        
-        {/* ============================================================ */}
-        {/* LEFT COLUMN (Chatbot Thread ~ 7 cols / 58%)                  */}
-        {/* ============================================================ */}
-        <div className="lg:col-span-7 flex flex-col h-full border-r border-[#E2E8F0] dark:border-[#26282E] bg-white dark:bg-[#121316] overflow-hidden">
+        {/* Scrollable Center View */}
+        <div className="flex-1 overflow-y-auto px-4 sm:px-6 md:px-8 py-6 flex flex-col items-center">
           
-          {/* Chat Messages Scrollable Stream */}
-          <div className="flex-1 p-4 sm:p-6 overflow-y-auto space-y-4">
-            {messages.map((msg) => {
-              const isAssistant = msg.role === "assistant";
+          {/* STATE A: INITIAL HERO VIEW (Matches Reference Image Exactly) */}
+          {!hasChatted ? (
+            <div className="w-full max-w-3xl my-auto flex flex-col items-center text-center animate-in fade-in duration-300">
+              
+              {/* 3D AI Robot Mascot Image */}
+              <div className="relative w-64 sm:w-80 md:w-96 max-w-full aspect-[710/425] flex items-center justify-center select-none pointer-events-none mb-3 sm:mb-5">
+                <img
+                  src="/consultation-mascot.png"
+                  alt="AI Mentor Mascot"
+                  className="w-full h-auto object-contain drop-shadow-lg transition-transform duration-500 hover:scale-105"
+                  loading="eager"
+                />
+              </div>
 
-              return (
-                <div
-                  key={msg.id}
-                  className={`flex items-start gap-3 text-xs leading-relaxed ${
-                    isAssistant ? "justify-start" : "justify-end"
-                  }`}
-                >
-                  {isAssistant && (
-                    <div className="w-7 h-7 rounded-full bg-[#34D399]/15 border border-[#34D399]/30 flex items-center justify-center text-[#34D399] flex-shrink-0 mt-1 shadow-2xs">
-                      <Bot className="w-4 h-4" />
-                    </div>
-                  )}
+              {/* Headline: Klinik Bimbingan & Konsultasi Ide */}
+              <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold tracking-tight text-[#0F172A] dark:text-white font-sans mb-3">
+                Klinik Bimbingan &amp; Konsultasi Ide
+              </h1>
 
-                  <div className={`max-w-[85%] space-y-2 ${isAssistant ? "" : "items-end"}`}>
-                    <div
-                      className={`p-4 sm:p-5 rounded-2xl ${
-                        isAssistant
-                          ? "bg-[#F8FAFC] dark:bg-[#17181C] border border-[#E2E8F0] dark:border-[#26282E] text-[#0F172A] dark:text-[#F3F6FC]"
-                          : "bg-[#0F172A] text-white dark:bg-[#7C9CFF] dark:text-[#0C0D0E] font-medium ml-auto"
-                      }`}
-                    >
-                      {isAssistant ? (
-                        <div className="space-y-3">
-                          {/* Assistant Header & Actions */}
-                          <div className="flex items-center justify-between border-b border-[#E2E8F0] dark:border-[#26282E] pb-2 mb-2 text-[11px]">
-                            <div className="flex items-center gap-1.5 font-medium text-[#7C9CFF]">
-                              <Sparkles className="w-3.5 h-3.5" />
-                              <span>Telaah Pembimbing Akademik</span>
-                            </div>
-                            <button
-                              type="button"
-                              onClick={() => handleCopyMessage(msg.id, msg.content)}
-                              className="flex items-center gap-1 text-[10.5px] font-mono text-[#64748B] hover:text-[#7C9CFF] dark:text-[#9CA3AF] dark:hover:text-[#7C9CFF] px-2 py-0.5 rounded border border-transparent hover:border-[#26282E] transition-all cursor-pointer"
-                              title="Salin Tanggapan"
-                            >
-                              {copiedMessageId === msg.id ? (
-                                <>
-                                  <Check className="w-3 h-3 text-[#34D399]" />
-                                  <span className="text-[#34D399]">Tersalin</span>
-                                </>
-                              ) : (
-                                <>
-                                  <Copy className="w-3 h-3" />
-                                  <span>Salin</span>
-                                </>
-                              )}
-                            </button>
-                          </div>
+              {/* Status Badge: AI MENTOR AKTIF */}
+              <div className="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full bg-[#E6FBF2] dark:bg-emerald-950/50 border border-[#A7F3D0] dark:border-emerald-800 text-[#059669] dark:text-emerald-400 text-xs font-mono font-bold tracking-wider uppercase mb-3.5 shadow-2xs">
+                AI MENTOR AKTIF
+              </div>
 
-                          <FormattedConsultationMessage content={msg.content} />
-                        </div>
-                      ) : (
-                        <div className="whitespace-pre-wrap leading-relaxed font-sans text-xs">
-                          {stripDoubleAsterisks(msg.content)}
-                        </div>
-                      )}
+              {/* Subtext */}
+              <p className="text-xs sm:text-sm text-slate-500 dark:text-zinc-400 max-w-lg leading-relaxed mb-6 sm:mb-8 font-normal">
+                Eksplorasi masalah lapangan, validasi kelayakan, dan penajaman judul proposal.
+              </p>
 
-                      {/* Attached Candidate Title Card if Generated */}
-                      {msg.candidateTitle && (
-                        <div className="mt-3 p-3.5 rounded-xl border border-[#7C9CFF]/30 bg-[#7C9CFF]/10 text-[#0F172A] dark:text-[#F3F6FC] space-y-2 animate-in fade-in">
-                          <div className="flex items-center justify-between text-[10px] font-mono">
-                            <span className="font-bold text-[#7C9CFF] uppercase tracking-wider">
-                              💡 REKOMENDASI FORMULASI JUDUL
-                            </span>
-                            <span className="px-2 py-0.5 rounded-md bg-[#7C9CFF]/20 text-[#7C9CFF] font-semibold">
-                              {msg.candidateTitle.category.toUpperCase()} • {msg.candidateTitle.durationMonths} BULAN
-                            </span>
-                          </div>
-
-                          <h4 className="font-serif font-bold text-xs sm:text-sm text-[#0F172A] dark:text-[#F3F6FC] leading-snug">
-                            {msg.candidateTitle.title}
-                          </h4>
-
-                          <p className="text-[11px] text-[#64748B] dark:text-[#9CA3AF]">
-                            <strong>Lokus/Instansi:</strong> {msg.candidateTitle.entity}
-                          </p>
-
-                          <div className="pt-2 flex items-center justify-between border-t border-[#7C9CFF]/20 text-xs">
-                            <span className="text-[11px] text-[#64748B] dark:text-[#9CA3AF] italic">
-                              Tersimpan otomatis di Rak Calon Judul (Kanan)
-                            </span>
-                            <button
-                              type="button"
-                              onClick={() => handleApplyCandidate(msg.candidateTitle!)}
-                              className="px-3 py-1 rounded-lg bg-[#7C9CFF] hover:bg-[#688bf5] text-[#0C0D0E] font-semibold text-[11px] transition-colors cursor-pointer flex items-center gap-1 shadow-2xs"
-                            >
-                              <span>Terapkan</span>
-                              <ArrowRight className="w-3 h-3" />
-                            </button>
-                          </div>
-                        </div>
-                      )}
-                    </div>
-
-                    <div className="text-[10px] text-[#64748B] dark:text-[#9CA3AF] px-1 font-mono">
-                      {msg.timestamp}
-                    </div>
+              {/* Quick Prompt Chips */}
+              <div className="w-full max-w-2xl flex flex-wrap items-center justify-center gap-2 mb-2">
+                {QUICK_PROMPT_CHIPS.map((chip, idx) => (
+                  <button
+                    key={idx}
+                    type="button"
+                    onClick={() => handleSendMessage(chip)}
+                    className="px-3.5 py-1.5 rounded-full border border-slate-200 dark:border-[#26282E] bg-white/90 dark:bg-[#121316] hover:border-blue-400 hover:bg-blue-50/50 dark:hover:bg-blue-950/30 text-xs text-slate-700 dark:text-zinc-300 font-medium transition-all shadow-2xs hover:scale-102 cursor-pointer active:scale-98"
+                  >
+                    {chip}
+                  </button>
+                ))}
+              </div>
+            </div>
+          ) : (
+            /* STATE B: ACTIVE CONVERSATION STREAM */
+            <div className="w-full max-w-3xl space-y-4 pb-4">
+              
+              {/* Header Mini Pill with Reset option */}
+              <div className="flex items-center justify-between pb-3 mb-2 border-b border-slate-200/80 dark:border-[#26282E]">
+                <div className="flex items-center gap-2.5">
+                  <div className="w-8 h-8 rounded-full overflow-hidden bg-blue-50 dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 flex items-center justify-center shrink-0">
+                    <img src="/consultation-mascot.png" alt="Mascot" className="w-7 h-auto object-contain" />
                   </div>
-
-                  {!isAssistant && (
-                    <div className="w-7 h-7 rounded-full bg-[#7C9CFF]/15 border border-[#7C9CFF]/30 text-[#7C9CFF] flex items-center justify-center flex-shrink-0 mt-1 font-mono font-bold text-[10px]">
-                      U
-                    </div>
-                  )}
+                  <div>
+                    <h3 className="text-xs sm:text-sm font-bold text-slate-900 dark:text-white leading-none">
+                      Klinik Bimbingan AI Mentor
+                    </h3>
+                    <span className="text-[10px] text-emerald-600 dark:text-emerald-400 font-mono">
+                      ● Sesi Dialog Aktif
+                    </span>
+                  </div>
                 </div>
-              );
-            })}
 
-            {isLoading && (
-              <div className="flex items-start gap-3">
-                <div className="w-7 h-7 rounded-full bg-[#34D399]/15 border border-[#34D399]/30 flex items-center justify-center text-[#34D399] flex-shrink-0 mt-1">
-                  <Bot className="w-4 h-4" />
-                </div>
-                <div className="p-3.5 rounded-2xl bg-[#F8FAFC] dark:bg-[#17181C] border border-[#E2E8F0] dark:border-[#26282E] flex items-center gap-2 text-xs text-[#64748B] dark:text-[#9CA3AF]">
-                  <div className="w-4 h-4 border-2 border-[#7C9CFF] border-t-transparent rounded-full animate-spin" />
-                  <span>Dr. Bimbingan sedang membedah masalah &amp; merumuskan judul...</span>
+                <div className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (confirm("Mulai sesi konsultasi baru dari awal?")) {
+                        setMessages([]);
+                      }
+                    }}
+                    className="px-2.5 py-1 rounded-lg border border-slate-200 dark:border-[#26282E] bg-white dark:bg-[#121316] hover:bg-slate-50 text-[11px] font-medium text-slate-600 dark:text-zinc-300 flex items-center gap-1.5 cursor-pointer shadow-2xs"
+                  >
+                    <RotateCcw className="w-3 h-3" />
+                    <span>Sesi Baru</span>
+                  </button>
                 </div>
               </div>
-            )}
 
-            <div ref={messagesEndRef} />
-          </div>
+              {/* Chat Message Stream */}
+              {messages.map((msg) => {
+                const isAssistant = msg.role === "assistant";
 
-          {/* Prompt Chips Recommendation */}
-          <div className="px-4 sm:px-6 py-2.5 border-t border-[#E2E8F0] dark:border-[#26282E] bg-[#F8FAFC]/50 dark:bg-[#121316]/50 flex items-center gap-2 overflow-x-auto scrollbar-none flex-shrink-0 text-xs">
-            <span className="text-[11px] font-mono text-[#64748B] dark:text-[#9CA3AF] whitespace-nowrap flex items-center gap-1">
-              <Lightbulb className="w-3 h-3 text-[#FBBF24]" /> Topik Bimbingan:
-            </span>
-            {QUICK_PROMPT_CHIPS.map((chip, i) => (
+                return (
+                  <div
+                    key={msg.id}
+                    className={`flex items-start gap-3 text-xs sm:text-sm leading-relaxed ${
+                      isAssistant ? "justify-start" : "justify-end"
+                    }`}
+                  >
+                    {isAssistant && (
+                      <div className="w-8 h-8 rounded-full bg-blue-500/10 border border-blue-500/25 flex items-center justify-center text-blue-600 dark:text-blue-400 flex-shrink-0 mt-1 shadow-2xs">
+                        <Bot className="w-4 h-4" />
+                      </div>
+                    )}
+
+                    <div className={`max-w-[85%] sm:max-w-[80%] space-y-2 ${isAssistant ? "" : "items-end"}`}>
+                      <div
+                        className={`p-4 sm:p-5 rounded-2xl ${
+                          isAssistant
+                            ? "bg-white dark:bg-[#121316] border border-slate-200 dark:border-[#26282E] text-slate-900 dark:text-white shadow-xs"
+                            : "bg-[#3B82F6] text-white font-medium ml-auto shadow-sm"
+                        }`}
+                      >
+                        {isAssistant ? (
+                          <div className="space-y-3">
+                            <div className="flex items-center justify-between border-b border-slate-100 dark:border-[#26282E] pb-2 mb-2 text-[11px]">
+                              <div className="flex items-center gap-1.5 font-medium text-blue-600 dark:text-blue-400">
+                                <Sparkles className="w-3.5 h-3.5" />
+                                <span>Telaah AI Mentor Akademik</span>
+                              </div>
+                              <button
+                                type="button"
+                                onClick={() => handleCopyMessage(msg.id, msg.content)}
+                                className="flex items-center gap-1 text-[10.5px] font-mono text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 px-2 py-0.5 rounded transition-colors cursor-pointer"
+                                title="Salin Tanggapan"
+                              >
+                                {copiedMessageId === msg.id ? (
+                                  <>
+                                    <Check className="w-3 h-3 text-emerald-500" />
+                                    <span className="text-emerald-500">Tersalin</span>
+                                  </>
+                                ) : (
+                                  <>
+                                    <Copy className="w-3 h-3" />
+                                    <span>Salin</span>
+                                  </>
+                                )}
+                              </button>
+                            </div>
+
+                            <FormattedConsultationMessage content={msg.content} />
+                          </div>
+                        ) : (
+                          <div className="whitespace-pre-wrap leading-relaxed font-sans text-xs sm:text-sm">
+                            {stripDoubleAsterisks(msg.content)}
+                          </div>
+                        )}
+
+                        {/* Candidate Title Card Embedded in Message */}
+                        {msg.candidateTitle && (
+                          <div className="mt-3.5 p-3.5 sm:p-4 rounded-xl border border-blue-500/30 bg-blue-50/70 dark:bg-blue-950/30 text-slate-900 dark:text-white space-y-2">
+                            <div className="flex items-center justify-between text-[10px] font-mono">
+                              <span className="font-bold text-blue-600 dark:text-blue-400 uppercase tracking-wider">
+                                💡 REKOMENDASI FORMULASI JUDUL
+                              </span>
+                              <span className="px-2 py-0.5 rounded-md bg-blue-500/15 text-blue-600 dark:text-blue-400 font-semibold">
+                                {msg.candidateTitle.category.toUpperCase()} • {msg.candidateTitle.durationMonths} BULAN
+                              </span>
+                            </div>
+
+                            <h4 className="font-bold text-xs sm:text-sm text-slate-900 dark:text-white leading-snug">
+                              {msg.candidateTitle.title}
+                            </h4>
+
+                            <p className="text-[11px] text-slate-600 dark:text-zinc-400">
+                              <strong>Lokus/Instansi:</strong> {msg.candidateTitle.entity}
+                            </p>
+
+                            <div className="pt-2 flex items-center justify-between border-t border-blue-500/20 text-xs">
+                              <span className="text-[10.5px] text-slate-500 dark:text-zinc-400 italic">
+                                Tersimpan di Rak Calon Judul
+                              </span>
+                              <button
+                                type="button"
+                                onClick={() => handleApplyCandidate(msg.candidateTitle!)}
+                                className="px-3 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-semibold text-xs transition-colors cursor-pointer flex items-center gap-1.5 shadow-xs"
+                              >
+                                <span>Terapkan ke Usulan</span>
+                                <ArrowRight className="w-3 h-3" />
+                              </button>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+
+                      <div className="text-[10px] text-slate-400 px-1 font-mono">
+                        {msg.timestamp}
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+
+              {isLoading && (
+                <div className="flex items-start gap-3">
+                  <div className="w-8 h-8 rounded-full bg-blue-500/10 border border-blue-500/25 flex items-center justify-center text-blue-600 dark:text-blue-400 flex-shrink-0 mt-1">
+                    <Bot className="w-4 h-4" />
+                  </div>
+                  <div className="p-3.5 rounded-2xl bg-white dark:bg-[#121316] border border-slate-200 dark:border-[#26282E] flex items-center gap-2.5 text-xs text-slate-600 dark:text-zinc-300 shadow-xs">
+                    <div className="w-4 h-4 border-2 border-blue-600 border-t-transparent rounded-full animate-spin" />
+                    <span>AI Mentor sedang membedah masalah &amp; merumuskan judul...</span>
+                  </div>
+                </div>
+              )}
+
+              <div ref={messagesEndRef} />
+            </div>
+          )}
+        </div>
+
+        {/* ========================================================================= */}
+        {/* 2. FLOATING BOTTOM INPUT CARD (Matches Reference Image)                   */}
+        {/* ========================================================================= */}
+        <div className="w-full max-w-4xl mx-auto px-4 pb-4 sm:pb-6 pt-1 z-10 shrink-0">
+          <div className="rounded-2xl sm:rounded-3xl border border-slate-200/90 dark:border-[#26282E] bg-white dark:bg-[#121316] shadow-xl shadow-slate-200/40 dark:shadow-black/50 p-3 sm:p-4 transition-all focus-within:border-blue-500 focus-within:ring-4 focus-within:ring-blue-500/10">
+            
+            {/* Input Row */}
+            <div className="flex items-center gap-2 sm:gap-3">
+              {/* Voice Microphone Button */}
               <button
-                key={i}
                 type="button"
-                onClick={() => handleSendMessage(chip)}
-                className="px-3 py-1 rounded-full border border-[#E2E8F0] dark:border-[#26282E] bg-white dark:bg-[#17181C] hover:border-[#7C9CFF] text-[#0F172A] dark:text-[#F3F6FC] whitespace-nowrap text-[11px] font-medium transition-colors cursor-pointer shadow-2xs"
+                onClick={toggleSpeechRecognition}
+                className={`w-9 h-9 sm:w-10 sm:h-10 rounded-xl flex items-center justify-center shrink-0 transition-colors cursor-pointer ${
+                  isListening
+                    ? "bg-red-500 text-white animate-pulse"
+                    : "text-slate-400 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-950/40"
+                }`}
+                title={isListening ? "Mendengarkan suara..." : "Input dengan suara"}
               >
-                {chip}
+                {isListening ? <MicOff className="w-4 h-4 sm:w-5 sm:h-5" /> : <Mic className="w-4 h-4 sm:w-5 sm:h-5" />}
               </button>
-            ))}
-          </div>
 
-          {/* Input Box Footer */}
-          <div className="p-4 sm:p-5 border-t border-[#E2E8F0] dark:border-[#26282E] bg-white dark:bg-[#121316] flex-shrink-0">
-            <div className="relative flex items-center gap-2">
+              {/* Text Input / Textarea */}
               <textarea
-                rows={2}
+                ref={textareaRef}
+                rows={1}
                 value={inputText}
                 onChange={(e) => setInputText(e.target.value)}
                 onKeyDown={(e) => {
@@ -682,309 +737,315 @@ Tolong bedah masalah ini dan rumuskan judul proposal akademik yang tajam dan tid
                     handleSendMessage();
                   }
                 }}
-                placeholder="Tuliskan kendala Anda, amatan tugas di kantor, atau ide judul yang ingin dikonsultasikan... (Tekan Enter untuk kirim)"
-                className="w-full p-3 pr-24 rounded-xl border border-[#E2E8F0] dark:border-[#26282E] bg-[#F8FAFC] dark:bg-[#17181C] text-[#0F172A] dark:text-[#F3F6FC] placeholder:text-[#64748B] dark:placeholder:text-[#9CA3AF] text-xs focus:outline-hidden focus:border-[#7C9CFF] font-sans leading-relaxed resize-none"
+                placeholder="Tuliskan pertanyaan atau ide yang ingin Anda konsultasikan..."
+                className="w-full bg-transparent text-xs sm:text-sm text-[#0F172A] dark:text-[#F3F6FC] placeholder:text-slate-400 outline-none resize-none px-2 py-1.5 font-sans leading-relaxed max-h-28"
               />
 
-              <div className="absolute right-2.5 bottom-2.5 flex items-center gap-1.5">
-                {/* Voice speech to text */}
-                <button
-                  type="button"
-                  onClick={toggleSpeechRecognition}
-                  className={`p-2 rounded-lg text-xs transition-colors cursor-pointer ${
-                    isListening
-                      ? "bg-red-500 text-white animate-pulse"
-                      : "text-[#64748B] hover:text-[#0F172A] dark:text-[#9CA3AF] dark:hover:text-[#F3F6FC] hover:bg-[#F1F5F9] dark:hover:bg-[#1E1F24]"
-                  }`}
-                  title="Gunakan suara"
-                >
-                  {isListening ? <MicOff className="w-4 h-4" /> : <Mic className="w-4 h-4" />}
-                </button>
-
-                {/* Send button */}
-                <button
-                  type="button"
-                  onClick={() => handleSendMessage()}
-                  disabled={isLoading || !inputText.trim()}
-                  className="px-3.5 py-2 rounded-lg bg-[#7C9CFF] hover:bg-[#688bf5] text-[#0C0D0E] text-xs font-semibold disabled:opacity-40 transition-all cursor-pointer shadow-xs flex items-center gap-1.5"
-                >
-                  <Send className="w-3.5 h-3.5" />
-                  <span>Kirim</span>
-                </button>
-              </div>
+              {/* Primary Blue "Kirim" Button with Paper Airplane */}
+              <button
+                type="button"
+                onClick={() => handleSendMessage()}
+                disabled={isLoading || !inputText.trim()}
+                className="px-5 sm:px-6 py-2.5 sm:py-3 rounded-xl sm:rounded-2xl bg-[#3B82F6] hover:bg-[#2563EB] active:scale-95 text-white text-xs sm:text-sm font-semibold disabled:opacity-40 transition-all cursor-pointer shadow-sm flex items-center gap-2 shrink-0"
+              >
+                <Send className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                <span>Kirim</span>
+              </button>
             </div>
-            <div className="flex items-center justify-between text-[10px] text-[#64748B] dark:text-[#9CA3AF] mt-1.5 px-1 font-mono">
-              <span>Shift + Enter untuk baris baru</span>
+
+            {/* Bottom Caption Row */}
+            <div className="flex items-center justify-between text-[10.5px] sm:text-xs text-slate-400 mt-2 px-1 font-sans">
+              <span className="hidden sm:inline">Shift + Enter untuk baris baru</span>
+              <span className="sm:hidden">Enter untuk kirim</span>
               <span>Didukung Model Penalaran Akademik Gemini 3.5</span>
             </div>
           </div>
-
         </div>
+      </main>
 
-        {/* ============================================================ */}
-        {/* RIGHT COLUMN (Toolbox Suite ~ 5 cols / 42%)                  */}
-        {/* ============================================================ */}
-        <div className="lg:col-span-5 flex flex-col h-full bg-zinc-50/50 dark:bg-zinc-950/40 overflow-hidden">
+      {/* ========================================================================= */}
+      {/* 3. RIGHT VERTICAL ACTION RAIL (Matches Reference Image)                   */}
+      {/* ========================================================================= */}
+      <aside className="hidden md:flex flex-col items-center justify-start gap-5 py-6 px-3 border-l border-slate-200/80 dark:border-[#26282E] bg-white dark:bg-[#121316] select-none z-20 shrink-0">
+        
+        {/* Button 1: Parameter & Diagnostic Canvas (SlidersHorizontal) */}
+        <button
+          type="button"
+          onClick={() => setActiveDrawer(activeDrawer === "parameters" ? "none" : "parameters")}
+          className={`relative p-2.5 rounded-xl transition-all cursor-pointer group ${
+            activeDrawer === "parameters"
+              ? "text-blue-600 bg-blue-50 dark:bg-blue-950/40 dark:text-blue-400"
+              : "text-slate-400 hover:text-slate-800 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-[#1E1F24]"
+          }`}
+          title="Parameter & Diagnostik Usulan"
+        >
+          {activeDrawer === "parameters" && (
+            <span className="absolute -left-3 top-2.5 bottom-2.5 w-1 bg-blue-600 rounded-r-full" />
+          )}
+          <SlidersHorizontal className="w-5 h-5 stroke-[2.2]" />
+          <div className="absolute right-12 px-2.5 py-1.5 rounded-lg bg-[#0F172A] text-white text-[11px] font-medium whitespace-nowrap opacity-0 pointer-events-none group-hover:opacity-100 transition-opacity shadow-lg z-50">
+            Parameter &amp; Diagnostik
+          </div>
+        </button>
+
+        {/* Button 2: Riwayat Sesi Konsultasi (Clock) */}
+        <button
+          type="button"
+          onClick={() => setActiveDrawer(activeDrawer === "history" ? "none" : "history")}
+          className={`relative p-2.5 rounded-xl transition-all cursor-pointer group ${
+            activeDrawer === "history"
+              ? "text-blue-600 bg-blue-50 dark:bg-blue-950/40 dark:text-blue-400"
+              : "text-slate-400 hover:text-slate-800 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-[#1E1F24]"
+          }`}
+          title="Riwayat Percakapan"
+        >
+          {activeDrawer === "history" && (
+            <span className="absolute -left-3 top-2.5 bottom-2.5 w-1 bg-blue-600 rounded-r-full" />
+          )}
+          <Clock className="w-5 h-5 stroke-[2.2]" />
+          <div className="absolute right-12 px-2.5 py-1.5 rounded-lg bg-[#0F172A] text-white text-[11px] font-medium whitespace-nowrap opacity-0 pointer-events-none group-hover:opacity-100 transition-opacity shadow-lg z-50">
+            Riwayat Sesi
+          </div>
+        </button>
+
+        {/* Button 3: Rak Calon Judul (Bookmark) */}
+        <button
+          type="button"
+          onClick={() => setActiveDrawer(activeDrawer === "candidates" ? "none" : "candidates")}
+          className={`relative p-2.5 rounded-xl transition-all cursor-pointer group ${
+            activeDrawer === "candidates"
+              ? "text-blue-600 bg-blue-50 dark:bg-blue-950/40 dark:text-blue-400"
+              : "text-slate-400 hover:text-slate-800 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-[#1E1F24]"
+          }`}
+          title="Rak Calon Judul Terpilih"
+        >
+          {activeDrawer === "candidates" && (
+            <span className="absolute -left-3 top-2.5 bottom-2.5 w-1 bg-blue-600 rounded-r-full" />
+          )}
+          <Bookmark className="w-5 h-5 stroke-[2.2]" />
+          {candidateTitles.length > 0 && (
+            <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-blue-600" />
+          )}
+          <div className="absolute right-12 px-2.5 py-1.5 rounded-lg bg-[#0F172A] text-white text-[11px] font-medium whitespace-nowrap opacity-0 pointer-events-none group-hover:opacity-100 transition-opacity shadow-lg z-50">
+            Rak Calon Judul ({candidateTitles.length})
+          </div>
+        </button>
+      </aside>
+
+      {/* ========================================================================= */}
+      {/* 4. SLIDE-OUT DRAWER PANEL (When Rail Button Clicked)                      */}
+      {/* ========================================================================= */}
+      {activeDrawer !== "none" && (
+        <div className="fixed inset-y-0 right-0 w-full sm:w-96 bg-white dark:bg-[#121316] border-l border-slate-200 dark:border-[#26282E] shadow-2xl z-40 flex flex-col h-full animate-in slide-in-from-right duration-200">
           
-          {/* Navigation Sub-Tabs */}
-          <div className="px-5 pt-3 border-b border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 flex items-center gap-3 text-xs flex-shrink-0">
-            <button
-              type="button"
-              onClick={() => setActiveRightTab("titles")}
-              className={`pb-3 px-1 border-b-2 font-semibold transition-colors cursor-pointer flex items-center gap-1.5 ${
-                activeRightTab === "titles"
-                  ? "border-zinc-950 dark:border-zinc-100 text-zinc-950 dark:text-zinc-100"
-                  : "border-transparent text-zinc-500 hover:text-zinc-900 dark:text-zinc-400"
-              }`}
-            >
-              <Lightbulb className="w-3.5 h-3.5 text-amber-500" />
-              <span>Rak Calon Judul ({candidateTitles.length})</span>
-            </button>
+          {/* Drawer Header */}
+          <div className="p-4 sm:p-5 border-b border-slate-200 dark:border-[#26282E] flex items-center justify-between">
+            <div>
+              <h3 className="text-sm font-bold text-slate-900 dark:text-white">
+                {activeDrawer === "candidates" && "Rak Calon Judul"}
+                {activeDrawer === "parameters" && "Parameter & Diagnostik"}
+                {activeDrawer === "history" && "Riwayat Sesi Bimbingan"}
+              </h3>
+              <p className="text-[11px] text-slate-500 dark:text-zinc-400">
+                {activeDrawer === "candidates" && "Formulasi judul yang siap diterapkan ke usulan"}
+                {activeDrawer === "parameters" && "Atur kategori usulan dan bedah masalah riil"}
+                {activeDrawer === "history" && "Pertanyaan dan analisis dalam sesi ini"}
+              </p>
+            </div>
 
             <button
               type="button"
-              onClick={() => setActiveRightTab("diagnostic")}
-              className={`pb-3 px-1 border-b-2 font-semibold transition-colors cursor-pointer flex items-center gap-1.5 ${
-                activeRightTab === "diagnostic"
-                  ? "border-zinc-950 dark:border-zinc-100 text-zinc-950 dark:text-zinc-100"
-                  : "border-transparent text-zinc-500 hover:text-zinc-900 dark:text-zinc-400"
-              }`}
+              onClick={() => setActiveDrawer("none")}
+              className="p-1.5 rounded-lg text-slate-400 hover:text-slate-800 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-[#1E1F24] transition-colors"
             >
-              <Layers className="w-3.5 h-3.5 text-indigo-500" />
-              <span>Kanvas Diagnostik</span>
-            </button>
-
-            <button
-              type="button"
-              onClick={() => setActiveRightTab("guidelines")}
-              className={`pb-3 px-1 border-b-2 font-semibold transition-colors cursor-pointer flex items-center gap-1.5 ${
-                activeRightTab === "guidelines"
-                  ? "border-zinc-950 dark:border-zinc-100 text-zinc-950 dark:text-zinc-100"
-                  : "border-transparent text-zinc-500 hover:text-zinc-900 dark:text-zinc-400"
-              }`}
-            >
-              <BookOpen className="w-3.5 h-3.5 text-emerald-500" />
-              <span>Kaidah Judul Dikti</span>
+              <X className="w-5 h-5" />
             </button>
           </div>
 
-          {/* Sub-Tab 1: Candidate Titles Scratchpad */}
-          {activeRightTab === "titles" && (
-            <div className="flex-1 p-5 overflow-y-auto space-y-3.5">
-              <div className="flex items-center justify-between text-xs">
-                <span className="font-semibold text-zinc-900 dark:text-zinc-200">
-                  Daftar Judul Hasil Diskusi & Bimbingan:
-                </span>
-                <span className="text-[11px] text-zinc-500 font-mono">
-                  Pilih salah satu untuk diaplikasikan
-                </span>
-              </div>
+          {/* Drawer Content */}
+          <div className="flex-1 overflow-y-auto p-4 sm:p-5 space-y-4">
+            
+            {/* TAB 1: RAK CALON JUDUL */}
+            {activeDrawer === "candidates" && (
+              <div className="space-y-3.5">
+                {candidateTitles.map((cand) => {
+                  const isSelected = cand.id === selectedTitleId;
 
-              {candidateTitles.map((cand) => {
-                const isSelected = cand.id === selectedTitleId;
-
-                return (
-                  <div
-                    key={cand.id}
-                    onClick={() => setSelectedTitleId(cand.id)}
-                    className={`p-4 rounded-xl border transition-all cursor-pointer relative shadow-2xs ${
-                      isSelected
-                        ? "bg-white dark:bg-zinc-900 border-zinc-950 dark:border-zinc-200 ring-2 ring-zinc-950/10 dark:ring-zinc-100/10"
-                        : "bg-white dark:bg-zinc-900/60 border-zinc-200 dark:border-zinc-800 hover:border-zinc-400 dark:hover:border-zinc-700"
-                    }`}
-                  >
-                    <div className="flex items-start justify-between gap-2 mb-2">
-                      <span className="text-[10px] font-mono uppercase px-2 py-0.5 rounded bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 font-semibold">
-                        {cand.category} • {cand.durationMonths} Bulan
-                      </span>
-                      {isSelected && (
-                        <span className="text-[10px] font-mono text-emerald-600 dark:text-emerald-400 font-bold flex items-center gap-1">
-                          <CheckCircle2 className="w-3 h-3" /> Pilihan Aktif
+                  return (
+                    <div
+                      key={cand.id}
+                      onClick={() => setSelectedTitleId(cand.id)}
+                      className={`p-4 rounded-2xl border transition-all cursor-pointer relative shadow-xs ${
+                        isSelected
+                          ? "bg-blue-50/60 dark:bg-blue-950/20 border-blue-500 ring-2 ring-blue-500/20"
+                          : "bg-white dark:bg-[#17181C] border-slate-200 dark:border-[#26282E] hover:border-slate-300"
+                      }`}
+                    >
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="text-[10px] font-mono uppercase px-2 py-0.5 rounded-md bg-blue-500/10 text-blue-600 dark:text-blue-400 font-bold">
+                          {cand.category} • {cand.durationMonths} BULAN
                         </span>
-                      )}
-                    </div>
-
-                    <h3 className="font-serif font-bold text-xs sm:text-sm text-zinc-950 dark:text-zinc-50 leading-snug">
-                      {cand.title}
-                    </h3>
-
-                    <div className="mt-2 text-[11px] text-zinc-600 dark:text-zinc-400 space-y-1">
-                      <p><strong>Lokus:</strong> {cand.entity}</p>
-                      <p className="line-clamp-2"><strong>Gap Riset:</strong> {cand.researchGap}</p>
-                    </div>
-
-                    {/* Flow Steps Preview */}
-                    {cand.flowSteps && cand.flowSteps.length > 0 && (
-                      <div className="mt-3 pt-2.5 border-t border-zinc-100 dark:border-zinc-800 text-[10px] space-y-1">
-                        <span className="font-mono text-zinc-400 uppercase font-semibold">Rencana Alur Kerja:</span>
-                        {cand.flowSteps.slice(0, 3).map((st, sIdx) => (
-                          <div key={sIdx} className="text-zinc-600 dark:text-zinc-400 flex items-center gap-1.5">
-                            <span className="w-1.5 h-1.5 rounded-full bg-zinc-400" />
-                            <span>{st}</span>
-                          </div>
-                        ))}
+                        {isSelected && (
+                          <span className="flex items-center gap-1 text-[10.5px] font-semibold text-blue-600 dark:text-blue-400">
+                            <CheckCircle2 className="w-3.5 h-3.5" />
+                            <span>Terpilih</span>
+                          </span>
+                        )}
                       </div>
-                    )}
 
-                    <div className="mt-3 pt-2.5 flex items-center justify-between border-t border-zinc-100 dark:border-zinc-800">
+                      <h4 className="font-bold text-xs sm:text-sm text-slate-900 dark:text-white leading-snug mb-2">
+                        {cand.title}
+                      </h4>
+
+                      <div className="text-[11px] text-slate-500 dark:text-zinc-400 space-y-1 mb-3">
+                        <div><strong>Lokus:</strong> {cand.entity}</div>
+                        <div><strong>Research Gap:</strong> {cand.researchGap}</div>
+                      </div>
+
                       <button
                         type="button"
                         onClick={(e) => {
                           e.stopPropagation();
                           handleApplyCandidate(cand);
                         }}
-                        className="w-full py-1.5 rounded-lg bg-zinc-900 hover:bg-black dark:bg-zinc-100 dark:hover:bg-white text-white dark:text-zinc-950 font-semibold text-xs transition-colors flex items-center justify-center gap-1.5 shadow-2xs"
+                        className="w-full py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold flex items-center justify-center gap-2 transition-colors cursor-pointer"
                       >
                         <span>Gunakan Judul Ini ke Usulan</span>
-                        <ArrowRight className="w-3 h-3" />
+                        <ArrowRight className="w-3.5 h-3.5" />
                       </button>
                     </div>
-                  </div>
-                );
-              })}
-            </div>
-          )}
-
-          {/* Sub-Tab 2: Diagnostic Problem Canvas */}
-          {activeRightTab === "diagnostic" && (
-            <div className="flex-1 p-5 overflow-y-auto space-y-4 text-xs">
-              <div className="p-4 rounded-xl bg-indigo-50/70 dark:bg-indigo-950/30 border border-indigo-200 dark:border-indigo-900 text-indigo-900 dark:text-indigo-200">
-                <h4 className="font-bold flex items-center gap-1.5 text-xs mb-1">
-                  <Layers className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
-                  <span>Kanvas Diagnostik Masalah (4 Kuadran)</span>
-                </h4>
-                <p className="text-[11px] leading-relaxed text-indigo-800 dark:text-indigo-300">
-                  Isi apa yang Anda amati di lapangan. AI Mentor akan membedah akar penyebab masalah dan memformulasikan judul yang layak diangkat.
-                </p>
+                  );
+                })}
               </div>
+            )}
 
-              <div className="space-y-3">
+            {/* TAB 2: PARAMETER & DIAGNOSTIK */}
+            {activeDrawer === "parameters" && (
+              <div className="space-y-4 text-xs">
                 <div>
-                  <label className="block text-[11px] font-semibold text-zinc-700 dark:text-zinc-300 mb-1">
-                    1. Instansi / Lokus Studi:
+                  <label className="block font-semibold text-slate-700 dark:text-zinc-300 mb-1.5">
+                    Kategori Usulan
+                  </label>
+                  <div className="grid grid-cols-3 gap-2">
+                    {(["magang", "skripsi", "tesis"] as ProposalCategory[]).map((cat) => (
+                      <button
+                        key={cat}
+                        type="button"
+                        onClick={() => setCategory(cat)}
+                        className={`py-2 px-3 rounded-xl border text-center font-medium capitalize transition-all cursor-pointer ${
+                          category === cat
+                            ? "bg-blue-600 text-white border-blue-600 shadow-xs"
+                            : "bg-white dark:bg-[#17181C] border-slate-200 dark:border-[#26282E] text-slate-700 dark:text-zinc-300 hover:bg-slate-50"
+                        }`}
+                      >
+                        {cat}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block font-semibold text-slate-700 dark:text-zinc-300 mb-1.5">
+                    Lokus / Instansi Mitra
                   </label>
                   <input
                     type="text"
-                    value={diagEntity}
-                    onChange={(e) => setDiagEntity(e.target.value)}
-                    placeholder="Contoh: PT Telkom / RSUP Sardjito / Dinas Pendidikan"
-                    className="w-full p-2.5 rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-xs focus:outline-none focus:border-zinc-400"
+                    value={targetEntity}
+                    onChange={(e) => setTargetEntity(e.target.value)}
+                    placeholder="Contoh: PT Telkom Indonesia, Rumah Sakit X"
+                    className="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-[#26282E] bg-white dark:bg-[#17181C] text-slate-900 dark:text-white outline-none focus:border-blue-500"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-[11px] font-semibold text-zinc-700 dark:text-zinc-300 mb-1">
-                    2. Gejala Masalah / Inefisiensi Lapangan yang Diamati:
+                  <label className="block font-semibold text-slate-700 dark:text-zinc-300 mb-1.5">
+                    Target Durasi (Bulan)
                   </label>
-                  <textarea
-                    rows={2}
-                    value={diagSymptom}
-                    onChange={(e) => setDiagSymptom(e.target.value)}
-                    placeholder="Contoh: Proses persetujuan dokumen masih manual menggunakan kertas sehingga memakan waktu 4 hari kerja..."
-                    className="w-full p-2.5 rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-xs focus:outline-none focus:border-zinc-400 leading-relaxed resize-none"
+                  <input
+                    type="number"
+                    min={1}
+                    max={24}
+                    value={durationMonths}
+                    onChange={(e) => setDurationMonths(Number(e.target.value) || 6)}
+                    className="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-[#26282E] bg-white dark:bg-[#17181C] text-slate-900 dark:text-white outline-none focus:border-blue-500"
                   />
                 </div>
 
-                <div>
-                  <label className="block text-[11px] font-semibold text-zinc-700 dark:text-zinc-300 mb-1">
-                    3. Dugaan Akar Masalah (Root Cause):
-                  </label>
-                  <textarea
-                    rows={2}
-                    value={diagRootCause}
-                    onChange={(e) => setDiagRootCause(e.target.value)}
-                    placeholder="Contoh: Belum ada sistem alur kerja digital terpusat dan notifikasi asinkron antar bagian..."
-                    className="w-full p-2.5 rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-xs focus:outline-none focus:border-zinc-400 leading-relaxed resize-none"
-                  />
-                </div>
+                <div className="pt-3 border-t border-slate-200 dark:border-[#26282E] space-y-3">
+                  <div className="flex items-center gap-1.5 text-slate-900 dark:text-white font-bold">
+                    <Layers className="w-4 h-4 text-blue-500" />
+                    <span>Kanvas Diagnostik Masalah</span>
+                  </div>
 
-                <div>
-                  <label className="block text-[11px] font-semibold text-zinc-700 dark:text-zinc-300 mb-1">
-                    4. Usulan Solusi atau Bidang yang Ingin Anda Terapkan:
-                  </label>
-                  <textarea
-                    rows={2}
-                    value={diagSolution}
-                    onChange={(e) => setDiagSolution(e.target.value)}
-                    placeholder="Contoh: Membangun sistem alur persetujuan berbasis web dengan tanda tangan digital dan metrik SLA..."
-                    className="w-full p-2.5 rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-xs focus:outline-none focus:border-zinc-400 leading-relaxed resize-none"
-                  />
-                </div>
+                  <div>
+                    <label className="block text-[11px] font-medium text-slate-600 dark:text-zinc-400 mb-1">
+                      Gejala Hambatan di Lapangan
+                    </label>
+                    <textarea
+                      rows={2}
+                      value={diagSymptom}
+                      onChange={(e) => setDiagSymptom(e.target.value)}
+                      placeholder="Apa masalah nyata yang dirasakan instansi?"
+                      className="w-full p-2.5 rounded-xl border border-slate-200 dark:border-[#26282E] bg-white dark:bg-[#17181C] text-slate-900 dark:text-white outline-none resize-none"
+                    />
+                  </div>
 
-                <button
-                  type="button"
-                  onClick={handleAnalyzeDiagnostic}
-                  disabled={isAnalyzingDiag || !diagSymptom.trim()}
-                  className="w-full py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-xs transition-colors flex items-center justify-center gap-2 cursor-pointer shadow-sm disabled:opacity-40"
-                >
-                  <Sparkles className="w-3.5 h-3.5" />
-                  <span>Bedah Masalah & Rumuskan Judul dengan AI</span>
-                </button>
-              </div>
-            </div>
-          )}
+                  <div>
+                    <label className="block text-[11px] font-medium text-slate-600 dark:text-zinc-400 mb-1">
+                      Dugaan Penyebab Pokok
+                    </label>
+                    <textarea
+                      rows={2}
+                      value={diagRootCause}
+                      onChange={(e) => setDiagRootCause(e.target.value)}
+                      placeholder="Mengapa hambatan tersebut bisa terjadi?"
+                      className="w-full p-2.5 rounded-xl border border-slate-200 dark:border-[#26282E] bg-white dark:bg-[#17181C] text-slate-900 dark:text-white outline-none resize-none"
+                    />
+                  </div>
 
-          {/* Sub-Tab 3: Academic Guidelines */}
-          {activeRightTab === "guidelines" && (
-            <div className="flex-1 p-5 overflow-y-auto space-y-4 text-xs">
-              <div className="p-4 rounded-xl bg-emerald-50/70 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-900 text-emerald-900 dark:text-emerald-200">
-                <h4 className="font-bold flex items-center gap-1.5 text-xs mb-1">
-                  <CheckCircle2 className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
-                  <span>4 Kaidah Emas Judul Proposal (SOP Dikti)</span>
-                </h4>
-                <p className="text-[11px] leading-relaxed text-emerald-800 dark:text-emerald-300">
-                  Setiap usulan judul proposal magang maupun skripsi yang diajukan wajib memenuhi 4 pilar verifikasi dosen penguji berikut:
-                </p>
-              </div>
-
-              <div className="space-y-3">
-                <div className="p-3.5 rounded-xl bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 space-y-1">
-                  <h5 className="font-bold text-zinc-900 dark:text-zinc-100 flex items-center gap-1.5 text-xs">
-                    <span className="w-5 h-5 rounded-full bg-zinc-100 dark:bg-zinc-800 text-zinc-800 dark:text-zinc-200 font-mono text-[10px] flex items-center justify-center font-bold">1</span>
-                    <span>Ada Hubungan Antar Variabel / Objek & Metode</span>
-                  </h5>
-                  <p className="text-[11px] text-zinc-600 dark:text-zinc-400 leading-relaxed pl-6.5">
-                    Judul tidak boleh hanya deskriptif tanpa aksi (misal: "Studi tentang Penggunaan Komputer"). Harus memuat metode/intervensi dan parameter luaran terukur (misal: "Analisis Efektivitas dan Optimasi Algoritma X terhadap Waktu Siklus Y").
-                  </p>
-                </div>
-
-                <div className="p-3.5 rounded-xl bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 space-y-1">
-                  <h5 className="font-bold text-zinc-900 dark:text-zinc-100 flex items-center gap-1.5 text-xs">
-                    <span className="w-5 h-5 rounded-full bg-zinc-100 dark:bg-zinc-800 text-zinc-800 dark:text-zinc-200 font-mono text-[10px] flex items-center justify-center font-bold">2</span>
-                    <span>Lokus & Instansi yang Spesifik</span>
-                  </h5>
-                  <p className="text-[11px] text-zinc-600 dark:text-zinc-400 leading-relaxed pl-6.5">
-                    Harus mencantumkan unit kerja, rumah sakit, divisi perusahaan, atau lokus penelitian secara jelas agar batas penelitian (scope) tidak meluas.
-                  </p>
-                </div>
-
-                <div className="p-3.5 rounded-xl bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 space-y-1">
-                  <h5 className="font-bold text-zinc-900 dark:text-zinc-100 flex items-center gap-1.5 text-xs">
-                    <span className="w-5 h-5 rounded-full bg-zinc-100 dark:bg-zinc-800 text-zinc-800 dark:text-zinc-200 font-mono text-[10px] flex items-center justify-center font-bold">3</span>
-                    <span>Fasilitas & Data Dapat Diakses (Feasibility)</span>
-                  </h5>
-                  <p className="text-[11px] text-zinc-600 dark:text-zinc-400 leading-relaxed pl-6.5">
-                    Pastikan data yang diperlukan tidak berstatus NDA rahasia negara/perusahaan. Jika rahasia, gunakan teknik anonimisasi dataset atau simulasi terkalibrasi.
-                  </p>
-                </div>
-
-                <div className="p-3.5 rounded-xl bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 space-y-1">
-                  <h5 className="font-bold text-zinc-900 dark:text-zinc-100 flex items-center gap-1.5 text-xs">
-                    <span className="w-5 h-5 rounded-full bg-zinc-100 dark:bg-zinc-800 text-zinc-800 dark:text-zinc-200 font-mono text-[10px] flex items-center justify-center font-bold">4</span>
-                    <span>Tuntas dalam Durasi 4 s.d. 6 Bulan</span>
-                  </h5>
-                  <p className="text-[11px] text-zinc-600 dark:text-zinc-400 leading-relaxed pl-6.5">
-                    Rencana kerja logbook mingguan harus realistis diselesaikan dalam rentang 1 semester akademik tanpa keterlambatan seminar hasil.
-                  </p>
+                  <button
+                    type="button"
+                    onClick={handleAnalyzeDiagnostic}
+                    disabled={isAnalyzingDiag || !diagSymptom.trim()}
+                    className="w-full py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-semibold text-xs transition-colors flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
+                  >
+                    <Sparkles className="w-3.5 h-3.5" />
+                    <span>Bedah Masalah &amp; Rumuskan Judul</span>
+                  </button>
                 </div>
               </div>
-            </div>
-          )}
+            )}
 
+            {/* TAB 3: RIWAYAT SESI */}
+            {activeDrawer === "history" && (
+              <div className="space-y-3 text-xs">
+                {messages.length === 0 ? (
+                  <div className="text-center py-10 text-slate-400">
+                    Belum ada percakapan dalam sesi ini.
+                  </div>
+                ) : (
+                  messages.map((m) => (
+                    <div
+                      key={m.id}
+                      className="p-3 rounded-xl border border-slate-200 dark:border-[#26282E] bg-white dark:bg-[#17181C] space-y-1"
+                    >
+                      <div className="flex items-center justify-between text-[10px] text-slate-400 font-mono">
+                        <span className="font-bold text-slate-700 dark:text-zinc-300 capitalize">{m.role}</span>
+                        <span>{m.timestamp}</span>
+                      </div>
+                      <p className="line-clamp-3 text-slate-600 dark:text-zinc-400">
+                        {stripDoubleAsterisks(m.content)}
+                      </p>
+                    </div>
+                  ))
+                )}
+              </div>
+            )}
+          </div>
         </div>
-
-      </div>
-
+      )}
     </div>
   );
 };
+
+export default ConsultationStudio;

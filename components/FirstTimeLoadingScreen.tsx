@@ -66,9 +66,11 @@ export const FirstTimeLoadingScreen: React.FC<FirstTimeLoadingScreenProps> = ({
         setIsFirstTime(true);
       } else {
         setIsFirstTime(false);
+        onComplete();
       }
     } catch {
       setIsFirstTime(false);
+      onComplete();
     }
     setHasCheckedStorage(true);
   }, [forceShow]);
@@ -701,9 +703,9 @@ export const FirstTimeLoadingScreen: React.FC<FirstTimeLoadingScreenProps> = ({
     return <div className="fixed inset-0 z-50 bg-[#08090D]" />;
   }
 
-  // IF REFRESH / SUBSEQUENT VISIT: Show simple, minimal ScreenLoader
+  // IF REFRESH / SUBSEQUENT VISIT: Screen loading 2 telah dibuang, langsung masuk
   if (!isFirstTime) {
-    return <ScreenLoader onComplete={onComplete} />;
+    return null;
   }
 
   // Calculate 3D WebGL Orb visibility between 7.8s and 12.2s
