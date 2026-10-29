@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from 'react';
 
 export interface ScreenLoaderProps {
-  onComplete: () => void;
+  onComplete?: () => void;
 }
 
 export function ScreenLoader({ onComplete }: ScreenLoaderProps) {
@@ -11,28 +11,31 @@ export function ScreenLoader({ onComplete }: ScreenLoaderProps) {
   const [isFading, setIsFading] = useState(false);
 
   useEffect(() => {
-    // Fast, smooth 650ms progress transition
+    // Fast, smooth progress transition
     const p1 = setTimeout(() => setProgress(45), 100);
     const p2 = setTimeout(() => setProgress(85), 320);
     const p3 = setTimeout(() => setProgress(100), 550);
 
-    const finishTimer = setTimeout(() => {
-      setIsFading(true);
-      setTimeout(onComplete, 250);
-    }, 720);
+    let finishTimer: NodeJS.Timeout | undefined;
+    if (onComplete) {
+      finishTimer = setTimeout(() => {
+        setIsFading(true);
+        setTimeout(onComplete, 250);
+      }, 720);
+    }
 
     return () => {
       clearTimeout(p1);
       clearTimeout(p2);
       clearTimeout(p3);
-      clearTimeout(finishTimer);
+      if (finishTimer) clearTimeout(finishTimer);
     };
   }, [onComplete]);
 
   return (
     <div
       className={`fixed inset-0 z-50 flex flex-col items-center justify-center bg-[#09090b] transition-opacity duration-300 select-none overflow-hidden ${
-        isFading ? 'opacity-0 pointer-events-none' : 'opacity-100'
+        isFading && onComplete ? 'opacity-0 pointer-events-none' : 'opacity-100'
       }`}
     >
       <div className="relative z-10 flex flex-col items-center gap-4 text-center">
